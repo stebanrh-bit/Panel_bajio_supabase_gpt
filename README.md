@@ -1,6 +1,6 @@
 # Panel Bajío: Supabase y alojamiento en Google Apps Script
 
-La base de datos y autenticación permanecen en Supabase. La página se aloja en Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. El usuario confirmó en Google el acceso, la consulta de cargas y los comentarios persistentes; también confirmó la revisión de tránsito y el registro persistente de un aviso que resuelve el pendiente de comunicación. La siguiente entrega, `google-apps-script/index-pendientes.html`, agrega solicitudes sin número de carga y requiere ejecutar primero SQL 003. Esta entrega pasó las pruebas locales; su activación y validación en Google siguen pendientes.
+La base de datos y autenticación permanecen en Supabase. La página se aloja en Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. El usuario confirmó en Google el acceso, la consulta de cargas y los comentarios persistentes; también confirmó la revisión de tránsito y el registro persistente de un aviso que resuelve el pendiente de comunicación. La tercera entrega, `google-apps-script/index-pendientes.html`, agrega solicitudes sin número de carga y requiere SQL 003. El usuario la activó y confirmó la vinculación: la nota y el comentario aparecen en la carga después de actualizar y la solicitud queda en Vinculados. La cancelación y las pruebas con otros roles siguen pendientes de comprobar en el proyecto real.
 
 La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raíz se conservan como referencia y no se ejecutan en la nueva aplicación.
 
@@ -65,7 +65,7 @@ La caché en `/tmp` evita depender de permisos de escritura en el directorio hom
 
 Con el proyecto conectado, valida manualmente: iniciar sesión con el administrador; crear una carga; editar el estatus; agregar comentario e incidencia; cerrar sesión; entrar como `manager` y comprobar lectura sin escritura; entrar como `pending` y comprobar que no tiene datos. La edición, las revisiones y el registro de avisos detectan cambios concurrentes mediante `updated_at`. Las fechas del formulario usan la zona horaria del navegador y se guardan con su zona horaria; al editar otro campo se conservan las fechas intactas, incluidos sus segundos. Descompuesta, En resguardo y Patio permisionario requieren recordatorio; En transito programa revisión a tres horas. Agregar un comentario o registrar un aviso reinicia esa revisión. Las reglas se aplican también en PostgreSQL, sin depender del navegador. Se listan todas las cargas activas mediante paginación; comentarios/incidencias muestran los 100 más recientes y el historial las 10 últimas fechas.
 
-Sin variables de conexión, el panel muestra que falta configurar Supabase y no simula operaciones exitosas. El proyecto real respondió y se confirmó la estructura inicial y operativa, con rechazo de acceso sin sesión. El usuario confirmó login y persistencia de cargas, estatus, comentarios e incidencias en la primera versión Netlify. Después confirmó en Google el acceso, lectura, comentarios, revisión de tránsito y registro de avisos con persistencia al actualizar. Esas pruebas corresponden a los flujos indicados, no a todos los módulos ni roles. SQL 003 y la nueva pantalla de pendientes todavía requieren instalación y prueba en el proyecto real.
+Sin variables de conexión, el panel muestra que falta configurar Supabase y no simula operaciones exitosas. El proyecto real respondió y se confirmó la estructura inicial y operativa, con rechazo de acceso sin sesión. El usuario confirmó login y persistencia de cargas, estatus, comentarios e incidencias en la primera versión Netlify. Después confirmó en Google el acceso, lectura, comentarios, revisión de tránsito y registro de avisos con persistencia al actualizar. En la tercera entrega confirmó que vincular una solicitud traslada su nota y comentario a la carga, permanecen al actualizar y la solicitud queda en Vinculados. Esas pruebas corresponden a los flujos indicados, no a todos los módulos ni roles. La cancelación y el acceso por roles del nuevo módulo aún requieren prueba en el proyecto real.
 
 ## Organización del código nuevo
 
@@ -81,7 +81,7 @@ El build de Vite se genera sin minificar para facilitar su lectura. El HTML de G
 
 ## Siguientes etapas
 
-1. Instalar SQL 003 y validar las solicitudes pendientes en Google y Supabase.
+1. Comprobar cancelación de solicitudes y acceso por roles en Google y Supabase; la vinculación ya fue confirmada por el usuario.
 2. Completar las reglas restantes conforme se migren los módulos del backend original.
 3. Implementar los módulos restantes y recuperar las pantallas originales.
 4. Crear portales externos con vistas y permisos por cliente, sin exponer campos operativos internos.
