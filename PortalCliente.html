@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>Portal de Seguimiento</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <?!= include('PortalClienteEstilos'); ?>
+</head>
+<body>
+
+  <!-- ===================== PANTALLA: LOGIN ===================== -->
+  <section id="login-screen" class="screen login-screen">
+    <div class="login-card">
+      <p class="eyebrow">CI-CSR-FD-007</p>
+      <h1>Portal de Seguimiento</h1>
+      <p class="login-sub">Consulta tus embarques en tiempo real.</p>
+      <form id="login-form" autocomplete="off">
+        <label class="field">
+          <span class="field-label">Usuario</span>
+          <input type="text" id="login-usuario" autocomplete="username" required>
+        </label>
+        <label class="field">
+          <span class="field-label">Contraseña</span>
+          <input type="password" id="login-password" autocomplete="current-password" required>
+        </label>
+        <div id="login-error" class="login-error" hidden></div>
+        <button type="submit" id="login-submit" class="btn-primary">Entrar</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== PANTALLA: DASHBOARD ===================== -->
+  <section id="dashboard-screen" class="screen dashboard-screen" hidden>
+    <header class="portal-top">
+      <div>
+        <p class="eyebrow">Portal de Seguimiento</p>
+        <h1 id="dashboard-greeting">Buenos días</h1>
+      </div>
+      <button type="button" id="logout-btn" class="btn-ghost">Cerrar sesión</button>
+    </header>
+
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Buscar por PO / número de embarque">
+    </div>
+
+    <div id="summary-cards" class="summary-cards"></div>
+
+    <div class="shipments-table-wrap">
+      <table class="shipments-table">
+        <thead>
+          <tr>
+            <th>PO</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>ETA</th>
+            <th>Estatus</th>
+          </tr>
+        </thead>
+        <tbody id="shipments-tbody"></tbody>
+      </table>
+      <div id="shipments-empty" class="shipments-empty" hidden>No se encontraron embarques.</div>
+    </div>
+  </section>
+
+  <!-- ===================== PANTALLA: DETALLE DE EMBARQUE ===================== -->
+  <section id="detail-screen" class="screen detail-screen" hidden>
+    <header class="portal-top">
+      <div>
+        <button type="button" id="back-btn" class="btn-ghost back-btn">&larr; Volver</button>
+        <p class="eyebrow">Embarque</p>
+        <h1 id="detail-po"></h1>
+      </div>
+    </header>
+
+    <div id="detail-alert" class="alert-banner" hidden></div>
+
+    <div class="route-strip">
+      <div class="route-point">
+        <span class="route-label">Origen</span>
+        <span class="route-value" id="detail-origin"></span>
+      </div>
+      <div class="route-arrow">&rarr;</div>
+      <div class="route-point">
+        <span class="route-label">Frontera</span>
+        <span class="route-value">Laredo</span>
+      </div>
+      <div class="route-arrow">&rarr;</div>
+      <div class="route-point">
+        <span class="route-label">Destino</span>
+        <span class="route-value" id="detail-dest"></span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h2>Timeline</h2>
+        <ol id="detail-timeline" class="timeline"></ol>
+      </div>
+      <div class="detail-card detail-facts">
+        <h2>Detalles</h2>
+        <dl class="facts-list" id="detail-facts"></dl>
+      </div>
+      <div class="detail-card">
+        <h2>Documentos</h2>
+        <div id="detail-docs" class="docs-list"></div>
+      </div>
+      <div class="detail-card">
+        <h2>Incidencias</h2>
+        <div id="detail-incidencias" class="incidencias-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>window.TIMELINE_STAGES_GS = <?!= jsonPagina_(TIMELINE_STAGES_GS) ?>;</script>
+  <?!= include('PortalClienteScript'); ?>
+</body>
+</html>

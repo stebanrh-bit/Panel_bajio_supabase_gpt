@@ -1,0 +1,324 @@
+<script>
+  (function () {
+    'use strict';
+
+    var SESSION_KEY = 'portalClienteSesion';
+    // Etapas del timeline: vienen del servidor (TIMELINE_STAGES_GS en Code.gs), sin copia aquí.
+    var TIMELINE_STAGES = window.TIMELINE_STAGES_GS || [];
+    var STAGE_BUCKETS = {
+      programado: 'programado',
+      cargado: 'transito', documentos: 'transito', salida_mexico: 'transito', cruce_usa: 'transito',
+      frontera: 'frontera',
+      en_transito: 'transito',
+      arribo_planta: 'planta', descarga: 'planta',
+      pod: 'entregado'
+    };
+    var BUCKET_LABELS = {
+      programado: 'Programados', transito: 'En tránsito', frontera: 'En frontera',
+      planta: 'En planta', entregado: 'Entregados'
+    };
+    var BUCKET_ORDER = ['programado', 'transito', 'frontera', 'planta', 'entregado'];
+
+    var currentSession = null; // { usuario, nombre, cliente }
+    var currentLoads = [];
+
+    function $(id) { return document.getElementById(id); }
+
+    function escHtml(v) {
+      return (v === null || v === undefined) ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function fmtDateTime(d) {
+      if (!d) return '';
+      var dt = (d instanceof Date) ? d : new Date(d);
+      if (isNaN(dt.getTime())) return String(d);
+      var months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      var pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
+      return dt.getDate() + ' ' + months[dt.getMonth()] + ', ' + pad2(dt.getHours()) + ':' + pad2(dt.getMinutes());
+    }
+
+    function greeting() {
+      var h = new Date().getHours();
+      if (h < 12) return 'Buenos días';
+      if (h < 19) return 'Buenas tardes';
+      return 'Buenas noches';
+    }
+
+    function showScreen(id) {
+      ['login-screen', 'dashboard-screen', 'detail-screen'].forEach(function (s) {
+        $(s).hidden = (s !== id);
+      });
+    }
+
+    /* ---------------- Sesión ---------------- */
+
+    function saveSession(session) {
+      currentSession = session;
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch (e) { /* almacenamiento no disponible, sigue sin persistir */ }
+    }
+
+    function loadSession() {
+      try {
+        var raw = localStorage.getItem(SESSION_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function clearSession() {
+      currentSession = null;
+      try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* nada que limpiar */ }
+    }
+
+    // FIX: seguridad — el servidor ya no acepta el nombre del cliente para entregar cargas; pide
+    // el token que regresa el login (ver clienteDeTokenPortal_ en Code.gs). Si el token venció o
+    // le cambiaron la contraseña a la cuenta, las funciones responden { ok:false } y se regresa
+    // al login con el aviso.
+    function sesionExpirada(res) {
+      if (!res || res.ok !== false) return false;
+      clearSession();
+      showScreen('login-screen');
+      $('login-error').textContent = res.error || 'Tu sesión expiró. Vuelve a entrar.';
+      $('login-error').hidden = false;
+      return true;
+    }
+
+    /* ---------------- Login ---------------- */
+
+    $('login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var usuario = $('login-usuario').value.trim();
+      var password = $('login-password').value;
+      if (!usuario || !password) return;
+      $('login-error').hidden = true;
+      $('login-submit').disabled = true;
+      $('login-submit').textContent = 'Entrando…';
+      google.script.run
+        .withSuccessHandler(function (res) {
+          $('login-submit').disabled = false;
+          $('login-submit').textContent = 'Entrar';
+          if (!res.ok) {
+            $('login-error').textContent = res.error || 'Usuario o contraseña incorrectos';
+            $('login-error').hidden = false;
+            return;
+          }
+          saveSession({ usuario: usuario, nombre: res.nombre, cliente: res.cliente, token: res.token });
+          enterDashboard();
+        })
+        .withFailureHandler(function (err) {
+          $('login-submit').disabled = false;
+          $('login-submit').textContent = 'Entrar';
+          $('login-error').textContent = 'No se pudo verificar: ' + err.message;
+          $('login-error').hidden = false;
+        })
+        .checkClientLogin(usuario, password);
+    });
+
+    $('logout-btn').addEventListener('click', function () {
+      clearSession();
+      $('login-usuario').value = '';
+      $('login-password').value = '';
+      showScreen('login-screen');
+    });
+
+    /* ---------------- Dashboard ---------------- */
+
+    function enterDashboard() {
+      $('dashboard-greeting').textContent = greeting() + ', ' + (currentSession.nombre || currentSession.cliente);
+      showScreen('dashboard-screen');
+      loadLoads();
+    }
+
+    function loadLoads() {
+      google.script.run
+        .withSuccessHandler(function (loads) {
+          if (sesionExpirada(loads)) return;
+          currentLoads = loads || [];
+          renderSummary(currentLoads);
+          renderTable(currentLoads);
+        })
+        .withFailureHandler(function (err) {
+          $('shipments-tbody').innerHTML = '';
+          $('shipments-empty').hidden = false;
+          $('shipments-empty').textContent = 'No se pudieron cargar tus embarques: ' + err.message;
+        })
+        .getLoadsForCliente(currentSession.token);
+    }
+
+    function renderSummary(loads) {
+      var counts = { programado: 0, transito: 0, frontera: 0, planta: 0, entregado: 0 };
+      loads.forEach(function (rec) {
+        var bucket = STAGE_BUCKETS[rec.stageKey] || 'programado';
+        counts[bucket]++;
+      });
+      $('summary-cards').innerHTML = BUCKET_ORDER.map(function (b) {
+        return '<div class="summary-card c-' + b + '"><div class="num">' + counts[b] + '</div><div class="lbl">' + BUCKET_LABELS[b] + '</div></div>';
+      }).join('');
+    }
+
+    function stageBadgeHtml(rec) {
+      var bucket = STAGE_BUCKETS[rec.stageKey] || 'programado';
+      return '<span class="stage-badge s-' + bucket + '"><span class="dot"></span>' + escHtml(rec.stageLabel) + '</span>';
+    }
+
+    function renderTable(loads) {
+      var q = ($('search-input').value || '').trim().toLowerCase();
+      var filtered = q ? loads.filter(function (rec) { return String(rec.load).toLowerCase().indexOf(q) !== -1; }) : loads;
+
+      // Ordena por ETA (delivery_appt) más próxima primero; sin ETA al final.
+      filtered = filtered.slice().sort(function (a, b) {
+        var ta = a.delivery_appt ? new Date(a.delivery_appt).getTime() : Infinity;
+        var tb = b.delivery_appt ? new Date(b.delivery_appt).getTime() : Infinity;
+        if (isNaN(ta)) ta = Infinity;
+        if (isNaN(tb)) tb = Infinity;
+        return ta - tb;
+      });
+
+      if (!filtered.length) {
+        $('shipments-tbody').innerHTML = '';
+        $('shipments-empty').hidden = false;
+        $('shipments-empty').textContent = 'No se encontraron embarques.';
+        return;
+      }
+      $('shipments-empty').hidden = true;
+      $('shipments-tbody').innerHTML = filtered.map(function (rec) {
+        var dot = '<span class="semaforo-dot l-' + (rec.alertLevel || 'good') + '" title="' + escHtml(rec.alertMessage || '') + '"></span>';
+        return '<tr data-load="' + escHtml(rec.load) + '">' +
+          '<td class="po-num">' + dot + escHtml(rec.load) + '</td>' +
+          '<td>' + escHtml(rec.origin_city) + (rec.origin_state ? ', ' + escHtml(rec.origin_state) : '') + '</td>' +
+          '<td>' + escHtml(rec.dest_city) + (rec.dest_state ? ', ' + escHtml(rec.dest_state) : '') + '</td>' +
+          '<td>' + fmtDateTime(rec.delivery_appt) + '</td>' +
+          '<td>' + stageBadgeHtml(rec) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    $('search-input').addEventListener('input', function () { renderTable(currentLoads); });
+
+    $('shipments-tbody').addEventListener('click', function (e) {
+      var tr = e.target.closest('tr[data-load]');
+      if (!tr) return;
+      openDetail(tr.getAttribute('data-load'));
+    });
+
+    /* ---------------- Detalle ---------------- */
+
+    function openDetail(load) {
+      showScreen('detail-screen');
+      $('detail-po').textContent = 'PO ' + load;
+      $('detail-origin').textContent = '';
+      $('detail-dest').textContent = '';
+      $('detail-alert').hidden = true;
+      $('detail-timeline').innerHTML = '';
+      $('detail-facts').innerHTML = '';
+      $('detail-docs').innerHTML = '<div class="incidencia-empty">Cargando…</div>';
+      $('detail-incidencias').innerHTML = '<div class="incidencia-empty">Cargando…</div>';
+
+      google.script.run
+        .withSuccessHandler(function (rec) {
+          if (sesionExpirada(rec)) return;
+          if (!rec) {
+            $('detail-docs').innerHTML = '<div class="incidencia-empty">No se pudo cargar este embarque.</div>';
+            $('detail-incidencias').innerHTML = '';
+            return;
+          }
+          showDetail(rec);
+        })
+        .withFailureHandler(function (err) {
+          $('detail-docs').innerHTML = '<div class="incidencia-empty">Error: ' + escHtml(err.message) + '</div>';
+          $('detail-incidencias').innerHTML = '';
+        })
+        .getLoadDetailForCliente(load, currentSession.token);
+    }
+
+    function showDetail(rec) {
+      $('detail-po').textContent = 'PO ' + rec.load;
+      $('detail-origin').textContent = (rec.origin_city || '—') + (rec.origin_state ? ', ' + rec.origin_state : '');
+      $('detail-dest').textContent = (rec.dest_city || '—') + (rec.dest_state ? ', ' + rec.dest_state : '');
+
+      if (rec.alertLevel && rec.alertLevel !== 'good') {
+        var icon = rec.alertLevel === 'critical' ? '⚠️ ' : '🟡 ';
+        $('detail-alert').className = 'alert-banner l-' + rec.alertLevel;
+        $('detail-alert').textContent = icon + rec.alertMessage;
+        $('detail-alert').hidden = false;
+      } else {
+        $('detail-alert').hidden = true;
+      }
+
+      $('detail-timeline').innerHTML = TIMELINE_STAGES.map(function (stage, i) {
+        var cls = i < rec.stageIndex ? 'done' : (i === rec.stageIndex ? 'current' : 'pending');
+        return '<li class="' + cls + '">' + escHtml(stage.label) + '</li>';
+      }).join('');
+
+      var facts = [
+        ['ETA', fmtDateTime(rec.delivery_appt) || 'Sin programar'],
+        ['Cita de carga', fmtDateTime(rec.pickup_appt) || 'Sin programar'],
+        ['Unidad', rec.truck || '—'],
+        ['Trailer', rec.trailer || '—'],
+        ['Estatus actual', rec.stageLabel]
+      ];
+      $('detail-facts').innerHTML = facts.map(function (f) {
+        return '<div><dt>' + escHtml(f[0]) + '</dt><dd>' + escHtml(f[1]) + '</dd></div>';
+      }).join('');
+
+      var docs = rec.documentos || {};
+      var docRows = [['BOL', docs.bol], ['DODA', docs.doda], ['Entry', docs.entry], ['Sobre listo', docs.sobreListo]];
+      $('detail-docs').innerHTML = docRows.map(function (d) {
+        var ok = !!d[1];
+        return '<div class="doc-row"><span class="doc-name">' + escHtml(d[0]) + '</span>' +
+          '<span class="doc-status ' + (ok ? 'ok' : 'pending') + '"><span class="dot"></span>' + (ok ? 'Listo' : 'Pendiente') + '</span></div>';
+      }).join('');
+
+      var incidencias = rec.incidencias || [];
+      if (!incidencias.length) {
+        $('detail-incidencias').innerHTML = '<div class="incidencia-empty">Sin incidencias registradas.</div>';
+      } else {
+        $('detail-incidencias').innerHTML = incidencias.map(function (inc) {
+          return '<div class="incidencia-item i-' + escHtml(inc.severidad) + '">' +
+            '<div class="incidencia-head"><span class="incidencia-cat">' + escHtml(inc.categoria) + '</span> · ' + fmtDateTime(inc.fecha) + '</div>' +
+            '<div class="incidencia-desc">' + escHtml(inc.descripcion) + '</div>' +
+            (inc.accion_tomada ? '<div class="incidencia-accion"><b>Acción tomada:</b> ' + escHtml(inc.accion_tomada) + '</div>' : '') +
+            '</div>';
+        }).join('');
+      }
+      renderAvisosCliente(rec.avisos);
+    }
+
+    // Avisos que el equipo le envió al cliente sobre este embarque (ver avisosEnviadosAlCliente_ en
+    // Code.gs). La tarjeta se crea aquí con las mismas clases que "Incidencias" para no tener que
+    // tocar PortalCliente.html ni sus estilos.
+    function renderAvisosCliente(avisos) {
+      var grid = document.querySelector('#detail-screen .detail-grid');
+      if (!grid) return;
+      var card = $('detail-avisos-card');
+      if (!card) {
+        card = document.createElement('div');
+        card.className = 'detail-card';
+        card.id = 'detail-avisos-card';
+        card.innerHTML = '<h2>Avisos que te enviamos</h2><div id="detail-avisos" class="incidencias-list"></div>';
+        grid.appendChild(card);
+      }
+      var lista = avisos || [];
+      $('detail-avisos').innerHTML = lista.length ? lista.map(function (a) {
+        return '<div class="incidencia-item i-info"><div class="incidencia-head">' + fmtDateTime(a.fecha) + (a.canal ? ' · ' + escHtml(a.canal) : '') + '</div>' +
+          '<div class="incidencia-desc" style="white-space:pre-wrap">' + escHtml(a.mensaje) + '</div></div>';
+      }).join('') : '<div class="incidencia-empty">Todavía no hay avisos registrados para este embarque.</div>';
+    }
+
+    $('back-btn').addEventListener('click', function () {
+      showScreen('dashboard-screen');
+    });
+
+    /* ---------------- Arranque ---------------- */
+
+    var session = loadSession();
+    if (session && session.token) {
+      currentSession = session;
+      enterDashboard();
+    } else {
+      // Sesiones guardadas con el formato anterior (sin token) ya no sirven — se piden
+      // usuario y contraseña una vez más.
+      if (session) clearSession();
+      showScreen('login-screen');
+    }
+  })();
+</script>

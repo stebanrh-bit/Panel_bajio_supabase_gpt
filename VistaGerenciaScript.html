@@ -1,0 +1,286 @@
+<script>
+  (function () {
+    'use strict';
+
+    var SESSION_KEY = 'vistaGerenciaSesion';
+    // Etapas del timeline: vienen del servidor (TIMELINE_STAGES_GS en Code.gs), sin copia aquí.
+    var TIMELINE_STAGES = window.TIMELINE_STAGES_GS || [];
+    var STAGE_BUCKETS = {
+      programado: 'programado',
+      cargado: 'transito', documentos: 'transito', salida_mexico: 'transito', cruce_usa: 'transito',
+      frontera: 'frontera',
+      en_transito: 'transito',
+      arribo_planta: 'planta', descarga: 'planta',
+      pod: 'entregado'
+    };
+    var BUCKET_LABELS = {
+      programado: 'Programados', transito: 'En tránsito', frontera: 'En frontera',
+      planta: 'En planta', entregado: 'Entregados'
+    };
+    var BUCKET_ORDER = ['programado', 'transito', 'frontera', 'planta', 'entregado'];
+
+    var unlocked = false;
+    // FIX: seguridad — antes el "candado" solo era un '1' en localStorage y getLoadsParaVista()
+    // entregaba todo sin pedir nada. Ahora se guarda el token que regresa el login y se manda en
+    // cada pedido (ver vistaTokenValido_ en Code.gs).
+    var vistaToken = '';
+    var currentLoads = [];
+
+    function $(id) { return document.getElementById(id); }
+
+    function escHtml(v) {
+      return (v === null || v === undefined) ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function fmtDateTime(d) {
+      if (!d) return '';
+      var dt = (d instanceof Date) ? d : new Date(d);
+      if (isNaN(dt.getTime())) return String(d);
+      var months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      var pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
+      return dt.getDate() + ' ' + months[dt.getMonth()] + ', ' + pad2(dt.getHours()) + ':' + pad2(dt.getMinutes());
+    }
+
+    function showScreen(id) {
+      ['login-screen', 'dashboard-screen', 'detail-screen'].forEach(function (s) {
+        $(s).hidden = (s !== id);
+      });
+    }
+
+    /* ---------------- Sesión (solo un candado compartido, sin identidad individual) ---------------- */
+
+    function saveUnlocked(token) {
+      unlocked = true;
+      vistaToken = token || '';
+      try { localStorage.setItem(SESSION_KEY, vistaToken); } catch (e) { /* sigue sin persistir */ }
+    }
+
+    /** Token guardado, o '' si no hay (o si es el '1' del formato anterior, que ya no sirve). */
+    function loadUnlocked() {
+      try {
+        var v = localStorage.getItem(SESSION_KEY) || '';
+        return v.indexOf('vg_') === 0 ? v : '';
+      } catch (e) { return ''; }
+    }
+
+    function clearUnlocked() {
+      unlocked = false;
+      vistaToken = '';
+      try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* nada que limpiar */ }
+    }
+
+    function sesionExpirada(res) {
+      if (!res || res.ok !== false) return false;
+      clearUnlocked();
+      showScreen('login-screen');
+      $('login-error').textContent = res.error || 'Tu sesión expiró. Vuelve a entrar.';
+      $('login-error').hidden = false;
+      return true;
+    }
+
+    /* ---------------- Contraseña ---------------- */
+
+    $('login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var password = $('login-password').value;
+      if (!password) return;
+      $('login-error').hidden = true;
+      $('login-submit').disabled = true;
+      $('login-submit').textContent = 'Entrando…';
+      google.script.run
+        .withSuccessHandler(function (res) {
+          $('login-submit').disabled = false;
+          $('login-submit').textContent = 'Entrar';
+          if (!res.ok) {
+            $('login-error').textContent = res.error || 'Contraseña incorrecta';
+            $('login-error').hidden = false;
+            return;
+          }
+          saveUnlocked(res.token);
+          enterDashboard();
+        })
+        .withFailureHandler(function (err) {
+          $('login-submit').disabled = false;
+          $('login-submit').textContent = 'Entrar';
+          $('login-error').textContent = 'No se pudo verificar: ' + err.message;
+          $('login-error').hidden = false;
+        })
+        .checkVistaLecturaPassword(password);
+    });
+
+    $('logout-btn').addEventListener('click', function () {
+      clearUnlocked();
+      $('login-password').value = '';
+      showScreen('login-screen');
+    });
+
+    /* ---------------- Dashboard ---------------- */
+
+    function enterDashboard() {
+      showScreen('dashboard-screen');
+      loadLoads();
+    }
+
+    function loadLoads() {
+      google.script.run
+        .withSuccessHandler(function (loads) {
+          if (sesionExpirada(loads)) return;
+          currentLoads = loads || [];
+          renderSummary(currentLoads);
+          renderTable(currentLoads);
+        })
+        .withFailureHandler(function (err) {
+          $('shipments-tbody').innerHTML = '';
+          $('shipments-empty').hidden = false;
+          $('shipments-empty').textContent = 'No se pudieron cargar las cargas: ' + err.message;
+        })
+        .getLoadsParaVista(vistaToken);
+    }
+
+    function renderSummary(loads) {
+      var counts = { programado: 0, transito: 0, frontera: 0, planta: 0, entregado: 0 };
+      loads.forEach(function (rec) {
+        var bucket = STAGE_BUCKETS[rec.stageKey] || 'programado';
+        counts[bucket]++;
+      });
+      $('summary-cards').innerHTML = BUCKET_ORDER.map(function (b) {
+        return '<div class="summary-card c-' + b + '"><div class="num">' + counts[b] + '</div><div class="lbl">' + BUCKET_LABELS[b] + '</div></div>';
+      }).join('');
+    }
+
+    function stageBadgeHtml(rec) {
+      var bucket = STAGE_BUCKETS[rec.stageKey] || 'programado';
+      return '<span class="stage-badge s-' + bucket + '"><span class="dot"></span>' + escHtml(rec.stageLabel) + '</span>';
+    }
+
+    function renderTable(loads) {
+      var q = ($('search-input').value || '').trim().toLowerCase();
+      var filtered = q ? loads.filter(function (rec) {
+        return String(rec.load).toLowerCase().indexOf(q) !== -1 ||
+          String(rec.customer || '').toLowerCase().indexOf(q) !== -1 ||
+          String(rec.origin_city || '').toLowerCase().indexOf(q) !== -1 ||
+          String(rec.dest_city || '').toLowerCase().indexOf(q) !== -1;
+      }) : loads;
+
+      filtered = filtered.slice().sort(function (a, b) {
+        var ta = a.delivery_appt ? new Date(a.delivery_appt).getTime() : Infinity;
+        var tb = b.delivery_appt ? new Date(b.delivery_appt).getTime() : Infinity;
+        if (isNaN(ta)) ta = Infinity;
+        if (isNaN(tb)) tb = Infinity;
+        return ta - tb;
+      });
+
+      if (!filtered.length) {
+        $('shipments-tbody').innerHTML = '';
+        $('shipments-empty').hidden = false;
+        $('shipments-empty').textContent = 'No se encontraron embarques.';
+        return;
+      }
+      $('shipments-empty').hidden = true;
+      $('shipments-tbody').innerHTML = filtered.map(function (rec) {
+        var dot = '<span class="semaforo-dot l-' + (rec.alertLevel || 'good') + '" title="' + escHtml(rec.alertMessage || '') + '"></span>';
+        return '<tr data-load="' + escHtml(rec.load) + '">' +
+          '<td class="po-num">' + dot + escHtml(rec.load) + '</td>' +
+          '<td class="cliente-cell" title="' + escHtml(rec.customer) + '">' + escHtml(rec.customer) + '</td>' +
+          '<td>' + escHtml(rec.origin_city) + (rec.origin_state ? ', ' + escHtml(rec.origin_state) : '') + '</td>' +
+          '<td>' + escHtml(rec.dest_city) + (rec.dest_state ? ', ' + escHtml(rec.dest_state) : '') + '</td>' +
+          '<td>' + fmtDateTime(rec.delivery_appt) + '</td>' +
+          '<td>' + stageBadgeHtml(rec) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    $('search-input').addEventListener('input', function () { renderTable(currentLoads); });
+
+    $('shipments-tbody').addEventListener('click', function (e) {
+      var tr = e.target.closest('tr[data-load]');
+      if (!tr) return;
+      var rec = currentLoads.filter(function (r) { return String(r.load) === tr.getAttribute('data-load'); })[0];
+      if (rec) showDetail(rec);
+    });
+
+    /* ---------------- Detalle ---------------- */
+
+    function showDetail(rec) {
+      $('detail-po').textContent = 'PO ' + rec.load;
+      $('detail-cliente').textContent = rec.customer || '';
+      $('detail-origin').textContent = (rec.origin_city || '—') + (rec.origin_state ? ', ' + rec.origin_state : '');
+      $('detail-dest').textContent = (rec.dest_city || '—') + (rec.dest_state ? ', ' + rec.dest_state : '');
+
+      if (rec.alertLevel && rec.alertLevel !== 'good') {
+        var icon = rec.alertLevel === 'critical' ? '⚠️ ' : '🟡 ';
+        $('detail-alert').className = 'alert-banner l-' + rec.alertLevel;
+        $('detail-alert').textContent = icon + rec.alertMessage;
+        $('detail-alert').hidden = false;
+      } else {
+        $('detail-alert').hidden = true;
+      }
+
+      $('detail-timeline').innerHTML = TIMELINE_STAGES.map(function (stage, i) {
+        var cls = i < rec.stageIndex ? 'done' : (i === rec.stageIndex ? 'current' : 'pending');
+        return '<li class="' + cls + '">' + escHtml(stage.label) + '</li>';
+      }).join('');
+
+      var facts = [
+        ['ETA', fmtDateTime(rec.delivery_appt) || 'Sin programar'],
+        ['Cita de carga', fmtDateTime(rec.pickup_appt) || 'Sin programar'],
+        ['Unidad', rec.truck || '—'],
+        ['Trailer', rec.trailer || '—'],
+        ['Estatus (panel)', rec.status || '—'],
+        ['Etapa (timeline)', rec.stageLabel]
+      ];
+      $('detail-facts').innerHTML = facts.map(function (f) {
+        return '<div><dt>' + escHtml(f[0]) + '</dt><dd>' + escHtml(f[1]) + '</dd></div>';
+      }).join('');
+
+      var docRows = [['BOL', rec.bol], ['DODA', rec.doda], ['Entry', rec.entry], ['Sobre listo', rec.sobre_listo]];
+      $('detail-docs').innerHTML = docRows.map(function (d) {
+        var ok = !!d[1];
+        return '<div class="doc-row"><span class="doc-name">' + escHtml(d[0]) + '</span>' +
+          '<span class="doc-status ' + (ok ? 'ok' : 'pending') + '"><span class="dot"></span>' + (ok ? 'Listo' : 'Pendiente') + '</span></div>';
+      }).join('');
+
+      $('detail-incidencias').innerHTML = '<div class="incidencia-empty">Cargando…</div>';
+      showScreen('detail-screen');
+
+      google.script.run
+        .withSuccessHandler(function (raw) {
+          if (sesionExpirada(raw)) return;
+          var list;
+          try { list = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { list = []; }
+          if (!list || !list.length) {
+            $('detail-incidencias').innerHTML = '<div class="incidencia-empty">Sin incidencias registradas.</div>';
+            return;
+          }
+          $('detail-incidencias').innerHTML = list.map(function (inc) {
+            var meta = escHtml(inc.categoria) + ' · ' + fmtDateTime(inc.fecha) + (inc.creado_por ? ' · ' + escHtml(inc.creado_por) : '');
+            return '<div class="incidencia-item i-' + escHtml(inc.severidad) + '">' +
+              '<div class="incidencia-head">' + meta + '</div>' +
+              '<div class="incidencia-desc">' + escHtml(inc.descripcion) + '</div>' +
+              (inc.accion_tomada ? '<div class="incidencia-accion"><b>Acción tomada:</b> ' + escHtml(inc.accion_tomada) + '</div>' : '') +
+              '</div>';
+          }).join('');
+        })
+        .withFailureHandler(function (err) {
+          $('detail-incidencias').innerHTML = '<div class="incidencia-empty">Error: ' + escHtml(err.message) + '</div>';
+        })
+        .getIncidenciasParaVista(rec.load, vistaToken);
+    }
+
+    $('back-btn').addEventListener('click', function () {
+      showScreen('dashboard-screen');
+    });
+
+    /* ---------------- Arranque ---------------- */
+
+    var tokenGuardado = loadUnlocked();
+    if (tokenGuardado) {
+      unlocked = true;
+      vistaToken = tokenGuardado;
+      enterDashboard();
+    } else {
+      clearUnlocked(); // limpia el '1' del formato anterior, si lo había
+      showScreen('login-screen');
+    }
+  })();
+</script>
