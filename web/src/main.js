@@ -3,12 +3,14 @@ import { statuses, stages, booleanFields, dateFields, marked, stageIndex, alertF
 import { escapeHtml as escape } from './ui/html.js';
 import { createPendingLoadsService } from './features/pending-loads/service.js';
 import { createPendingLoadsPanel } from './features/pending-loads/panel.js';
+import { createReservedLoadsService } from './features/reserved-loads/service.js';
+import { createReservedLoadsPanel } from './features/reserved-loads/panel.js';
 import './style.css';
 const root = document.querySelector('#app');
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 let client, session, profile, loads = [], activeLoad = null, filter = 'all', generation = 0;
-let pendingPanel = null;
+let secondaryPanel = null;
 let currentModule = 'loads';
 const fields = {
   load:'Número de carga', customer:'Cliente', origin_city:'Ciudad de origen', origin_state:'Estado de origen', origin_address:'Dirección de origen',
@@ -32,16 +34,18 @@ async function request(query) {
   return data;
 }
 function shell(content) {
-  disposePendingPanel();
+  disposeSecondaryPanel();
   const navigation = session && profile && profile.role !== 'pending'
     ? `<nav class="module-navigation" aria-label="Módulos del panel">
         <button id="nav-loads" aria-pressed="${currentModule === 'loads'}">Cargas</button>
         <button id="nav-pending" aria-pressed="${currentModule === 'pending'}">Solicitudes pendientes</button>
+        <button id="nav-reserved" aria-pressed="${currentModule === 'reserved'}">Apartados</button>
       </nav>`
     : '';
   root.innerHTML = `<header><div><small>OPERACIONES</small><h1>Panel Bajío</h1></div>${session ? `<div>${escape(profile?.display_name || session.user.email)} <button id="logout">Salir</button></div>` : ''}</header><main>${navigation}<p id="message" aria-live="polite"></p>${content}</main>`;
   document.querySelector('#nav-loads')?.addEventListener('click', dashboard);
   document.querySelector('#nav-pending')?.addEventListener('click', showPendingLoads);
+  document.querySelector('#nav-reserved')?.addEventListener('click', showReservedLoads);
   document.querySelector('#logout')?.addEventListener('click', async () => {
     try {
       const {error:err} = await client.auth.signOut(); if(err) throw err;
@@ -50,32 +54,48 @@ function shell(content) {
   });
 }
 /** Detiene respuestas del módulo anterior cuando se cambia de pantalla o se cierra sesión. */
-function disposePendingPanel() {
-  pendingPanel?.dispose();
-  pendingPanel = null;
+function disposeSecondaryPanel() {
+  secondaryPanel?.dispose();
+  secondaryPanel = null;
 }
-function clearSession() { disposePendingPanel(); generation++; session=null; profile=null; loads=[]; activeLoad=null; }
+function clearSession() { disposeSecondaryPanel(); generation++; session=null; profile=null; loads=[]; activeLoad=null; }
 
-/** Las solicitudes reutilizan la sesión y las cargas; los permisos se verifican además en Supabase. */
-async function showPendingLoads() {
+/** Los módulos comparten sesión, navegación y protección contra respuestas tardías. */
+async function showSecondaryModule(moduleName, createPanel, createService) {
   if (!session || !profile || profile.role === 'pending') return;
   const current = ++generation;
-  currentModule = 'pending';
+  currentModule = moduleName;
   activeLoad = null;
-  shell('<div id="pending-module"></div>');
-  pendingPanel = createPendingLoadsPanel({
-    container: document.querySelector('#pending-module'),
-    service: createPendingLoadsService(client),
+  shell('<div id="secondary-module"></div>');
+  try {
+    const people = await request(client.from('profiles').select('id,display_name,role').order('display_name'));
+    if (current !== generation || !session) return;
+    secondaryPanel = createPanel({
+    container: document.querySelector('#secondary-module'),
+    service: createService(client),
     loads,
     userId: session.user.id,
     role: profile.role,
+    people,
     onError: message => { if (current === generation && session) error(message); },
     onOpenLoad: async loadNumber => {
       if (current !== generation || !session) return;
       await refreshLoad(loadNumber);
     },
-  });
-  await pendingPanel.open();
+    });
+    await secondaryPanel.open();
+  } catch (err) {
+    if (current !== generation || !session) return;
+    shell('<section class="card"><h2>No se pudo abrir el módulo</h2><button id="module-retry">Reintentar</button></section>');
+    error(err.message);
+    document.querySelector('#module-retry').onclick = () => showSecondaryModule(moduleName, createPanel, createService);
+  }
+}
+function showPendingLoads() {
+  return showSecondaryModule('pending', createPendingLoadsPanel, createPendingLoadsService);
+}
+function showReservedLoads() {
+  return showSecondaryModule('reserved', createReservedLoadsPanel, createReservedLoadsService);
 }
 function login() {
   shell(`<section class="card narrow"><h2>Entrar al panel</h2><p>Usa la cuenta que te asignó el administrador.</p><form id="login"><label>Correo<input name="email" type="email" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><button>Iniciar sesión</button></form></section>`);
@@ -90,7 +110,7 @@ function login() {
 }
 async function dashboard() {
   if(!session) return login();
-  disposePendingPanel();
+  disposeSecondaryPanel();
   currentModule = 'loads';
   const current=++generation;
   try {
