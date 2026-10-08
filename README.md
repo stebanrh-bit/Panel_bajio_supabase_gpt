@@ -1,4 +1,6 @@
-# Panel Bajío: migración a Supabase
+# Panel Bajío: Supabase y alojamiento en Google Apps Script
+
+La base de datos y autenticación permanecen en Supabase. El alojamiento solicitado ahora es Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. La carpeta google-apps-script contiene una adaptación autónoma de la primera versión validada, sin exigir SQL 002. El despliegue Google y sus pruebas reales siguen pendientes.
 
 La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raíz se conservan como referencia y no se ejecutan en la nueva aplicación.
 
@@ -71,7 +73,7 @@ Sin variables de conexión, el panel muestra que falta configurar Supabase y no 
 4. Crear portales externos con vistas y permisos por cliente, sin exponer campos operativos internos.
 5. Preparar importación de datos, tareas programadas y pruebas de regresión de todos los módulos. La primera versión fue desplegada manualmente por el usuario; la migración completa no está terminada.
 
-## Actualizar el sitio existente a la segunda versión
+## Referencia: actualizar la versión anterior de Netlify
 
 1. Ejecuta **solo** `supabase/migrations/002_load_operations.sql` en SQL Editor. No vuelvas a ejecutar `001_panel.sql`. Esta actualización agrega comunicaciones y funciones/activadores; no borra las cargas ni los usuarios.
 2. Descarga `entregables/panel-bajio-operaciones.zip` desde GitHub y descomprímelo.
