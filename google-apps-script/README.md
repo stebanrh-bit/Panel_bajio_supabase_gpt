@@ -4,7 +4,7 @@ Esta carpeta contiene la página del panel para servirla desde Google Apps Scrip
 
 El archivo `index.html` conserva la primera entrega validada, generada desde `entregables/panel-bajio-web.zip`, sin depender de SQL 002. `index-operaciones.html` conserva la segunda entrega con alertas, documentos/POD, citas y cruce, revisiones y comunicaciones; requiere SQL 002. El usuario confirmó en Google el acceso, la lectura de cargas, comentarios persistentes, revisión de tránsito y registro de avisos que resuelve el pendiente y permanece al actualizar.
 
-`index-pendientes.html` es la tercera entrega: incluye las funciones operativas y agrega solicitudes sin número de carga. Requiere SQL 001, 002 y 003. El usuario la activó y confirmó que la vinculación traslada la nota y el comentario a la carga, permanecen al actualizar y la solicitud queda en Vinculados. La cancelación y el acceso por roles siguen pendientes de prueba real. Ninguna entrega completa todavía todos los módulos del Apps Script original.
+`index-pendientes.html` es la tercera entrega: incluye las funciones operativas y agrega solicitudes sin número de carga. Requiere SQL 001, 002 y 003. El usuario la activó y confirmó que la vinculación traslada la nota y el comentario a la carga, permanecen al actualizar y la solicitud queda en Vinculados. El usuario confirmó el alta de PRUEBA-002 y que, al cancelarla, conserva su nota y comentario en Cancelados después de actualizar. El acceso por otros roles sigue pendiente de prueba real. Ninguna entrega completa todavía todos los módulos del Apps Script original.
 
 ## Enlace de implementación proporcionado
 
@@ -12,7 +12,7 @@ El usuario proporcionó este enlace para la aplicación web:
 
 https://script.google.com/macros/s/AKfycbzoOVMfiVGBU1ZWht4TcYZc2cqeBUKVeDTYsiSiEpwWIHnu_SPEnoCFKKG1AhZ6Mdjr/exec
 
-Los flujos verificados en el navegador del usuario son login, lectura de cargas, escritura de comentarios, revisión de tránsito y registro persistente de un aviso que resuelve el pendiente. En la tercera entrega confirmó la vinculación de una solicitud con traslado de su nota y comentario, persistencia al actualizar y cierre en Vinculados. La cancelación y el acceso por roles aún requieren prueba real. El acceso de comprobación desde Codex fue bloqueado por el proxy (CONNECT 403), antes de recibir una respuesta de Google; esa limitación no demuestra un fallo de la aplicación.
+Los flujos verificados en el navegador del usuario son login, lectura de cargas, escritura de comentarios, revisión de tránsito y registro persistente de un aviso que resuelve el pendiente. En la tercera entrega confirmó la vinculación de una solicitud con traslado de su nota y comentario, persistencia al actualizar y cierre en Vinculados. También confirmó creación y cancelación de PRUEBA-002 con nota y comentario persistentes en Cancelados. El acceso por otros roles aún requiere prueba real. El acceso de comprobación desde Codex fue bloqueado por el proxy (CONNECT 403), antes de recibir una respuesta de Google; esa limitación no demuestra un fallo de la aplicación.
 
 ## Crear el proyecto Google
 
@@ -61,7 +61,7 @@ Los archivos están en la rama `supabase-inicial` del repositorio. Sigue este or
 7. En **Cargas**, crea una carga `PENDIENTE-001` con el mismo cliente `PRUEBA PENDIENTE`. Regresa a solicitudes, abre la creada y selecciona esa carga en **Vincular con una carga confirmada**. Al vincular se abre la carga y aparecen la nota y el comentario. La solicitud queda en **Vinculados**, sin duplicar el traslado si se intenta nuevamente.
 8. Crea una segunda solicitud de prueba y usa **Cancelar solicitud**. Confirma que aparece en **Cancelados**, conservando su nota y comentarios.
 
-Administración opera todas las solicitudes, cada CSR opera las propias y gerencia tiene lectura. El historial queda almacenado en `pending_load_history`; las pestañas de la pantalla muestran los expedientes cerrados. Los permisos y la transacción se probaron en PostgreSQL embebido con Auth simulado. El usuario activó esta entrega y confirmó el vínculo, el traslado de nota/comentario, su persistencia al actualizar y el cierre en Vinculados. Faltan las pruebas reales de cancelación y acceso por roles. Codex no ejecutó SQL 003 remotamente ni modificó la implementación Google; esas acciones las realizó el usuario.
+Administración opera todas las solicitudes, cada CSR opera las propias y gerencia tiene lectura. El historial queda almacenado en `pending_load_history`; las pestañas de la pantalla muestran los expedientes cerrados. Los permisos y la transacción se probaron en PostgreSQL embebido con Auth simulado. El usuario activó esta entrega y confirmó el vínculo, el traslado de nota/comentario, su persistencia al actualizar y el cierre en Vinculados. El usuario confirmó además creación y cancelación de PRUEBA-002, conservando nota y comentario al actualizar. Faltan las pruebas reales de acceso por otros roles. Codex no ejecutó SQL 003 remotamente ni modificó la implementación Google; esas acciones las realizó el usuario.
 
 El código nuevo está organizado y comentado en español en `web/src/features/pending-loads/`. El HTML de entrega se genera sin minificar, pero incluye también la biblioteca Supabase. Para cambiar la aplicación, edita sus fuentes y regenera el HTML.
 
@@ -69,7 +69,7 @@ El código nuevo está organizado y comentado en español en `web/src/features/p
 
 Se reprodujo localmente que crear una solicitud desde **Vinculados** o **Cancelados** guardaba el registro, pero dejaba la lista filtrada por el estado anterior. La entrega actual vuelve a **Pendientes** después de guardar y muestra la solicitud creada. Las pruebas de interfaz con DOM simulado comprueban ambos casos y la persistencia en la lista al volver a consultar. El cambio está preparado en `index-pendientes.html`; aún debe copiarse al `index.html` de Google y actualizarse la implementación con **Nueva versión** para activarlo. No requiere SQL nuevo.
 
-Para repetir la segunda prueba en la versión ya publicada: abrir **Solicitudes pendientes → Pendientes → Nueva solicitud**, crear un registro de prueba y comprobar que aparece antes de cancelarlo. Después cancelar ese registro y buscarlo en **Cancelados**. El usuario pidió retomar esta prueba porque perdió el hilo; la cancelación aún no está confirmada en Google.
+Para repetir la segunda prueba en la versión ya publicada: abrir **Solicitudes pendientes → Pendientes → Nueva solicitud**, crear un registro de prueba y comprobar que aparece antes de cancelarlo. Después cancelar ese registro y buscarlo en **Cancelados**. El usuario retomó esta prueba paso a paso y confirmó que PRUEBA-002 aparece al crearla y que, después de cancelarla, permanece en Cancelados con su nota y comentario al actualizar. La captura previa mostraba Cargas con el botón Solicitudes pendientes visible; no permitió atribuir el reporte inicial de solicitud ausente al defecto del filtro. La corrección del filtro sigue preparada y pendiente de activación en Google.
 
 ## Actualizar el mismo enlace
 
