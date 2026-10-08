@@ -25,7 +25,7 @@ export function createRadarPanel({
     });
   }
   function render() {
-    container.innerHTML = `<section class="card"><h2>Radar de regreso cargado</h2><p>Busca cargas por cercanía a una ciudad. La distancia inicial es en línea recta; verifica la carretera de cada candidato antes de planear el viaje.</p>
+    container.innerHTML = `<section class="card"><h2>Radar de millas</h2><p>Busca cargas por cercanía a una ciudad. La distancia inicial es en línea recta; verifica la carretera de cada candidato antes de planear el viaje.</p>
       <form id="radar-search"><div class="grid"><label>Punto de partida<input name="origin" required maxlength="300" placeholder="Laredo, Texas, USA" value="${escape(originText)}"></label>
         <label>Radio (millas)<input name="radius" type="number" min="1" max="3000" value="300" required></label>
         <label>Fuente<select name="source"><option value="active">Cargas activas</option>${data.source ? `<option value="file">Archivo compartido: ${escape(data.source.file_name)}</option>` : ""}</select></label></div><button>Buscar cercanía</button></form>

@@ -65,7 +65,7 @@ export function createPendingLoadsPanel(options) {
     container.innerHTML = `
       <section class="card">
         <div class="toolbar">
-          <h2>Solicitudes sin número de carga</h2>
+          <h2>Pendientes de load</h2>
           ${canCreate ? '<button id="pending-new">Nueva solicitud</button>' : ""}
           <button id="pending-refresh">Actualizar</button>
         </div>

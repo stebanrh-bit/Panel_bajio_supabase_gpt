@@ -6,9 +6,9 @@ Las comprobaciones reales anteriores de login, cargas, comentarios, revisión/av
 
 | Orden | Prueba | Resultado esperado | Estado real |
 | --- | --- | --- | --- |
-| 1 | Entrar por el mismo `/exec` y abrir todos los módulos | Cargas existentes visibles; navegación sin errores | Pendiente |
+| 1 | Entrar por el mismo `/exec` y abrir todos los módulos | Inicio Mi operación y barra lateral visibles; cargas existentes en Operación completa; tarjetas/tabla y navegación sin errores | Pendiente |
 | 2 | Crear `SITIO-001`, editar cita/unidad/estatus; actualizar | Datos conservados y citas en la zona indicada | Pendiente |
-| 3 | Agregar comentario e incidencia; actualizar | Ambos conservados; ningún registro duplicado | Pendiente |
+| 3 | Abrir pestañas Comunicación/Incidencias; intentar una incidencia sin categoría; luego registrar una válida y actualizar | La vacía no se guarda; comentario e incidencia válida conservados, sin duplicados | Pendiente |
 | 4 | Cambiar a En transito y pulsar Ya revisé; cambiar cita; registrar aviso | Revisión a tres horas; aviso pendiente y después resuelto con canal/tipo | Pendiente |
 | 5 | Crear solicitud desde Cancelados, comentar y vincular a carga del mismo cliente | Vuelve a Pendientes; vínculo traslada texto y queda en Vinculados | Pendiente |
 | 6 | Crear otra solicitud y cancelarla; actualizar | Expediente en Cancelados conserva nota/comentario | Pendiente |
@@ -16,8 +16,8 @@ Las comprobaciones reales anteriores de login, cargas, comentarios, revisión/av
 | 8 | Crear pendiente de turno para dos cargas y para uno mismo; resolver/reabrir/cancelar | Una tarea por carga; filtros correctos e historial conservado | Pendiente |
 | 9 | Preparar y guardar cierre de turno | Resumen editable conservado después de actualizar | Pendiente |
 | 10 | Crear/editar plantilla con `{load}` y `{customer}`; usarla en una carga | Variables se sustituyen; copiar funciona o ofrece selección manual | Pendiente |
-| 11 | Asignar cliente a tu cuenta; seguir una carga; abrir Mi jornada | Filtros de cliente/operador/seguidas coherentes; alertas visibles | Pendiente |
-| 12 | Abrir Calendario y cambiar mes; revisar indicadores | Fechas de citas/cruce/apartados correctas; métricas y muestra explicadas | Pendiente |
+| 11 | Asignar cliente a tu cuenta; seguir una carga; abrir Mi operación | Filtros de cliente/operador/seguidas coherentes; alertas visibles | Pendiente |
+| 12 | Abrir Calendario y cambiar semana; revisar indicadores | Fechas de citas/cruce/apartados correctas; métricas y muestra explicadas | Pendiente |
 | 13 | Abrir la misma carga en dos pestañas y guardar cambios en ambas | La segunda edición con versión anterior se rechaza; no pisa cambios | Pendiente |
 | 14 | Seleccionar dos cargas y cambiar un campo masivamente | Ambas se guardan; una versión vieja revierte el conjunto | Pendiente |
 | 15 | Importar CSV de prueba con una carga nueva y una existente, primero vista previa | Vista previa no cambia datos; aplicar mantiene estatus/POD manuales y campos vacíos | Pendiente |

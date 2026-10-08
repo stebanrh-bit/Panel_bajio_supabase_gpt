@@ -2,6 +2,20 @@
 
 Supabase conserva los datos y las cuentas. Google Apps Script publica la página y presta el servicio de mapas. Esta entrega reúne los módulos; las pruebas manuales se hacen después de instalarla, una por una, como solicitó el usuario.
 
+## Diseño original recuperado
+
+La entrega usa el logo y los estilos del panel original: barra lateral, Inicio «Mi operación», pestañas Ahora/Mi turno, tarjetas y tabla en Operación completa, calendario semanal y expediente lateral con Operación, Tracking, Comunicación, Documentos, Incidencias e Historial. Los módulos nuevos siguen usando Supabase. Las fuentes están separadas por función y tienen comentarios explicativos en español; el HTML entregado conserva el código legible.
+
+Vista previa con datos ficticios:
+
+![Inicio del panel con el diseño original recuperado](imagenes/panel-home.png)
+
+![Operación completa en tarjetas](imagenes/panel-operation.png)
+
+La corrección de incidencias requiere actualizar tanto la página como SQL: la categoría se valida antes de enviar y Supabase rechaza registros nuevos con categoría vacía. Las incidencias antiguas se conservan. No inventamos una categoría ni eliminamos lo ya guardado.
+
+Si ya instalaste la entrega completa con Bitácora y Radar, puedes ejecutar solo [SQL 008](https://raw.githubusercontent.com/stebanrh-bit/Panel_bajio_supabase_gpt/supabase-inicial/supabase/migrations/008_incident_category_validation.sql), reemplazar `index.html` y publicar una nueva versión. `Code-sitio.gs` no cambió en esta actualización visual. Si no estás seguro de tu versión, sigue los tres pasos de abajo: el SQL completo se puede repetir y conserva tus datos.
+
 ## Los tres archivos que necesitas
 
 Abre los enlaces y usa **Ctrl+A → Ctrl+C** para copiar todo. No necesitas descargar un ZIP.
@@ -18,7 +32,7 @@ Abre los enlaces y usa **Ctrl+A → Ctrl+C** para copiar todo. No necesitas desc
 4. Pégalo en la consulta nueva y pulsa **Run**.
 5. Continúa cuando Supabase muestre el resultado satisfactorio. Si aparece un error, conserva la versión de Google que ya funciona y comparte el texto del error, sin contraseñas.
 
-El archivo reúne SQL 004, 005, 006 y 007 en una sola transacción. Requiere las actualizaciones 001, 002 y 003 que ya se usaron en tu panel. Agrega módulos y ajusta permisos; conserva las cargas, los usuarios y los expedientes. No vuelvas a ejecutar SQL 001 ni elimines tablas. La actualización se puede repetir si hace falta; un error revierte el conjunto.
+El archivo reúne SQL 004, 005, 006, 007 y 008 en una sola transacción. Requiere las actualizaciones 001, 002 y 003 que ya se usaron en tu panel. Agrega módulos y ajusta permisos; conserva las cargas, los usuarios y los expedientes. No vuelvas a ejecutar SQL 001 ni elimines tablas. La actualización se puede repetir si hace falta; un error revierte el conjunto.
 
 ## Paso 2: actualizar el código en Google
 
@@ -27,7 +41,7 @@ El archivo reúne SQL 004, 005, 006 y 007 en una sola transacción. Requiere las
 3. Abre el archivo **index.html** del mismo proyecto. Selecciona su contenido y pega **todo** el tercer archivo: `index-sitio.html`. En Google el nombre sigue siendo **index**.
 4. Guarda ambos archivos. No copies el antiguo `Code.gs` de la raíz de GitHub; ese pertenece a la versión basada en Google Sheets.
 
-La página ya incluye los estilos, las bibliotecas y la configuración pública de tu Supabase. No necesitas pegar claves adicionales ni crear una hoja. Las nuevas cuentas se crean en **Supabase → Authentication → Users**; después asignas su rol en **Equipo y clientes**. Las contraseñas se administran con Supabase Auth.
+La página ya incluye los estilos, las bibliotecas y la configuración pública de tu Supabase. No necesitas pegar claves adicionales ni crear una hoja. Las nuevas cuentas se crean en **Supabase → Authentication → Users**; después asignas su rol en **Gestionar CSR y clientes**. Las contraseñas se administran con Supabase Auth.
 
 ## Paso 3: activar la misma implementación
 

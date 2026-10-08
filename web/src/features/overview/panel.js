@@ -2,6 +2,7 @@ import { escapeHtml as escape } from "../../ui/html.js";
 import { createPanelController, personName } from "../../ui/panel.js";
 import { fetchAll } from "../../data/supabase.js";
 import { attentionFor, marked } from "../../load-rules.js";
+import { homeMarkup } from "./home.js";
 import { customerKey, dayKey, calendarEvents, indicators } from "./rules.js";
 
 export function createOverviewService(client) {
@@ -12,31 +13,39 @@ export function createOverviewService(client) {
     );
   return {
     async list() {
-      const [loads, assignments, following, communications, reserved] =
-        await Promise.all([
-          fetchAll(() =>
-            client
-              .from("loads")
-              .select("*,incidents(count)")
-              .eq("archived", false)
-              .order("load"),
-          ),
-          fetchAll(() =>
-            client
-              .from("customer_assignments")
-              .select("*")
-              .order("customer_key"),
-          ),
-          fetchAll(() =>
-            client
-              .from("load_followers")
-              .select("*")
-              .order("load")
-              .order("user_id"),
-          ),
-          list("communications"),
-          list("reserved_loads"),
-        ]);
+      const [
+        loads,
+        assignments,
+        following,
+        communications,
+        reserved,
+        pending,
+        tasks,
+        closures,
+      ] = await Promise.all([
+        fetchAll(() =>
+          client
+            .from("loads")
+            .select("*,incidents(count)")
+            .eq("archived", false)
+            .order("load"),
+        ),
+        fetchAll(() =>
+          client.from("customer_assignments").select("*").order("customer_key"),
+        ),
+        fetchAll(() =>
+          client
+            .from("load_followers")
+            .select("*")
+            .order("load")
+            .order("user_id"),
+        ),
+        list("communications"),
+        list("reserved_loads"),
+        list("pending_loads"),
+        list("shift_tasks"),
+        list("shift_closures"),
+      ]);
       return {
         loads: loads.map((row) => ({
           ...row,
@@ -46,6 +55,9 @@ export function createOverviewService(client) {
         following,
         communications,
         reserved,
+        pending,
+        tasks,
+        closures,
       };
     },
   };
@@ -59,11 +71,17 @@ export function createOverviewPanel({
   userId,
   mode = "home",
   onOpenLoad,
+  onNavigate,
   onError,
 }) {
   const view = createPanelController(container, onError);
   let data,
-    month = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    week = new Date();
+  week.setHours(0, 0, 0, 0);
+  week.setDate(week.getDate() - ((week.getDay() + 6) % 7));
+  let homeTab = "now",
+    priority = "",
+    search = "";
   let person = "",
     customer = "",
     onlyFollowed = false;
@@ -79,6 +97,18 @@ export function createOverviewPanel({
         (item) => item.customer_key === customerKey(load.customer),
       );
       return (
+        [
+          load.load,
+          load.customer,
+          load.trailer,
+          load.truck,
+          load.origin_city,
+          load.dest_city,
+        ].some((value) =>
+          String(value ?? "")
+            .toLocaleLowerCase()
+            .includes(search),
+        ) &&
         (!person || assignment?.owner_id === person) &&
         (!customer || load.customer === customer) &&
         (!onlyFollowed ||
@@ -96,7 +126,7 @@ export function createOverviewPanel({
           loads.some((load) => load.load === event.load),
         ),
       );
-    container.innerHTML = `<section class="card"><div class="toolbar"><h2>${{ home: "Mi jornada", calendar: "Calendario operativo", metrics: "Indicadores de operación" }[mode]}</h2><button id="overview-refresh">Actualizar</button></div>
+    container.innerHTML = `<section class="${mode === "home" ? "home-command" : "card"}"><div class="home-command-head"><div class="home-command-title"><h1>${{ home: "Mi operación", calendar: "Calendario de la semana", metrics: "Indicadores de operación" }[mode]}</h1><p>${mode === "home" ? "Lo que requiere tu atención ahora" : "Consulta las cargas del filtro seleccionado."}</p></div>${mode === "home" ? `<label class="home-global-search"><input id="home-search" type="search" placeholder="Buscar load, cliente, trailer…" aria-label="Buscar en mi operación" value="${escape(search)}"></label>` : ""}<button id="overview-refresh">Actualizar</button></div>
       <div class="grid"><label>Operador asignado<select id="overview-person"><option value="">Todo el equipo</option>${people
         .filter((row) => ["csr", "admin"].includes(row.role))
         .map(
@@ -130,7 +160,44 @@ export function createOverviewPanel({
     };
     const content = container.querySelector("#overview-content");
     if (mode === "calendar") renderCalendar(content, loads);
-    else {
+    else if (mode === "home") {
+      content.innerHTML = homeMarkup(loads, data, {
+        tab: homeTab,
+        priority,
+        userId,
+      });
+      content.querySelectorAll("[data-home-tab]").forEach(
+        (button) =>
+          (button.onclick = () => {
+            homeTab = button.dataset.homeTab;
+            render();
+          }),
+      );
+      content.querySelectorAll("[data-home-priority]").forEach(
+        (button) =>
+          (button.onclick = () => {
+            priority =
+              priority === button.dataset.homePriority
+                ? ""
+                : button.dataset.homePriority;
+            render();
+          }),
+      );
+      content
+        .querySelectorAll("[data-home-module]")
+        .forEach(
+          (button) =>
+            (button.onclick = () => onNavigate(button.dataset.homeModule)),
+        );
+      container.querySelector("#home-search").oninput = (event) => {
+        search = event.target.value.toLocaleLowerCase();
+        const position = event.target.selectionStart;
+        render();
+        const input = container.querySelector("#home-search");
+        input.focus();
+        input.setSelectionRange(position, position);
+      };
+    } else {
       content.innerHTML = `<div class="kpis">${Object.entries({
         "Cargas activas": stats.active,
         "Requieren atención": stats.attention,
@@ -173,14 +240,13 @@ export function createOverviewPanel({
       loads,
       data.reserved.filter((record) => !person || record.created_by === person),
     );
-    const first = new Date(month.getFullYear(), month.getMonth(), 1),
-      last = new Date(month.getFullYear(), month.getMonth() + 1, 0);
     const days = Array.from(
-      { length: last.getDate() },
-      (_, index) => new Date(month.getFullYear(), month.getMonth(), index + 1),
+      { length: 7 },
+      (_, index) =>
+        new Date(week.getFullYear(), week.getMonth(), week.getDate() + index),
     );
-    content.innerHTML = `<div class="toolbar"><button id="month-previous">Mes anterior</button><h3>${escape(month.toLocaleDateString("es", { month: "long", year: "numeric" }))}</h3><button id="month-next">Mes siguiente</button></div>
-      <p>Fechas en ${escape(Intl.DateTimeFormat().resolvedOptions().timeZone)}.</p><div class="calendar-grid">${Array.from({ length: (first.getDay() + 6) % 7 }, () => '<div class="calendar-empty"></div>').join("")}${days
+    content.innerHTML = `<div class="toolbar"><button id="week-previous">← Semana anterior</button><h3>${escape(days[0].toLocaleDateString("es-MX"))} — ${escape(days[6].toLocaleDateString("es-MX"))}</h3><button id="week-today">Esta semana</button><button id="week-next">Semana siguiente →</button></div>
+      <p>Fechas en ${escape(Intl.DateTimeFormat().resolvedOptions().timeZone)}.</p><div class="calendar-grid">${days
         .map(
           (
             day,
@@ -195,12 +261,18 @@ export function createOverviewPanel({
           .join("")}</div>`,
         )
         .join("")}</div>`;
-    content.querySelector("#month-previous").onclick = () => {
-      month = new Date(month.getFullYear(), month.getMonth() - 1, 1);
+    content.querySelector("#week-previous").onclick = () => {
+      week.setDate(week.getDate() - 7);
       render();
     };
-    content.querySelector("#month-next").onclick = () => {
-      month = new Date(month.getFullYear(), month.getMonth() + 1, 1);
+    content.querySelector("#week-next").onclick = () => {
+      week.setDate(week.getDate() + 7);
+      render();
+    };
+    content.querySelector("#week-today").onclick = () => {
+      week = new Date();
+      week.setHours(0, 0, 0, 0);
+      week.setDate(week.getDate() - ((week.getDay() + 6) % 7));
       render();
     };
   }

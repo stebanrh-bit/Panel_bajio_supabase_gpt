@@ -40,7 +40,21 @@ import {
 import { createRadarPanel } from "./features/radar/panel.js";
 import { createRadarService } from "./features/radar/service.js";
 import { mountLoadActions, bulkEditor } from "./features/loads/actions.js";
+import { bindIncidentForm } from "./features/incidents/form.js";
+import { appShellMarkup } from "./ui/app-shell.js";
+import {
+  operationMarkup,
+  loadCardsMarkup,
+  loadRowsMarkup,
+  matchesOperationFilter,
+} from "./features/loads/presentation.js";
+import {
+  mountLoadWorkspace,
+  mountEditorWorkspace,
+} from "./features/loads/workspace.js";
 import "./style.css";
+import "./theme/original.css";
+import "./theme/adaptation.css";
 const root = document.querySelector("#app");
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -52,7 +66,8 @@ let client,
   filter = "all",
   generation = 0;
 let secondaryPanel = null;
-let currentModule = "loads";
+let currentModule = "home";
+let loadView = "cards";
 const fields = {
   load: "Número de carga",
   customer: "Cliente",
@@ -113,7 +128,9 @@ const formatField = (field, value) =>
       ? formatDate(value)
       : String(value ?? "") || "—";
 function error(message) {
-  const el = document.querySelector("#message");
+  const el =
+    document.querySelector("#workspace-message") ||
+    document.querySelector("#message");
   if (el) {
     el.textContent = message;
     el.setAttribute("role", "alert");
@@ -132,80 +149,39 @@ async function request(query) {
 }
 function shell(content) {
   disposeSecondaryPanel();
-  const navigation =
-    session &&
-    profile &&
-    !["pending", "client"].includes(profile.role) &&
-    profile.active !== false
-      ? `<nav class="module-navigation" aria-label="Módulos del panel">
-        <button id="nav-home" aria-pressed="${currentModule === "home"}">Mi jornada</button>
-        <button id="nav-loads" aria-pressed="${currentModule === "loads"}">Cargas</button>
-        <button id="nav-pending" aria-pressed="${currentModule === "pending"}">Solicitudes pendientes</button>
-        <button id="nav-reserved" aria-pressed="${currentModule === "reserved"}">Apartados</button>
-        <button id="nav-shifts" aria-pressed="${currentModule === "shifts"}">Turnos</button>
-        <button id="nav-team" aria-pressed="${currentModule === "team"}">Equipo y clientes</button>
-        <button id="nav-templates" aria-pressed="${currentModule === "templates"}">Plantillas</button>
-        <button id="nav-account" aria-pressed="${currentModule === "account"}">Mi cuenta</button>
-        <button id="nav-calendar" aria-pressed="${currentModule === "calendar"}">Calendario</button>
-        <button id="nav-metrics" aria-pressed="${currentModule === "metrics"}">Indicadores</button>
-        <button id="nav-radar" aria-pressed="${currentModule === "radar"}">Radar</button>
-        <button id="nav-archive" aria-pressed="${currentModule === "archive"}">Archivo</button>
-        ${profile.role === "admin" ? '<button id="nav-imports">Importación y respaldos</button>' : ""}
-      </nav>`
-      : "";
-  root.innerHTML = `<header><div><small>OPERACIONES</small><h1>Panel Bajío</h1></div>${session ? `<div>${escape(profile?.display_name || session.user.email)} <button id="logout">Salir</button></div>` : ""}</header><main>${navigation}<p id="message" aria-live="polite"></p>${content}</main>`;
-  document.querySelector("#nav-loads")?.addEventListener("click", dashboard);
+  document.documentElement.classList.remove("ws-open");
+  root.innerHTML = appShellMarkup({
+    content,
+    session,
+    profile,
+    module: currentModule,
+    attentionCount: loads.filter(
+      (row) => attentionFor(row) || marked(row.client_notify_pending),
+    ).length,
+  });
+  root.querySelectorAll("[data-module]").forEach((button) => {
+    button.onclick = () => navigateModule(button.dataset.module);
+  });
   document
-    .querySelector("#nav-pending")
-    ?.addEventListener("click", showPendingLoads);
+    .querySelector("#header-refresh")
+    ?.addEventListener("click", () => navigateModule(currentModule));
+  const showNotices = async () => {
+    await dashboard();
+    filter = "attention";
+    renderRows();
+  };
   document
-    .querySelector("#nav-reserved")
-    ?.addEventListener("click", showReservedLoads);
+    .querySelector("#header-avisos")
+    ?.addEventListener("click", showNotices);
   document
-    .querySelector("#nav-shifts")
-    ?.addEventListener("click", () =>
-      showSecondaryModule("shifts", createShiftsPanel, createShiftsService),
-    );
-  document
-    .querySelector("#nav-team")
-    ?.addEventListener("click", () =>
-      showSecondaryModule("team", createTeamPanel, createTeamService),
-    );
-  document
-    .querySelector("#nav-templates")
-    ?.addEventListener("click", () =>
-      showSecondaryModule("templates", createTemplatesPanel, createTeamService),
-    );
-  document
-    .querySelector("#nav-account")
-    ?.addEventListener("click", () =>
-      showSecondaryModule("account", createAccountPanel, createTeamService),
-    );
-  for (const mode of ["home", "calendar", "metrics"])
-    document
-      .querySelector(`#nav-${mode}`)
-      ?.addEventListener("click", () =>
-        showSecondaryModule(
-          mode,
-          (options) => createOverviewPanel({ ...options, mode }),
-          createOverviewService,
-        ),
-      );
-  document
-    .querySelector("#nav-radar")
-    ?.addEventListener("click", () =>
-      showSecondaryModule("radar", createRadarPanel, createRadarService),
-    );
-  document
-    .querySelector("#nav-archive")
-    ?.addEventListener("click", () =>
-      showSecondaryModule("archive", createArchivePanel, createArchiveService),
-    );
-  document
-    .querySelector("#nav-imports")
-    ?.addEventListener("click", () =>
-      showSecondaryModule("imports", createImportsPanel, createImportsService),
-    );
+    .querySelector("#mobile-avisos")
+    ?.addEventListener("click", showNotices);
+  document.querySelector("#mobile-more")?.addEventListener("click", (event) => {
+    const open = document
+      .querySelector("#sidebar")
+      .classList.toggle("abierta-movil");
+    event.currentTarget.setAttribute("aria-expanded", String(open));
+  });
   document.querySelector("#logout")?.addEventListener("click", async () => {
     try {
       const { error: err } = await client.auth.signOut();
@@ -216,6 +192,28 @@ function shell(content) {
       error(err.message);
     }
   });
+}
+/** Cada botón conserva su módulo de Supabase; solo cambia la presentación. */
+function navigateModule(name) {
+  if (name === "loads") return dashboard();
+  if (name === "pending") return showPendingLoads();
+  if (name === "reserved") return showReservedLoads();
+  if (["home", "calendar", "metrics"].includes(name))
+    return showSecondaryModule(
+      name,
+      (options) => createOverviewPanel({ ...options, mode: name }),
+      createOverviewService,
+    );
+  const modules = {
+    shifts: [createShiftsPanel, createShiftsService],
+    team: [createTeamPanel, createTeamService],
+    templates: [createTemplatesPanel, createTeamService],
+    account: [createAccountPanel, createTeamService],
+    radar: [createRadarPanel, createRadarService],
+    archive: [createArchivePanel, createArchiveService],
+    imports: [createImportsPanel, createImportsService],
+  };
+  if (modules[name]) return showSecondaryModule(name, ...modules[name]);
 }
 /** Detiene respuestas del módulo anterior cuando se cambia de pantalla o se cierra sesión. */
 function disposeSecondaryPanel() {
@@ -271,6 +269,7 @@ async function showSecondaryModule(moduleName, createPanel, createService) {
       role: profile.role,
       people,
       client,
+      onNavigate: navigateModule,
       onError: (message) => {
         if (current === generation && session) error(message);
       },
@@ -321,7 +320,7 @@ function login() {
       });
       if (err) throw err;
       session = data.session;
-      await dashboard();
+      await dashboard({ openHome: true });
     } catch (err) {
       error(err.message);
     } finally {
@@ -330,7 +329,7 @@ function login() {
   });
 }
 /** Comprueba el perfil primero; clientes entran al portal antes de consultar tablas internas. */
-async function dashboard() {
+async function dashboard({ openHome = false } = {}) {
   if (!session) return login();
   disposeSecondaryPanel();
   currentModule = "loads";
@@ -383,9 +382,8 @@ async function dashboard() {
     }
     loads = nextLoads;
     activeLoad = null;
-    shell(
-      `<section class="card"><div class="toolbar"><h2>Cargas activas <span class="count">${loads.length}</span></h2>${writable() ? '<button id="new">Nueva carga</button><button id="bulk">Cambiar selección</button>' : ""}<button id="refresh">Actualizar</button></div><div class="filters"><button data-filter="all">Todas (${loads.length})</button><button data-filter="attention">Requieren atención (${loads.filter((row) => attentionFor(row)).length})</button><button data-filter="notify">Pendientes de avisar (${loads.filter((row) => marked(row.client_notify_pending)).length})</button></div><label>Buscar carga, cliente, unidad o ruta<input id="search" type="search" placeholder="Buscar…"></label><div class="scroll"><table><thead><tr>${writable() ? "<th>Seleccionar</th>" : ""}<th>Carga</th><th>Cliente</th><th>Ruta</th><th>Estatus / etapa</th><th>Unidad</th><th>Atención</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></section><section id="detail"></section>`,
-    );
+    if (openHome) return navigateModule("home");
+    shell(operationMarkup(loads, writable()));
     renderRows();
     document
       .querySelector("#search")
@@ -397,7 +395,14 @@ async function dashboard() {
           renderRows();
         }),
     );
-    document.querySelector("#refresh").addEventListener("click", dashboard);
+    document.querySelector("#customer-filter").onchange = renderRows;
+    document.querySelector("#view-toggle").onclick = () => {
+      loadView = loadView === "cards" ? "table" : "cards";
+      renderRows();
+    };
+    document
+      .querySelector("#refresh")
+      .addEventListener("click", () => dashboard());
     document.querySelector("#new")?.addEventListener("click", () => editor());
     document.querySelector("#bulk")?.addEventListener("click", () =>
       bulkEditor({
@@ -406,9 +411,13 @@ async function dashboard() {
         onError: error,
         onSaved: dashboard,
         isCurrent: () => current === generation && Boolean(session),
-        items: [...document.querySelectorAll("[data-load-select]:checked")].map(
-          (input) => loads.find((row) => row.load === input.dataset.loadSelect),
-        ),
+        items: [
+          ...new Set(
+            [...document.querySelectorAll("[data-load-select]:checked")].map(
+              (input) => input.dataset.loadSelect,
+            ),
+          ),
+        ].map((id) => loads.find((row) => row.load === id)),
       }),
     );
   } catch (err) {
@@ -420,48 +429,58 @@ async function dashboard() {
     document.querySelector("#retry").onclick = dashboard;
   }
 }
+/** La vista de tarjetas y la tabla comparten exactamente los mismos filtros. */
 function renderRows() {
-  const search =
-    document.querySelector("#search")?.value.toLocaleLowerCase() || "";
+  if (!document.querySelector("#rows")) return;
+  const search = document.querySelector("#search").value.toLocaleLowerCase();
+  const customer = document.querySelector("#customer-filter").value;
   const filtered = loads.filter(
     (row) =>
-      [row.load, row.customer, row.origin_city, row.dest_city, row.truck].some(
-        (v) =>
-          String(v ?? "")
-            .toLocaleLowerCase()
-            .includes(search),
+      [
+        row.load,
+        row.customer,
+        row.origin_city,
+        row.dest_city,
+        row.truck,
+        row.trailer,
+        row.work_order,
+      ].some((value) =>
+        String(value ?? "")
+          .toLocaleLowerCase()
+          .includes(search),
       ) &&
-      (filter === "all" ||
-        (filter === "attention" && attentionFor(row)) ||
-        (filter === "notify" && marked(row.client_notify_pending))),
+      (!customer || row.customer === customer) &&
+      matchesOperationFilter(row, filter),
   );
-  document
-    .querySelectorAll("[data-filter]")
-    .forEach((button) =>
-      button.setAttribute(
-        "aria-pressed",
-        String(button.dataset.filter === filter),
-      ),
-    );
-  document.querySelector("#rows").innerHTML =
-    filtered
-      .map((row) => {
-        const alert = alertFor(row),
-          attention = attentionFor(row);
-        return `<tr>${writable() ? `<td><input type="checkbox" data-load-select="${escape(row.load)}" aria-label="Seleccionar carga ${escape(row.load)}"></td>` : ""}<td>${escape(row.load)}</td><td>${escape(row.customer)}</td><td>${escape(row.origin_city)} → ${escape(row.dest_city)}</td><td>${escape(row.status)}<small class="block">${stages[stageIndex(row)]}</small></td><td>${escape(row.truck)}</td><td><span class="badge ${alert.level === "critical" ? "critical" : attention ? "warn" : alert.level}">${escape(attention || alert.message)}</span>${marked(row.client_notify_pending) ? '<small class="block">Pendiente de avisar al cliente</small>' : ""}</td><td><button data-load="${escape(row.load)}">Abrir</button></td></tr>`;
-      })
-      .join("") || '<tr><td colspan="7">No hay cargas para mostrar.</td></tr>';
-  document
-    .querySelectorAll("[data-load]")
-    .forEach((button) => (button.onclick = () => detail(button.dataset.load)));
+  document.querySelectorAll("[data-filter]").forEach((button) => {
+    const active = button.dataset.filter === filter;
+    button.setAttribute("aria-pressed", String(active));
+    button.classList.toggle("active", active);
+  });
+  const cards = document.querySelector("#cards-view"),
+    table = document.querySelector("#table-view");
+  cards.innerHTML = loadCardsMarkup(filtered, writable());
+  document.querySelector("#rows").innerHTML = loadRowsMarkup(
+    filtered,
+    writable(),
+  );
+  cards.hidden = loadView !== "cards";
+  table.hidden = loadView !== "table";
+  document.querySelector("#view-toggle").textContent =
+    loadView === "cards" ? "Vista tabla" : "Vista tarjetas";
+  document.querySelectorAll("[data-load]").forEach((button) => {
+    button.onclick = () =>
+      detail(button.dataset.load, button.dataset.workspaceTab || "operacion");
+  });
 }
-async function refreshLoad(id) {
+async function refreshLoad(id, initialTab = "operacion") {
   // Actualiza los contadores y las alertas antes de volver a abrir la carga.
   await dashboard();
-  if (session && document.querySelector("#detail")) await detail(id);
+  if (session && document.querySelector("#detail"))
+    await detail(id, initialTab);
 }
 /** Expediente con consultas independientes y control de la pantalla que inició la petición. */
-async function detail(id) {
+async function detail(id, initialTab = "operacion") {
   const current = generation;
   activeLoad = id;
   try {
@@ -523,11 +542,19 @@ async function detail(id) {
     )
       .map(
         ([field, label]) =>
-          `<div><dt>${label}</dt><dd>${escape(formatField(field, row[field]))}</dd></div>`,
+          `<div data-field="${field}"><dt>${label}</dt><dd>${escape(formatField(field, row[field]))}</dd></div>`,
       )
       .join(
         "",
-      )}</dl><h3>Comunicaciones con el cliente</h3><p>Registra aquí los avisos que ya enviaste por otro medio.</p>${canEdit ? '<form id="notice"><div class="grid"><label>Canal<select name="channel"><option>WhatsApp</option><option>Correo</option><option>Teléfono</option><option>Otro</option></select></label><label>Tipo de aviso<input name="notice_type" placeholder="Cambio de cita, cruce, retraso…" required maxlength="200"></label></div><button>Registrar aviso enviado</button></form>' : ""}<ul>${communications.map((item) => `<li><strong>${item.event_type === "NOTIFICADO" ? "Aviso registrado" : "Pendiente de avisar"}</strong> ${escape(item.channel)} ${escape(item.notice_type)}<p>${escape(item.reason)}</p><small>${escape(formatDate(item.created_at))}</small></li>`).join("") || "<li>Sin comunicaciones registradas.</li>"}</ul><h3>Comentarios</h3><ul>${comments.map((c) => `<li>${escape(c.body)}<small class="block">${escape(formatDate(c.created_at))}</small></li>`).join("") || "<li>Sin comentarios.</li>"}</ul>${canEdit ? '<form id="comment"><label>Nuevo comentario<textarea name="body" required maxlength="10000"></textarea></label><button>Agregar comentario</button></form>' : ""}<h3>Incidencias</h3><ul>${incidents.map((i) => `<li><strong>${escape(i.category)} · ${escape(i.severity)}</strong><p>${escape(i.description)}</p><p>${escape(i.action_taken)}</p></li>`).join("") || "<li>Sin incidencias.</li>"}</ul>${canEdit ? '<form id="incident"><label>Categoría<input name="category" required maxlength="100"></label><label>Severidad<select name="severity"><option>baja</option><option>media</option><option>alta</option></select></label><label>Descripción<textarea name="description" required maxlength="10000"></textarea></label><label>Acción tomada<textarea name="action_taken"></textarea></label><button>Registrar incidencia</button></form>' : ""}<div id="load-extra-actions"></div><h3>Últimos cambios</h3><ul>${updates || "<li>Sin cambios registrados.</li>"}</ul></div>`;
+      )}</dl><h3>Comunicaciones con el cliente</h3><p>Registra aquí los avisos que ya enviaste por otro medio.</p>${canEdit ? '<form id="notice"><div class="grid"><label>Canal<select name="channel"><option>WhatsApp</option><option>Correo</option><option>Teléfono</option><option>Otro</option></select></label><label>Tipo de aviso<input name="notice_type" placeholder="Cambio de cita, cruce, retraso…" required maxlength="200"></label></div><button>Registrar aviso enviado</button></form>' : ""}<ul>${communications.map((item) => `<li><strong>${item.event_type === "NOTIFICADO" ? "Aviso registrado" : "Pendiente de avisar"}</strong> ${escape(item.channel)} ${escape(item.notice_type)}<p>${escape(item.reason)}</p><small>${escape(formatDate(item.created_at))}</small></li>`).join("") || "<li>Sin comunicaciones registradas.</li>"}</ul><h3>Comentarios</h3><ul>${comments.map((c) => `<li>${escape(c.body)}<small class="block">${escape(formatDate(c.created_at))}</small></li>`).join("") || "<li>Sin comentarios.</li>"}</ul>${canEdit ? '<form id="comment"><label>Nuevo comentario<textarea name="body" required maxlength="10000"></textarea></label><button>Agregar comentario</button></form>' : ""}<h3>Incidencias</h3><ul>${incidents.map((i) => `<li><strong>${escape(i.category)} · ${escape(i.severity)}</strong><p>${escape(i.description)}</p><p>${escape(i.action_taken)}</p></li>`).join("") || "<li>Sin incidencias.</li>"}</ul>${canEdit ? '<form id="incident"><label>Categoría<select name="category" required><option value="">Selecciona una categoría</option><option>Documentación</option><option>Operador</option><option>Unidad</option><option>Aduana</option><option>Cliente</option><option>Otro</option></select></label><label>Severidad<select name="severity"><option value="baja">Informativa</option><option value="media">Media</option><option value="alta">Crítica</option></select></label><label>Descripción<textarea name="description" required maxlength="10000"></textarea></label><label>Acción tomada<textarea name="action_taken" maxlength="10000"></textarea></label><button>Registrar incidencia</button></form>' : ""}<div id="load-extra-actions"></div><h3>Últimos cambios</h3><ul>${updates || "<li>Sin cambios registrados.</li>"}</ul></div>`;
+    mountLoadWorkspace(section, {
+      row,
+      initialTab,
+      onClose: () => {
+        activeLoad = null;
+        section.replaceChildren();
+      },
+    });
     document
       .querySelector("#edit")
       ?.addEventListener("click", () => editor(row));
@@ -572,10 +599,19 @@ async function detail(id) {
           button.disabled = false;
         }
       });
-    for (const [formId, table] of [
-      ["comment", "comments"],
-      ["incident", "incidents"],
-    ]) {
+    const incidentForm = document.querySelector("#incident");
+    if (incidentForm)
+      bindIncidentForm({
+        form: incidentForm,
+        loadNumber: id,
+        saveIncident: (values) =>
+          request(client.from("incidents").insert(values)),
+        onSaved: () => refreshLoad(id, "incidencias"),
+        onError: error,
+        isCurrent: () =>
+          activeLoad === id && current === generation && Boolean(session),
+      });
+    for (const [formId, table] of [["comment", "comments"]]) {
       document
         .querySelector(`#${formId}`)
         ?.addEventListener("submit", async (event) => {
@@ -595,7 +631,6 @@ async function detail(id) {
           }
         });
     }
-    section.scrollIntoView({ behavior: "smooth" });
     await mountLoadActions({
       container: section.querySelector("#load-extra-actions"),
       row,
@@ -628,6 +663,11 @@ function editor(row = {}) {
     })
     .join("");
   section.innerHTML = `<div class="card"><h2>${row.load ? "Editar carga" : "Nueva carga"}</h2><p>Las fechas se muestran en tu zona horaria: ${escape(Intl.DateTimeFormat().resolvedOptions().timeZone)}. En tránsito se agenda una revisión cada tres horas.</p><form id="editor"><div class="grid">${inputs}</div><button>Guardar</button> <button type="button" id="cancel">Cancelar</button></form></div>`;
+  mountEditorWorkspace(
+    section,
+    row.load ? `Editar load ${row.load}` : "Nueva carga",
+    () => section.replaceChildren(),
+  );
   const form = document.querySelector("#editor");
   const reminder = form.elements.recordatorio_fecha;
   const updateRequired = () => {
@@ -636,7 +676,8 @@ function editor(row = {}) {
   form.elements.status.addEventListener("change", updateRequired);
   updateRequired();
   document.querySelector("#cancel").onclick = () => {
-    section.innerHTML = "";
+    document.documentElement.classList.remove("ws-open");
+    section.replaceChildren();
   };
   form.onsubmit = async (event) => {
     event.preventDefault();
@@ -674,7 +715,6 @@ function editor(row = {}) {
       button.disabled = false;
     }
   };
-  section.scrollIntoView({ behavior: "smooth" });
 }
 if (!url || !key) {
   shell(
@@ -686,7 +726,7 @@ if (!url || !key) {
     const { data, error: err } = await client.auth.getSession();
     if (err) throw err;
     session = data.session;
-    if (session) await dashboard();
+    if (session) await dashboard({ openHome: true });
     else login();
     client.auth.onAuthStateChange((event, newSession) => {
       session = newSession;

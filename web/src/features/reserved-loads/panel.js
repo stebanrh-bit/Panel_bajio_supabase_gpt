@@ -74,7 +74,7 @@ export function createReservedLoadsPanel({
   function renderPage() {
     container.innerHTML = `
       <section class="card">
-        <div class="toolbar"><h2>Apartados para regreso cargado</h2>
+        <div class="toolbar"><h2>Loads apartados</h2>
           ${canCreate ? '<button id="reserved-new">Apartar carga</button>' : ""}
           <button id="reserved-refresh">Actualizar</button>
         </div>

@@ -6,10 +6,10 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from package_google import package_html
 
 ROOT=Path(__file__).resolve().parents[1]
-MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql']
+MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql']
 
 def combined_sql():
-    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–007.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
+    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–008.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
     for name in MIGRATIONS:
         content=(ROOT/'supabase/migrations'/name).read_text()
         lines=content.splitlines()
@@ -40,6 +40,8 @@ def main():
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',
         'INSTALAR_SITIO.md':ROOT/'docs/INSTALAR_SITIO.md',
         'PRUEBAS_FINALES.md':ROOT/'docs/PRUEBAS_FINALES.md',
+        'imagenes/panel-home.png':ROOT/'docs/imagenes/panel-home.png',
+        'imagenes/panel-operation.png':ROOT/'docs/imagenes/panel-operation.png',
         'importacion-prueba.csv':ROOT/'entregables/importacion-prueba.csv',
     }
     zip_path=ROOT/'entregables/panel-bajio-sitio.zip'

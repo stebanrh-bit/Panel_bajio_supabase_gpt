@@ -22,6 +22,12 @@ Supabase conserva usuarios, permisos y datos. Google Apps Script sirve un único
 | Portal de clientes y vista de gerencia | Preparados; campos y cliente restringidos, gerencia en consulta |
 | Integraciones externas y tareas programadas | Alcance documentado: no se instalan envíos automáticos, TCI, cron ni restauración de respaldos |
 
+## Visualización original y categoría de incidencias
+
+Por petición del usuario, el sitio recupera la barra lateral, encabezado/logo, Inicio Mi operación, tarjetas/tabla, filtros de cruces y calendario semanal del original. El expediente agrupa los controles en seis pestañas y conserva sus eventos. Entregadas requiere estatus de cierre y POD compartido; los cierres con POD pendiente permanecen en curso como en el original. Los módulos se conservan sobre Supabase y el HTML se publica en Google.
+
+La categoría de incidencias se exige en el formulario antes del envío y en SQL 008. Las incidencias previas sin categoría quedan conservadas; no se inventa su clasificación ni se eliminan. Ambas modificaciones se entregan juntas para reducir pasos de instalación.
+
 ## Entrega conjunta
 
 La entrega conjunta está en `supabase/actualizar_sitio.sql`, `google-apps-script/index-sitio.html`, `google-apps-script/Code-sitio.gs` y `entregables/panel-bajio-sitio.zip`. La guía está en `docs/INSTALAR_SITIO.md` y las pruebas ordenadas en `docs/PRUEBAS_FINALES.md`. No volver a ejecutar SQL 001 en el proyecto actual. Hasta ejecutar esa actualización y activar Nueva versión en Google, los módulos nuevos son entregas preparadas, no funciones verificadas en producción.

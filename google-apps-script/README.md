@@ -1,6 +1,6 @@
 # Supabase como base de datos; Google Apps Script como alojamiento
 
-**Entrega conjunta más reciente:** sigue [la guía de instalación del sitio](../docs/INSTALAR_SITIO.md). Reúne SQL 004–007, `index-sitio.html` y `Code-sitio.gs`; conserva el mismo enlace Google. Las instrucciones inferiores documentan las entregas anteriores. El usuario pidió hacer las pruebas manuales al final, una por una: [lista preparada](../docs/PRUEBAS_FINALES.md).
+**Entrega conjunta más reciente:** sigue [la guía de instalación del sitio](../docs/INSTALAR_SITIO.md). Reúne SQL 004–008, `index-sitio.html` y `Code-sitio.gs`; conserva el mismo enlace Google. Las instrucciones inferiores documentan las entregas anteriores. El usuario pidió hacer las pruebas manuales al final, una por una: [lista preparada](../docs/PRUEBAS_FINALES.md).
 
 Esta carpeta contiene la página del panel para servirla desde Google Apps Script. Supabase conserva la base de datos, usuarios, contraseñas, sesiones y permisos RLS. No se necesita una hoja de Google Sheets ni Netlify para este alojamiento.
 
