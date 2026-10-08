@@ -4,6 +4,14 @@ Esta carpeta contiene la página del panel para servirla desde Google Apps Scrip
 
 La primera entrega usa la versión que el usuario ya validó (login, cargas, comentarios e incidencias). Se generó desde `entregables/panel-bajio-web.zip` y no depende de la migración SQL 002. Esta adaptación todavía necesita un despliegue Google real y comprobación en su iframe. No es la migración de todas las funciones del Apps Script original.
 
+## Enlace de implementación proporcionado
+
+El usuario proporcionó este enlace para la aplicación web:
+
+https://script.google.com/macros/s/AKfycbzoOVMfiVGBU1ZWht4TcYZc2cqeBUKVeDTYsiSiEpwWIHnu_SPEnoCFKKG1AhZ6Mdjr/exec
+
+El acceso desde el entorno de Codex fue bloqueado por el proxy (CONNECT 403), antes de recibir una respuesta de Google. La validación de esta página queda pendiente: iniciar sesión con la cuenta Supabase existente y comprobar sus cargas, guardado y persistencia en el navegador real. No confundir esta limitación de la red de Codex con un error confirmado de la aplicación.
+
 ## Crear el proyecto Google
 
 1. Abre https://script.google.com/home e inicia sesión en Google.
