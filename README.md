@@ -1,6 +1,6 @@
 # Panel Bajío: Supabase y alojamiento en Google Apps Script
 
-La base de datos y autenticación permanecen en Supabase. El alojamiento solicitado ahora es Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. La carpeta google-apps-script contiene una adaptación autónoma de la primera versión validada, sin exigir SQL 002. El despliegue Google y sus pruebas reales siguen pendientes.
+La base de datos y autenticación permanecen en Supabase. El alojamiento solicitado ahora es Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. La carpeta google-apps-script contiene una adaptación autónoma de la primera versión validada, sin exigir SQL 002. El usuario ya desplegó la página en Google y confirmó login y consulta de sus cargas Supabase. Queda pendiente confirmar guardado y persistencia desde Google.
 
 La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raíz se conservan como referencia y no se ejecutan en la nueva aplicación.
 
