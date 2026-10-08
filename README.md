@@ -79,6 +79,8 @@ Las nuevas funciones se escriben con nombres descriptivos y comentarios en espa�
 
 El build de Vite se genera sin minificar para facilitar su lectura. El HTML de Google incluye además la biblioteca Supabase: los cambios se hacen en los archivos fuente anteriores y después se vuelve a empaquetar, evitando editar el código generado a mano.
 
+Las pruebas de interfaz con DOM simulado detectaron una lista vacía al crear solicitudes desde Vinculados o Cancelados: el registro se guardaba, pero la pantalla mantenía el filtro anterior. El módulo ahora vuelve a Pendientes después de guardar. Esta corrección está preparada en el HTML de entrega y requiere actualizar la implementación Google para activarse; aún no está validada allí.
+
 ## Siguientes etapas
 
 1. Comprobar cancelación de solicitudes y acceso por roles en Google y Supabase; la vinculación ya fue confirmada por el usuario.

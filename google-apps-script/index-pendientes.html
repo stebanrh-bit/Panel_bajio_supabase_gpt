@@ -22060,6 +22060,7 @@ function createPendingLoadsPanel(options) {
 			runAction(event.target.querySelector("button[type=\"submit\"], button:not([type])"), async () => {
 				const values = preparePendingLoad(Object.fromEntries(new FormData(event.target)));
 				const saved = record ? await service.update(record, values) : await service.create(values);
+				selectedState = "pending";
 				await open();
 				if (isMounted) await showDetail(saved.id);
 			});

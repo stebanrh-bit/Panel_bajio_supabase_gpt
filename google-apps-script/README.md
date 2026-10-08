@@ -65,6 +65,12 @@ Administración opera todas las solicitudes, cada CSR opera las propias y gerenc
 
 El código nuevo está organizado y comentado en español en `web/src/features/pending-loads/`. El HTML de entrega se genera sin minificar, pero incluye también la biblioteca Supabase. Para cambiar la aplicación, edita sus fuentes y regenera el HTML.
 
+### Corrección de la lista después de guardar
+
+Se reprodujo localmente que crear una solicitud desde **Vinculados** o **Cancelados** guardaba el registro, pero dejaba la lista filtrada por el estado anterior. La entrega actual vuelve a **Pendientes** después de guardar y muestra la solicitud creada. Las pruebas de interfaz con DOM simulado comprueban ambos casos y la persistencia en la lista al volver a consultar. El cambio está preparado en `index-pendientes.html`; aún debe copiarse al `index.html` de Google y actualizarse la implementación con **Nueva versión** para activarlo. No requiere SQL nuevo.
+
+Para repetir la segunda prueba en la versión ya publicada: abrir **Solicitudes pendientes → Pendientes → Nueva solicitud**, crear un registro de prueba y comprobar que aparece antes de cancelarlo. Después cancelar ese registro y buscarlo en **Cancelados**. El usuario pidió retomar esta prueba porque perdió el hilo; la cancelación aún no está confirmada en Google.
+
 ## Actualizar el mismo enlace
 
 Tras cambiar `index.html`, usa **Implementar → Administrar implementaciones → Editar (lápiz) → Versión → Nueva versión → Implementar**. Actualiza la implementación existente para conservar su URL.

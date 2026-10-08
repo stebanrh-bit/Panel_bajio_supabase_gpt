@@ -222,6 +222,9 @@ export function createPendingLoadsPanel(options) {
       runAction(event.target.querySelector('button[type="submit"], button:not([type])'), async () => {
         const values = preparePendingLoad(Object.fromEntries(new FormData(event.target)));
         const saved = record ? await service.update(record, values) : await service.create(values);
+        // Una solicitud guardada sigue abierta. Mostrar Pendientes evita que parezca
+        // perdida cuando se crea desde las pestañas Vinculados o Cancelados.
+        selectedState = 'pending';
         await open();
         if (isMounted) await showDetail(saved.id);
       });
