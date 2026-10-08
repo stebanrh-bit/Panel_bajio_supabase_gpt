@@ -2,7 +2,7 @@
 
 Esta carpeta contiene la página del panel para servirla desde Google Apps Script. Supabase conserva la base de datos, usuarios, contraseñas, sesiones y permisos RLS. No se necesita una hoja de Google Sheets ni Netlify para este alojamiento.
 
-La primera entrega usa la versión que el usuario ya validó (login, cargas, comentarios e incidencias). Se generó desde `entregables/panel-bajio-web.zip` y no depende de la migración SQL 002. El usuario ya desplegó esta adaptación en Google y confirmó que puede iniciar sesión y ver sus cargas. El guardado y la persistencia de cambios desde el iframe de Google todavía no se han confirmado. No es la migración de todas las funciones del Apps Script original.
+La primera entrega usa la versión que el usuario ya validó (login, cargas, comentarios e incidencias). Se generó desde `entregables/panel-bajio-web.zip` y no depende de la migración SQL 002. El usuario ya desplegó esta adaptación en Google y confirmó que puede iniciar sesión y ver sus cargas. El usuario también confirmó que agregó un comentario desde Google y que se guarda. Quedan verificados el acceso, la lectura de cargas y el guardado de comentarios en el runtime Google mediante sus pruebas. No es la migración de todas las funciones del Apps Script original.
 
 ## Enlace de implementación proporcionado
 
@@ -10,7 +10,7 @@ El usuario proporcionó este enlace para la aplicación web:
 
 https://script.google.com/macros/s/AKfycbzoOVMfiVGBU1ZWht4TcYZc2cqeBUKVeDTYsiSiEpwWIHnu_SPEnoCFKKG1AhZ6Mdjr/exec
 
-El usuario confirmó en su navegador que puede iniciar sesión con su cuenta Supabase y ver las cargas existentes en esta página. La consulta y el acceso desde Google quedan verificados mediante esa prueba del usuario. El guardado y la persistencia de cambios desde Google todavía no se han confirmado. El acceso de comprobación desde Codex fue bloqueado por el proxy (CONNECT 403), antes de recibir una respuesta de Google; esa limitación no demuestra un fallo de la aplicación.
+El usuario confirmó en su navegador que puede iniciar sesión con su cuenta Supabase y ver las cargas existentes en esta página. La consulta y el acceso desde Google quedan verificados mediante esa prueba del usuario. El usuario también confirmó el guardado de un comentario desde Google. Los flujos verificados en Google son login, consulta de cargas y escritura de comentarios; otros flujos no se describen como probados en ese alojamiento. El acceso de comprobación desde Codex fue bloqueado por el proxy (CONNECT 403), antes de recibir una respuesta de Google; esa limitación no demuestra un fallo de la aplicación.
 
 ## Crear el proyecto Google
 
