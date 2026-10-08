@@ -1,0 +1,3 @@
+# El login es público. La función verifica por sí misma JWT + rol para cada acción privada.
+[functions.panel-accounts]
+verify_jwt = false

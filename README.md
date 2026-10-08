@@ -7,17 +7,17 @@ La base de datos y autenticación permanecen en Supabase. La página se aloja en
 
 La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raíz se conservan como referencia y no se ejecutan en la nueva aplicación.
 
-## Estado
+## Estado actual
 
-Implementado: acceso por correo y contraseña con Supabase Auth, roles internos, listado/búsqueda/alta/edición de cargas, comentarios, incidencias e historial automático. La segunda actualización agrega etapas del recorrido, alertas, campos de documentos/POD y cruce, citas con zona horaria, próximas revisiones, recordatorios, filtros de atención y registro de comunicaciones. Gerencia (`manager`) tiene acceso de lectura; `csr` y `admin` pueden escribir. Las cuentas nuevas quedan en `pending`, sin acceso a los datos. Los permisos se verifican en la base mediante RLS, no solo en la interfaz.
+La entrada de `web/` reutiliza las tres interfaces originales en `web/src/original/`. Sus 97 acciones se conectan a Supabase mediante adaptadores comentados. Incluye administración de cuentas Auth a través de `panel-accounts`, cargas, comentarios/incidencias, pendientes, bitácora/cierres, apartados, seguimiento, plantillas, calendario, indicadores, importación/deshacer, radar compartido y ambos portales. Consulta [la comparación y sus límites](docs/COMPARACION_ORIGINAL.md).
 
-La tercera actualización agrega solicitudes pendientes: cliente, ruta, fecha estimada, nota, comentarios y listas de pendientes/vinculados/cancelados. Cada CSR consulta y modifica sus solicitudes; administración opera todas; gerencia consulta todas. Al vincular una solicitud con una carga activa del mismo cliente, la base copia su nota y sus comentarios con el autor y fecha originales y cierra la solicitud en una sola transacción. Los registros cancelados y vinculados se conservan junto con su historial automático. No se permite vincular dos veces ni editar solicitudes cerradas. Los comentarios concurrentes bloquean la misma solicitud para incluirse antes del vínculo o rechazarse después del cierre.
+El proyecto existente requiere la actualización conjunta SQL 004–009, desplegar `panel-accounts` y activar la nueva versión del mismo proyecto Google. Sigue **docs/INSTALAR_SITIO.md**; no repitas SQL 001. Los módulos anteriores de `web/src/features/` permanecen como servicios reutilizables y referencia de la migración. No se ejecuta el backend Sheets de la raíz.
 
-Se conservan las columnas originales de cargas. Salvo `created_at` y `updated_at`, los valores heredados se almacenan como texto para no perder códigos, ceros iniciales o formatos; la normalización de fechas, números y booleanos será una migración posterior. No se han copiado datos de Sheets ni contraseñas antiguas.
+Auth/RLS/RPC verifican permisos y autores. Admin y CSR escriben; manager consulta; clientes reciben únicamente los campos de sus cargas autorizadas. La sesión no almacena contraseñas. Los estados y versiones conservan los expedientes y evitan sobrescrituras. Las pruebas reales entre cuentas y en Google quedan para el final, por petición del usuario.
 
-Esto todavía no reemplaza todas las funciones originales. No están migrados los portales externos, asignaciones CSR-cliente, apartados, bitácoras y cierres de turno, plantillas, mapas/distancias, radar Excel, importación/deshacer, archivado automático ni la integración de envío de notificaciones. Los avisos de esta versión se registran después de enviarlos por otro medio; el panel no envía WhatsApp ni correo. El frontend original queda como referencia para recuperar sus pantallas y comportamiento. La migración completa sigue en desarrollo.
+## Referencia: crear un proyecto nuevo
 
-## 1. Crear el proyecto
+El proyecto del usuario ya existe. Para actualizarlo, usar la guía de instalación enlazada arriba. Estos pasos iniciales se conservan para una instalación desde cero; después se aplica la actualización 004–009 y se instala `panel-accounts`.
 
 1. Abre https://supabase.com y entra en Dashboard.
 2. Crea una organización si no tienes una y pulsa **New project**.
@@ -32,7 +32,7 @@ Esto todavía no reemplaza todas las funciones originales. No están migrados lo
    where id = 'UUID-DE-TU-USUARIO';
    ```
 
-7. Crea las demás cuentas del mismo modo y asigna `csr` (operación) o `manager` (lectura). No se permite cambiar roles desde el navegador. Para un panel interno sin registro abierto, desactiva **Allow new users to sign up** en la configuración de Auth.
+7. Crea las demás cuentas del mismo modo y asigna `csr` (operación) o `manager` (lectura). La entrega nueva permite administrar roles desde Gestionar CSR, mediante funciones de servidor protegidas. Para un panel interno sin registro abierto, desactiva **Allow new users to sign up** en la configuración de Auth.
 
 ## 2. Conectar la aplicación
 
@@ -72,7 +72,16 @@ Sin variables de conexión, el panel muestra que falta configurar Supabase y no 
 
 ## Organización del código nuevo
 
-Las nuevas funciones se escriben con nombres descriptivos y comentarios en español que explican su propósito. El módulo de pendientes separa responsabilidades:
+Las nuevas funciones se escriben con nombres descriptivos y comentarios en español. La entrada actual separa estas responsabilidades:
+
+- `web/src/original/main.js` y `page.js`: sesión, selección y montaje de las tres interfaces.
+- `web/src/original/api/context.js`: autorización, caché, versiones y consultas comunes.
+- `web/src/original/api/operations.js` y `models.js`: operaciones y formatos esperados por la UI original.
+- `web/src/original/api/team.js`, `imports.js` y `radar.js`: equipo, importación y mapas.
+- `supabase/functions/panel-accounts/index.ts`: cuentas Auth y controles de administración en servidor.
+- `supabase/migrations/009_original_interface.sql`: preferencias, radar, bajas lógicas y permisos adicionales.
+
+El módulo anterior de pendientes se conserva como servicio y referencia:
 
 - `web/src/features/pending-loads/rules.js`: validación de formularios y selección de cargas compatibles.
 - `web/src/features/pending-loads/service.js`: consultas Supabase, paginación y detección de versiones antiguas.
@@ -88,11 +97,11 @@ Las pruebas de interfaz con DOM simulado detectaron una lista vacía al crear so
 
 El usuario pidió dejar las pruebas manuales con otras cuentas para el final porque solo dispone de su cuenta y no tiene otro correo. Esta decisión permite continuar el desarrollo; el acceso real entre cuentas sigue pendiente de verificar. Las pruebas locales de permisos ya pasaron. Creación, vinculación y cancelación con persistencia fueron confirmadas por el usuario.
 
-1. Completar las reglas restantes conforme se migren los módulos del backend original.
-2. Implementar los módulos restantes y recuperar las pantallas originales.
-3. Crear portales externos con vistas y permisos por cliente, sin exponer campos operativos internos.
-4. Preparar importación de datos, tareas programadas y pruebas de regresión de todos los módulos.
-5. Al final, comprobar en Google/Supabase el acceso entre cuentas: aislamiento de solicitudes entre operadores, acceso global de administración y lectura de gerencia. La migración completa no está terminada.
+1. Instalar SQL 004–009 y `panel-accounts` en Supabase.
+2. Actualizar Code.gs e index.html y activar una nueva versión del mismo enlace Google.
+3. Recorrer las pruebas finales de la interfaz original, una por una.
+4. Comprobar al final el acceso entre cuentas y los portales cliente/gerencia.
+5. Acordar por separado la migración de datos históricos y automatizaciones externas TCI/activadores, que no están instaladas. Consultar los límites en `docs/COMPARACION_ORIGINAL.md`.
 
 ## Referencia: actualizar la versión anterior de Netlify
 

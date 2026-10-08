@@ -1,41 +1,55 @@
-# Validación de la entrega conjunta
+# Validación de la interfaz original con Supabase
 
-Comprobaciones ejecutadas en Codex el 8 de octubre de 2026. No representan un despliegue nuevo en Google ni ejecución remota de SQL 004–008.
+Comprobaciones ejecutadas en Codex el 8 de octubre de 2026. No representan una actualización de la publicación Google ni ejecución remota de SQL 004–009.
 
 | Comprobación | Resultado |
 | --- | --- |
-| Instalación reproducible con `npm --cache /tmp/panel-npm-cache ci --no-audit --no-fund` | Correcta con el lockfile actualizado |
-| `npm --cache /tmp/panel-npm-cache test` | 59 pruebas aprobadas; 0 fallidas y 0 omitidas |
-| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 134 módulos correcta |
-| Peticiones internas al servidor Vite | Documento, main, radar e importador respondieron HTTP 200 |
-| `python3 scripts/package_site.py --check` | SQL, HTML y contenido íntegro del ZIP coinciden con las fuentes |
-| HTML autónomo | Estilos incluidos, base `_top`, un módulo JavaScript válido y ningún asset externo |
-| Archivos originales de la raíz | Conservados; estilos y logos reutilizados en la interfaz Supabase |
-| Chromium local con respuestas Supabase simuladas | Inicio/Ahora/Mi turno, tarjetas/tabla, filtros, seis pestañas, guardado de incidencias, semana y navegación móvil correctos |
+| Panel original publicado | HTML recuperado; árbol JavaScript idéntico al `PanelScript.html` de la raíz |
+| Portal Cliente y Vista Gerencia originales | Plantillas recuperadas de sus páginas publicadas |
+| `npm --cache /tmp/panel-npm-cache test` | 72 pruebas aprobadas; 0 fallidas y 0 omitidas |
+| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 71 módulos correcta |
+| `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
+| Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
+| Chromium: comparación visual | 36 parejas con datos ficticios; escritorio y móvil; panel, portales y 15 ventanas |
+| Chromium: incidencia | Categoría vacía rechazada sin insertar; registro válido persiste al recargar |
+| Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
+| Entrega reproducible | SQL, HTML y ZIP se comprueban con `python3 scripts/package_site.py --check` |
+| Originales de la raíz | Conservados sin modificaciones |
 
-Las pruebas de PostgreSQL usan PGlite, identidades Auth simuladas y los roles `anon`/`authenticated` con concesiones por defecto similares a Supabase. Cubren lectura y escritura por rol, autor real, versiones, transacciones, repetición de migraciones, datos del portal restringidos, importación/deshacer y exportación administrativa. La instalación conjunta se probó incluyendo un fallo deliberado al final: revierte todo y conserva las cargas anteriores. Al repetir la instalación, los datos se conservan y los permisos de avisos/respaldos siguen activos.
+Las pruebas PostgreSQL usan PGlite con identidades y roles Auth simulados. Cubren lectura/escritura por rol, autor real, versiones, transacciones, repetición de migraciones, aislamiento de plantillas, datos públicos del cliente, radar y conservación de incidencias retiradas. La instalación conjunta se prueba con un fallo deliberado al final: revierte todo y conserva las cargas anteriores. Repetir la instalación conserva datos y permisos.
 
-Las pruebas de interfaz usan Happy DOM. Se verifica que mover el expediente a sus pestañas conserva los controles y sus eventos, que los textos se escapan y que la semana navega en ambos sentidos. Cubren listas de solicitudes/apartados al crear/cerrar/reabrir, turnos múltiples, plantillas, portal sin campos internos y respuestas tardías después de salir. Se probó la lectura de un XLSX real y CSV con comillas/saltos de línea. El puente de Google se probó con servicios simulados para verificar que autentica y comprueba el rol antes de consumir Maps y que suma todos los tramos de carretera.
+Las pruebas de cuentas ejecutan el manejador de la función Edge con el SDK Supabase real y transporte interceptado. Cubren acceso por nombre, privacidad del directorio, comprobación del rol administrativo, cambios de contraseña sin secretos en la auditoría, conservación de contraseña al editar un cliente, desactivación frente a retirada, bloqueo por cinco fallos y desbloqueo administrativo. Estas pruebas no autentican contra el proyecto real.
 
-La regresión de incidencias se reprodujo en el manejador anterior: envíos directos con categoría vacía/espacios alcanzaban el guardado y un doble envío podía duplicarlo. El nuevo manejador valida antes de guardar y controla envíos repetidos. La prueba SQL simula la ausencia de la restricción inicial, conserva un registro antiguo inválido y verifica el rechazo de nuevos valores vacíos, nulos, con espacios/saltos/NBSP o más de 100 caracteres. Esto no establece qué restricciones tiene la base remota del usuario.
+El navegador compara el HTML generado con las fuentes originales usando datos independientes equivalentes. Incluye Ahora/Mi turno, tarjetas y tabla, seis pestañas del expediente, calendario, indicadores, radar, históricos, administración, ventanas y los dos portales. Admite como máximo 50 píxeles de diferencia de suavizado por captura; las fuentes externas se sustituyen por la misma respuesta en ambos lados. Las capturas y resultados quedan en `/tmp/panel-original-comparison/`. Dos capturas de la entrega se incluyen en `docs/imagenes/` y el ZIP.
 
-La revisión en Chromium usa el navegador real con sesiones y respuestas HTTP simuladas, sin consultar ni escribir en producción. Se comparó la organización con los archivos originales `index.html` y `PanelEstilos.html`. No sustituye las comprobaciones del iframe de Google y las cuentas reales.
+Las pruebas conservadas de los módulos anteriores verifican también importación XLSX/CSV, deshacer, archivo, pendientes, turnos y Maps. El puente Google se comprueba con servicios simulados: verifica JWT y rol antes de consumir Maps y suma todos los tramos de carretera.
 
-Falta instalar la actualización en el proyecto real y seguir [las pruebas finales](PRUEBAS_FINALES.md). Supabase Auth real, Google HtmlService, permisos de UrlFetch/Maps, cuotas y cuentas adicionales requieren la validación en el navegador del usuario. El proxy de Codex había bloqueado Google con CONNECT 403; no se repitió esa llamada sin cambios. Las comprobaciones reales anteriores del usuario se conservan documentadas; no validan los módulos nuevos.
+No se inspeccionó la publicación nueva desde Codex porque su enlace devuelve CONNECT 403. El original sí respondió; esa diferencia no demuestra un fallo de la página del usuario. Faltan instalación y comprobaciones reales de Auth, iframe Google, mapas, cuotas y otros roles, descritas en [PRUEBAS_FINALES.md](PRUEBAS_FINALES.md). Las automatizaciones externas TCI y los activadores del backend antiguo no se instalaron; los límites están en [COMPARACION_ORIGINAL.md](COMPARACION_ORIGINAL.md).
 
-## Repetir la comprobación del HTML final
+## Repetir la comprobación
 
-Desde la raíz del repositorio, con Chromium instalado en `/usr/bin/chromium`:
+Desde `web/`, con las variables públicas Supabase configuradas:
 
 ```bash
-npm install --prefix /tmp/panel-browser-tools --cache /tmp/panel-npm-cache --no-audit --no-fund playwright-core@1.56.1
+npm --cache /tmp/panel-npm-cache ci --no-audit --no-fund
+npm --cache /tmp/panel-npm-cache test
+npm --cache /tmp/panel-npm-cache run build
+```
+
+Desde la raíz del repositorio:
+
+```bash
+python3 scripts/package_site.py
+python3 scripts/package_site.py --check
+npm install --prefix /tmp/panel-browser-tools --cache /tmp/panel-npm-cache --no-audit --no-fund playwright-core@1.56.1 pngjs@7.0.0 deno@2.5.4
+DENO_TLS_CA_STORE=system DENO_DIR=/tmp/panel-deno-cache /tmp/panel-browser-tools/node_modules/.bin/deno check supabase/functions/panel-accounts/index.ts
 python3 -m http.server 5182 --bind 127.0.0.1 --directory google-apps-script
 ```
 
-En otra terminal de la misma máquina:
+En otra terminal de la misma máquina, con Chromium en `/usr/bin/chromium`:
 
 ```bash
 node scripts/check_browser.mjs
 ```
 
-El servidor se usa solo durante esta comprobación interna. El script abre `index-sitio.html`, intercepta las solicitudes a Supabase y utiliza una sesión ficticia: no hace operaciones en producción. También comprueba que Cancelar no deje bloqueado el scroll y abre pendientes, bitácora, apartados, radar, indicadores, archivo, plantillas y cuenta bajo la barra lateral nueva. Las capturas se guardan en `/tmp/panel-*.png`. Puedes cambiar la ruta de herramientas con `PANEL_BROWSER_TOOLS` y la URL interna con `PANEL_PREVIEW_URL`.
+El servidor se utiliza solo para la comprobación interna y puede detenerse después. El script intercepta las peticiones Supabase; no escribe en producción. Las rutas se pueden configurar con `PANEL_BROWSER_TOOLS` y `PANEL_PREVIEW_URL`. Publicar Google no requiere mantener este servidor ni Codex abierto.

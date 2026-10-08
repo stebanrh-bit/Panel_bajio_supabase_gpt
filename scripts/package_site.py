@@ -6,10 +6,10 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from package_google import package_html
 
 ROOT=Path(__file__).resolve().parents[1]
-MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql']
+MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql']
 
 def combined_sql():
-    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–008.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
+    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–009.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
     for name in MIGRATIONS:
         content=(ROOT/'supabase/migrations'/name).read_text()
         lines=content.splitlines()
@@ -35,6 +35,9 @@ def main():
         else: path.write_text(content)
     files={
         'index.html':ROOT/'google-apps-script/index-sitio.html',
+        'panel-accounts/index.ts':ROOT/'supabase/functions/panel-accounts/index.ts',
+        'COMPARACION_ORIGINAL.md':ROOT/'docs/COMPARACION_ORIGINAL.md',
+        'VALIDACION_SITIO.md':ROOT/'docs/VALIDACION_SITIO.md',
         'Code.gs':ROOT/'google-apps-script/Code-sitio.gs',
         'appsscript.json':ROOT/'google-apps-script/appsscript.json',
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',

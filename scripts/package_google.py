@@ -24,8 +24,8 @@ def package_html(read):
     html = read('index.html')
     assets = Assets()
     assets.feed(html)
-    if len(assets.scripts) != 1 or not assets.styles:
-        raise ValueError('Se esperaba un bundle JavaScript y al menos una hoja de estilos.')
+    if len(assets.scripts) != 1:
+        raise ValueError('Se esperaba un único bundle JavaScript autónomo.')
     def content(path):
         path = path.lstrip('/')
         if '..' in PurePosixPath(path).parts or not path.startswith('assets/'):
@@ -41,6 +41,7 @@ def package_html(read):
     html = html.replace('<head>', '<head><base target="_top">', 1)
     html = html.replace('</head>', '<style>\n' + css + '\n</style></head>', 1)
     html = html.replace('</body>', '<script type="module">\n' + js + '\n</script></body>', 1)
+    html = '\n'.join(line.rstrip() for line in html.splitlines()) + '\n'
     return '<!-- Generado por scripts/package_google.py; los ajustes se hacen en web/. -->\n' + html
 
 def main():
