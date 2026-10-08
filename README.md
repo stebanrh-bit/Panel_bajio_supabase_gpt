@@ -83,11 +83,13 @@ Las pruebas de interfaz con DOM simulado detectaron una lista vacía al crear so
 
 ## Siguientes etapas
 
-1. Comprobar acceso por roles en Google y Supabase; creación, vinculación y cancelación con persistencia ya fueron confirmadas por el usuario.
-2. Completar las reglas restantes conforme se migren los módulos del backend original.
-3. Implementar los módulos restantes y recuperar las pantallas originales.
-4. Crear portales externos con vistas y permisos por cliente, sin exponer campos operativos internos.
-5. Preparar importación de datos, tareas programadas y pruebas de regresión de todos los módulos. La primera versión fue desplegada manualmente por el usuario; la migración completa no está terminada.
+El usuario pidió dejar las pruebas manuales con otras cuentas para el final porque solo dispone de su cuenta y no tiene otro correo. Esta decisión permite continuar el desarrollo; el acceso real entre cuentas sigue pendiente de verificar. Las pruebas locales de permisos ya pasaron. Creación, vinculación y cancelación con persistencia fueron confirmadas por el usuario.
+
+1. Completar las reglas restantes conforme se migren los módulos del backend original.
+2. Implementar los módulos restantes y recuperar las pantallas originales.
+3. Crear portales externos con vistas y permisos por cliente, sin exponer campos operativos internos.
+4. Preparar importación de datos, tareas programadas y pruebas de regresión de todos los módulos.
+5. Al final, comprobar en Google/Supabase el acceso entre cuentas: aislamiento de solicitudes entre operadores, acceso global de administración y lectura de gerencia. La migración completa no está terminada.
 
 ## Referencia: actualizar la versión anterior de Netlify
 

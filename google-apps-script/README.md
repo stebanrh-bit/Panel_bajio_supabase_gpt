@@ -71,6 +71,10 @@ Se reprodujo localmente que crear una solicitud desde **Vinculados** o **Cancela
 
 Para repetir la segunda prueba en la versión ya publicada: abrir **Solicitudes pendientes → Pendientes → Nueva solicitud**, crear un registro de prueba y comprobar que aparece antes de cancelarlo. Después cancelar ese registro y buscarlo en **Cancelados**. El usuario retomó esta prueba paso a paso y confirmó que PRUEBA-002 aparece al crearla y que, después de cancelarla, permanece en Cancelados con su nota y comentario al actualizar. La captura previa mostraba Cargas con el botón Solicitudes pendientes visible; no permitió atribuir el reporte inicial de solicitud ausente al defecto del filtro. La corrección del filtro sigue preparada y pendiente de activación en Google.
 
+### Pruebas con otras cuentas: diferidas al final
+
+Por petición del usuario, las comprobaciones manuales con cuentas adicionales se harán al final: actualmente solo tiene su cuenta y no dispone de otro correo. Continuar el desarrollo de los módulos restantes y conservar estas comprobaciones pendientes: que cada operador consulte únicamente sus solicitudes, administración consulte/gestione todas y gerencia tenga lectura. Los permisos ya se probaron localmente con Auth simulado; la validación con cuentas reales sigue pendiente. La creación, vinculación y cancelación con la cuenta actual sí fueron confirmadas.
+
 ## Actualizar el mismo enlace
 
 Tras cambiar `index.html`, usa **Implementar → Administrar implementaciones → Editar (lápiz) → Versión → Nueva versión → Implementar**. Actualiza la implementación existente para conservar su URL.
