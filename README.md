@@ -1,6 +1,6 @@
 # Panel Bajío: Supabase y alojamiento en Google Apps Script
 
-La base de datos y autenticación permanecen en Supabase. El alojamiento solicitado ahora es Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. La carpeta google-apps-script contiene una adaptación autónoma de la primera versión validada, sin exigir SQL 002. El usuario ya desplegó la página en Google y confirmó login y consulta de sus cargas Supabase. El usuario también confirmó el guardado de comentarios desde Google; acceso, lectura de cargas y escritura de comentarios están verificados mediante sus pruebas. La actualización operativa está preparada en `google-apps-script/index-operaciones.html`; la estructura SQL 002 ya fue detectada en Supabase, y falta activar y validar esa interfaz en Google.
+La base de datos y autenticación permanecen en Supabase. La página se aloja en Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. El usuario confirmó en Google el acceso, la consulta de cargas y los comentarios persistentes; también confirmó la revisión de tránsito y el registro persistente de un aviso que resuelve el pendiente de comunicación. La siguiente entrega, `google-apps-script/index-pendientes.html`, agrega solicitudes sin número de carga y requiere ejecutar primero SQL 003. Esta entrega pasó las pruebas locales; su activación y validación en Google siguen pendientes.
 
 La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raíz se conservan como referencia y no se ejecutan en la nueva aplicación.
 
@@ -8,16 +8,18 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 Implementado: acceso por correo y contraseña con Supabase Auth, roles internos, listado/búsqueda/alta/edición de cargas, comentarios, incidencias e historial automático. La segunda actualización agrega etapas del recorrido, alertas, campos de documentos/POD y cruce, citas con zona horaria, próximas revisiones, recordatorios, filtros de atención y registro de comunicaciones. Gerencia (`manager`) tiene acceso de lectura; `csr` y `admin` pueden escribir. Las cuentas nuevas quedan en `pending`, sin acceso a los datos. Los permisos se verifican en la base mediante RLS, no solo en la interfaz.
 
+La tercera actualización agrega solicitudes pendientes: cliente, ruta, fecha estimada, nota, comentarios y listas de pendientes/vinculados/cancelados. Cada CSR consulta y modifica sus solicitudes; administración opera todas; gerencia consulta todas. Al vincular una solicitud con una carga activa del mismo cliente, la base copia su nota y sus comentarios con el autor y fecha originales y cierra la solicitud en una sola transacción. Los registros cancelados y vinculados se conservan junto con su historial automático. No se permite vincular dos veces ni editar solicitudes cerradas. Los comentarios concurrentes bloquean la misma solicitud para incluirse antes del vínculo o rechazarse después del cierre.
+
 Se conservan las columnas originales de cargas. Salvo `created_at` y `updated_at`, los valores heredados se almacenan como texto para no perder códigos, ceros iniciales o formatos; la normalización de fechas, números y booleanos será una migración posterior. No se han copiado datos de Sheets ni contraseñas antiguas.
 
-Esto todavía no reemplaza todas las funciones originales. No están migrados los portales externos, asignaciones CSR-cliente, pendientes, apartados, bitácoras y cierres de turno, plantillas, mapas/distancias, radar Excel, importación/deshacer, archivado automático ni la integración de envío de notificaciones. Los avisos de esta versión se registran después de enviarlos por otro medio; el panel no envía WhatsApp ni correo. El frontend original queda como referencia para recuperar sus pantallas y comportamiento. No se debe retirar una instalación anterior con esta primera etapa.
+Esto todavía no reemplaza todas las funciones originales. No están migrados los portales externos, asignaciones CSR-cliente, apartados, bitácoras y cierres de turno, plantillas, mapas/distancias, radar Excel, importación/deshacer, archivado automático ni la integración de envío de notificaciones. Los avisos de esta versión se registran después de enviarlos por otro medio; el panel no envía WhatsApp ni correo. El frontend original queda como referencia para recuperar sus pantallas y comportamiento. La migración completa sigue en desarrollo.
 
 ## 1. Crear el proyecto
 
 1. Abre https://supabase.com y entra en Dashboard.
 2. Crea una organización si no tienes una y pulsa **New project**.
 3. Ponle un nombre como `panel-bajio`, genera una contraseña fuerte para la base y guárdala en tu gestor de contraseñas. Elige una región cercana y espera a que se cree.
-4. En **SQL Editor**, crea una consulta y pega el contenido completo de `supabase/migrations/001_panel.sql`. Ejecútala una sola vez en el proyecto nuevo. Después ejecuta `supabase/migrations/002_load_operations.sql`. Ambos usan transacciones. Si la primera migración ya se aplicó, ejecuta únicamente la segunda; no repitas `001`. La segunda es repetible y no elimina los datos existentes.
+4. En **SQL Editor**, crea una consulta y pega el contenido completo de `supabase/migrations/001_panel.sql`. Ejecútala una sola vez en el proyecto nuevo. Después ejecuta `supabase/migrations/002_load_operations.sql` y `supabase/migrations/003_pending_loads.sql`, cada archivo completo por separado. Usan transacciones. Si `001` y `002` ya están aplicadas, ejecuta únicamente `003`; no repitas `001`. Las migraciones `002` y `003` son repetibles y no eliminan los datos existentes.
 5. En **Authentication → Users**, usa **Add user → Create new user** para crear tu cuenta con correo y contraseña, confirmando el correo desde el administrador cuando corresponda. No compartas esa contraseña en el chat.
 6. Copia el UUID de esa cuenta y ejecuta esta consulta en SQL Editor, reemplazando el marcador por el UUID real:
 
@@ -63,11 +65,23 @@ La caché en `/tmp` evita depender de permisos de escritura en el directorio hom
 
 Con el proyecto conectado, valida manualmente: iniciar sesión con el administrador; crear una carga; editar el estatus; agregar comentario e incidencia; cerrar sesión; entrar como `manager` y comprobar lectura sin escritura; entrar como `pending` y comprobar que no tiene datos. La edición, las revisiones y el registro de avisos detectan cambios concurrentes mediante `updated_at`. Las fechas del formulario usan la zona horaria del navegador y se guardan con su zona horaria; al editar otro campo se conservan las fechas intactas, incluidos sus segundos. Descompuesta, En resguardo y Patio permisionario requieren recordatorio; En transito programa revisión a tres horas. Agregar un comentario o registrar un aviso reinicia esa revisión. Las reglas se aplican también en PostgreSQL, sin depender del navegador. Se listan todas las cargas activas mediante paginación; comentarios/incidencias muestran los 100 más recientes y el historial las 10 últimas fechas.
 
-Sin variables de conexión, el panel muestra que falta configurar Supabase y no simula operaciones exitosas. El proyecto real respondió y se confirmó la existencia de las cinco tablas iniciales y el bloqueo de acceso sin sesión. El usuario confirmó login y persistencia de cargas, estatus, comentarios e incidencias en https://relaxed-douhua-c9ee09.netlify.app/. Esa prueba corresponde a la primera versión. La segunda actualización y sus comunicaciones, alertas y revisiones siguen pendientes de aplicar y validar en Supabase/Netlify; sus pruebas locales usan PostgreSQL embebido.
+Sin variables de conexión, el panel muestra que falta configurar Supabase y no simula operaciones exitosas. El proyecto real respondió y se confirmó la estructura inicial y operativa, con rechazo de acceso sin sesión. El usuario confirmó login y persistencia de cargas, estatus, comentarios e incidencias en la primera versión Netlify. Después confirmó en Google el acceso, lectura, comentarios, revisión de tránsito y registro de avisos con persistencia al actualizar. Esas pruebas corresponden a los flujos indicados, no a todos los módulos ni roles. SQL 003 y la nueva pantalla de pendientes todavía requieren instalación y prueba en el proyecto real.
+
+## Organización del código nuevo
+
+Las nuevas funciones se escriben con nombres descriptivos y comentarios en español que explican su propósito. El módulo de pendientes separa responsabilidades:
+
+- `web/src/features/pending-loads/rules.js`: validación de formularios y selección de cargas compatibles.
+- `web/src/features/pending-loads/service.js`: consultas Supabase, paginación y detección de versiones antiguas.
+- `web/src/features/pending-loads/panel.js`: pantalla, formularios y navegación del módulo.
+- `web/src/ui/html.js`: protección del HTML frente a texto ingresado por usuarios.
+- `supabase/migrations/003_pending_loads.sql`: tablas, permisos, historial y operaciones transaccionales, con secciones explicadas.
+
+El build de Vite se genera sin minificar para facilitar su lectura. El HTML de Google incluye además la biblioteca Supabase: los cambios se hacen en los archivos fuente anteriores y después se vuelve a empaquetar, evitando editar el código generado a mano.
 
 ## Siguientes etapas
 
-1. Aplicar y validar la segunda actualización de cargas y comunicaciones contra Supabase/Netlify.
+1. Instalar SQL 003 y validar las solicitudes pendientes en Google y Supabase.
 2. Completar las reglas restantes conforme se migren los módulos del backend original.
 3. Implementar los módulos restantes y recuperar las pantallas originales.
 4. Crear portales externos con vistas y permisos por cliente, sin exponer campos operativos internos.

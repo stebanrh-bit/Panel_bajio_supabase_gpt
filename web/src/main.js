@@ -1,11 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 import { statuses, stages, booleanFields, dateFields, marked, stageIndex, alertFor, attentionFor, localDateInput, historyDiff, reminderStatuses, prepareLoadValues } from './load-rules.js';
+import { escapeHtml as escape } from './ui/html.js';
+import { createPendingLoadsService } from './features/pending-loads/service.js';
+import { createPendingLoadsPanel } from './features/pending-loads/panel.js';
 import './style.css';
 const root = document.querySelector('#app');
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let client, session, profile, loads = [], activeLoad = null, filter = 'all', generation = 0;
+let pendingPanel = null;
+let currentModule = 'loads';
 const fields = {
   load:'Número de carga', customer:'Cliente', origin_city:'Ciudad de origen', origin_state:'Estado de origen', origin_address:'Dirección de origen',
   dest_city:'Ciudad de destino', dest_state:'Estado de destino', dest_address:'Dirección de destino', truck:'Unidad', trailer:'Remolque', status:'Estatus',
@@ -28,7 +32,16 @@ async function request(query) {
   return data;
 }
 function shell(content) {
-  root.innerHTML = `<header><div><small>OPERACIONES</small><h1>Panel Bajío</h1></div>${session ? `<div>${escape(profile?.display_name || session.user.email)} <button id="logout">Salir</button></div>` : ''}</header><main><p id="message" aria-live="polite"></p>${content}</main>`;
+  disposePendingPanel();
+  const navigation = session && profile && profile.role !== 'pending'
+    ? `<nav class="module-navigation" aria-label="Módulos del panel">
+        <button id="nav-loads" aria-pressed="${currentModule === 'loads'}">Cargas</button>
+        <button id="nav-pending" aria-pressed="${currentModule === 'pending'}">Solicitudes pendientes</button>
+      </nav>`
+    : '';
+  root.innerHTML = `<header><div><small>OPERACIONES</small><h1>Panel Bajío</h1></div>${session ? `<div>${escape(profile?.display_name || session.user.email)} <button id="logout">Salir</button></div>` : ''}</header><main>${navigation}<p id="message" aria-live="polite"></p>${content}</main>`;
+  document.querySelector('#nav-loads')?.addEventListener('click', dashboard);
+  document.querySelector('#nav-pending')?.addEventListener('click', showPendingLoads);
   document.querySelector('#logout')?.addEventListener('click', async () => {
     try {
       const {error:err} = await client.auth.signOut(); if(err) throw err;
@@ -36,7 +49,34 @@ function shell(content) {
     } catch(err) { error(err.message); }
   });
 }
-function clearSession() { generation++; session=null; profile=null; loads=[]; activeLoad=null; }
+/** Detiene respuestas del módulo anterior cuando se cambia de pantalla o se cierra sesión. */
+function disposePendingPanel() {
+  pendingPanel?.dispose();
+  pendingPanel = null;
+}
+function clearSession() { disposePendingPanel(); generation++; session=null; profile=null; loads=[]; activeLoad=null; }
+
+/** Las solicitudes reutilizan la sesión y las cargas; los permisos se verifican además en Supabase. */
+async function showPendingLoads() {
+  if (!session || !profile || profile.role === 'pending') return;
+  const current = ++generation;
+  currentModule = 'pending';
+  activeLoad = null;
+  shell('<div id="pending-module"></div>');
+  pendingPanel = createPendingLoadsPanel({
+    container: document.querySelector('#pending-module'),
+    service: createPendingLoadsService(client),
+    loads,
+    userId: session.user.id,
+    role: profile.role,
+    onError: message => { if (current === generation && session) error(message); },
+    onOpenLoad: async loadNumber => {
+      if (current !== generation || !session) return;
+      await refreshLoad(loadNumber);
+    },
+  });
+  await pendingPanel.open();
+}
 function login() {
   shell(`<section class="card narrow"><h2>Entrar al panel</h2><p>Usa la cuenta que te asignó el administrador.</p><form id="login"><label>Correo<input name="email" type="email" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><button>Iniciar sesión</button></form></section>`);
   document.querySelector('#login').addEventListener('submit', async event => {
@@ -50,6 +90,8 @@ function login() {
 }
 async function dashboard() {
   if(!session) return login();
+  disposePendingPanel();
+  currentModule = 'loads';
   const current=++generation;
   try {
     const nextProfile=await request(client.from('profiles').select('*').eq('id',session.user.id).single());
@@ -90,7 +132,7 @@ function renderRows() {
   document.querySelectorAll('[data-load]').forEach(button=>button.onclick=()=>detail(button.dataset.load));
 }
 async function refreshLoad(id) {
-  // Update counts and badges after any operation before reopening the detail.
+  // Actualiza los contadores y las alertas antes de volver a abrir la carga.
   await dashboard();
   if(session && document.querySelector('#detail')) await detail(id);
 }
@@ -159,7 +201,7 @@ function editor(row={}) {
   form.onsubmit=async event=>{
     event.preventDefault();const button=event.target.querySelector('button');button.disabled=true;
     try {
-      // Only send changes: preserve seconds in dates and text from imported records.
+      // Envía solo cambios: conserva los segundos de las fechas y los textos importados.
       const {values,changes:changed}=prepareLoadValues(Object.fromEntries(new FormData(form)),Object.fromEntries(booleanFields.map(field=>[field,form.elements[field].checked])),row);
       if(row.load) {
         if(Object.keys(changed).length) {
