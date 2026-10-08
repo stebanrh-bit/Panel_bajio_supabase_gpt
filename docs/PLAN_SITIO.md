@@ -13,18 +13,18 @@ Supabase conserva usuarios, permisos y datos. Google Apps Script sirve un único
 | Cargas, documentos, comentarios, incidencias, historial y comunicación | Implementados; varios flujos confirmados por el usuario en Google |
 | Solicitudes pendientes y vinculación | Implementados; creación, vínculo y cancelación confirmados con persistencia |
 | Apartados para regreso cargado | Código preparado; pruebas automáticas de agenda, permisos, etapas, cierre, reapertura y filtros |
-| Equipo, clientes asignados y seguimiento | Por implementar |
-| Bitácora y cierres de turno | Por implementar |
-| Plantillas y cuenta personal | Por implementar |
-| Inicio, calendario, indicadores y SLA | Por implementar |
-| Archivo, importación y deshacer | Por implementar |
-| Radar y mapas/distancias | Por implementar |
-| Portal de clientes y vista de gerencia | Por completar |
-| Integraciones externas y tareas programadas | Revisar requisitos y documentar limitaciones reales |
+| Equipo, clientes asignados y seguimiento | Preparados; administración por RPC y pruebas de roles/versiones |
+| Bitácora y cierres de turno | Preparados; tareas múltiples, seguimiento, estados e historial |
+| Plantillas y cuenta personal | Preparadas; privacidad por autor y cambio de contraseña vía Auth |
+| Inicio, calendario, indicadores y SLA | Preparados; filtros y definiciones de métricas explícitas |
+| Archivo, importación y deshacer | Preparados; archivo reversible, .xlsx/CSV, vista previa, versiones, deshacer y respaldo JSON |
+| Radar y mapas/distancias | Preparados; fuente compartida, coordenadas y puente Google con Auth comprobado antes de Maps |
+| Portal de clientes y vista de gerencia | Preparados; campos y cliente restringidos, gerencia en consulta |
+| Integraciones externas y tareas programadas | Alcance documentado: no se instalan envíos automáticos, TCI, cron ni restauración de respaldos |
 
 ## Entrega conjunta
 
-Preparar una actualización SQL que incluya únicamente las migraciones nuevas, un HTML para el proyecto Google existente y un listado de pruebas manuales. No volver a ejecutar SQL 001 en el proyecto actual. Hasta ejecutar esa actualización y activar Nueva versión en Google, los módulos nuevos son entregas preparadas, no funciones verificadas en producción.
+La entrega conjunta está en `supabase/actualizar_sitio.sql`, `google-apps-script/index-sitio.html`, `google-apps-script/Code-sitio.gs` y `entregables/panel-bajio-sitio.zip`. La guía está en `docs/INSTALAR_SITIO.md` y las pruebas ordenadas en `docs/PRUEBAS_FINALES.md`. No volver a ejecutar SQL 001 en el proyecto actual. Hasta ejecutar esa actualización y activar Nueva versión en Google, los módulos nuevos son entregas preparadas, no funciones verificadas en producción.
 
 Las pruebas finales cubrirán acceso, cargas, pendientes, apartados, turnos, equipo, calendario, importación/deshacer, archivo, indicadores y portal. Las pruebas entre cuentas quedan pendientes para esa etapa por decisión del usuario.
 
@@ -35,3 +35,7 @@ Las pruebas finales cubrirán acceso, cargas, pendientes, apartados, turnos, equ
 - Los cierres conservan su expediente y el historial.
 - Las comprobaciones locales con Auth y DOM simulados no sustituyen las pruebas en Google y Supabase reales.
 - El proxy de Codex bloqueó las llamadas directas a Google. El usuario validó los flujos publicados en su navegador.
+
+## Mantenimiento
+
+Ejecutar `npm ci`, `npm test` y `npm run build` desde web/ (usar caché `/tmp/panel-npm-cache` en Codex). Desde la raíz, `python3 scripts/package_site.py` regenera la entrega durante un cambio autorizado y `python3 scripts/package_site.py --check` la comprueba sin modificarla. El HTML incluye las bibliotecas; el código editable y comentado permanece en web/src/.

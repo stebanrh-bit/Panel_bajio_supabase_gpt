@@ -1,5 +1,7 @@
 # Supabase como base de datos; Google Apps Script como alojamiento
 
+**Entrega conjunta más reciente:** sigue [la guía de instalación del sitio](../docs/INSTALAR_SITIO.md). Reúne SQL 004–007, `index-sitio.html` y `Code-sitio.gs`; conserva el mismo enlace Google. Las instrucciones inferiores documentan las entregas anteriores. El usuario pidió hacer las pruebas manuales al final, una por una: [lista preparada](../docs/PRUEBAS_FINALES.md).
+
 Esta carpeta contiene la página del panel para servirla desde Google Apps Script. Supabase conserva la base de datos, usuarios, contraseñas, sesiones y permisos RLS. No se necesita una hoja de Google Sheets ni Netlify para este alojamiento.
 
 El archivo `index.html` conserva la primera entrega validada, generada desde `entregables/panel-bajio-web.zip`, sin depender de SQL 002. `index-operaciones.html` conserva la segunda entrega con alertas, documentos/POD, citas y cruce, revisiones y comunicaciones; requiere SQL 002. El usuario confirmó en Google el acceso, la lectura de cargas, comentarios persistentes, revisión de tránsito y registro de avisos que resuelve el pendiente y permanece al actualizar.

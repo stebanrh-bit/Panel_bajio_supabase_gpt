@@ -1,0 +1,3 @@
+Load,Customers,City O.,State O.,City D.,State D.,Truck
+IMPORT-EXISTENTE,PRUEBA CLIENTE,Laredo,TX,Dallas,TX,PRUEBA-100
+IMPORT-NUEVA,PRUEBA CLIENTE,Laredo,TX,San Antonio,TX,PRUEBA-200

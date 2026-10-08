@@ -1,5 +1,8 @@
 # Panel Bajío: Supabase y alojamiento en Google Apps Script
 
+La entrega conjunta para Supabase y Google Apps Script está preparada en la rama `supabase-inicial`. Sigue [la instalación paso a paso](docs/INSTALAR_SITIO.md) y después [las pruebas finales, una por una](docs/PRUEBAS_FINALES.md). Los módulos nuevos deben instalarse y validarse en la página real; los archivos originales se conservan como referencia.
+
+
 La base de datos y autenticación permanecen en Supabase. La página se aloja en Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. El usuario confirmó en Google el acceso, la consulta de cargas y los comentarios persistentes; también confirmó la revisión de tránsito y el registro persistente de un aviso que resuelve el pendiente de comunicación. La tercera entrega, `google-apps-script/index-pendientes.html`, agrega solicitudes sin número de carga y requiere SQL 003. El usuario la activó y confirmó la vinculación: la nota y el comentario aparecen en la carga después de actualizar y la solicitud queda en Vinculados. El usuario confirmó también que la solicitud PRUEBA-002 aparece en Pendientes y que, tras cancelarla, permanece en Cancelados con su nota y comentario al actualizar. Las pruebas con otros roles siguen pendientes en el proyecto real.
 
 La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raíz se conservan como referencia y no se ejecutan en la nueva aplicación.
