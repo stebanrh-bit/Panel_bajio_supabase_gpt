@@ -2,7 +2,7 @@
 
 Esta carpeta contiene la página del panel para servirla desde Google Apps Script. Supabase conserva la base de datos, usuarios, contraseñas, sesiones y permisos RLS. No se necesita una hoja de Google Sheets ni Netlify para este alojamiento.
 
-La primera entrega usa la versión que el usuario ya validó (login, cargas, comentarios e incidencias). Se generó desde `entregables/panel-bajio-web.zip` y no depende de la migración SQL 002. El usuario ya desplegó esta adaptación en Google y confirmó que puede iniciar sesión y ver sus cargas. El usuario también confirmó que agregó un comentario desde Google y que se guarda. Quedan verificados el acceso, la lectura de cargas y el guardado de comentarios en el runtime Google mediante sus pruebas. No es la migración de todas las funciones del Apps Script original.
+El archivo `index.html` conserva la primera entrega que el usuario ya validó. `index-operaciones.html` contiene la siguiente actualización con alertas, documentos/POD, citas y cruce, revisiones y comunicaciones. Se generó desde `entregables/panel-bajio-web.zip` y no depende de la migración SQL 002. El usuario ya desplegó esta adaptación en Google y confirmó que puede iniciar sesión y ver sus cargas. El usuario también confirmó que agregó un comentario desde Google y que se guarda. Quedan verificados el acceso, la lectura de cargas y el guardado de comentarios en el runtime Google mediante sus pruebas. Ninguna de estas versiones completa todavía todos los módulos del Apps Script original.
 
 ## Enlace de implementación proporcionado
 
@@ -33,6 +33,19 @@ El usuario confirmó en su navegador que puede iniciar sesión con su cuenta Sup
 - Que nuevas cargas, comentarios e incidencias permanecen tras actualizar la página.
 - Que cerrar sesión vuelve al login y que la sesión se comporta correctamente en el navegador del usuario. Apps Script sirve el HTML dentro de un iframe: las restricciones de almacenamiento de algunos navegadores requieren validación real, que no se sustituye con las pruebas locales.
 
+## Activar la actualización operativa en Google
+
+Se comprobó que Supabase ya dispone de `communications`, las columnas `last_communication_channel`/`last_communication_type` y las funciones `review_load` y `confirm_client_notice`; las solicitudes sin sesión se rechazaron. Sus flujos autenticados en Google siguen pendientes de validación. No se requiere repetir SQL para activar esta interfaz.
+
+1. Copia todo el contenido de [index-operaciones.html](index-operaciones.html).
+2. Abre el proyecto existente en Google Apps Script y sustituye **el contenido** de su archivo `index.html` por lo copiado. En el proyecto Google el archivo debe seguir llamándose `index`: `Code.gs` lo sirve con ese nombre. No crees allí un archivo llamado `index-operaciones` ni cambies `Code.gs`.
+3. Guarda y abre **Implementar → Administrar implementaciones → Editar (lápiz)**.
+4. En **Versión**, selecciona **Nueva versión** y pulsa **Implementar**. Actualiza la implementación existente para conservar la URL `/exec`.
+5. Actualiza el navegador y comprueba que aparecen los filtros **Requieren atención** y **Pendientes de avisar**.
+6. Con una carga de prueba, comprueba: cambiar a En transito programa revisión a tres horas; Descompuesta exige fecha de recordatorio; cambiar una cita marca pendiente de aviso; **Registrar aviso enviado** guarda canal y tipo y resuelve el pendiente; comentar reinicia la revisión de tránsito. El panel registra avisos que enviaste por otro medio, no envía WhatsApp ni correo por sí mismo.
+
+La versión inicial permanece en el archivo `index.html` del repositorio como referencia; la versión nueva solo se activa en Google cuando pegues su contenido y actualices la implementación.
+
 ## Actualizar el mismo enlace
 
 Tras cambiar `index.html`, usa **Implementar → Administrar implementaciones → Editar (lápiz) → Versión → Nueva versión → Implementar**. Actualiza la implementación existente para conservar su URL.
@@ -41,7 +54,7 @@ Cuando se aplique la migración 002 y se valide la segunda versión, el empaquet
 
 ```bash
 cd /workspace/Panel_bajio_supabase_gpt
-python3 scripts/package_google.py --source-zip entregables/panel-bajio-operaciones.zip
+python3 scripts/package_google.py --source-zip entregables/panel-bajio-operaciones.zip --output google-apps-script/index-operaciones.html
 ```
 
 Para usar un build nuevo del código fuente:
