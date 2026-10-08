@@ -15,6 +15,8 @@ El proyecto existente requiere la actualización conjunta SQL 004–009, despleg
 
 Auth/RLS/RPC verifican permisos y autores. Admin y CSR escriben; manager consulta; clientes reciben únicamente los campos de sus cargas autorizadas. La sesión no almacena contraseñas. Los estados y versiones conservan los expedientes y evitan sobrescrituras. Las pruebas reales entre cuentas y en Google quedan para el final, por petición del usuario.
 
+Esteban también puede trabajar como CSR manteniendo administración y comprobar el portal con una cuenta de cliente de prueba. [Activar el ajuste e instrucciones](docs/ADMINISTRADOR_Y_CSR.md). Si la instalación completa ya está aplicada, este ajuste solo requiere actualizar el HTML Google.
+
 ## Referencia: crear un proyecto nuevo
 
 El proyecto del usuario ya existe. Para actualizarlo, usar la guía de instalación enlazada arriba. Estos pasos iniciales se conservan para una instalación desde cero; después se aplica la actualización 004–009 y se instala `panel-accounts`.

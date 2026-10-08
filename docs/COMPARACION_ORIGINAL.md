@@ -29,6 +29,7 @@ Las 15 ventanas principales conservan sus elementos y estilos. Los módulos orig
 - Eliminar/cancelar retira registros de las listas visibles y conserva sus expedientes. Una incidencia retirada deja auditoría y ya no aparece en el portal.
 - La categoría se valida antes de insertar y en la base. Los registros antiguos inválidos se conservan. Documentos sin información permanecen distintos de los marcados como pendientes.
 - El refresco consulta marcas ligeras y descarga únicamente áreas modificadas. Las respuestas posteriores a cerrar sesión se descartan.
+- A petición del usuario, los supervisores también se pueden asignar clientes y aparecer como CSR operativo. El selector permite Esteban · CSR y Todos conservando la misma cuenta administradora. El Portal Cliente se comprueba con una cuenta de cliente separada; [instrucciones](ADMINISTRADOR_Y_CSR.md).
 
 ## Límites de la comprobación
 

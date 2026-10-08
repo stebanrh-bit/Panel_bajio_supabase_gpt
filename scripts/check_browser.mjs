@@ -286,6 +286,14 @@ const errors = [],
 await mkdir("/tmp/panel-original-comparison", { recursive: true });
 let incidentSaves = 0;
 const incidents = [];
+const customerAssignments = [
+  {
+    customer: "ACME",
+    customer_key: "acme",
+    owner_id: csrId,
+    updated_at: stamp,
+  },
+];
 async function newPage(
   golden = false,
   viewport = { width: 1440, height: 1024 },
@@ -344,16 +352,16 @@ async function newPage(
           result = [row];
         } else
           result = load ? rawLoads.find((row) => row.load === load) : rawLoads;
-      } else if (table === "customer_assignments")
-        result = [
-          {
-            customer: "ACME",
-            customer_key: "acme",
-            owner_id: csrId,
-            updated_at: stamp,
-          },
-        ];
-      else if (table === "pending_loads") result = [pendingRow];
+      } else if (table === "customer_assignments") result = customerAssignments;
+      else if (table === "ops_assign_customer") {
+        const input = request.postDataJSON();
+        assert.equal(input.p_owner, adminId);
+        Object.assign(customerAssignments[0], {
+          owner_id: input.p_owner,
+          updated_at: "2026-10-08T18:00:01Z",
+        });
+        result = null;
+      } else if (table === "pending_loads") result = [pendingRow];
       else if (table === "shift_tasks") result = [taskRow];
       else if (table === "reserved_loads") result = [reservedRow];
       else if (table === "incidents") {
@@ -623,7 +631,15 @@ try {
   await both((page) => page.locator("#csr-pw-input").fill("Solo-prueba-local"));
   await both((page) => page.locator("#csr-pw-submit").click());
   await both((page) => page.locator("#csr-backdrop.show").waitFor());
-  await compare("administracion");
+  // Esta ventana incorpora la opción Supervisor como CSR solicitada por el usuario.
+  // Su selector se verifica funcionalmente; las demás ventanas conservan comparación visual.
+  assert.equal(
+    await pages[1].locator('#csr-asig-csr option[value="Esteban"]').count(),
+    1,
+  );
+  await pages[1].screenshot({
+    path: "/tmp/panel-original-comparison/administracion-supabase.png",
+  });
   await both((page) => page.locator("#csr-close").click());
   // Comprobar también las ventanas secundarias completas, aunque no haya datos seleccionados.
   for (const modal of [
@@ -731,6 +747,56 @@ try {
     await both((page) => page.setViewportSize({ width: 390, height: 844 }));
     await compare(`${view}-movil`);
   }
+  // El mismo administrador puede asignarse clientes y alternar su vista de CSR.
+  // Es una extensión solicitada del original: se prueba funcionalmente, sin alterar el patrón visual.
+  await both((page) => page.close());
+  rawLoads[1].customer = "OTRO CLIENTE";
+  const own = await newPage(false);
+  pages.splice(0, pages.length, own);
+  await own
+    .locator("#home-cierres")
+    .filter({ hasText: "Sin cierres" })
+    .waitFor();
+  await own.locator("#sidebar-manage-csr-btn").click();
+  await own.locator("#csr-pw-input").fill("Solo-prueba-local");
+  await own.locator("#csr-pw-submit").click();
+  await own.locator("#csr-backdrop.show").waitFor();
+  await own.locator("#csr-asig-csr").selectOption("Esteban");
+  await own.locator("#csr-asig-cliente").selectOption("ACME");
+  await own.locator("#csr-asignar-btn").click();
+  await own
+    .getByText("Cliente asignado: ACME → Esteban", { exact: true })
+    .waitFor();
+  await own.locator("#csr-close").click();
+  assert.equal(await own.evaluate(() => window.panelApi.profile.role), "admin");
+  await own.reload();
+  await own
+    .locator("#home-cierres")
+    .filter({ hasText: "Sin cierres" })
+    .waitFor();
+  await own.locator("[data-page=operation]").click();
+  await own.locator("#who-toggle-btn").click();
+  await own.locator('[data-who-csr="Esteban"]').click();
+  await own
+    .locator("#panel-owner-name")
+    .filter({ hasText: "Esteban · CSR" })
+    .waitFor();
+  const ownLoads = await own
+    .locator("#page-operation .card[data-load]:visible")
+    .evaluateAll((nodes) => nodes.map((node) => node.dataset.load).sort());
+  // VISUAL-003 ya tiene POD y está finalizada: el filtro En curso no la muestra.
+  assert.deepEqual(ownLoads, ["VISUAL-001"]);
+  assert.equal(await own.locator("#sidebar-manage-csr-btn").isVisible(), true);
+  await own.screenshot({
+    path: "/tmp/panel-original-comparison/supervisor-csr.png",
+  });
+  await own.locator("#who-toggle-btn").click();
+  await own.locator("[data-who-all]").click();
+  assert.equal(
+    await own.locator("#page-operation .card[data-load]:visible").count(),
+    2,
+  );
+  assert.equal(await own.evaluate(() => window.panelApi.profile.role), "admin");
   assert.deepEqual(errors, []);
   await writeFile(
     "/tmp/panel-original-comparison/result.json",
@@ -741,7 +807,7 @@ try {
     ),
   );
   console.log(
-    `${screenshots.length} comparaciones visuales aprobadas; categoría vacía rechazada, registro válido persistente y cierre de sesión correcto; sin errores JS.`,
+    `${screenshots.length} comparaciones visuales aprobadas; incidencias y cierre de sesión correctos; supervisor asigna clientes y alterna su vista CSR sin perder permisos; sin errores JS.`,
   );
 } catch (error) {
   for (let index = 0; index < pages.length; index++) {

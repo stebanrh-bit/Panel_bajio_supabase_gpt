@@ -6,11 +6,12 @@ Comprobaciones ejecutadas en Codex el 8 de octubre de 2026. No representan una a
 | --- | --- |
 | Panel original publicado | HTML recuperado; árbol JavaScript idéntico al `PanelScript.html` de la raíz |
 | Portal Cliente y Vista Gerencia originales | Plantillas recuperadas de sus páginas publicadas |
-| `npm --cache /tmp/panel-npm-cache test` | 72 pruebas aprobadas; 0 fallidas y 0 omitidas |
-| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 71 módulos correcta |
+| `npm --cache /tmp/panel-npm-cache test` | 74 pruebas aprobadas; 0 fallidas y 0 omitidas |
+| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 72 módulos correcta |
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
-| Chromium: comparación visual | 36 parejas con datos ficticios; escritorio y móvil; panel, portales y 15 ventanas |
+| Chromium: comparación visual | 35 parejas con datos ficticios; escritorio y móvil; administración verificada funcionalmente por el nuevo selector de supervisor |
+| Chromium: supervisor también CSR | Asignación desde el formulario, persistencia al recargar, vista propia y Todos sin perder el rol ni los controles administrativos |
 | Chromium: incidencia | Categoría vacía rechazada sin insertar; registro válido persiste al recargar |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
 | Entrega reproducible | SQL, HTML y ZIP se comprueban con `python3 scripts/package_site.py --check` |

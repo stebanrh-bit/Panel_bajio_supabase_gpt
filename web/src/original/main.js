@@ -7,6 +7,7 @@ import script from "./panel-script.js?raw";
 import config from "./config.js";
 import { originalPage } from "./page.js";
 import { createOriginalApi } from "./api/index.js";
+import * as people from "./people.js";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -16,6 +17,7 @@ async function start() {
   );
   const api = createOriginalApi(client);
   window.panelApi = api;
+  window.panelPeople = people;
   const portal =
     window.PANEL_VIEW ||
     new URLSearchParams(location.search).get("portal") ||

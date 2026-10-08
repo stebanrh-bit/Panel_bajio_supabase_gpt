@@ -77,6 +77,8 @@ En **Gestionar CSR** puedes crear personas y asignarles una contraseña. Si no i
 
 ## Después de instalar
 
+Para usar Esteban también como CSR y comprobar el Portal Cliente, sigue [ADMINISTRADOR_Y_CSR.md](ADMINISTRADOR_Y_CSR.md). Si ya instalaste esta entrega, ese ajuste solo requiere actualizar el HTML de Google.
+
 Seguiremos [PRUEBAS_FINALES.md](PRUEBAS_FINALES.md), una prueba por vez. Las pruebas con otras cuentas quedan para la última etapa, como acordamos. Las comprobaciones locales están en [VALIDACION_SITIO.md](VALIDACION_SITIO.md).
 
 ![Inicio original conectado a Supabase, con datos de prueba](imagenes/panel-home.png)

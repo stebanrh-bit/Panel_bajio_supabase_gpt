@@ -111,6 +111,31 @@ test("equipo y turnos: permisos, asignaciones, bitácora, plantillas y portal ai
     );
 
     await context.test(
+      "administrador operador: asignaciones propias sin perder administración ni asumir rol Cliente",
+      async () => {
+        await asUser("admin");
+        await rpc("ops_assign_customer", [
+          "CLIENTE PROPIO",
+          people.admin,
+          null,
+        ]);
+        assert.equal(
+          (
+            await db.query(
+              "select owner_id from customer_assignments where customer_key='cliente propio'",
+            )
+          ).rows[0].owner_id,
+          people.admin,
+        );
+        assert.equal((await row("profiles", people.admin)).role, "admin");
+        await assert.rejects(
+          rpc("ops_portal_loads", []),
+          /portal no autorizado/,
+        );
+      },
+    );
+
+    await context.test(
       "bitácora: múltiples cargas, autor real, seguimiento y reversión integral",
       async () => {
         await asUser("csr");

@@ -1,10 +1,10 @@
 # Pruebas finales, una por una
 
-Realizar después de instalar SQL 004–009, la función `panel-accounts` y la nueva versión de Google. Avanzar juntos desde el punto 1, registrar cada resultado y corregir un fallo antes de continuar. Las verificaciones anteriores del usuario siguen siendo válidas para sus versiones; esta tabla está pendiente en la nueva publicación.
+Realizar después de instalar SQL 004–009, la función `panel-accounts` y la nueva versión de Google. Registrar cada resultado y corregir un fallo antes de continuar. El usuario ya confirmó el acceso y la apariencia original; las demás verificaciones siguen pendientes, incluyendo la actualización de supervisor como CSR.
 
 | Orden | Prueba | Resultado esperado | Estado real |
 | --- | --- | --- | --- |
-| 1 | Entrar con Esteban y su contraseña actual | Login original, mismo enlace Google y mismas cargas Supabase | Pendiente |
+| 1 | Entrar con Esteban y su contraseña actual | Login original, mismo enlace Google y mismas cargas Supabase | Confirmado por el usuario antes del ajuste de supervisor como CSR |
 | 2 | Inicio/Ahora/Mi turno y selector de persona | Paneles originales, jornada, pendientes y cierres | Pendiente |
 | 3 | Operación, filtros, búsqueda, tarjetas/tabla, densidad y vistas guardadas | Mismos controles y ventanas del original | Pendiente |
 | 4 | Abrir una carga y recorrer las seis pestañas del Workspace | Datos correctos en cada pestaña | Pendiente |
@@ -25,6 +25,7 @@ Realizar después de instalar SQL 004–009, la función `panel-accounts` y la n
 | 19 | Abrir Gestionar CSR con contraseña personal y crear una persona | Cuenta creada en Auth; asignar contraseña y rol | Pendiente |
 | 20 | Crear/editar/desactivar cliente y configurar Vista Gerencia | Accesos administrados sin exponer contraseñas | Pendiente |
 | 21 | Cerrar sesión, entrar de nuevo y navegar desde móvil | Login correcto; no quedan datos de otra sesión | Pendiente |
+| 22 | Asignar clientes a Esteban y alternar Esteban · CSR / Todos | Vista propia y general con la misma cuenta; conserva administración | Pendiente |
 
 ## Última etapa: cuentas y permisos
 

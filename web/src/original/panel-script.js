@@ -2047,7 +2047,7 @@
     });
   }
   function currentWhoEsSupervisor_() {
-    if (!currentWho) return false;
+    if (!currentWho || currentOperationalScope) return false;
     var p = (personas || []).filter(function (x) {
       return x.nombre === currentWho;
     })[0];
@@ -2063,7 +2063,7 @@
     }
     if (section) section.hidden = false;
     var csrs = (personas || []).filter(function (p) {
-      return p.rol === "CSR";
+      return esCsrOperativo_(p);
     });
     var countEl = document.getElementById("home-carga-csr-count");
     if (countEl) countEl.textContent = csrs.length + " CSR";
@@ -2882,7 +2882,17 @@
   var asignaciones = [];
   var loadSeguimientos = [];
   var currentWho = "";
+  // Cambia solo la vista: la identidad Auth y el rol administrativo permanecen iguales.
+  var currentOperationalScope = false;
   var currentFollowCsrs = [];
+
+  function esCsrOperativo_(persona) {
+    return window.panelPeople.isOperational(
+      persona,
+      asignaciones,
+      loadSeguimientos,
+    );
+  }
 
   var currentView = "table";
   try {
@@ -3266,7 +3276,7 @@
       .slice();
     var csrNombres = personas
       .filter(function (p) {
-        return p.rol === "CSR";
+        return esCsrOperativo_(p);
       })
       .map(function (p) {
         return p.nombre;
@@ -4504,7 +4514,11 @@
     var persona = personas.filter(function (p) {
       return p.nombre === currentWho;
     })[0];
-    if (persona && persona.rol === "CSR") {
+    if (
+      persona &&
+      (persona.rol === "CSR" ||
+        (persona.rol === "Supervisor" && currentOperationalScope))
+    ) {
       return loadSeguimientos
         .filter(function (s) {
           return s.csr === persona.nombre;
@@ -4563,7 +4577,11 @@
     var persona = personas.filter(function (p) {
       return p.nombre === currentWho;
     })[0];
-    if (persona && persona.rol === "CSR") {
+    if (
+      persona &&
+      (persona.rol === "CSR" ||
+        (persona.rol === "Supervisor" && currentOperationalScope))
+    ) {
       return clientesDeCsr(persona.nombre);
     }
     if (persona && persona.rol === "Seguimiento" && currentFollowCsrs.length) {
@@ -4984,7 +5002,10 @@
         return currentWho + " → " + currentFollowCsrs.join(", ");
       return currentWho + " → " + currentFollowCsrs.length + " CSR";
     }
-    return currentWho;
+    return (
+      currentWho +
+      (currentOperationalScope && persona?.rol === "Supervisor" ? " · CSR" : "")
+    );
   }
 
   function updateWhoToggleLabel() {
@@ -5001,15 +5022,21 @@
     var ownerName = document.getElementById("panel-owner-name");
     if (!ownerCaption || !ownerName) return;
     if (currentWho) {
-      ownerName.textContent = currentWho;
+      ownerName.textContent =
+        currentWho + (currentOperationalScope ? " · CSR" : "");
       ownerCaption.hidden = false;
     } else {
       ownerCaption.hidden = true;
     }
   }
 
-  function selectWho(nombre, followCsr) {
+  function selectWho(nombre, followCsr, operationalScope) {
     currentWho = nombre;
+    var selected = personas.find(function (p) {
+      return p.nombre === nombre;
+    });
+    currentOperationalScope =
+      operationalScope === true && selected?.rol === "Supervisor";
     currentFollowCsrs = followCsr ? [followCsr] : [];
     updateWhoToggleLabel();
     closeWhoDrawer();
@@ -5020,7 +5047,7 @@
   function renderWhoDrawer() {
     var body = document.getElementById("who-drawer-body");
     var csrList = personas.filter(function (p) {
-      return p.rol === "CSR";
+      return esCsrOperativo_(p);
     });
     var segList = personas.filter(function (p) {
       return p.rol === "Seguimiento";
@@ -5039,11 +5066,15 @@
         .map(function (p) {
           return (
             '<button type="button" class="who-row' +
-            (currentWho === p.nombre ? " active" : "") +
+            (currentWho === p.nombre &&
+            (p.rol !== "Supervisor" || currentOperationalScope)
+              ? " active"
+              : "") +
             '" data-who-csr="' +
             esc(p.nombre) +
             '">' +
             esc(p.nombre) +
+            (p.rol === "Supervisor" ? " · CSR" : "") +
             "</button>"
           );
         })
@@ -5086,12 +5117,13 @@
     });
     body.querySelectorAll("[data-who-csr]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        selectWho(btn.getAttribute("data-who-csr"), "");
+        selectWho(btn.getAttribute("data-who-csr"), "", true);
       });
     });
     body.querySelectorAll("[data-who-seg-toggle]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var nombre = btn.getAttribute("data-who-seg-toggle");
+        currentOperationalScope = false;
         if (currentWho !== nombre) {
           currentWho = nombre;
           var persona = personas.filter(function (pp) {
@@ -5112,7 +5144,7 @@
   function renderFollowDrawer() {
     var body = document.getElementById("who-drawer-body");
     var csrList = personas.filter(function (p) {
-      return p.rol === "CSR";
+      return esCsrOperativo_(p);
     });
     var html = '<div><div class="who-group-title">A quién sigues</div>';
     html +=
@@ -5378,7 +5410,7 @@
     var current = sel.value;
     var csrNames = personas
       .filter(function (p) {
-        return p.rol === "CSR";
+        return window.panelPeople.canOperate(p);
       })
       .map(function (p) {
         return p.nombre;
@@ -5918,6 +5950,7 @@
     bitacoraCargada_ = false;
     abrirAvisos_(false);
     currentWho = "";
+    currentOperationalScope = false;
     currentFollowCsrs = [];
     updateWhoToggleLabel();
     renderWhoDrawer();
@@ -7877,7 +7910,7 @@
     addRow(["CSR", "Cargas activas", "Necesitan atención"]);
     (personas || [])
       .filter(function (p) {
-        return p.rol === "CSR";
+        return esCsrOperativo_(p);
       })
       .forEach(function (p) {
         var cargas = loadsOfCsr(p.nombre);
@@ -14557,7 +14590,7 @@
       });
       var filas = (personas || [])
         .filter(function (p) {
-          return p.rol === "CSR";
+          return esCsrOperativo_(p);
         })
         .map(function (p) {
           var cargas = loadsOfCsr(p.nombre);
