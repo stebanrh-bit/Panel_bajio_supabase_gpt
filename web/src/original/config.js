@@ -1,5 +1,10 @@
 // Configuración pública del original: listas y umbrales compartidos.
 export default {
+  // Puestos visibles por cuenta. Estas etiquetas no otorgan ni retiran permisos:
+  // la autorización siempre depende del rol guardado en Supabase.
+  PROFILE_ROLE_LABELS: {
+    Abraham: { Supervisor: "Supervisor" },
+  },
   DONE_STATUSES: [
     "Delivered",
     "Completed",

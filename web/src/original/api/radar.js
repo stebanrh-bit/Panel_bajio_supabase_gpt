@@ -129,7 +129,7 @@ export function radarMethods(ctx) {
       ctx.staff(true);
       if (ctx.profile.role !== "admin")
         throw Error(
-          "Solo un administrador del portal puede recalcular las millas.",
+          "Recalcular millas requiere permisos de administración.",
         );
       const [points, distances] = await Promise.all([places(), routes()]);
       const route = distances.find((row) => row.route_key === key);

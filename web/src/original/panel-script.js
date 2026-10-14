@@ -5318,10 +5318,13 @@
       if (e.target.id === "who-drawer-backdrop") closeWhoDrawer();
     });
 
-  function rolLabel(rol) {
-    // "Supervisor" es el identificador heredado de admin; solo cambia su nombre visible.
-    // Conservarlo internamente permite usar las cuentas existentes y sus permisos.
-    if (rol === "Supervisor") return "Administrador del portal";
+  function rolLabel(rol, nombre) {
+    // El puesto visible puede variar entre personas con los mismos permisos.
+    // "Supervisor" sigue siendo el identificador heredado de admin en los datos.
+    var etiquetas = PANEL_CONFIG.PROFILE_ROLE_LABELS || {};
+    var etiquetaPersonal = etiquetas[nombre] && etiquetas[nombre][rol];
+    if (etiquetaPersonal) return etiquetaPersonal;
+    if (rol === "Supervisor") return "Admin";
     return rol === "Seguimiento" ? "General" : rol;
   }
 
@@ -5342,7 +5345,7 @@
               '"' +
               (p.rol === r ? " selected" : "") +
               ">" +
-              esc(rolLabel(r)) +
+              esc(rolLabel(r, p.nombre)) +
               "</option>"
             );
           })
@@ -5392,7 +5395,7 @@
                 refreshOperationalAttention();
               }
               showToast(
-                "Rol actualizado: " + nombre + " → " + rolLabel(rol),
+                "Rol actualizado: " + nombre + " → " + rolLabel(rol, nombre),
                 "good",
               );
             } else {
@@ -5981,7 +5984,7 @@
       })[0];
       avatar.textContent = sessionInitials(myRealIdentity);
       name.textContent = myRealIdentity;
-      chip.title = persona ? rolLabel(persona.rol) : "";
+      chip.title = persona ? rolLabel(persona.rol, persona.nombre) : "";
     } else {
       avatar.textContent = "";
       name.textContent = "Sin sesión";
@@ -6137,7 +6140,7 @@
             document.getElementById("csr-new-correo").value = "";
             loadPersonasYAsignaciones();
             showToast(
-              "Persona agregada: " + nombre + " (" + rolLabel(rol) + ")",
+              "Persona agregada: " + nombre + " (" + rolLabel(rol, nombre) + ")",
               "good",
             );
           } else {

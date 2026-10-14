@@ -1,8 +1,10 @@
 # Esteban: administración, operación y prueba del portal
 
-La cuenta Esteban se identifica como **Administrador del portal** (`admin` en Supabase). Puede recibir clientes y trabajar sus cargas como CSR. No hay que cambiarle los permisos ni crear otra cuenta interna.
+La cuenta Esteban se identifica como **Admin** (`admin` en Supabase). Puede recibir clientes y trabajar sus cargas como CSR. No hay que cambiarle los permisos ni crear otra cuenta interna.
 
-El nombre actualizado aparece en la identificación de la sesión y en los selectores de roles de administración. El código conserva el identificador heredado `Supervisor` para ser compatible con las cuentas existentes; ese identificador no se muestra como nombre del puesto.
+La cuenta Abraham se identifica como **Supervisor**. El directorio remoto confirmó que ambas cuentas tienen actualmente el mismo rol `admin`; esta actualización cambia sus etiquetas visibles y conserva esos permisos.
+
+Los nombres aparecen en la identificación de la sesión y en los selectores de roles de cada persona. El código conserva el identificador heredado `Supervisor` para ser compatible con las cuentas existentes. `PROFILE_ROLE_LABELS`, en `web/src/original/config.js`, permite distinguir el puesto de Abraham del nombre predeterminado Admin. Esta configuración se usa únicamente para presentación; nunca para autorizar operaciones.
 
 ## Activar este ajuste
 

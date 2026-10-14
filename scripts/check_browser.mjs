@@ -39,6 +39,12 @@ const adminId = "11111111-1111-4111-8111-111111111111",
 const profiles = [
   { id: adminId, display_name: "Esteban", role: "admin", active: true },
   { id: csrId, display_name: "Ana", role: "csr", active: true },
+  {
+    id: "33333333-3333-4333-8333-333333333333",
+    display_name: "Abraham",
+    role: "admin",
+    active: true,
+  },
 ];
 const stamp = "2026-10-08T17:00:00Z";
 const rawLoads = [
@@ -316,6 +322,7 @@ async function newPage(
   golden = false,
   viewport = { width: 1440, height: 1024 },
   view = "internal",
+  identity = profiles[0],
 ) {
   const page = await browser.newPage({
     viewport,
@@ -356,11 +363,11 @@ async function newPage(
         table = url.pathname.split("/").at(-1);
       let result = [];
       if (table === "user")
-        result = { id: adminId, email: "prueba@local.test" };
+        result = { id: identity.id, email: "prueba@local.test" };
       else if (table === "profiles")
         result = url.searchParams.has("id")
           ? {
-              ...profiles[0],
+              ...identity,
               role:
                 view === "client"
                   ? "client"
@@ -466,7 +473,7 @@ async function newPage(
     },
   );
   await page.addInitScript(
-    ({ id, fixtures, golden, view }) => {
+    ({ id, displayName, fixtures, golden, view }) => {
       const claims = {
         sub: id,
         role: "authenticated",
@@ -495,10 +502,10 @@ async function newPage(
       );
       localStorage.setItem("bajio_view", "cards");
       localStorage.setItem(
-        "bajio_inicio_turno_Esteban",
+        "bajio_inicio_turno_" + displayName,
         new Date().toDateString(),
       );
-      localStorage.setItem("bajio_identity_nombre", "Esteban");
+      localStorage.setItem("bajio_identity_nombre", displayName);
       localStorage.setItem("bajio_identity_token", "supabase-session");
       if (view === "client")
         localStorage.setItem(
@@ -535,7 +542,13 @@ async function newPage(
         window.panelApi = { run: runner(), profile: { role: "admin" } };
       }
     },
-    { id: adminId, fixtures, golden, view },
+    {
+      id: identity.id,
+      displayName: identity.display_name,
+      fixtures,
+      golden,
+      view,
+    },
   );
   let html = goldenHtml;
   if (view !== "internal") {
@@ -697,19 +710,25 @@ try {
     // Su selector se verifica funcionalmente; las demás ventanas conservan comparación visual.
     assert.equal(
       await pages[1].locator("#session-chip").getAttribute("title"),
-      "Administrador del portal",
+      "Admin",
     );
     assert.equal(
       await pages[1]
         .locator('[data-rol-nombre="Esteban"] option:checked')
         .textContent(),
-      "Administrador del portal",
+      "Admin",
     );
     assert.equal(
       await pages[1]
         .locator('#csr-new-rol option[value="Supervisor"]')
         .textContent(),
-      "Administrador del portal",
+      "Admin",
+    );
+    assert.equal(
+      await pages[1]
+        .locator('[data-rol-nombre="Abraham"] option:checked')
+        .textContent(),
+      "Supervisor",
     );
     assert.equal(
       await pages[1].locator('#csr-asig-csr option[value="Esteban"]').count(),
@@ -890,6 +909,33 @@ try {
       await own.evaluate(() => window.panelApi.profile.role),
       "admin",
     );
+  }
+  // Cambiar el puesto visible de Abraham no debe cambiar su identidad ni sus permisos.
+  const supervisorPage = await newPage(
+    false,
+    undefined,
+    "internal",
+    profiles[2],
+  );
+  try {
+    assert.equal(
+      await supervisorPage.locator("#session-chip-name").textContent(),
+      "Abraham",
+    );
+    assert.equal(
+      await supervisorPage.locator("#session-chip").getAttribute("title"),
+      "Supervisor",
+    );
+    assert.equal(
+      await supervisorPage.evaluate(() => window.panelApi.profile.role),
+      "admin",
+    );
+    assert.equal(
+      await supervisorPage.locator("#sidebar-manage-csr-btn").isVisible(),
+      true,
+    );
+  } finally {
+    await supervisorPage.close();
   }
   // Selección de archivos reales mediante el botón y los callbacks originales.
   const importPage = pages[0];
