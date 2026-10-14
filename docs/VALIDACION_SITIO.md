@@ -11,7 +11,7 @@ Comprobaciones actualizadas en Codex el 14 de octubre de 2026. No representan un
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
 | Chromium: comparación visual | 35 parejas de presentación prevista y entrega con datos ficticios independientes; escritorio y móvil; Inicio simplificado por petición del usuario |
-| Chromium: supervisor también CSR | Asignación desde el formulario, persistencia al recargar, vista propia y Todos sin perder el rol ni los controles administrativos |
+| Chromium: administrador también CSR | Nombre visible Administrador del portal en la identificación y selectores de roles; asignación desde el formulario, persistencia al recargar, vista propia y Todos sin perder el rol ni los controles administrativos |
 | Chromium: incidencia | Categoría vacía rechazada sin insertar; registro válido persiste al recargar |
 | Chromium: revisiones y seguimientos | Plazos independientes, tránsito +3 h, completar seguimiento sin eliminar el otro plazo, próximas fechas y móvil sin desbordamiento |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |

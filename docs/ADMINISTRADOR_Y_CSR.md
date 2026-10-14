@@ -1,6 +1,8 @@
 # Esteban: administración, operación y prueba del portal
 
-La cuenta Esteban conserva su rol **Supervisor** (admin en Supabase). Puede recibir clientes y trabajar sus cargas como CSR. No hay que cambiarle el rol ni crear otra cuenta interna.
+La cuenta Esteban se identifica como **Administrador del portal** (`admin` en Supabase). Puede recibir clientes y trabajar sus cargas como CSR. No hay que cambiarle los permisos ni crear otra cuenta interna.
+
+El nombre actualizado aparece en la identificación de la sesión y en los selectores de roles de administración. El código conserva el identificador heredado `Supervisor` para ser compatible con las cuentas existentes; ese identificador no se muestra como nombre del puesto.
 
 ## Activar este ajuste
 
@@ -22,7 +24,7 @@ No hace falta repetir SQL, borrar datos ni desplegar `panel-accounts` de nuevo.
 5. La vista muestra tus clientes y las cargas que sigues. Los comentarios y cambios siguen firmados por tu misma cuenta Esteban.
 6. Para revisar toda la operación, selecciona **Todos (sin filtro)**. Conservas los controles administrativos en ambas vistas.
 
-La asignación persiste al actualizar. Al iniciar sesión o recargar, la vista de Supervisor sigue siendo general; puedes volver a seleccionar Esteban · CSR cuando quieras. El filtro del selector cambia la presentación, no el rol ni los permisos de la sesión.
+La asignación persiste al actualizar. Al iniciar sesión o recargar, la vista del administrador sigue siendo general; puedes volver a seleccionar Esteban · CSR cuando quieras. El filtro del selector cambia la presentación, no el rol ni los permisos de la sesión.
 
 ## Comprobar lo que ve un cliente
 

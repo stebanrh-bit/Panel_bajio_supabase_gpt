@@ -2,6 +2,8 @@ import config from "../config.js";
 import { booleanFields, marked, stageIndex, toISO } from "../../load-rules.js";
 
 export const json = JSON.stringify;
+// Identificadores de compatibilidad con el panel original. La interfaz presenta
+// admin como "Administrador del portal" mediante rolLabel, sin cambiar permisos.
 export const roles = {
   admin: "Supervisor",
   csr: "CSR",

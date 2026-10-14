@@ -693,8 +693,24 @@ try {
     );
     await both((page) => page.locator("#csr-pw-submit").click());
     await both((page) => page.locator("#csr-backdrop.show").waitFor());
-    // Esta ventana incorpora la opción Supervisor como CSR solicitada por el usuario.
+    // El administrador mantiene sus permisos y también puede operar como CSR.
     // Su selector se verifica funcionalmente; las demás ventanas conservan comparación visual.
+    assert.equal(
+      await pages[1].locator("#session-chip").getAttribute("title"),
+      "Administrador del portal",
+    );
+    assert.equal(
+      await pages[1]
+        .locator('[data-rol-nombre="Esteban"] option:checked')
+        .textContent(),
+      "Administrador del portal",
+    );
+    assert.equal(
+      await pages[1]
+        .locator('#csr-new-rol option[value="Supervisor"]')
+        .textContent(),
+      "Administrador del portal",
+    );
     assert.equal(
       await pages[1].locator('#csr-asig-csr option[value="Esteban"]').count(),
       1,
@@ -1065,7 +1081,7 @@ try {
     ),
   );
   console.log(
-    `${importsOnly ? "Flujos verificados" : screenshots.length + " comparaciones visuales aprobadas; incidencias, cierre de sesión y supervisor CSR correctos"}; CSV/XLSX${legacyXls ? "/XLS" : ""}, recordatorios independientes, completar seguimiento y navegación móvil verificados; sin errores JS.`,
+    `${importsOnly ? "Flujos verificados" : screenshots.length + " comparaciones visuales aprobadas; incidencias, cierre de sesión y administrador CSR correctos"}; CSV/XLSX${legacyXls ? "/XLS" : ""}, recordatorios independientes, completar seguimiento y navegación móvil verificados; sin errores JS.`,
   );
 } catch (error) {
   for (let index = 0; index < pages.length; index++) {

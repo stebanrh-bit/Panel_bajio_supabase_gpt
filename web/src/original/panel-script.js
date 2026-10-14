@@ -5319,6 +5319,9 @@
     });
 
   function rolLabel(rol) {
+    // "Supervisor" es el identificador heredado de admin; solo cambia su nombre visible.
+    // Conservarlo internamente permite usar las cuentas existentes y sus permisos.
+    if (rol === "Supervisor") return "Administrador del portal";
     return rol === "Seguimiento" ? "General" : rol;
   }
 

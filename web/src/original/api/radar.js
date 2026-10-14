@@ -128,7 +128,9 @@ export function radarMethods(ctx) {
     recalcularMillasGoogle: async (key) => {
       ctx.staff(true);
       if (ctx.profile.role !== "admin")
-        throw Error("Solo un supervisor puede recalcular las millas.");
+        throw Error(
+          "Solo un administrador del portal puede recalcular las millas.",
+        );
       const [points, distances] = await Promise.all([places(), routes()]);
       const route = distances.find((row) => row.route_key === key);
       if (!route) throw Error("Ese trayecto no está guardado.");
