@@ -34,6 +34,8 @@ Las 15 ventanas principales conservan sus elementos y estilos. Los módulos orig
 
 ## Límites de la comprobación
 
+El usuario pidió después simplificar Inicio por la confusión entre recordatorios, avisos y pendientes. Esa petición modifica la organización y los textos anteriores: [Inicio y recordatorios](INICIO_Y_RECORDATORIOS.md). Los estilos de base y las funciones se conservan. Las comparaciones internas de esta entrega verifican la presentación nueva con datos independientes; no se declaran idénticas al Inicio original.
+
 Las capturas se comparan localmente con los mismos datos ficticios. El navegador aplica un margen máximo de 50 píxeles para variaciones de suavizado en bordes; no se cambian las posiciones, fuentes, tamaños ni colores del original. No se transfirieron cargas ni contraseñas del proyecto original.
 
 Maps real, Supabase Auth real, el iframe Google, otros roles y las cuotas se validan después de instalar. Se conservan las dependencias originales de Inter, SheetJS, Leaflet, Nominatim y OSRM. La integración TCI con una hoja externa y los activadores de mantenimiento/archivado/certificación horaria no se instalaron en la nueva arquitectura. No se declara equivalencia de esas automatizaciones externas ni de los permisos heredados del backend Sheets.

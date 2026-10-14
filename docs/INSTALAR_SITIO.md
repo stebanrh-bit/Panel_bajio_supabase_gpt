@@ -77,6 +77,8 @@ En **Gestionar CSR** puedes crear personas y asignarles una contraseña. Si no i
 
 ## Después de instalar
 
+La mejora actual de [Inicio y recordatorios](INICIO_Y_RECORDATORIOS.md) organiza la información y explica cada plazo. Si ya instalaste el sitio, actualiza solo `index.html` y activa una nueva versión Google.
+
 La revisión del 14 de octubre corrigió la lectura de archivos con encabezados en la primera fila y habilitó CSV en el selector. Si ya instalaste el sitio, solo actualiza `index.html` y activa una nueva versión de Google. [Resultados y pasos](REVISION_COMPLETA_2026-10-14.md).
 
 Para usar Esteban también como CSR y comprobar el Portal Cliente, sigue [ADMINISTRADOR_Y_CSR.md](ADMINISTRADOR_Y_CSR.md). Si ya instalaste esta entrega, ese ajuste solo requiere actualizar el HTML de Google.

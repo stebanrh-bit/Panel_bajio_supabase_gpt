@@ -9,7 +9,9 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 ## Estado actual
 
-[Revisión completa del 14 de octubre](docs/REVISION_COMPLETA_2026-10-14.md): 78 pruebas automáticas y 35 comparaciones visuales pasaron. Se corrigió la lectura del importador; para activar esa corrección, actualizar solo el HTML Google. La publicación con sesión real todavía requiere las pruebas manuales finales.
+[Inicio y recordatorios](docs/INICIO_Y_RECORDATORIOS.md): por petición del usuario, Inicio se organiza en Por atender / Solicitudes y tareas, separa revisiones automáticas de seguimientos personales y ofrece acciones claras. La entrega pasó 81 pruebas automáticas y 35 comprobaciones visuales; solo requiere actualizar el HTML Google.
+
+[Revisión general anterior del 14 de octubre](docs/REVISION_COMPLETA_2026-10-14.md): pasaron las 78 pruebas disponibles entonces y 35 comparaciones visuales. Se corrigió la lectura del importador; para activar esa corrección, actualizar solo el HTML Google. La publicación con sesión real todavía requiere las pruebas manuales finales.
 
 La entrada de `web/` reutiliza las tres interfaces originales en `web/src/original/`. Sus 97 acciones se conectan a Supabase mediante adaptadores comentados. Incluye administración de cuentas Auth a través de `panel-accounts`, cargas, comentarios/incidencias, pendientes, bitácora/cierres, apartados, seguimiento, plantillas, calendario, indicadores, importación/deshacer, radar compartido y ambos portales. Consulta [la comparación y sus límites](docs/COMPARACION_ORIGINAL.md).
 

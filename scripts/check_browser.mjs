@@ -1,5 +1,6 @@
 /**
- * Comparación de la UI original y el HTML entregable con los mismos datos ficticios.
+ * Comprobación de la presentación prevista y el HTML entregable con datos independientes.
+ * Inicio fue simplificado a petición del usuario; el patrón interno usa esa presentación nueva.
  * Todas las peticiones Supabase se interceptan: esta prueba nunca escribe en producción.
  * Ejecutar después de build + package_site.py. Necesita Chromium y playwright-core externo.
  */
@@ -265,21 +266,29 @@ fixtures.getLoadsParaVista = legacyLoads.map((row) => ({
 }));
 fixtures.getIncidenciasParaVista = "[]";
 const original = originalPage({
-  template: await read("index.html"),
-  styles: (await read("PanelEstilos.html"))
-    .replace(/^\s*<style>/, "")
-    .replace(/<\/style>\s*$/, ""),
-  script: (await read("PanelScript.html"))
-    .replace(/^\s*<script>/, "")
-    .replace(/<\/script>\s*$/, ""),
+  template: await read("web/src/original/index.template.html"),
+  styles:
+    (await read("web/src/original/panel-styles.css")) +
+    "\n" +
+    (await read("web/src/original/guidance.css")),
+  script: await read("web/src/original/panel-script.js"),
   config,
 });
+const helperSource = (
+  (await read("web/src/original/guidance.js")) +
+  "\n" +
+  (await read("web/src/original/people.js"))
+).replace(/^export /gm, "");
 const goldenHtml =
   "<!doctype html><html><head>" +
   original.head +
   "</head><body>" +
   original.body +
+  "<script>(function(){" +
+  helperSource +
+  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};})()</script>" +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
+  "<script>window.panelGuidance.mountGuidance(document);</script>" +
   "</body></html>";
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
@@ -523,7 +532,7 @@ async function newPage(
             },
           );
         }
-        window.panelApi = { run: runner() };
+        window.panelApi = { run: runner(), profile: { role: "admin" } };
       }
     },
     { id: adminId, fixtures, golden, view },
@@ -562,7 +571,7 @@ async function newPage(
     await page
       .locator("#home-cierres")
       .filter({ hasText: "Sin cierres" })
-      .waitFor();
+      .waitFor({ state: "attached" });
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
 }
@@ -778,7 +787,7 @@ try {
       page
         .locator("#home-cierres")
         .filter({ hasText: "Sin cierres" })
-        .waitFor(),
+        .waitFor({ state: "attached" }),
     );
     await compare("movil-inicio");
     // Salir debe limpiar la sesión y mostrar el selector de identidad sin errores.
@@ -815,7 +824,7 @@ try {
     await own
       .locator("#home-cierres")
       .filter({ hasText: "Sin cierres" })
-      .waitFor();
+      .waitFor({ state: "attached" });
     await own.locator("#sidebar-manage-csr-btn").click();
     await own.locator("#csr-pw-input").fill("Solo-prueba-local");
     await own.locator("#csr-pw-submit").click();
@@ -835,7 +844,7 @@ try {
     await own
       .locator("#home-cierres")
       .filter({ hasText: "Sin cierres" })
-      .waitFor();
+      .waitFor({ state: "attached" });
     await own.locator("[data-page=operation]").click();
     await own.locator("#who-toggle-btn").click();
     await own.locator('[data-who-csr="Esteban"]').click();
@@ -988,6 +997,57 @@ try {
   await importPage
     .locator('#page-operation .card[data-load="IMPORT-NUEVA"]')
     .waitFor();
+  // Inicio: leer una notificación no completa sus plazos. Los dos relojes son independientes.
+  rawLoads[0].recordatorio_fecha = "2026-10-08T17:00:00Z";
+  rawLoads[0].next_review_at = "2026-10-08T16:00:00Z";
+  await importPage.reload();
+  await importPage
+    .locator("#home-recordatorio-count")
+    .filter({ hasText: "2 por atender" })
+    .waitFor();
+  await importPage.locator("#home-guide summary").click();
+  await importPage
+    .getByText("Vencer no borra el recordatorio.", { exact: false })
+    .waitFor();
+  const beforeRead = rawLoads[0].next_review_at;
+  await importPage.evaluate(() =>
+    document.getElementById("avisos-leer-todo").click(),
+  );
+  assert.equal(rawLoads[0].next_review_at, beforeRead);
+  await importPage
+    .locator(
+      '[data-reminder-load="VISUAL-001"][data-reminder-kind="transit"] [data-recordatorio-revisar]',
+    )
+    .click();
+  await importPage
+    .locator("#home-recordatorio-count")
+    .filter({ hasText: "1 por atender" })
+    .waitFor();
+  assert.equal(rawLoads[0].next_review_at, beforeRead);
+  assert.equal(rawLoads[0].recordatorio_fecha, "2026-10-08T21:00:00.000Z");
+  await importPage
+    .locator('[data-home-reminder-complete="VISUAL-001"]')
+    .click();
+  await importPage
+    .locator("#home-recordatorio-count")
+    .filter({ hasText: "0 por atender" })
+    .waitFor();
+  assert.equal(rawLoads[0].next_review_at, "");
+  assert.equal(rawLoads[0].recordatorio_fecha, "2026-10-08T21:00:00.000Z");
+  await importPage.locator("#home-reminders-upcoming summary").click();
+  await importPage.locator('[data-reminder-kind="transit"]').waitFor();
+  await importPage.setViewportSize({ width: 390, height: 844 });
+  assert.equal(
+    await importPage.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+    false,
+  );
+  await importPage.locator('[data-movil="mas"]').click();
+  await importPage
+    .locator("#sidebar .nav-label")
+    .filter({ hasText: "Solicitudes" })
+    .waitFor();
   assert.deepEqual(errors, []);
   await writeFile(
     `/tmp/panel-original-comparison/${importsOnly ? "result-imports" : "result"}.json`,
@@ -1005,7 +1065,7 @@ try {
     ),
   );
   console.log(
-    `${importsOnly ? "Importación verificada" : screenshots.length + " comparaciones visuales aprobadas; incidencias, cierre de sesión y supervisor CSR correctos"}; CSV/XLSX${legacyXls ? "/XLS" : ""}, cancelar, fecha inválida y guardado persistente verificados; sin errores JS.`,
+    `${importsOnly ? "Flujos verificados" : screenshots.length + " comparaciones visuales aprobadas; incidencias, cierre de sesión y supervisor CSR correctos"}; CSV/XLSX${legacyXls ? "/XLS" : ""}, recordatorios independientes, completar seguimiento y navegación móvil verificados; sin errores JS.`,
   );
 } catch (error) {
   for (let index = 0; index < pages.length; index++) {

@@ -40,6 +40,7 @@ def main():
         'VALIDACION_SITIO.md':ROOT/'docs/VALIDACION_SITIO.md',
         'REVISION_COMPLETA_2026-10-14.md':ROOT/'docs/REVISION_COMPLETA_2026-10-14.md',
         'ADMINISTRADOR_Y_CSR.md':ROOT/'docs/ADMINISTRADOR_Y_CSR.md',
+        'INICIO_Y_RECORDATORIOS.md':ROOT/'docs/INICIO_Y_RECORDATORIOS.md',
         'Code.gs':ROOT/'google-apps-script/Code-sitio.gs',
         'appsscript.json':ROOT/'google-apps-script/appsscript.json',
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',

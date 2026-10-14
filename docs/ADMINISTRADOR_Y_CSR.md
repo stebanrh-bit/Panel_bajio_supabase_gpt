@@ -16,7 +16,7 @@ No hace falta repetir SQL, borrar datos ni desplegar `panel-accounts` de nuevo.
 ## Operar tus cargas como CSR
 
 1. Importa el archivo de cargas. Los clientes aparecerán en los selectores cuando se hayan guardado sus cargas.
-2. Abre **Gestionar CSR** y entra con tu contraseña personal de Esteban.
+2. Abre **Administrar (Gestionar CSR)** y entra con tu contraseña personal de Esteban.
 3. En **Asignar cliente a CSR**, selecciona **Esteban**, el cliente que atenderás y pulsa **Asignar**. Repite para tus demás clientes.
 4. Abre el selector **¿Quién eres?** y selecciona **Esteban · CSR**. Esta opción aparece al tener clientes asignados o cargas seguidas.
 5. La vista muestra tus clientes y las cargas que sigues. Los comentarios y cambios siguen firmados por tu misma cuenta Esteban.
@@ -42,3 +42,5 @@ La cuenta de prueba representa al cliente elegido; para comprobar otro cliente, 
 La base ya admitía asignar clientes a administradores. El ajuste agrega esa posibilidad a los selectores y a la vista operativa, conservando los estilos existentes. Las pruebas PostgreSQL verifican la asignación propia, la conservación del rol admin y el rechazo de acceso al portal con ese rol. Chromium verifica la asignación desde el formulario, persistencia al recargar, vista propia y regreso a Todos, con controles administrativos disponibles.
 
 La instalación y estas comprobaciones con cuentas reales quedan pendientes en Google. El usuario confirmó el acceso y la apariencia original antes de este ajuste y ejecutó la limpieza de datos de prueba para preparar la importación.
+
+El usuario confirmó que ya pudo acceder a administración después de actualizar el HTML. Las asignaciones y las cuentas del portal siguen pendientes de validación manual específica.

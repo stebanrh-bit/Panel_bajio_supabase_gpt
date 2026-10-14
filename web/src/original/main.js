@@ -9,6 +9,8 @@ import { originalPage } from "./page.js";
 import { createOriginalApi } from "./api/index.js";
 import * as people from "./people.js";
 import * as files from "./files.js";
+import * as guidance from "./guidance.js";
+import guidanceStyles from "./guidance.css?raw";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -20,6 +22,7 @@ async function start() {
   window.panelApi = api;
   window.panelPeople = people;
   window.panelFiles = files;
+  window.panelGuidance = guidance;
   const portal =
     window.PANEL_VIEW ||
     new URLSearchParams(location.search).get("portal") ||
@@ -31,7 +34,7 @@ async function start() {
       client: clientTemplate,
       manager: managerTemplate,
     }[view],
-    styles,
+    styles: styles + "\n" + guidanceStyles,
     script,
     config,
     view,
@@ -86,6 +89,7 @@ async function start() {
     tag.textContent = source;
     document.body.append(tag);
   }
+  if (view === "internal") guidance.mountGuidance(document);
 }
 start().catch((error) => {
   // textContent evita interpretar mensajes del servidor como HTML.

@@ -1,18 +1,19 @@
 # Validación de la interfaz original con Supabase
 
-Comprobaciones actualizadas en Codex el 14 de octubre de 2026. No representan una actualización de la publicación Google ni ejecución remota de SQL 004–009. La revisión remota fue de lectura, sin modificar datos. [Informe de esta revisión](REVISION_COMPLETA_2026-10-14.md).
+Comprobaciones actualizadas en Codex el 14 de octubre de 2026. No representan una actualización de la publicación Google ni ejecución remota de SQL 004–009. La revisión remota fue de lectura, sin modificar datos. [Informe de la revisión general](REVISION_COMPLETA_2026-10-14.md) y [mejora posterior de Inicio](INICIO_Y_RECORDATORIOS.md).
 
 | Comprobación | Resultado |
 | --- | --- |
 | Panel original publicado | HTML recuperado; árbol JavaScript idéntico al `PanelScript.html` de la raíz |
 | Portal Cliente y Vista Gerencia originales | Plantillas recuperadas de sus páginas publicadas |
-| `npm --cache /tmp/panel-npm-cache test` | 78 pruebas aprobadas; 0 fallidas y 0 omitidas |
-| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 123 módulos correcta, incluyendo lector XLSX |
+| `npm --cache /tmp/panel-npm-cache test` | 81 pruebas aprobadas; 0 fallidas y 0 omitidas |
+| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 125 módulos correcta, incluyendo lector XLSX y orientación de Inicio |
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
-| Chromium: comparación visual | 35 parejas con datos ficticios; escritorio y móvil; administración verificada funcionalmente por el nuevo selector de supervisor |
+| Chromium: comparación visual | 35 parejas de presentación prevista y entrega con datos ficticios independientes; escritorio y móvil; Inicio simplificado por petición del usuario |
 | Chromium: supervisor también CSR | Asignación desde el formulario, persistencia al recargar, vista propia y Todos sin perder el rol ni los controles administrativos |
 | Chromium: incidencia | Categoría vacía rechazada sin insertar; registro válido persiste al recargar |
+| Chromium: revisiones y seguimientos | Plazos independientes, tránsito +3 h, completar seguimiento sin eliminar el otro plazo, próximas fechas y móvil sin desbordamiento |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
 | Chromium: archivos reales | CSV, XLSX y XLS; vista previa, cancelar sin guardar, fechas inválidas, ceros iniciales, booleanos, duplicados y persistencia al confirmar |
 | Supabase remoto | Auth y directorio responden 200; 13 tablas privadas, administración de cuentas y RPC del portal rechazan peticiones sin sesión con 401 |
@@ -24,7 +25,7 @@ Las pruebas PostgreSQL usan PGlite con identidades y roles Auth simulados. Cubre
 
 Las pruebas de cuentas ejecutan el manejador de la función Edge con el SDK Supabase real y transporte interceptado. Cubren acceso por nombre, privacidad del directorio, comprobación del rol administrativo, cambios de contraseña sin secretos en la auditoría, conservación de contraseña al editar un cliente, desactivación frente a retirada, bloqueo por cinco fallos y desbloqueo administrativo. Estas pruebas no autentican contra el proyecto real.
 
-El navegador compara el HTML generado con las fuentes originales usando datos independientes equivalentes. Incluye Ahora/Mi turno, tarjetas y tabla, seis pestañas del expediente, calendario, indicadores, radar, históricos, administración, ventanas y los dos portales. Admite como máximo 50 píxeles de diferencia de suavizado por captura; las fuentes externas se sustituyen por la misma respuesta en ambos lados. Las capturas y resultados quedan en `/tmp/panel-original-comparison/`. Dos capturas de la entrega se incluyen en `docs/imagenes/` y el ZIP.
+El navegador compara el HTML generado con la presentación prevista usando datos independientes equivalentes. Inicio distingue Por atender / Solicitudes y tareas por petición del usuario; no se declara igualdad visual con el Inicio anterior. Incluye tarjetas y tabla, seis pestañas del expediente, calendario, indicadores, radar, históricos, administración, ventanas y los dos portales. Admite como máximo 50 píxeles de diferencia de suavizado por captura; las fuentes externas se sustituyen por la misma respuesta en ambos lados. Las capturas y resultados quedan en `/tmp/panel-original-comparison/`. Dos capturas de la entrega se incluyen en `docs/imagenes/` y el ZIP.
 
 Las pruebas conservadas de los módulos anteriores verifican también importación XLSX/CSV, deshacer, archivo, pendientes, turnos y Maps. El puente Google se comprueba con servicios simulados: verifica JWT y rol antes de consumir Maps y suma todos los tramos de carretera.
 

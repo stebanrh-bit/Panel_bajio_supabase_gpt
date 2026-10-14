@@ -541,7 +541,7 @@
 
   /** Si el servidor reinició la revisión de tránsito (comentar o avisar al cliente cuenta como
    * revisar la carga — ver reiniciarRevisionTransito_ en Code.gs), refleja la nueva fecha de
-   * inmediato para que el aviso "Van más de 3h sin revisar" se quite sin esperar el refresco. */
+   * inmediato para que el aviso "Revisión de tránsito vencida · cada 3h sin revisar" se quite sin esperar el refresco. */
   function aplicarRevision_(load, res) {
     if (!res || !res.recordatorio_fecha) return;
     var rec = recPorLoad_(load);
@@ -561,6 +561,127 @@
           .replace(/"/g, "&quot;");
   }
 
+  /** Dos plazos diferentes pueden corresponder a una carga; se muestran con nombre propio. */
+  function renderHomeReminders(rows) {
+    var entries = window.panelGuidance.reminderEntries(
+      rows,
+      Date.now(),
+      PANEL_CONFIG,
+    );
+    var due = entries.filter(function (entry) {
+      return entry.needsAction;
+    });
+    var upcoming = entries.filter(function (entry) {
+      return !entry.needsAction;
+    });
+    var count = document.getElementById("home-recordatorio-count");
+    if (count)
+      count.textContent =
+        due.length + " por atender · " + upcoming.length + " programados";
+    var box = document.getElementById("home-recordatorios");
+    if (!box) return;
+    function row(entry) {
+      var r = entry.row;
+      var state =
+        entry.state === "sinfecha"
+          ? "Falta fecha"
+          : entry.state === "vencido"
+            ? "Vencido"
+            : "Programado";
+      var when =
+        entry.when && !isNaN(Date.parse(entry.when))
+          ? (entry.state === "vencido" ? "Venció: " : "Fecha: ") +
+            fmtDateTime(entry.when)
+          : "Revisa la carga y programa una fecha.";
+      var action = "";
+      var role = window.panelApi.profile && window.panelApi.profile.role;
+      if (role === "admin" || role === "csr") {
+        if (entry.kind === "transit")
+          action =
+            '<button type="button" class="ws-btn" data-recordatorio-revisar="' +
+            esc(r.load) +
+            '">Ya revisé (+3 h)</button>';
+        else if (entry.kind === "status")
+          action =
+            '<button type="button" class="ws-btn" data-recordatorio-edit="' +
+            esc(r.load) +
+            '" data-recordatorio-status="' +
+            esc(r.status) +
+            '">Cambiar fecha</button>';
+        else
+          action =
+            '<button type="button" class="ws-btn" data-home-reminder-complete="' +
+            esc(r.load) +
+            '">Completar seguimiento</button>';
+      }
+      return (
+        '<article class="ux-reminder-row" data-reminder-kind="' +
+        entry.kind +
+        '" data-reminder-load="' +
+        esc(r.load) +
+        '"><div><div class="ux-reminder-title"><b>Carga ' +
+        esc(r.load) +
+        "</b><span>" +
+        esc(r.customer || "Sin cliente") +
+        '</span><span class="ux-state ' +
+        entry.state +
+        '">' +
+        state +
+        '</span></div><div class="ux-reminder-kind">' +
+        esc(entry.label) +
+        '</div><div class="ux-reminder-meta">' +
+        esc(when) +
+        (entry.kind === "transit"
+          ? " · Se repite cada 3 horas."
+          : " · No se borra al vencer.") +
+        (entry.note ? "<br>" + esc(entry.note) : "") +
+        '</div></div><div class="ux-reminder-actions">' +
+        action +
+        '<button type="button" class="ws-btn" data-home-open="' +
+        esc(r.load) +
+        '">Ver carga</button></div></article>'
+      );
+    }
+    box.innerHTML =
+      (due.length
+        ? due.map(row).join("")
+        : '<div class="action-empty">Sin revisiones vencidas ni fechas por programar.</div>') +
+      (upcoming.length
+        ? '<details class="home-reminders-upcoming" id="home-reminders-upcoming"><summary>Programados (' +
+          upcoming.length +
+          "): ver próximas fechas</summary>" +
+          upcoming.map(row).join("") +
+          "</details>"
+        : "");
+  }
+
+  document
+    .getElementById("home-recordatorios")
+    .addEventListener("click", function (event) {
+      var button = event.target.closest("[data-home-reminder-complete]");
+      if (!button) return;
+      var rec = currentData.find(function (row) {
+        return row.load === button.getAttribute("data-home-reminder-complete");
+      });
+      if (!rec) return;
+      ensureLoggedIn(function () {
+        button.disabled = true;
+        guardarConVerificacion_(
+          function () {
+            rec.next_review_at = "";
+            rec.next_review_note = "";
+            rec.next_review_by = "";
+            render(currentData);
+            showToast("Seguimiento completado · Carga " + rec.load, "good");
+          },
+          function (error) {
+            button.disabled = false;
+            showToast("No se pudo completar: " + error.message, "error");
+          },
+        ).clearNextReview(rec.load, myRealIdentity, myPassword);
+      });
+    });
+
   /** Tag de recordatorio. Dos variantes:
    * - Manual (Descompuesta / En resguardo / Patio permisionario): muestra la fecha que alguien
    *   programó a mano (o invita a programarla si por algún motivo no tiene) y, si ya se venció,
@@ -573,7 +694,7 @@
       var revisarBtn =
         '<button type="button" data-recordatorio-revisar="' +
         rec.load +
-        '">Ya revisé</button>';
+        '" title="Confirma la revisión y programa otra dentro de 3 horas">Ya revisé (+3 h)</button>';
       if (!rec.recordatorio_fecha) {
         return (
           '<div class="pod-pending-tag tag-critical">&#9200; Pendiente de revisar (ubicación, estatus, etc.) &mdash; ' +
@@ -583,17 +704,15 @@
       }
       if (isRecordatorioVencido(rec)) {
         return (
-          '<div class="pod-pending-tag tag-critical" title="También cuenta como revisión agregar un comentario o registrar un aviso al cliente">&#9200; Van más de ' +
-          AUTO_REVIEW_HOURS +
-          "h sin revisar (" +
+          '<div class="pod-pending-tag tag-critical" title="Agregar un comentario o registrar un aviso enviado también reinicia las 3 horas">Revisión de tránsito vencida. Fecha: ' +
           fmtDateTime(rec.recordatorio_fecha) +
-          ") &mdash; " +
+          " &mdash; " +
           revisarBtn +
           ' <span style="font-weight:400;opacity:.8">o comenta / avisa al cliente</span></div>'
         );
       }
       return (
-        '<div class="recordatorio-tag">Próxima revisión: ' +
+        '<div class="recordatorio-tag">Revisión de tránsito (cada 3 h): ' +
         fmtDateTime(rec.recordatorio_fecha) +
         " " +
         revisarBtn +
@@ -1181,7 +1300,7 @@
     viewDirty.table = false;
   }
 
-  // ===== Mi Jornada / Action Center =====
+  // ===== Inicio / Action Center =====
   function isSameLocalDay(a, b) {
     if (!a || !b) return false;
     var da = new Date(a),
@@ -1312,7 +1431,7 @@
         }),
       ),
     );
-    lines.push("- Cliente pendiente: " + snap.client.length);
+    lines.push("- Avisar al cliente: " + snap.client.length);
     lines = lines.concat(detailLines_(snap.client));
     lines.push("- Entregas hoy: " + snap.today.length);
     lines = lines.concat(detailLines_(snap.today));
@@ -1745,57 +1864,7 @@
             );
           })
         : '<div class="action-empty">✓ No hay comunicaciones pendientes.</div>';
-    var recordatorios = scoped
-      .filter(function (r) {
-        return tieneRecordatorio(r.status);
-      })
-      .sort(function (a, b) {
-        var va = isRecordatorioVencido(a),
-          vb = isRecordatorioVencido(b);
-        if (va !== vb) return va ? -1 : 1;
-        var da = a.recordatorio_fecha
-          ? pd(a.recordatorio_fecha).getTime()
-          : -Infinity;
-        var db = b.recordatorio_fecha
-          ? pd(b.recordatorio_fecha).getTime()
-          : -Infinity;
-        return da - db;
-      });
-    var recordatorioVencidos = recordatorios.filter(
-      isRecordatorioVencido,
-    ).length;
-    set(
-      "home-recordatorio-count",
-      recordatorios.length +
-        (recordatorioVencidos
-          ? " · " + recordatorioVencidos + " vencidos"
-          : " pendientes"),
-    );
-    var rc = document.getElementById("home-recordatorios");
-    if (rc)
-      rc.innerHTML = recordatorios.length
-        ? htmlListaConMas_("recordatorios", recordatorios, 8, function (r) {
-            var venc = isRecordatorioVencido(r);
-            var label = !r.recordatorio_fecha
-              ? "Falta programar fecha"
-              : venc
-                ? "Vencido (" + fmtDateTime(r.recordatorio_fecha) + ")"
-                : fmtDateTime(r.recordatorio_fecha);
-            return (
-              '<div class="home-mini-row"><span class="hm-load">' +
-              esc(r.load) +
-              "</span><span>" +
-              esc(r.customer || "—") +
-              '</span><span class="hm-soft">' +
-              esc(label) +
-              '</span><span class="hm-soft hm-opt">' +
-              esc(r.status || "—") +
-              '</span><button class="ws-btn" data-home-open="' +
-              esc(r.load) +
-              '">Abrir</button></div>'
-            );
-          })
-        : '<div class="action-empty">✓ Sin recordatorios pendientes.</div>';
+    renderHomeReminders(scoped);
     var conIncidencias = scoped
       .filter(function (r) {
         return Number(r.incidenciasCount) > 0;
@@ -2386,7 +2455,7 @@
         add(
           "critical",
           110 - i * 0.01,
-          (i === 0 ? "Cliente pendiente: " : "") + p,
+          (i === 0 ? "Avisar al cliente: " : "") + p,
           "notify",
         );
       });
@@ -2394,12 +2463,12 @@
     if (rec.next_review_at) {
       var rt = new Date(rec.next_review_at).getTime();
       if (!isNaN(rt) && rt <= now)
-        add("critical", 105, "Próxima revisión vencida");
+        add("critical", 105, "Seguimiento que programaste: vencido");
       else if (!isNaN(rt) && rt > now)
         add(
           "monitor",
           50,
-          "Próxima revisión " + relativeTimeLabel(rec.next_review_at),
+          "Seguimiento programado " + relativeTimeLabel(rec.next_review_at),
         );
     }
     if (st === "tonu") {
@@ -2420,7 +2489,12 @@
     } else if (st === "en transito") {
       var commAge = hoursBetween(rec.client_notified_at);
       if (commAge === null)
-        add("warn", 82, "Falta registrar estatus enviado al cliente", "comm");
+        add(
+          "warn",
+          82,
+          "Registra el aviso al cliente cuando lo hayas enviado",
+          "comm",
+        );
       else if (commAge >= 3)
         add("critical", 108, "Más de 3h sin estatus al cliente", "comm");
       else if (commAge >= 2.5)
@@ -2497,7 +2571,7 @@
       '"></span>' +
       '<span class="action-load" data-journey-load="' +
       esc(r.load) +
-      '">Load ' +
+      '">Carga ' +
       esc(r.load) +
       "</span>" +
       (r.trailer
@@ -2520,7 +2594,7 @@
       "</span>" +
       '<button type="button" class="action-open" data-journey-load="' +
       esc(r.load) +
-      '">Revisar</button></div>' +
+      '">Abrir carga</button></div>' +
       '<div class="action-reasons">' +
       rs
         .slice(0, 4)
@@ -6755,7 +6829,7 @@
   function workspaceReviewHtml(r) {
     var scheduled = !!r.next_review_at;
     return (
-      '<div class="review-card"><h3 class="ws-section-title">Próxima revisión</h3><div class="section-help">ⓘ Programa cuándo quieres que esta carga te vuelva a aparecer como pendiente en tu Jornada. Llegada la fecha, sale en tu Action Center con la nota que escribas abajo.</div><div class="review-row"><div class="review-field"><label>Fecha y hora</label><input id="next-review-at" class="review-input" type="datetime-local" value="' +
+      '<div class="review-card"><h3 class="ws-section-title">Seguimiento programado por ti</h3><div class="section-help">Elige cuándo volver a revisar esta carga. Al vencer queda por atender hasta que completes el seguimiento o cambies su fecha. Es independiente de la revisión automática de tránsito.</div><div class="review-row"><div class="review-field"><label>Fecha y hora</label><input id="next-review-at" class="review-input" type="datetime-local" value="' +
       reviewLocalValue(r.next_review_at) +
       '"></div><div class="review-field"><label>Qué revisar</label><input id="next-review-note" class="review-input" type="text" maxlength="250" placeholder="Ej. validar cruce / confirmar ETA" value="' +
       esc(r.next_review_note || "") +
@@ -6763,7 +6837,7 @@
       (scheduled ? "Reprogramar" : "Programar") +
       "</button>" +
       (scheduled
-        ? '<button class="ws-btn" data-review-clear>Quitar</button>'
+        ? '<button class="ws-btn" data-review-clear>Completar seguimiento</button>'
         : "") +
       '</div><div id="review-action-feedback" class="tracking-note">' +
       (scheduled
@@ -8125,7 +8199,7 @@
         b.classList.toggle("active", b.getAttribute("data-movil") === page);
       });
     document.getElementById("sidebar").classList.remove("abierta-movil");
-    // Operación completa SIEMPRE se reconstruye desde currentData al abrirla. Mi Jornada puede
+    // Operación completa SIEMPRE se reconstruye desde currentData al abrirla. Inicio puede
     // clasificar/ocultar cargas por reglas operativas, pero nunca debe vaciar esta vista maestra.
     if (page === "operation") {
       viewDirty.cards = true;
@@ -8417,13 +8491,13 @@
             b.textContent = "✓ Revisión programada";
             if (fb)
               fb.textContent =
-                "✓ Va a aparecer en tu Jornada el " +
+                "✓ Va a aparecer en Inicio el " +
                 wsDate(r.next_review_at) +
                 (r.next_review_note ? " · " + r.next_review_note : "");
             refreshOperationalAttention();
             render(currentData);
             showToast(
-              "✓ Te va a aparecer en tu Jornada el " + wsDate(r.next_review_at),
+              "✓ Te va a aparecer en Inicio el " + wsDate(r.next_review_at),
               "good",
             );
             setTimeout(function () {
@@ -8464,7 +8538,7 @@
             r.next_review_by = "";
             render(currentData);
             renderWorkspace();
-            showToast("Próxima revisión eliminada", "good");
+            showToast("Seguimiento completado", "good");
           })
           .withFailureHandler(function (err) {
             showToast("Error: " + err.message, "error");
@@ -15589,7 +15663,7 @@
       acc.push(["ap:revisar", "Ya revisé (+" + a.frecuencia + " h)"]);
     }
     if (a.tipo === "apmia") acc.push(["ap:broker", "Cambiar a broker"]);
-    if (!AVISO_EVENTO_[a.tipo]) acc.push(["posponer", "Posponer 1 h"]);
+    if (!AVISO_EVENTO_[a.tipo]) acc.push(["posponer", "Ocultar aviso 1 h"]);
     return acc
       .map(function (x) {
         return (

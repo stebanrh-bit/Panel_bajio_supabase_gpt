@@ -5,7 +5,7 @@ Realizar después de instalar SQL 004–009, la función `panel-accounts` y la n
 | Orden | Prueba | Resultado esperado | Estado real |
 | --- | --- | --- | --- |
 | 1 | Entrar con Esteban y su contraseña actual | Login original, mismo enlace Google y mismas cargas Supabase | Confirmado por el usuario antes del ajuste de supervisor como CSR |
-| 2 | Inicio/Ahora/Mi turno y selector de persona | Paneles originales, jornada, pendientes y cierres | Pendiente |
+| 2 | Inicio/Por atender/Solicitudes y tareas y selector de persona | Paneles originales, jornada, pendientes y cierres | Pendiente |
 | 3 | Operación, filtros, búsqueda, tarjetas/tabla, densidad y vistas guardadas | Mismos controles y ventanas del original | Pendiente |
 | 4 | Abrir una carga y recorrer las seis pestañas del Workspace | Datos correctos en cada pestaña | Pendiente |
 | 5 | Cambiar truck/trailer, tracking, citas, salida y cruce en una carga de prueba | Guarda, persiste al recargar y deja historial | Pendiente |
@@ -26,6 +26,7 @@ Realizar después de instalar SQL 004–009, la función `panel-accounts` y la n
 | 20 | Crear/editar/desactivar cliente y configurar Vista Gerencia | Accesos administrados sin exponer contraseñas | Pendiente |
 | 21 | Cerrar sesión, entrar de nuevo y navegar desde móvil | Login correcto; no quedan datos de otra sesión | Pendiente |
 | 22 | Asignar clientes a Esteban y alternar Esteban · CSR / Todos | Vista propia y general con la misma cuenta; conserva administración | Pendiente |
+| 23 | Revisiones y seguimientos: programados, vencidos y acciones | Revisar tránsito mantiene el seguimiento personal; completarlo conserva la revisión de tránsito | Pendiente |
 
 ## Última etapa: cuentas y permisos
 

@@ -103,14 +103,14 @@
   <!-- Centro de avisos: lo nuevo y lo que se vence, por CSR (ver detectarAvisos_). -->
   <div class="avisos-panel" id="avisos-panel" role="dialog" aria-label="Avisos y recordatorios" hidden>
     <div class="avisos-head">
-      <b>Avisos y recordatorios</b>
+      <b>Avisos de tu operación</b>
       <div class="avisos-head-actions">
         <label class="avisos-sonido"><input type="checkbox" id="avisos-sonido"> Sonido</label>
         <label class="avisos-sonido" title="Aviso de Windows para lo urgente aunque estés en otra pestaña"><input type="checkbox" id="avisos-escritorio"> Escritorio</label>
-        <button type="button" class="link-btn" id="avisos-leer-todo">Marcar todo como visto</button>
+        <button type="button" class="link-btn" id="avisos-leer-todo">Marcar avisos como leídos</button>
       </div>
     </div>
-    <div class="avisos-lista" id="avisos-lista"></div>
+    <p class="home-section-help">Leer o posponer un aviso no completa la tarea. Registra la acción realizada en la carga.</p><div class="avisos-lista" id="avisos-lista"></div>
   </div>
 
   <div class="who-drawer-backdrop" id="who-drawer-backdrop">
@@ -133,26 +133,29 @@
     <div class="home-global-search"><input id="home-search" type="text" placeholder="Buscar load, cliente, trailer, WO, comentario…" autocomplete="off" aria-label="Buscar en todas tus cargas"><div class="search-resultados" id="home-search-resultados" role="listbox" hidden></div></div>
   </div>
   <div class="home-tabs">
-    <button type="button" class="home-tab-btn active" data-home-tab="ahora">Ahora</button>
-    <button type="button" class="home-tab-btn" data-home-tab="turno">Mi turno</button>
+    <button type="button" class="home-tab-btn active" data-home-tab="ahora">Por atender</button>
+    <button type="button" class="home-tab-btn" data-home-tab="turno">Solicitudes y tareas</button>
   </div>
+<details class="home-guide" id="home-guide"><summary>¿Qué significa cada pendiente?</summary>
+<ul><li><b>Revisiones y seguimientos:</b> cuándo debes volver a revisar una carga. Vencer no borra el recordatorio.</li>
+<li><b>Avisos al cliente:</b> información que debes comunicarle. Registra el aviso cuando ya lo enviaste.</li>
+<li><b>Solicitudes y tareas:</b> solicitudes sin carga confirmada y trabajo que registraste o te asignaron.</li></ul>
+<p>Las revisiones en tránsito se repiten cada 3 horas. Un seguimiento que programas tú se completa o cambia de fecha desde la carga.</p>
+</details>
 </section>
 <div class="home-tab-panel" id="home-tab-ahora">
 <section class="home-command" id="home-kpis-wrap">
   <div class="home-priority-kpis">
-    <div class="home-priority-kpi now" data-kpi-detail="now"><span class="home-n" id="home-now">0</span><div><b>ATENDER AHORA</b><small>Acción inmediata</small></div></div>
-    <div class="home-priority-kpi review" data-kpi-detail="review"><span class="home-n" id="home-review">0</span><div><b>REVISAR</b><small>Próxima revisión / atraso</small></div></div>
-    <div class="home-priority-kpi monitor" data-kpi-detail="monitor"><span class="home-n" id="home-monitor">0</span><div><b>MONITOREAR</b><small>Seguimiento activo</small></div></div>
-    <div class="home-priority-kpi clear" data-kpi-detail="clear"><span class="home-n" id="home-clear">0</span><div><b>SIN ACCIÓN</b><small>Operación en orden</small></div></div>
-    <div class="home-priority-kpi" data-kpi-detail="today"><span class="home-n" id="journey-today">0</span><div><b>ENTREGAS HOY</b><small>Con cita de entrega hoy</small></div></div>
-    <div class="home-priority-kpi" data-kpi-detail="stale"><span class="home-n" id="journey-stale">0</span><div><b>SIN ACTUALIZAR</b><small>+3h sin tocar</small></div></div>
+    <div class="home-priority-kpi now" data-kpi-detail="now"><span class="home-n" id="home-now">0</span><div><b>URGENTES</b><small>Acción inmediata</small></div></div>
+    <div class="home-priority-kpi review" data-kpi-detail="review"><span class="home-n" id="home-review">0</span><div><b>REVISAR EN EL TURNO</b><small>Revisar durante el turno</small></div></div>
+    <div class="home-priority-kpi monitor" data-kpi-detail="monitor"><span class="home-n" id="home-monitor">0</span><div><b>EN SEGUIMIENTO</b><small>Seguimiento activo</small></div></div>
   </div>
 </section>
 <section class="action-center" id="action-center">
     <div class="action-center-head">
       <div>
-        <h2 class="action-center-title">Mi jornada · Action Center</h2>
-        <p class="action-center-sub">Cola de trabajo priorizada por riesgo, comunicación, citas, documentos, tracking y próxima revisión.</p>
+        <h2 class="action-center-title">Qué debes atender</h2>
+        <p class="action-center-sub">Primero lo urgente. Cada carga indica el motivo y la acción que necesita.</p>
       </div>
       <div class="action-center-count" id="action-center-count">0</div>
     </div>
@@ -160,13 +163,20 @@
   </section>
 
 
+<section class="home-mini-panel home-mini-panel-wide" id="group-recordatorios"><div class="home-mini-head"><h3>Revisiones y seguimientos</h3><span id="home-recordatorio-count">0 por atender</span></div><p class="home-section-help">Por atender significa que la fecha ya llegó o falta programarla. Las próximas fechas están en Programados.</p><div class="home-mini-list" id="home-recordatorios"></div></section>
+<section class="home-mini-panel"><div class="home-mini-head"><h3>Avisar al cliente</h3><span id="home-comm-count">0 pendientes</span><button type="button" class="ws-btn" data-abrir-multi-msg>Preparar aviso de varias cargas</button></div><p class="home-section-help">El panel registra el aviso; envíalo por tu canal habitual y después confirma que ya avisaste.</p><div class="home-mini-list" id="home-communications"></div></section>
+<details class="home-more" id="home-more-info"><summary>Agenda y resumen de la operación</summary>
+<div class="home-summary-kpis">    <div class="home-priority-kpi clear" data-kpi-detail="clear"><span class="home-n" id="home-clear">0</span><div><b>AL DÍA</b><small>Operación en orden</small></div></div>
+    <div class="home-priority-kpi" data-kpi-detail="today"><span class="home-n" id="journey-today">0</span><div><b>ENTREGAS HOY</b><small>Con cita de entrega hoy</small></div></div>
+    <div class="home-priority-kpi" data-kpi-detail="stale"><span class="home-n" id="journey-stale">0</span><div><b>SIN ACTUALIZAR</b><small>Sin cambios en 3 horas</small></div></div>
+</div>
 <div class="home-two-col">
   <section class="home-mini-panel"><div class="home-mini-head"><h3>PRÓXIMAS CARGAS</h3><span id="home-pickup-count">0 próximas</span></div><div class="home-mini-list" id="home-pickups"></div></section>
   <section class="home-mini-panel"><div class="home-mini-head"><h3>PRÓXIMAS ENTREGAS</h3><span id="home-delivery-count">0 próximas</span></div><div class="home-mini-list" id="home-deliveries"></div></section>
-  <section class="home-mini-panel"><div class="home-mini-head"><h3>PENDIENTES DE COMUNICACIÓN</h3><span id="home-comm-count">0 pendientes</span><button type="button" class="ws-btn" data-abrir-multi-msg>Avisar varias</button></div><div class="home-mini-list" id="home-communications"></div></section>
+
 </div>
 <section class="home-mini-panel home-mini-panel-wide" id="group-sin-csr" hidden><div class="home-mini-head"><h3>CLIENTES SIN CSR ASIGNADO</h3><span id="home-sin-csr-count">0 clientes</span></div><div class="home-mini-list" id="home-sin-csr"></div></section>
-<section class="home-mini-panel home-mini-panel-wide" id="group-recordatorios"><div class="home-mini-head"><h3>RECORDATORIOS</h3><span id="home-recordatorio-count">0 pendientes</span></div><div class="home-mini-list" id="home-recordatorios"></div></section>
+
 <!-- FIX: "¿Ya cruzó la caja?" — a petición de Esteban. Aviso NO bloqueante (vive aquí, dentro del
      panel, no es un popup que interrumpa) que aparece cuando ya pasó la fecha/hora de Cruce
      aduana capturada y todavía no se confirmó si de verdad cruzó (ver loadsNeedingCruceConfirm_/
@@ -181,9 +191,10 @@
 <section class="home-mini-panel home-mini-panel-wide" id="group-sla"><div class="home-mini-head"><h3>TIEMPO DE RESPUESTA AL CLIENTE</h3><span>Últimos 30 días</span></div><div class="home-mini-list" id="home-sla"><div class="action-empty">Cargando…</div></div></section>
 <section class="home-mini-panel home-mini-panel-wide" id="group-carga-csr" hidden><div class="home-mini-head"><h3>CARGA DE TRABAJO POR CSR</h3><span id="home-carga-csr-count">0 CSR</span></div><div class="home-mini-list" id="home-carga-csr"></div></section>
 <section class="home-mini-panel home-mini-panel-wide" id="group-cierres-recibidos" hidden><div class="home-mini-head"><h3>CIERRES DE TURNO RECIBIDOS</h3><span id="home-cierres-count">0</span></div><div class="home-mini-list" id="home-cierres"><div class="action-empty">Cargando…</div></div></section>
+</details>
 </div>
 <div class="home-tab-panel" id="home-tab-turno" hidden>
-<div class="home-secondary-title"><h2>Seguimiento del turno</h2></div>
+<div class="home-secondary-title"><h2>Solicitudes y tareas del turno</h2><p class="home-section-help">Una solicitud todavía no tiene número de carga. Una tarea es trabajo que alguien debe completar.</p></div>
   <section class="brief-panel" id="shift-brief">
     <div class="brief-head"><div><h2 class="brief-title" id="brief-greeting">Resumen de turno</h2><p class="brief-sub" id="brief-time">Situación operativa actual</p></div>
       <div class="brief-actions"><button class="ws-btn" type="button" id="brief-copy">Copiar resumen</button><button class="ws-btn primary" type="button" id="handoff-toggle">Preparar cierre de turno</button></div></div>
@@ -194,9 +205,9 @@
 <div class="home-secondary-grid"><section class="group" id="group-pendientes">
     <h2>
       <button type="button" class="group-toggle" id="pendientes-toggle" aria-expanded="true">
-        <span class="group-toggle-arrow">&#9662;</span> Pendientes de load <span class="count" id="count-pendientes">0</span>
+        <span class="group-toggle-arrow">&#9662;</span> Solicitudes sin carga confirmada <span class="count" id="count-pendientes">0</span>
       </button>
-      <button type="button" class="csr-btn add-btn" id="pendiente-add-btn">+ Nuevo registro</button>
+      <button type="button" class="csr-btn add-btn" id="pendiente-add-btn">+ Nueva solicitud</button>
     </h2>
     <div class="cards" id="pendientes-list"></div>
   </section>
@@ -204,7 +215,7 @@
   <section class="group" id="group-bitacora-asignados">
     <h2>
       <button type="button" class="group-toggle" id="bitacora-asignados-toggle" aria-expanded="true">
-        <span class="group-toggle-arrow">&#9662;</span> Asignados a ti <span class="count" id="count-bitacora-asignados">0</span>
+        <span class="group-toggle-arrow">&#9662;</span> Tareas asignadas a ti <span class="count" id="count-bitacora-asignados">0</span>
       </button>
     </h2>
     <div class="cards" id="bitacora-asignados-list"></div>
@@ -213,9 +224,9 @@
   <section class="group" id="group-bitacora">
     <h2>
       <button type="button" class="group-toggle" id="bitacora-toggle" aria-expanded="true">
-        <span class="group-toggle-arrow">&#9662;</span> Tus pendientes de turno <span class="count" id="count-bitacora">0</span>
+        <span class="group-toggle-arrow">&#9662;</span> Tareas que registraste <span class="count" id="count-bitacora">0</span>
       </button>
-      <button type="button" class="csr-btn add-btn" id="bitacora-add-btn">+ Nuevo pendiente de turno</button>
+      <button type="button" class="csr-btn add-btn" id="bitacora-add-btn">+ Nueva tarea</button>
     </h2>
     <div class="cards" id="bitacora-list"></div>
   </section>
@@ -633,7 +644,7 @@
         <span class="modal-title" id="recordatorio-title">Programar recordatorio</span>
         <button type="button" class="modal-close" id="recordatorio-close">&times;</button>
       </div>
-      <p class="recordatorio-note" id="recordatorio-note">Se va a marcar en rojo aquí en el panel cuando llegue esta fecha.</p>
+      <p class="recordatorio-note" id="recordatorio-note">Al llegar esta fecha quedará por atender. No se borra al vencer: revisa la carga y cambia la fecha o su estatus.</p>
       <div class="csr-form" style="flex-direction:column; align-items:stretch;">
         <input type="datetime-local" id="recordatorio-fecha-input" aria-label="Fecha y hora del recordatorio">
         <div class="recordatorio-quick">
