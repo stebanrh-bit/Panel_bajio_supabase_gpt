@@ -9,6 +9,8 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 ## Estado actual
 
+[Revisión completa del 14 de octubre](docs/REVISION_COMPLETA_2026-10-14.md): 78 pruebas automáticas y 35 comparaciones visuales pasaron. Se corrigió la lectura del importador; para activar esa corrección, actualizar solo el HTML Google. La publicación con sesión real todavía requiere las pruebas manuales finales.
+
 La entrada de `web/` reutiliza las tres interfaces originales en `web/src/original/`. Sus 97 acciones se conectan a Supabase mediante adaptadores comentados. Incluye administración de cuentas Auth a través de `panel-accounts`, cargas, comentarios/incidencias, pendientes, bitácora/cierres, apartados, seguimiento, plantillas, calendario, indicadores, importación/deshacer, radar compartido y ambos portales. Consulta [la comparación y sus límites](docs/COMPARACION_ORIGINAL.md).
 
 El proyecto existente requiere la actualización conjunta SQL 004–009, desplegar `panel-accounts` y activar la nueva versión del mismo proyecto Google. Sigue **docs/INSTALAR_SITIO.md**; no repitas SQL 001. Los módulos anteriores de `web/src/features/` permanecen como servicios reutilizables y referencia de la migración. No se ejecuta el backend Sheets de la raíz.

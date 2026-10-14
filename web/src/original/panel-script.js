@@ -10537,44 +10537,7 @@
     wireDelegatedEventsOnce();
   }
 
-  // ---- Excel import (SheetJS, client-side) ----
-
-  function parseDelta(v) {
-    if (v === null || v === undefined) return null;
-    var s = String(v).trim();
-    if (s === "") return null;
-    if (s === "-00:00") return 0;
-    var neg = s.charAt(0) === "-";
-    var s2 = neg ? s.substring(1) : s;
-    var bits = s2.split(":");
-    if (bits.length !== 2) return null;
-    var h = parseInt(bits[0], 10),
-      m = parseInt(bits[1], 10);
-    if (isNaN(h) || isNaN(m)) return null;
-    var total = h * 60 + m;
-    return neg ? -total : total;
-  }
-
-  function excelDateToStr(v) {
-    if (v === null || v === undefined || v === "") return null;
-    if (v instanceof Date) {
-      var pad = function (n) {
-        return (n < 10 ? "0" : "") + n;
-      };
-      return (
-        v.getFullYear() +
-        "-" +
-        pad(v.getMonth() + 1) +
-        "-" +
-        pad(v.getDate()) +
-        " " +
-        pad(v.getHours()) +
-        ":" +
-        pad(v.getMinutes())
-      );
-    }
-    return String(v);
-  }
+  // ---- Importación: CSV/XLSX incluidos y compatibilidad .xls con SheetJS ----
 
   var xlsxLoadPromise = null;
   function ensureXlsxLoaded() {
@@ -10602,6 +10565,20 @@
     return xlsxLoadPromise;
   }
 
+  /** Compatibilidad con .xls: conserva SheetJS solo para el formato antiguo. */
+  async function readLegacyExcelRows(file) {
+    await ensureXlsxLoaded();
+    var workbook = XLSX.read(await file.arrayBuffer(), {
+      type: "array",
+      cellDates: true,
+    });
+    return XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
+      header: 1,
+      raw: true,
+      defval: null,
+    });
+  }
+
   document
     .getElementById("file-input")
     .addEventListener("change", function (e) {
@@ -10611,232 +10588,145 @@
       statusEl.textContent = "Leyendo archivo…";
       statusEl.className = "import-status";
 
-      ensureXlsxLoaded()
-        .then(function () {
-          var reader = new FileReader();
-          reader.onload = function (evt) {
-            try {
-              var wb = XLSX.read(evt.target.result, {
-                type: "array",
-                cellDates: true,
-              });
-              var ws = wb.Sheets[wb.SheetNames[0]];
-              var rows = XLSX.utils.sheet_to_json(ws, {
-                header: 1,
-                raw: true,
-                defval: null,
-              });
-              // Row 0: title. Row 1: real headers. Row 2+: data.
-              var headers = rows[1];
+      // Leer el archivo completo antes de pedir la vista previa. No se escribe al seleccionar.
+      e.target.value = "";
+      window.panelFiles
+        .parseLoadFile(file, readLegacyExcelRows)
+        .then(function (records) {
+          try {
+            if (!records.length) {
+              statusEl.textContent =
+                "No se encontraron cargas con número de load en este archivo.";
+              statusEl.className = "import-status err";
+              return;
+            }
 
-              // Se importan TODAS las filas del archivo (sin filtrar por cliente asignado ni por
-              // quién la capturó). Lo único que se descarta es una fila sin número de load.
-              var records = [];
-              for (var i = 2; i < rows.length; i++) {
-                var row = rows[i];
-                if (!row) continue;
-                var obj = {};
-                headers.forEach(function (h, idx) {
-                  obj[h] = row[idx];
-                });
-                if (obj["Load"] === null || obj["Load"] === undefined) continue;
-
-                records.push({
-                  load: obj["Load"],
-                  customer: obj["Customers"]
-                    ? String(obj["Customers"]).trim()
-                    : null,
-                  origin_city: obj["City O."],
-                  origin_state: obj["State O."],
-                  origin_address: obj["From"],
-                  dest_city: obj["City D."],
-                  dest_state: obj["State D."],
-                  dest_address: obj["To"],
-                  pickup_appt: excelDateToStr(obj["Pickup appt."]),
-                  pickup_actual: excelDateToStr(obj["Leg from In date"]),
-                  pickup_delta_min: parseDelta(obj["On time pickup"]),
-                  delivery_appt: excelDateToStr(obj["Delivery appt."]),
-                  delivery_actual: excelDateToStr(obj["Leg to In date"]),
-                  delivery_delta_min: parseDelta(obj["On time"]),
-                  truck: obj["Truck"],
-                  trailer: obj["Trailer"],
-                  // status: no se importa, siempre es manual (ver Code.gs importLoads)
-                  work_order:
-                    obj["Work order"] !== null &&
-                    obj["Work order"] !== undefined
-                      ? String(obj["Work order"])
-                      : null,
-                  bol: !!obj["BOL"],
-                  doc_status: obj["DOC. STATUS"],
-                  doda: !!obj["DODA"],
-                  entry: !!obj["ENTRY"],
-                  tracking_link: obj["Link de rastreo"]
-                    ? String(obj["Link de rastreo"]).trim()
-                    : null,
-                  exportacion: obj["EXPORTACION"],
-                  importacion: obj["IMPORTACION"],
-                  pedimentos: obj["PEDIMENTOS"],
-                  regresos:
-                    obj["REGRESOS"] !== null && obj["REGRESOS"] !== undefined
-                      ? String(obj["REGRESOS"])
-                      : null,
-                  sobre_listo: !!obj["SOBRE LISTO"],
-                  loaded_miles: obj["L.Mi"],
-                  empty_miles: obj["E.Mi."],
-                  rpm: obj["RPM"],
-                  charges: obj["Charges"],
-                  created_at: (function () {
-                    var cb =
-                      obj["Created by"] !== null &&
-                      obj["Created by"] !== undefined
-                        ? String(obj["Created by"])
-                        : "";
-                    var m = cb.match(/(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})/);
-                    return m ? m[1] : null;
-                  })(),
-                });
-              }
-
-              if (!records.length) {
-                statusEl.textContent =
-                  "No se encontraron cargas con número de load en este archivo.";
-                statusEl.className = "import-status err";
-                return;
-              }
-
-              // Vista previa: el servidor calcula qué va a cambiar SIN escribir nada (previewImport) y
-              // se pide confirmación antes de guardar (importLoads). Antes se guardaba de inmediato.
-              var guardarImportacion = function () {
-                statusEl.textContent =
-                  "Guardando " + records.length + " cargas…";
-                statusEl.className = "import-status";
-                google.script.run
-                  .withSuccessHandler(function (result) {
-                    if (result && result.ok === false) {
-                      statusEl.textContent =
-                        "No se importó: " +
-                        (result.error || "el servidor rechazó el archivo");
-                      statusEl.className = "import-status err";
-                      return;
-                    }
-                    var msg =
-                      "Listo: " +
-                      result.inserted +
-                      " nuevas, " +
-                      result.updated +
-                      " actualizadas" +
-                      (result.unchanged
-                        ? ", " + result.unchanged + " sin cambios"
-                        : "") +
-                      ".";
-                    if (result.skipped)
-                      msg +=
-                        " (" +
-                        result.skipped +
-                        " sin número de load, se ignoraron)";
-                    statusEl.textContent = msg;
-                    statusEl.className = "import-status ok";
-                    lastImportAt = new Date().toISOString();
-                    renderOperationMeta();
-                    loadData();
-                  })
-                  .withFailureHandler(function (err) {
-                    statusEl.textContent = "Error al guardar: " + err.message;
-                    statusEl.className = "import-status err";
-                  })
-                  .importLoads(records, adminCred_());
-              };
-              statusEl.textContent = "Revisando el archivo…";
+            // Vista previa: el servidor calcula qué va a cambiar SIN escribir nada (previewImport) y
+            // se pide confirmación antes de guardar (importLoads). Antes se guardaba de inmediato.
+            var guardarImportacion = function () {
+              statusEl.textContent = "Guardando " + records.length + " cargas…";
+              statusEl.className = "import-status";
               google.script.run
-                .withSuccessHandler(function (p) {
-                  if (!p || p.ok === false) {
+                .withSuccessHandler(function (result) {
+                  if (result && result.ok === false) {
                     statusEl.textContent =
-                      "No se pudo revisar el archivo: " +
-                      ((p && p.error) || "error desconocido");
+                      "No se importó: " +
+                      (result.error || "el servidor rechazó el archivo");
                     statusEl.className = "import-status err";
                     return;
                   }
-                  statusEl.textContent = "Esperando tu confirmación…";
-                  var html =
-                    "<ul>" +
-                    "<li><b>" +
-                    p.inserted +
-                    "</b> " +
-                    (p.inserted === 1 ? "carga nueva" : "cargas nuevas") +
-                    "</li>" +
-                    "<li><b>" +
-                    p.updated +
-                    "</b> con cambios" +
-                    (p.citasMovidas
-                      ? " (<b>" +
-                        p.citasMovidas +
-                        "</b> con cita movida — " +
-                        (p.citasMovidas === 1
-                          ? "quedará pendiente"
-                          : "quedarán pendientes") +
-                        " de avisar al cliente)"
+                  var msg =
+                    "Listo: " +
+                    result.inserted +
+                    " nuevas, " +
+                    result.updated +
+                    " actualizadas" +
+                    (result.unchanged
+                      ? ", " + result.unchanged + " sin cambios"
                       : "") +
-                    "</li>" +
-                    "<li><b>" +
-                    p.unchanged +
-                    "</b> sin cambios</li>" +
-                    (p.skipped
-                      ? "<li><b>" +
-                        p.skipped +
-                        "</b> filas sin número de load (se ignoran)</li>"
-                      : "") +
-                    "</ul>" +
-                    (p.clientesSinCsr && p.clientesSinCsr.length
-                      ? '<p class="aviso-fuerte">Clientes sin CSR asignado (sus cargas no le aparecerán a ningún CSR): ' +
-                        p.clientesSinCsr.map(esc).join(", ") +
-                        '. Asígnalos en "Gestionar CSR".</p>'
-                      : "") +
-                    (p.duplicadosEnArchivo && p.duplicadosEnArchivo.length
-                      ? '<p class="aviso-fuerte">Loads repetidos en el archivo (se queda el último): ' +
-                        p.duplicadosEnArchivo.map(esc).join(", ") +
-                        "</p>"
-                      : "") +
-                    '<p>Si después necesitas regresar, en "Gestionar CSR" puedes deshacer la última importación.</p>';
-                  confirmarModal_(
-                    "Importar " + records.length + " cargas",
-                    html,
-                    "Importar",
-                    guardarImportacion,
-                  );
-                  // Si se cierra sin confirmar, que la barra no se quede diciendo "Esperando…".
-                  var limpiarSiCancela = function () {
-                    if (
-                      !document
-                        .getElementById("confirmar-backdrop")
-                        .classList.contains("show")
-                    ) {
-                      if (
-                        statusEl.textContent === "Esperando tu confirmación…"
-                      ) {
-                        statusEl.textContent = "Importación cancelada.";
-                        statusEl.className = "import-status";
-                      }
-                    } else setTimeout(limpiarSiCancela, 500);
-                  };
-                  setTimeout(limpiarSiCancela, 500);
+                    ".";
+                  if (result.skipped)
+                    msg +=
+                      " (" +
+                      result.skipped +
+                      " sin número de load, se ignoraron)";
+                  statusEl.textContent = msg;
+                  statusEl.className = "import-status ok";
+                  lastImportAt = new Date().toISOString();
+                  renderOperationMeta();
+                  loadData();
                 })
                 .withFailureHandler(function (err) {
-                  statusEl.textContent =
-                    "No se pudo revisar el archivo: " + err.message;
+                  statusEl.textContent = "Error al guardar: " + err.message;
                   statusEl.className = "import-status err";
                 })
-                .previewImport(records, csrAdminPw);
-            } catch (err) {
-              statusEl.textContent = "Error al leer el archivo: " + err.message;
-              statusEl.className = "import-status err";
-            }
-          };
-          reader.readAsArrayBuffer(file);
-          e.target.value = "";
+                .importLoads(records, adminCred_());
+            };
+            statusEl.textContent = "Revisando el archivo…";
+            google.script.run
+              .withSuccessHandler(function (p) {
+                if (!p || p.ok === false) {
+                  statusEl.textContent =
+                    "No se pudo revisar el archivo: " +
+                    ((p && p.error) || "error desconocido");
+                  statusEl.className = "import-status err";
+                  return;
+                }
+                statusEl.textContent = "Esperando tu confirmación…";
+                var html =
+                  "<ul>" +
+                  "<li><b>" +
+                  p.inserted +
+                  "</b> " +
+                  (p.inserted === 1 ? "carga nueva" : "cargas nuevas") +
+                  "</li>" +
+                  "<li><b>" +
+                  p.updated +
+                  "</b> con cambios" +
+                  (p.citasMovidas
+                    ? " (<b>" +
+                      p.citasMovidas +
+                      "</b> con cita movida — " +
+                      (p.citasMovidas === 1
+                        ? "quedará pendiente"
+                        : "quedarán pendientes") +
+                      " de avisar al cliente)"
+                    : "") +
+                  "</li>" +
+                  "<li><b>" +
+                  p.unchanged +
+                  "</b> sin cambios</li>" +
+                  (p.skipped
+                    ? "<li><b>" +
+                      p.skipped +
+                      "</b> filas sin número de load (se ignoran)</li>"
+                    : "") +
+                  "</ul>" +
+                  (p.clientesSinCsr && p.clientesSinCsr.length
+                    ? '<p class="aviso-fuerte">Clientes sin CSR asignado (sus cargas no le aparecerán a ningún CSR): ' +
+                      p.clientesSinCsr.map(esc).join(", ") +
+                      '. Asígnalos en "Gestionar CSR".</p>'
+                    : "") +
+                  (p.duplicadosEnArchivo && p.duplicadosEnArchivo.length
+                    ? '<p class="aviso-fuerte">Loads repetidos en el archivo (se queda el último): ' +
+                      p.duplicadosEnArchivo.map(esc).join(", ") +
+                      "</p>"
+                    : "") +
+                  '<p>Si después necesitas regresar, en "Gestionar CSR" puedes deshacer la última importación.</p>';
+                confirmarModal_(
+                  "Importar " + records.length + " cargas",
+                  html,
+                  "Importar",
+                  guardarImportacion,
+                );
+                // Si se cierra sin confirmar, que la barra no se quede diciendo "Esperando…".
+                var limpiarSiCancela = function () {
+                  if (
+                    !document
+                      .getElementById("confirmar-backdrop")
+                      .classList.contains("show")
+                  ) {
+                    if (statusEl.textContent === "Esperando tu confirmación…") {
+                      statusEl.textContent = "Importación cancelada.";
+                      statusEl.className = "import-status";
+                    }
+                  } else setTimeout(limpiarSiCancela, 500);
+                };
+                setTimeout(limpiarSiCancela, 500);
+              })
+              .withFailureHandler(function (err) {
+                statusEl.textContent =
+                  "No se pudo revisar el archivo: " + err.message;
+                statusEl.className = "import-status err";
+              })
+              .previewImport(records, csrAdminPw);
+          } catch (err) {
+            statusEl.textContent = "Error al leer el archivo: " + err.message;
+            statusEl.className = "import-status err";
+          }
         })
         .catch(function (err) {
-          // Solo puede fallar aquí si ensureXlsxLoaded() no consiguió cargar la librería (ej. sin
-          // internet en ese momento) — el resto del proceso de import ya tiene su propio try/catch.
+          // Una lectura inválida termina aquí, antes de consultar o guardar cargas.
           statusEl.textContent = err.message;
           statusEl.className = "import-status err";
           e.target.value = "";

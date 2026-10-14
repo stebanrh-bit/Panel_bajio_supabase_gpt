@@ -38,6 +38,7 @@ def main():
         'panel-accounts/index.ts':ROOT/'supabase/functions/panel-accounts/index.ts',
         'COMPARACION_ORIGINAL.md':ROOT/'docs/COMPARACION_ORIGINAL.md',
         'VALIDACION_SITIO.md':ROOT/'docs/VALIDACION_SITIO.md',
+        'REVISION_COMPLETA_2026-10-14.md':ROOT/'docs/REVISION_COMPLETA_2026-10-14.md',
         'ADMINISTRADOR_Y_CSR.md':ROOT/'docs/ADMINISTRADOR_Y_CSR.md',
         'Code.gs':ROOT/'google-apps-script/Code-sitio.gs',
         'appsscript.json':ROOT/'google-apps-script/appsscript.json',

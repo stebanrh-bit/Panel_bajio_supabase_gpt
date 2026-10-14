@@ -152,7 +152,10 @@ function dateValue(value, rowNumber, field) {
 }
 
 /** Valida el archivo entero antes de solicitar una vista previa al servidor. */
-export function rowsToLoads(rows) {
+export function rowsToLoads(
+  rows,
+  { allowDuplicates = false, skipMissingLoads = false } = {},
+) {
   const headerIndex = rows
     .slice(0, 15)
     .findIndex((row) =>
@@ -161,6 +164,7 @@ export function rowsToLoads(rows) {
   if (headerIndex < 0)
     throw new Error("No se encontró el encabezado Load o Número de carga.");
   const columns = rows[headerIndex].map((cell) => headers.get(normalize(cell)));
+  const loadColumn = columns.indexOf("load");
   const mapped = columns.filter(Boolean);
   if (new Set(mapped).size !== mapped.length)
     throw new Error(
@@ -172,6 +176,8 @@ export function rowsToLoads(rows) {
     const cells = rows[index];
     if (cells.every((value) => value == null || String(value).trim() === ""))
       continue;
+    // Ignorar una fila sin carga antes de interpretar sus fechas u otros campos.
+    if (skipMissingLoads && !String(cells[loadColumn] ?? "").trim()) continue;
     const record = {};
     columns.forEach((field, column) => {
       if (!field) return;
@@ -182,7 +188,7 @@ export function rowsToLoads(rows) {
     });
     if (!record.load || record.load.length > 200)
       throw new Error(`Fila ${index + 1}: falta un número de carga válido.`);
-    if (seen.has(record.load))
+    if (seen.has(record.load) && !allowDuplicates)
       throw new Error(`Carga duplicada en el archivo: ${record.load}.`);
     seen.add(record.load);
     records.push(record);

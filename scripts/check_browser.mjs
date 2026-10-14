@@ -22,6 +22,12 @@ const { PNG } = await import(
 );
 const base =
   process.env.PANEL_PREVIEW_URL || "http://127.0.0.1:5182/index-sitio.html";
+const legacyXls = process.argv.includes("--legacy-xls");
+const legacyLibrary = legacyXls
+  ? await readFile(
+      process.env.PANEL_SHEETJS_FILE || "/tmp/panel-audit-sheetjs.js",
+    )
+  : null;
 const root = new URL("../", import.meta.url),
   read = (file) => readFile(new URL(file, root), "utf8");
 const now = new Date("2026-10-08T18:00:00Z"),
@@ -285,6 +291,9 @@ const errors = [],
   screenshots = [];
 await mkdir("/tmp/panel-original-comparison", { recursive: true });
 let incidentSaves = 0;
+let importPreviews = 0,
+  importSaves = 0,
+  previewedRecords = [];
 const incidents = [];
 const customerAssignments = [
   {
@@ -316,6 +325,15 @@ async function newPage(
     route.fulfill({ contentType: "text/css", body: "" }),
   );
   await page.route("https://fonts.gstatic.com/**", (route) => route.abort());
+  if (legacyXls)
+    await page.route(
+      "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+      (route) =>
+        route.fulfill({
+          contentType: "application/javascript",
+          body: legacyLibrary,
+        }),
+    );
   // Los servicios externos se prueban por separado; no dependen de una ubicación real aquí.
   await page.route("https://nominatim.openstreetmap.org/**", (route) =>
     route.fulfill({ contentType: "application/json", body: "[]" }),
@@ -361,6 +379,33 @@ async function newPage(
           updated_at: "2026-10-08T18:00:01Z",
         });
         result = null;
+      } else if (table === "ops_preview_import") {
+        importPreviews += 1;
+        previewedRecords = request.postDataJSON().p_records;
+        result = previewedRecords.map((record) => ({
+          load: record.load,
+          new: !rawLoads.some((item) => item.load === record.load),
+          version: null,
+          changes: Object.keys(record).filter((key) => key !== "load"),
+        }));
+      } else if (table === "ops_apply_import") {
+        importSaves += 1;
+        const input = request.postDataJSON();
+        assert.deepEqual(input.p_records, previewedRecords);
+        assert.equal(input.p_preview.length, input.p_records.length);
+        for (const record of input.p_records)
+          rawLoads.push({
+            ...record,
+            status: "Cargando",
+            archived: false,
+            updated_at: stamp,
+            updated_by: adminId,
+          });
+        result = {
+          id: "import-local",
+          file_name: input.p_file_name,
+          created_at: stamp,
+        };
       } else if (table === "pending_loads") result = [pendingRow];
       else if (table === "shift_tasks") result = [taskRow];
       else if (table === "reserved_loads") result = [reservedRow];
@@ -521,7 +566,10 @@ async function newPage(
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
 }
-const pages = [await newPage(true), await newPage()];
+const importsOnly = process.argv.includes("--imports-only");
+const pages = importsOnly
+  ? [await newPage()]
+  : [await newPage(true), await newPage()];
 async function both(operation) {
   for (const page of pages) await operation(page);
 }
@@ -569,245 +617,395 @@ async function compare(name, options = {}) {
   screenshots.push(name);
 }
 try {
-  await compare("inicio");
-  await both((page) => page.locator("[data-home-tab=turno]").click());
-  await compare("mi-turno");
-  await both((page) => page.locator("[data-page=operation]").click());
-  await both((page) =>
-    page.locator("[data-workspace-load=VISUAL-001]").first().waitFor(),
-  );
-  await compare("operacion");
-  for (const tab of [
-    "operacion",
-    "tracking",
-    "comunicacion",
-    "documentos",
-    "incidencias",
-    "historial",
-  ]) {
-    if (tab === "operacion")
+  if (!importsOnly) {
+    await compare("inicio");
+    await both((page) => page.locator("[data-home-tab=turno]").click());
+    await compare("mi-turno");
+    await both((page) => page.locator("[data-page=operation]").click());
+    await both((page) =>
+      page.locator("[data-workspace-load=VISUAL-001]").first().waitFor(),
+    );
+    await compare("operacion");
+    for (const tab of [
+      "operacion",
+      "tracking",
+      "comunicacion",
+      "documentos",
+      "incidencias",
+      "historial",
+    ]) {
+      if (tab === "operacion")
+        await both((page) =>
+          page.locator("[data-workspace-load=VISUAL-001]").first().click(),
+        );
+      else
+        await both((page) =>
+          page.locator(`[data-workspace-tab=${tab}]`).click(),
+        );
+      await both((page) => page.waitForTimeout(80));
+      await compare(`workspace-${tab}`);
+    }
+    await both((page) => page.locator("#workspace-close").click());
+    await both((page) =>
+      page.locator("[data-comments-load=VISUAL-001]").first().click(),
+    );
+    await compare("comentarios");
+    await both((page) => page.locator("#comments-close").click());
+    await both((page) =>
+      page
+        .locator("#page-operation [data-incidencias-load=VISUAL-001]")
+        .first()
+        .click(),
+    );
+    await compare("incidencias");
+    await both((page) => page.locator("#incidencia-close").click());
+    await both((page) => page.locator("#view-toggle-btn").click());
+    await compare("tabla");
+    await both((page) => page.locator("[data-page=calendario]").click());
+    await compare("calendario");
+    await both((page) => page.locator("[data-page=indicadores]").click());
+    await compare("indicadores");
+    await both((page) => page.locator("[data-page=apartados]").click());
+    await compare("apartados");
+    await both((page) => page.locator("[data-page=radar]").click());
+    await compare("radar");
+    await both((page) => page.locator("#sidebar-historico-btn").click());
+    await compare("historico");
+    await both((page) => page.locator("#who-toggle-btn").click());
+    await compare("selector-usuario");
+    await both((page) => page.locator("#who-drawer-close").click());
+    await both((page) => page.locator("#session-change-pw-btn").click());
+    await compare("cambiar-contrasena");
+    await both((page) => page.locator("#identity-close").click());
+    await both((page) => page.locator("#sidebar-manage-csr-btn").click());
+    await compare("clave-administracion");
+    await both((page) =>
+      page.locator("#csr-pw-input").fill("Solo-prueba-local"),
+    );
+    await both((page) => page.locator("#csr-pw-submit").click());
+    await both((page) => page.locator("#csr-backdrop.show").waitFor());
+    // Esta ventana incorpora la opción Supervisor como CSR solicitada por el usuario.
+    // Su selector se verifica funcionalmente; las demás ventanas conservan comparación visual.
+    assert.equal(
+      await pages[1].locator('#csr-asig-csr option[value="Esteban"]').count(),
+      1,
+    );
+    await pages[1].screenshot({
+      path: "/tmp/panel-original-comparison/administracion-supabase.png",
+    });
+    await both((page) => page.locator("#csr-close").click());
+    // Comprobar también las ventanas secundarias completas, aunque no haya datos seleccionados.
+    for (const modal of [
+      "kpi-detail",
+      "pendiente",
+      "bitacora",
+      "vincular",
+      "recordatorio",
+      "apartado",
+      "multimsg",
+      "confirmar",
+    ]) {
       await both((page) =>
-        page.locator("[data-workspace-load=VISUAL-001]").first().click(),
+        page.evaluate(
+          (id) =>
+            document.getElementById(id + "-backdrop").classList.add("show"),
+          modal,
+        ),
       );
-    else
-      await both((page) => page.locator(`[data-workspace-tab=${tab}]`).click());
-    await both((page) => page.waitForTimeout(80));
-    await compare(`workspace-${tab}`);
-  }
-  await both((page) => page.locator("#workspace-close").click());
-  await both((page) =>
-    page.locator("[data-comments-load=VISUAL-001]").first().click(),
-  );
-  await compare("comentarios");
-  await both((page) => page.locator("#comments-close").click());
-  await both((page) =>
-    page
+      await compare(`ventana-${modal}`);
+      await both((page) =>
+        page.evaluate(
+          (id) =>
+            document.getElementById(id + "-backdrop").classList.remove("show"),
+          modal,
+        ),
+      );
+    }
+    // Validación usando la UI entregada y el SDK real contra el transporte interceptado.
+    const page = pages[1];
+    await page.locator("[data-page=operation]").click();
+    await page.locator("#view-toggle-btn").click();
+    await page
       .locator("#page-operation [data-incidencias-load=VISUAL-001]")
       .first()
-      .click(),
-  );
-  await compare("incidencias");
-  await both((page) => page.locator("#incidencia-close").click());
-  await both((page) => page.locator("#view-toggle-btn").click());
-  await compare("tabla");
-  await both((page) => page.locator("[data-page=calendario]").click());
-  await compare("calendario");
-  await both((page) => page.locator("[data-page=indicadores]").click());
-  await compare("indicadores");
-  await both((page) => page.locator("[data-page=apartados]").click());
-  await compare("apartados");
-  await both((page) => page.locator("[data-page=radar]").click());
-  await compare("radar");
-  await both((page) => page.locator("#sidebar-historico-btn").click());
-  await compare("historico");
-  await both((page) => page.locator("#who-toggle-btn").click());
-  await compare("selector-usuario");
-  await both((page) => page.locator("#who-drawer-close").click());
-  await both((page) => page.locator("#session-change-pw-btn").click());
-  await compare("cambiar-contrasena");
-  await both((page) => page.locator("#identity-close").click());
-  await both((page) => page.locator("#sidebar-manage-csr-btn").click());
-  await compare("clave-administracion");
-  await both((page) => page.locator("#csr-pw-input").fill("Solo-prueba-local"));
-  await both((page) => page.locator("#csr-pw-submit").click());
-  await both((page) => page.locator("#csr-backdrop.show").waitFor());
-  // Esta ventana incorpora la opción Supervisor como CSR solicitada por el usuario.
-  // Su selector se verifica funcionalmente; las demás ventanas conservan comparación visual.
-  assert.equal(
-    await pages[1].locator('#csr-asig-csr option[value="Esteban"]').count(),
-    1,
-  );
-  await pages[1].screenshot({
-    path: "/tmp/panel-original-comparison/administracion-supabase.png",
-  });
-  await both((page) => page.locator("#csr-close").click());
-  // Comprobar también las ventanas secundarias completas, aunque no haya datos seleccionados.
-  for (const modal of [
-    "kpi-detail",
-    "pendiente",
-    "bitacora",
-    "vincular",
-    "recordatorio",
-    "apartado",
-    "multimsg",
-    "confirmar",
-  ]) {
-    await both((page) =>
-      page.evaluate(
-        (id) => document.getElementById(id + "-backdrop").classList.add("show"),
-        modal,
-      ),
-    );
-    await compare(`ventana-${modal}`);
-    await both((page) =>
-      page.evaluate(
-        (id) =>
-          document.getElementById(id + "-backdrop").classList.remove("show"),
-        modal,
-      ),
-    );
-  }
-  // Validación usando la UI entregada y el SDK real contra el transporte interceptado.
-  const page = pages[1];
-  await page.locator("[data-page=operation]").click();
-  await page.locator("#view-toggle-btn").click();
-  await page
-    .locator("#page-operation [data-incidencias-load=VISUAL-001]")
-    .first()
-    .click();
-  await page
-    .locator("#incidencia-descripcion")
-    .fill("Incidencia de prueba local");
-  await page.evaluate(() => {
-    const select = document.getElementById("incidencia-categoria");
-    select.add(new Option("Sin categoría", ""));
-    select.value = "";
-  });
-  await page.locator("#incidencia-submit").click();
-  await page
-    .getByText("Ingresa una categoría para registrar la incidencia.", {
-      exact: false,
-    })
-    .waitFor();
-  assert.equal(incidentSaves, 0);
-  await page.locator("#incidencia-categoria").selectOption("Unidad");
-  await page.locator("#incidencia-submit").click();
-  await page
-    .locator("#incidencia-list")
-    .filter({ hasText: "Incidencia de prueba local" })
-    .waitFor();
-  assert.equal(incidentSaves, 1);
-  await page.reload();
-  await page.locator("[data-page=operation]").click();
-  await page
-    .locator("#page-operation [data-incidencias-load=VISUAL-001]")
-    .first()
-    .click();
-  await page
-    .locator("#incidencia-list")
-    .filter({ hasText: "Incidencia de prueba local" })
-    .waitFor();
-  // Diseño móvil: la comparación usa el mismo ancho y los controles originales.
-  await both((page) => page.setViewportSize({ width: 390, height: 844 }));
-  await both((page) =>
-    page.evaluate(() => {
-      document
-        .querySelectorAll(".modal-backdrop,.who-drawer-backdrop")
-        .forEach((el) => el.classList.remove("show"));
-    }),
-  );
-  await both((page) => page.locator("[data-movil=home]").click());
-  // La incidencia creada cambia sus datos; comparar móvil con una pareja nueva limpia.
-  incidents.length = 0;
-  await both((page) => page.reload());
-  await both((page) =>
-    page.locator("#home-cierres").filter({ hasText: "Sin cierres" }).waitFor(),
-  );
-  await compare("movil-inicio");
-  // Salir debe limpiar la sesión y mostrar el selector de identidad sin errores.
-  await pages[1].setViewportSize({ width: 1440, height: 1024 });
-  await pages[1].locator("#session-logout-btn").click();
-  await pages[1].locator("#identity-backdrop.show").waitFor();
-  assert.equal(
-    await pages[1].evaluate(() => localStorage.getItem("bajio_identity_token")),
-    null,
-  );
-  for (const view of ["client", "manager"]) {
-    await both((page) => page.close());
-    pages.splice(
-      0,
-      pages.length,
-      await newPage(true, { width: 1440, height: 1024 }, view),
-      await newPage(false, { width: 1440, height: 1024 }, view),
-    );
-    await compare(`${view}-dashboard`);
-    await both((page) => page.locator("#shipments-tbody tr").first().click());
-    await both((page) => page.locator("#detail-screen").waitFor());
-    await compare(`${view}-detalle`);
+      .click();
+    await page
+      .locator("#incidencia-descripcion")
+      .fill("Incidencia de prueba local");
+    await page.evaluate(() => {
+      const select = document.getElementById("incidencia-categoria");
+      select.add(new Option("Sin categoría", ""));
+      select.value = "";
+    });
+    await page.locator("#incidencia-submit").click();
+    await page
+      .getByText("Ingresa una categoría para registrar la incidencia.", {
+        exact: false,
+      })
+      .waitFor();
+    assert.equal(incidentSaves, 0);
+    await page.locator("#incidencia-categoria").selectOption("Unidad");
+    await page.locator("#incidencia-submit").click();
+    await page
+      .locator("#incidencia-list")
+      .filter({ hasText: "Incidencia de prueba local" })
+      .waitFor();
+    assert.equal(incidentSaves, 1);
+    await page.reload();
+    await page.locator("[data-page=operation]").click();
+    await page
+      .locator("#page-operation [data-incidencias-load=VISUAL-001]")
+      .first()
+      .click();
+    await page
+      .locator("#incidencia-list")
+      .filter({ hasText: "Incidencia de prueba local" })
+      .waitFor();
+    // Diseño móvil: la comparación usa el mismo ancho y los controles originales.
     await both((page) => page.setViewportSize({ width: 390, height: 844 }));
-    await compare(`${view}-movil`);
+    await both((page) =>
+      page.evaluate(() => {
+        document
+          .querySelectorAll(".modal-backdrop,.who-drawer-backdrop")
+          .forEach((el) => el.classList.remove("show"));
+      }),
+    );
+    await both((page) => page.locator("[data-movil=home]").click());
+    // La incidencia creada cambia sus datos; comparar móvil con una pareja nueva limpia.
+    incidents.length = 0;
+    await both((page) => page.reload());
+    await both((page) =>
+      page
+        .locator("#home-cierres")
+        .filter({ hasText: "Sin cierres" })
+        .waitFor(),
+    );
+    await compare("movil-inicio");
+    // Salir debe limpiar la sesión y mostrar el selector de identidad sin errores.
+    await pages[1].setViewportSize({ width: 1440, height: 1024 });
+    await pages[1].locator("#session-logout-btn").click();
+    await pages[1].locator("#identity-backdrop.show").waitFor();
+    assert.equal(
+      await pages[1].evaluate(() =>
+        localStorage.getItem("bajio_identity_token"),
+      ),
+      null,
+    );
+    for (const view of ["client", "manager"]) {
+      await both((page) => page.close());
+      pages.splice(
+        0,
+        pages.length,
+        await newPage(true, { width: 1440, height: 1024 }, view),
+        await newPage(false, { width: 1440, height: 1024 }, view),
+      );
+      await compare(`${view}-dashboard`);
+      await both((page) => page.locator("#shipments-tbody tr").first().click());
+      await both((page) => page.locator("#detail-screen").waitFor());
+      await compare(`${view}-detalle`);
+      await both((page) => page.setViewportSize({ width: 390, height: 844 }));
+      await compare(`${view}-movil`);
+    }
+    // El mismo administrador puede asignarse clientes y alternar su vista de CSR.
+    // Es una extensión solicitada del original: se prueba funcionalmente, sin alterar el patrón visual.
+    await both((page) => page.close());
+    rawLoads[1].customer = "OTRO CLIENTE";
+    const own = await newPage(false);
+    pages.splice(0, pages.length, own);
+    await own
+      .locator("#home-cierres")
+      .filter({ hasText: "Sin cierres" })
+      .waitFor();
+    await own.locator("#sidebar-manage-csr-btn").click();
+    await own.locator("#csr-pw-input").fill("Solo-prueba-local");
+    await own.locator("#csr-pw-submit").click();
+    await own.locator("#csr-backdrop.show").waitFor();
+    await own.locator("#csr-asig-csr").selectOption("Esteban");
+    await own.locator("#csr-asig-cliente").selectOption("ACME");
+    await own.locator("#csr-asignar-btn").click();
+    await own
+      .getByText("Cliente asignado: ACME → Esteban", { exact: true })
+      .waitFor();
+    await own.locator("#csr-close").click();
+    assert.equal(
+      await own.evaluate(() => window.panelApi.profile.role),
+      "admin",
+    );
+    await own.reload();
+    await own
+      .locator("#home-cierres")
+      .filter({ hasText: "Sin cierres" })
+      .waitFor();
+    await own.locator("[data-page=operation]").click();
+    await own.locator("#who-toggle-btn").click();
+    await own.locator('[data-who-csr="Esteban"]').click();
+    await own
+      .locator("#panel-owner-name")
+      .filter({ hasText: "Esteban · CSR" })
+      .waitFor();
+    const ownLoads = await own
+      .locator("#page-operation .card[data-load]:visible")
+      .evaluateAll((nodes) => nodes.map((node) => node.dataset.load).sort());
+    // VISUAL-003 ya tiene POD y está finalizada: el filtro En curso no la muestra.
+    assert.deepEqual(ownLoads, ["VISUAL-001"]);
+    assert.equal(
+      await own.locator("#sidebar-manage-csr-btn").isVisible(),
+      true,
+    );
+    await own.screenshot({
+      path: "/tmp/panel-original-comparison/supervisor-csr.png",
+    });
+    await own.locator("#who-toggle-btn").click();
+    await own.locator("[data-who-all]").click();
+    assert.equal(
+      await own.locator("#page-operation .card[data-load]:visible").count(),
+      2,
+    );
+    assert.equal(
+      await own.evaluate(() => window.panelApi.profile.role),
+      "admin",
+    );
   }
-  // El mismo administrador puede asignarse clientes y alternar su vista de CSR.
-  // Es una extensión solicitada del original: se prueba funcionalmente, sin alterar el patrón visual.
-  await both((page) => page.close());
-  rawLoads[1].customer = "OTRO CLIENTE";
-  const own = await newPage(false);
-  pages.splice(0, pages.length, own);
-  await own
-    .locator("#home-cierres")
-    .filter({ hasText: "Sin cierres" })
-    .waitFor();
-  await own.locator("#sidebar-manage-csr-btn").click();
-  await own.locator("#csr-pw-input").fill("Solo-prueba-local");
-  await own.locator("#csr-pw-submit").click();
-  await own.locator("#csr-backdrop.show").waitFor();
-  await own.locator("#csr-asig-csr").selectOption("Esteban");
-  await own.locator("#csr-asig-cliente").selectOption("ACME");
-  await own.locator("#csr-asignar-btn").click();
-  await own
-    .getByText("Cliente asignado: ACME → Esteban", { exact: true })
-    .waitFor();
-  await own.locator("#csr-close").click();
-  assert.equal(await own.evaluate(() => window.panelApi.profile.role), "admin");
-  await own.reload();
-  await own
-    .locator("#home-cierres")
-    .filter({ hasText: "Sin cierres" })
-    .waitFor();
-  await own.locator("[data-page=operation]").click();
-  await own.locator("#who-toggle-btn").click();
-  await own.locator('[data-who-csr="Esteban"]').click();
-  await own
-    .locator("#panel-owner-name")
-    .filter({ hasText: "Esteban · CSR" })
-    .waitFor();
-  const ownLoads = await own
-    .locator("#page-operation .card[data-load]:visible")
-    .evaluateAll((nodes) => nodes.map((node) => node.dataset.load).sort());
-  // VISUAL-003 ya tiene POD y está finalizada: el filtro En curso no la muestra.
-  assert.deepEqual(ownLoads, ["VISUAL-001"]);
-  assert.equal(await own.locator("#sidebar-manage-csr-btn").isVisible(), true);
-  await own.screenshot({
-    path: "/tmp/panel-original-comparison/supervisor-csr.png",
-  });
-  await own.locator("#who-toggle-btn").click();
-  await own.locator("[data-who-all]").click();
-  assert.equal(
-    await own.locator("#page-operation .card[data-load]:visible").count(),
-    2,
+  // Selección de archivos reales mediante el botón y los callbacks originales.
+  const importPage = pages[0];
+  await importPage.locator("#sidebar-manage-csr-btn").click();
+  await importPage.locator("#csr-pw-input").fill("Solo-prueba-local");
+  await importPage.locator("#csr-pw-submit").click();
+  await importPage.locator("#csr-backdrop.show").waitFor();
+  await importPage.locator("#csr-close").click();
+  assert.match(
+    await importPage.locator("#file-input").getAttribute("accept"),
+    /\.csv/,
   );
-  assert.equal(await own.evaluate(() => window.panelApi.profile.role), "admin");
+  const selectFile = async (file) => {
+    const chooser = importPage.waitForEvent("filechooser");
+    await importPage.locator("#excel-import-btn").click();
+    // El original solicita contraseña administrativa también al abrir el importador.
+    if (await importPage.locator("#csr-pw-backdrop.show").isVisible()) {
+      await importPage.locator("#csr-pw-input").fill("Solo-prueba-local");
+      await importPage.locator("#csr-pw-submit").click();
+    }
+    await (await chooser).setFiles(file);
+  };
+  const csvFile = new URL(
+    "../entregables/importacion-prueba.csv",
+    import.meta.url,
+  ).pathname;
+  await selectFile(csvFile);
+  await importPage.locator("#confirmar-backdrop.show").waitFor();
+  assert.equal(importSaves, 0);
+  assert.deepEqual(
+    previewedRecords.map((row) => row.load),
+    ["IMPORT-EXISTENTE", "IMPORT-NUEVA"],
+  );
+  await importPage.locator("#confirmar-cancelar").click();
+  await importPage
+    .locator("#import-status")
+    .filter({ hasText: "Importación cancelada" })
+    .waitFor();
+  if (legacyXls) {
+    await selectFile(
+      new URL("../web/test/fixtures/import.xls", import.meta.url).pathname,
+    );
+    await importPage.locator("#confirmar-backdrop.show").waitFor();
+    assert.equal(previewedRecords[0].load, "LEGACY-0007");
+    assert.equal(previewedRecords[0].bol, "false");
+    await importPage.locator("#confirmar-cancelar").click();
+    await importPage
+      .locator("#import-status")
+      .filter({ hasText: "Importación cancelada" })
+      .waitFor();
+    assert.equal(importSaves, 0);
+  }
+  assert.equal(importSaves, 0);
+  await selectFile(
+    new URL("../web/test/fixtures/import.xlsx", import.meta.url).pathname,
+  );
+  await importPage.locator("#confirmar-backdrop.show").waitFor();
+  assert.equal(previewedRecords[0].load, "0007");
+  assert.equal(previewedRecords[0].customer, "PRUEBA XLSX");
+  await importPage.locator("#confirmar-cancelar").click();
+  await importPage
+    .locator("#import-status")
+    .filter({ hasText: "Importación cancelada" })
+    .waitFor();
+  await selectFile({
+    name: "documentos.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(
+      "Load,Customers,BOL,DODA,ENTRY,On time pickup\n0008,PRUEBA CLIENTE,false,0,no,-01:30",
+    ),
+  });
+  await importPage.locator("#confirmar-backdrop.show").waitFor();
+  assert.equal(previewedRecords[0].load, "0008");
+  for (const field of ["bol", "doda", "entry"])
+    assert.equal(previewedRecords[0][field], "false");
+  assert.equal(previewedRecords[0].pickup_delta_min, "-90");
+  await importPage.locator("#confirmar-cancelar").click();
+  await importPage
+    .locator("#import-status")
+    .filter({ hasText: "Importación cancelada" })
+    .waitFor();
+  await selectFile({
+    name: "repetidos.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from("Load,Customers\nDUP-1,PRIMERO\nDUP-1,ULTIMO"),
+  });
+  await importPage.locator("#confirmar-backdrop.show").waitFor();
+  assert.equal(previewedRecords.length, 1);
+  assert.equal(previewedRecords[0].customer, "ULTIMO");
+  await importPage
+    .locator("#confirmar-backdrop")
+    .filter({ hasText: "Loads repetidos en el archivo" })
+    .waitFor();
+  await importPage.locator("#confirmar-cancelar").click();
+  await importPage
+    .locator("#import-status")
+    .filter({ hasText: "Importación cancelada" })
+    .waitFor();
+  const previewsAfterValidFiles = importPreviews;
+  await selectFile({
+    name: "fecha-invalida.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from("Load,Pickup appt.\n1,2026-02-30"),
+  });
+  await importPage
+    .locator("#import-status")
+    .filter({ hasText: "fecha inexistente" })
+    .waitFor();
+  assert.equal(importPreviews, previewsAfterValidFiles);
+  assert.equal(importSaves, 0);
+  await selectFile(csvFile);
+  await importPage.locator("#confirmar-backdrop.show").waitFor();
+  await importPage.locator("#confirmar-ok").click();
+  await importPage
+    .locator("#import-status.ok")
+    .filter({ hasText: "2 nuevas" })
+    .waitFor();
+  assert.equal(importSaves, 1);
+  await importPage.reload();
+  await importPage.locator("[data-page=operation]").click();
+  await importPage
+    .locator('#page-operation .card[data-load="IMPORT-NUEVA"]')
+    .waitFor();
   assert.deepEqual(errors, []);
   await writeFile(
-    "/tmp/panel-original-comparison/result.json",
+    `/tmp/panel-original-comparison/${importsOnly ? "result-imports" : "result"}.json`,
     JSON.stringify(
-      { screenshots, incidentSaves, requests: requests.length, errors },
+      {
+        screenshots,
+        incidentSaves,
+        importPreviews,
+        importSaves,
+        requests: requests.length,
+        errors,
+      },
       null,
       2,
     ),
   );
   console.log(
-    `${screenshots.length} comparaciones visuales aprobadas; incidencias y cierre de sesión correctos; supervisor asigna clientes y alterna su vista CSR sin perder permisos; sin errores JS.`,
+    `${importsOnly ? "Importación verificada" : screenshots.length + " comparaciones visuales aprobadas; incidencias, cierre de sesión y supervisor CSR correctos"}; CSV/XLSX${legacyXls ? "/XLS" : ""}, cancelar, fecha inválida y guardado persistente verificados; sin errores JS.`,
   );
 } catch (error) {
   for (let index = 0; index < pages.length; index++) {
