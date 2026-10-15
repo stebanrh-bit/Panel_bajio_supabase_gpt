@@ -3761,11 +3761,14 @@
     document.getElementById("bitacora-load-help").textContent = existing
       ? "Elige una carga para esta tarea o deja la selección vacía para una tarea general."
       : "Sin selección, se guarda como tarea general. Si eliges varias cargas, se crea una tarea por cada una.";
-    bitacoraLoadOpciones = currentData.slice();
+    // No ofrecer viajes terminados para una relación nueva. Al editar se conserva la relación
+    // anterior aunque esa carga ya haya terminado; no se pierde el contexto de la tarea.
+    bitacoraLoadOpciones = currentData.filter(cargaActivaParaVincular_);
+    var cargaPreseleccionada = preselectLoad && recPorLoad_(preselectLoad);
     bitacoraLoadsSeleccionados =
       existing && existing.load
         ? [String(existing.load)]
-        : preselectLoad
+        : cargaPreseleccionada && cargaActivaParaVincular_(cargaPreseleccionada)
           ? [String(preselectLoad)]
           : [];
     var loadBuscado = existing
@@ -3810,7 +3813,7 @@
       if (myRealIdentity) sel.value = myRealIdentity;
     }
     document.getElementById("bitacora-turno-note").textContent = existing
-      ? "Actualiza la descripción, la carga, la fecha o el color. El turno y el responsable se conservan."
+      ? "Actualiza la descripción, la carga, la fecha o el color. El turno y la persona asignada se conservan."
       : bitacoraAutoAssignCsr
         ? "El turno se registra automáticamente al guardar."
         : "Describe el trabajo pendiente y elige quién lo atenderá. El turno se registra automáticamente al guardar.";
@@ -4111,6 +4114,16 @@
   var vincularCtx = null; // { pendienteId }
   var vincularOpciones = []; // lista completa de loads candidatos, para filtrar sin volver a pedirle nada al servidor
 
+  /** Vincular requiere una carga en curso. Una entrega con POD pendiente ya no es candidata. */
+  function cargaActivaParaVincular_(rec) {
+    return (
+      !rec.archived &&
+      !isDoneStatus(rec.status) &&
+      !isCancelledStatus(rec.status) &&
+      !isCanceladaFinalizada(rec)
+    );
+  }
+
   /** Redibuja las <option> del selector según lo que se haya escrito en el buscador (por load
    * o por cliente). Conserva la selección actual si sigue apareciendo en el resultado filtrado. */
   function renderVincularOpciones(filtro) {
@@ -4126,9 +4139,12 @@
           );
         });
     if (!filtradas.length) {
-      sel.innerHTML = '<option value="">Sin resultados…</option>';
+      sel.innerHTML =
+        '<option value="">No hay cargas activas que coincidan</option>';
+      document.getElementById("vincular-submit").disabled = true;
       return;
     }
+    document.getElementById("vincular-submit").disabled = false;
     sel.innerHTML = filtradas
       .map(function (r) {
         return (
@@ -4159,12 +4175,13 @@
     document.getElementById("vincular-note").textContent =
       "Busca y elige el load real de " +
       (p.cliente || "este cliente") +
-      ". Su nota y sus comentarios se van a combinar con el historial de ese load, y este registro pendiente se va a eliminar.";
+      ". Solo se muestran cargas activas. Su nota y sus comentarios se van a combinar con el historial de esa carga, y esta solicitud se va a eliminar.";
     var clienteLower = (p.cliente || "").toLowerCase();
-    var mismoCliente = currentData.filter(function (r) {
+    var activas = currentData.filter(cargaActivaParaVincular_);
+    var mismoCliente = activas.filter(function (r) {
       return (r.customer || "").toLowerCase() === clienteLower;
     });
-    var resto = currentData.filter(function (r) {
+    var resto = activas.filter(function (r) {
       return (r.customer || "").toLowerCase() !== clienteLower;
     });
     vincularOpciones = mismoCliente.concat(resto);
@@ -4227,6 +4244,12 @@
 
   function vincularPendienteConfirmado_(load) {
     var ctx = vincularCtx;
+    // Un refresco puede haber actualizado el estatus mientras la confirmación estaba abierta.
+    var rec = recPorLoad_(load);
+    if (!ctx || !rec || !cargaActivaParaVincular_(rec)) {
+      document.getElementById("vincular-error").style.display = "";
+      return;
+    }
     var btn = document.getElementById("vincular-submit");
     btn.disabled = true;
     google.script.run
@@ -4544,6 +4567,17 @@
     );
   }
 
+  /** Actualiza solo el encabezado: editar el trailer no debe reconstruir otros campos abiertos. */
+  function actualizarTituloDetalleTabla_(rec) {
+    if (String(selectedTableLoad) !== String(rec.load)) return;
+    document.getElementById("table-detail-load-label").textContent =
+      "Carga " +
+      rec.load +
+      (rec.trailer ? " — " + rec.trailer : "") +
+      " — " +
+      rec.customer;
+  }
+
   /** Dibuja (o esconde) el panel de detalle fijo debajo de la tabla, según cuál load esté
    * seleccionado (selectedTableLoad). Se llama después de cada renderTable() — incluidos los
    * refrescos de fondo (autoRefresh) — para que el panel siempre muestre datos vigentes del load
@@ -4562,12 +4596,7 @@
         });
       return;
     }
-    document.getElementById("table-detail-load-label").textContent =
-      "Carga " +
-      rec.load +
-      (rec.trailer ? " — " + rec.trailer : "") +
-      " — " +
-      rec.customer;
+    actualizarTituloDetalleTabla_(rec);
     document.getElementById("table-detail-body").innerHTML =
       detailPanelHtml(rec);
     panel.hidden = false;
@@ -8245,11 +8274,53 @@
     }
   }
 
-  function setHomeTab(tab) {
+  /** Cada acceso lateral tiene su propio contenido; la pestaña del turno conserva el resumen. */
+  function setTurnoSection_(section) {
+    var solicitudes = section === "group-pendientes";
+    var tareas = section === "group-bitacora";
+    document.getElementById("group-pendientes").hidden = tareas;
+    document.getElementById("group-bitacora-asignados").hidden = solicitudes;
+    document.getElementById("group-bitacora").hidden = solicitudes;
+    document.getElementById("shift-brief").hidden = solicitudes || tareas;
+    document.getElementById("turno-section-title").textContent = solicitudes
+      ? "Solicitudes sin carga confirmada"
+      : tareas
+        ? "Tareas de turno"
+        : "Solicitudes y tareas del turno";
+    document.getElementById("turno-section-help").textContent = solicitudes
+      ? "Registra solicitudes y vincúlalas a una carga activa cuando el cliente confirme."
+      : tareas
+        ? "Consulta lo que te asignaron o crea una tarea para alguien del panel."
+        : "Una solicitud todavía no tiene número de carga. Una tarea es trabajo que alguien debe completar.";
+    if (solicitudes) setPendientesCollapsed(false);
+    if (tareas) {
+      setBitacoraAsignadosCollapsed(false);
+      setBitacoraCollapsed(false);
+    }
+  }
+
+  function marcarNavegacion_(page, scrollId) {
+    document
+      .querySelectorAll(
+        ".sidebar-btn[data-page], .sidebar-btn[data-page-scroll]",
+      )
+      .forEach(function (b) {
+        var active = scrollId
+          ? b.getAttribute("data-page-scroll") === page + ":" + scrollId
+          : b.getAttribute("data-page") === page;
+        b.classList.toggle("active", active);
+        if (active) b.setAttribute("aria-current", "page");
+        else b.removeAttribute("aria-current");
+      });
+  }
+
+  function setHomeTab(tab, section) {
     var ahora = document.getElementById("home-tab-ahora"),
       turno = document.getElementById("home-tab-turno");
     if (ahora) ahora.hidden = tab !== "ahora";
     if (turno) turno.hidden = tab !== "turno";
+    setTurnoSection_(tab === "turno" ? section : "");
+    marcarNavegacion_("home", section);
     document.querySelectorAll(".home-tab-btn").forEach(function (b) {
       b.classList.toggle("active", b.getAttribute("data-home-tab") === tab);
     });
@@ -8277,9 +8348,7 @@
     if (page === "apartados") renderApartados_();
     if (page === "radar") radarAlAbrir_();
     if (page === "indicadores") renderIndicadores_();
-    document.querySelectorAll(".sidebar-btn[data-page]").forEach(function (b) {
-      b.classList.toggle("active", b.getAttribute("data-page") === page);
-    });
+    marcarNavegacion_(page, scrollId);
     document
       .querySelectorAll("#barra-movil [data-movil]")
       .forEach(function (b) {
@@ -8298,13 +8367,19 @@
     }
     if (page === "home") {
       if (scrollId === "group-pendientes" || scrollId === "group-bitacora")
-        setHomeTab("turno");
+        setHomeTab("turno", scrollId);
       else if (!scrollId) setHomeTab("ahora");
     }
     if (scrollId)
       setTimeout(function () {
-        var el = document.getElementById(scrollId);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        var target =
+          scrollId === "group-bitacora" ? "group-bitacora-asignados" : scrollId;
+        var el = document.getElementById(target);
+        if (el) {
+          var toggle = el.querySelector(".group-toggle");
+          if (toggle) toggle.focus({ preventScroll: true });
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }, 30);
     else window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -9790,7 +9865,10 @@
       var val = input.value.trim();
       var rec = recPorLoad_(load);
       var prev = rec ? rec.trailer : null;
-      if (rec) rec.trailer = val;
+      if (rec) {
+        rec.trailer = val;
+        actualizarTituloDetalleTabla_(rec);
+      }
       var fullValue = input
         .closest("td")
         ?.querySelector("[data-trailer-value]");
@@ -9800,7 +9878,10 @@
           showToast("Trailer actualizado — Carga " + load, "good");
         },
         function (err) {
-          if (rec) rec.trailer = prev;
+          if (rec) {
+            rec.trailer = prev;
+            actualizarTituloDetalleTabla_(rec);
+          }
           input.value = prev || "";
           if (fullValue) fullValue.textContent = prev || "Sin asignar";
           showToast("No se pudo guardar el trailer: " + err.message, "error");
@@ -10638,7 +10719,8 @@
 
     var row = e.target.closest("tr.t-row");
     if (row) {
-      if (e.target.closest("select") || e.target.closest("input")) return;
+      // Editar el trailer no debe abrir/cerrar el detalle ni cambiar el ancho durante la captura.
+      if (e.target.closest("select, input, button, details, a, label")) return;
       var load = row.getAttribute("data-load");
       selectedTableLoad =
         String(selectedTableLoad) === String(load) ? null : load;

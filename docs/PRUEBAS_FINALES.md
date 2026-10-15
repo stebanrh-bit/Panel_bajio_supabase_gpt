@@ -35,11 +35,15 @@ Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABIL
 | 27 | Guardar un Trailer largo en una carga de prueba y recargar | Valor completo en listado de tabla y tarjeta; Editar trailer conserva la edición | Pendiente |
 | 28 | Abrir Historial después de cambiar estatus, Trailer y una confirmación | Nombres legibles, autor y fecha; Antes/Ahora claros; cero y No enviado no aparecen vacíos | Pendiente |
 | 29 | Abrir/cerrar Solicitudes y tareas y registrar una solicitud | Encabezados alineados; campos legibles; fecha clara; guarda y se puede comentar/vincular | Pendiente |
-| 30 | Registrar y editar una tarea desde escritorio y móvil | Búsqueda, selección de cargas, responsable, fecha y color accesibles; persiste; editar conserva responsable | Pendiente |
+| 30 | Registrar y editar una tarea desde escritorio y móvil | Búsqueda, selección de cargas activas, Asignar a:, fecha y color accesibles; persiste; editar conserva la persona asignada | Pendiente |
 | 31 | Calendario: elegir cliente y Pickup/Cruce/Entrega/Load apartado; cambiar semana y limpiar | Solo aparecen movimientos del tipo y cliente elegidos; filtros se conservan entre semanas; apartados sin relación tienen opción separada; abre registros y funciona en móvil | Pendiente |
 | 32 | Activar millas automáticas, guardar un trayecto OSM y ejecutar un lote | Un activador por hora; Google se guarda en Supabase conservando OSM; al volver a buscar se muestra Google; funciona con el panel cerrado | Usuario confirmó activación y primer lote de 4 completados el 15 de octubre; falta confirmar ejecución programada y lectura desde el radar |
 | 33 | Repetir activación, detener y reactivar; recálculo manual | No duplica activadores de la cuenta; detener conserva datos; corrección manual persiste y tiene prioridad | Pendiente |
 | 34 | Apartar un load con CSR de VG que no sea usuario del panel; repetir desde Radar | Captura manual sin directorio ni asignación automática; nombre persiste al recargar y editar; autor del apartado sigue siendo la cuenta autenticada | Pendiente |
+
+| 35 | En Cargas, abrir el detalle de una fila y después Editar trailer; escribir T0132 | El detalle sigue abierto, T0132 cabe en el campo; abrir el editor no cambia la selección; tabla con desplazamiento interno en pantallas estrechas | Pendiente en Google; comprobación local documentada en VALIDACION_SITIO.md |
+| 36 | Plegar las tres secciones del turno, ir a Cargas y entrar por Solicitudes y por Tareas de turno | Solicitudes muestra sus registros; Tareas muestra las asignadas a ti y las registradas; botón lateral marcado y secciones abiertas; la pestaña conjunta recupera el resumen | Pendiente en Google |
+| 37 | Abrir Vincular a una carga, buscar una activa, una entregada sin POD y una cancelada | Solo se ofrecen cargas activas; entregadas/completadas y canceladas no aparecen; sin coincidencias no permite vincular | Pendiente en Google |
 
 ## Última etapa: cuentas y permisos
 

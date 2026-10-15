@@ -25,11 +25,11 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
     </button>
     <div class="sidebar-sep"></div>
-    <button type="button" class="sidebar-btn" data-page-scroll="home:group-pendientes" title="Pendientes de load">
+    <button type="button" class="sidebar-btn" data-page-scroll="home:group-pendientes" title="Solicitudes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
       <span class="sidebar-badge" id="sidebar-badge-pendientes"></span>
     </button>
-    <button type="button" class="sidebar-btn" data-page-scroll="home:group-bitacora" title="Bitácora de turno">
+    <button type="button" class="sidebar-btn" data-page-scroll="home:group-bitacora" title="Tareas de turno">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
       <span class="sidebar-badge" id="sidebar-badge-bitacora"></span>
     </button>
@@ -201,7 +201,7 @@
 </details>
 </div>
 <div class="home-tab-panel" id="home-tab-turno" hidden>
-<div class="home-secondary-title"><h2>Solicitudes y tareas del turno</h2><p class="home-section-help">Una solicitud todavía no tiene número de carga. Una tarea es trabajo que alguien debe completar.</p></div>
+<div class="home-secondary-title"><h2 id="turno-section-title">Solicitudes y tareas del turno</h2><p class="home-section-help" id="turno-section-help">Una solicitud todavía no tiene número de carga. Una tarea es trabajo que alguien debe completar.</p></div>
   <section class="brief-panel" id="shift-brief">
     <div class="brief-head"><div><h2 class="brief-title" id="brief-greeting">Resumen de turno</h2><p class="brief-sub" id="brief-time">Situación operativa actual</p></div>
       <div class="brief-actions"><button class="ws-btn" type="button" id="brief-copy">Copiar resumen</button><button class="ws-btn primary" type="button" id="handoff-toggle">Preparar cierre de turno</button></div></div>
@@ -633,9 +633,9 @@
         </fieldset>
         <label class="turno-field">Fecha de seguimiento (opcional)<input type="date" id="bitacora-fecha-seguimiento"></label>
         <div id="bitacora-asignado-wrap">
-          <label class="turno-field">Responsable<select id="bitacora-asignado"></select></label>
+          <label class="turno-field">Asignar a:<select id="bitacora-asignado"></select></label>
         </div>
-        <div class="turno-assignment-note turno-field-wide" id="bitacora-asignado-fixed-label" style="display:none;">Asignado a: <b id="bitacora-asignado-fixed"></b>. El responsable se conserva al editar.</div>
+        <div class="turno-assignment-note turno-field-wide" id="bitacora-asignado-fixed-label" style="display:none;">Asignado a: <b id="bitacora-asignado-fixed"></b>. La persona asignada se conserva al editar.</div>
         <div class="turno-assignment-note turno-field-wide" id="bitacora-asignado-auto-label" style="display:none;">Se asignará a quien dé seguimiento a <b id="bitacora-asignado-auto-csr"></b>. Si todavía nadie lo sigue, la tarea se guarda de todos modos.</div>
         <fieldset class="turno-colors turno-field-wide">
           <legend>Color de la tarjeta (opcional)</legend>
@@ -664,7 +664,7 @@
         <input type="text" id="vincular-load-search" placeholder="Buscar carga o cliente…" autocomplete="off">
         <select id="vincular-load-select" aria-label="Carga a vincular" size="8"></select>
       </div>
-      <div class="csr-pw-error" id="vincular-error" style="display:none;">Elige un load.</div>
+      <div class="csr-pw-error" id="vincular-error" style="display:none;" role="alert">Elige una carga activa.</div>
       <button type="button" class="csr-btn" id="vincular-submit" style="margin-top:0.6rem;">Vincular y combinar comentarios</button>
     </div>
   </div>

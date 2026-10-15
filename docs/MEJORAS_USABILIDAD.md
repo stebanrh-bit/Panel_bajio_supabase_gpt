@@ -86,6 +86,14 @@ El estado del guardado indica **Guardando cambios…**, **Cambios guardados** o 
 
 Dentro de las ventanas, Tab y Shift+Tab recorren sus controles; el fondo queda fuera del recorrido. Escape mantiene su comportamiento de cierre y las advertencias existentes. Al cerrar, el foco vuelve al control que abrió la ventana cuando sigue disponible. Se asocian los rótulos visuales a los campos para que puedan identificarse con tecnologías de asistencia.
 
+## Trailer, navegación y asignación
+
+Al abrir el detalle de una carga, el editor del trailer conserva espacio suficiente para T0132. Si lista y detalle no caben juntos, el desplazamiento horizontal queda dentro de la tabla. Abrir «Editar trailer» ya no abre o cierra el detalle por accidente; el encabezado también refleja el trailer editado. Los identificadores largos se leen completos encima del editor.
+
+En el menú lateral, **Solicitudes** muestra solo las solicitudes sin carga confirmada. **Tareas de turno** muestra tareas asignadas a ti y tareas que registraste. El botón elegido queda marcado y las secciones se abren aunque estuvieran plegadas. La pestaña **Solicitudes y tareas** vuelve a mostrar el conjunto y el resumen del turno.
+
+En Nueva tarea, **Asignar a:** permite elegir a una persona del panel. Al editar, la persona asignada se conserva. Las listas para vincular o relacionar una carga muestran únicamente cargas activas; excluyen entregadas/completadas incluso sin POD, canceladas, archivadas y TONU finalizadas. Editar una tarea que ya tenía relación con una carga terminada conserva ese contexto.
+
 ## Actualizar la página de Google
 
 1. Abre [index-sitio.html completo](https://raw.githubusercontent.com/stebanrh-bit/Panel_bajio_supabase_gpt/supabase-inicial/google-apps-script/index-sitio.html). Copia todo con Ctrl+A y Ctrl+C.
@@ -104,6 +112,8 @@ La entrega se comprueba con la suite automática, la compilación y el verificad
 - Una fila por carga en Inicio y filtros por tipo de acción.
 - Calendario con dos clientes: tipos exclusivos, combinación con cliente, apartados relacionados y sin cliente identificado, semana anterior/siguiente/actual, limpiar filtros, abrir registros y móvil a 360/390 px.
 - Desplegables de solicitudes/tareas con teclado y preferencia conservada al recargar; altas con validación y envío de los campos correctos; edición con responsable conservado; ventanas sin desbordamiento a 360 y 390 px.
+- T0132 completo en el editor con detalle abierto a 1533/1440/1180/1024/390/360 px; el título refleja la edición y el documento no se desborda.
+- Solicitudes y Tareas tienen destinos laterales distintos, secciones abiertas y botón marcado; Asignar a: conserva el envío a la persona elegida; solo se ofrecen cargas activas para vincular o crear relaciones nuevas.
 - Trailer largo completo en tabla y tarjetas, guardado y persistencia; historial con valores Antes/Ahora, cero y confirmaciones, sin nombres técnicos ni ejecución de HTML en los valores.
 - Dos plazos independientes al revisar tránsito o completar un seguimiento.
 - Tab/Shift+Tab dentro de Comentarios y el expediente, ventanas anidadas, Escape y retorno al botón de origen.
@@ -115,7 +125,7 @@ La entrega se comprueba con la suite automática, la compilación y el verificad
 
 Resultados detallados en [VALIDACION_SITIO.md](VALIDACION_SITIO.md). Las capturas incluidas muestran datos ficticios. La publicación Google con sesiones reales, las cuotas de mapas y las pruebas entre cuentas reales siguen pendientes después de actualizar. Las automatizaciones externas del sistema anterior mantienen los límites documentados en [COMPARACION_ORIGINAL.md](COMPARACION_ORIGINAL.md).
 
-Capturas: [Inicio](imagenes/panel-home.png), [Cargas](imagenes/panel-operation.png), [Administración](imagenes/panel-administracion.png) y [Cargas en móvil](imagenes/panel-cargas-movil.png).
+Capturas: [Trailer con detalle abierto](imagenes/trailer-detalle-T0132.png), [Inicio](imagenes/panel-home.png), [Cargas](imagenes/panel-operation.png), [Administración](imagenes/panel-administracion.png) y [Cargas en móvil](imagenes/panel-cargas-movil.png).
 
 ## Archivos fuente
 

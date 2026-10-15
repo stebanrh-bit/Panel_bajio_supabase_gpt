@@ -9,6 +9,8 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 ## Estado actual
 
+[Auditoría del proyecto y 90 opciones](docs/AUDITORIA_OPTIMIZACION_2026-10-15.md): 20 hallazgos documentados y 30 mejoras, 30 cambios de uso y 30 funciones nuevas, con prioridad, esfuerzo y efecto previsto sobre recursos. Distingue recomendaciones pendientes de los cuatro ajustes preparados para Trailer, navegación, asignación y vinculación de cargas activas.
+
 **Millas Google automáticas:** [guía de activación](docs/MILLAS_GOOGLE_AUTOMATICAS.md). Completa trayectos OSM pendientes en lotes de hasta 20 cada hora, con pausa por cuota y recuperación de trabajos. Para el sitio existente requiere SQL 010, actualizar Code.gs e index.html y vincular/activar el proceso desde el editor Google. El repositorio actualizado no activa el proceso remoto por sí mismo.
 
 [Mejoras de usabilidad aplicadas](docs/MEJORAS_USABILIDAD.md): Inicio con una fila por carga; tarjetas con edición desplegable; Administración por secciones; lectura, móvil, teclado y confirmación de guardado mejorados. Pasaron 108 pruebas automáticas y 38 comparaciones visuales; el build compila 129 módulos. Solicitudes y tareas tienen desplegables alineados y formularios con campos agrupados. El CSR que tiene un load apartado se captura manualmente como contacto externo de Vanguard. El calendario semanal filtra por cliente y por Pickup, Cruce, Entrega o Load apartado. El listado muestra el trailer completo y el historial presenta nombres legibles con valores Antes/Ahora. Para activarlas en el proyecto existente, reemplazar solo el HTML Google y publicar una nueva versión.

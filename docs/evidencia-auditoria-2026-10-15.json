@@ -1,0 +1,161 @@
+{
+  "recorded_at": "2026-10-15T12:13:53.767448-06:00",
+  "metrics": {
+    "base_commit": "c4bbadec545c08e4588ed962a4a1c249efd37012",
+    "active_entry": "web/src/original/main.js",
+    "internal_script_lines": 16473,
+    "google_server_lines": 452,
+    "web_source_files": 63,
+    "migrations": 10,
+    "bundle": [
+      {
+        "path": "web/dist/assets/index-DZqeVZaV.js",
+        "bytes": 1916125,
+        "gzip_bytes_estimated": 436229
+      }
+    ],
+    "embedded_images": {
+      "web/src/original/client.template.html": {
+        "count": 0,
+        "html_bytes": 28057
+      },
+      "web/src/original/index.template.html": {
+        "count": 2,
+        "html_bytes": 103699
+      },
+      "web/src/original/manager.template.html": {
+        "count": 0,
+        "html_bytes": 26461
+      }
+    },
+    "baseline_tests": {
+      "passed": 108,
+      "failed": 0,
+      "skipped": 0
+    },
+    "build_modules": 129,
+    "previous_browser_check": {
+      "comparisons": 38,
+      "errors": 0,
+      "fresh_run_for_this_audit": false
+    },
+    "no_production_access": true
+  },
+  "local_probes": {
+    "htmlRendering": {
+      "inert": true,
+      "source": "tableRowHtml",
+      "identifierLength": 44,
+      "parsedElementCount": 2
+    },
+    "incidentRemovalHistory": {
+      "inputRecords": 1,
+      "visibleItems": 0
+    },
+    "routeRead": {
+      "fixture": true,
+      "rowsReturnedByRepositoryLayer": 10000,
+      "rowsShown": 1,
+      "pagesWithCurrent500RowReader": 21
+    },
+    "csvExport": {
+      "sample": "=1+1",
+      "exportedCell": "=1+1",
+      "formulaPrefixPreserved": true
+    },
+    "backupNewTables": [
+      {
+        "table": "original_places",
+        "inClientExport": false,
+        "inSqlAllowlist": false
+      },
+      {
+        "table": "original_routes",
+        "inClientExport": false,
+        "inSqlAllowlist": false
+      },
+      {
+        "table": "original_radar",
+        "inClientExport": false,
+        "inSqlAllowlist": false
+      },
+      {
+        "table": "original_preferences",
+        "inClientExport": false,
+        "inSqlAllowlist": false
+      }
+    ],
+    "limits": [
+      "Sin acceso a producción ni revisión de consumo real",
+      "La prueba HTML demuestra interpretación de etiquetas; no ejecuta scripts ni prueba una explotación remota",
+      "La prueba de consultas usa un conjunto ficticio; no mide latencia ni ahorro económico real"
+    ]
+  },
+  "scope": "Auditoría local de c4bbade y propuestas; cuatro ajustes posteriores de interfaz con validación separada; sin acceso a producción",
+  "post_audit_changes": {
+    "recorded_at": "2026-10-15T12:48:26.529687-06:00",
+    "changes": [
+      "Editor Trailer con detalle abierto y encabezado sincronizado",
+      "Destinos independientes de Solicitudes y Tareas de turno",
+      "Etiqueta Asignar a: con selección de personas del panel",
+      "Listas de vinculación y relaciones nuevas limitadas a cargas activas"
+    ],
+    "validation": {
+      "tests": {
+        "passed": 108,
+        "failed": 0,
+        "skipped": 0
+      },
+      "build_modules": 129,
+      "browser_visual_comparisons": 38,
+      "browser_errors": [],
+      "trailer_editor_measurements": [
+        {
+          "viewport": 1533,
+          "available": 114,
+          "required": 28.3544921875,
+          "insideCell": true,
+          "documentFits": true
+        },
+        {
+          "viewport": 1440,
+          "available": 114,
+          "required": 28.3544921875,
+          "insideCell": true,
+          "documentFits": true
+        },
+        {
+          "viewport": 1180,
+          "available": 114,
+          "required": 28.3544921875,
+          "insideCell": true,
+          "documentFits": true
+        },
+        {
+          "viewport": 1024,
+          "available": 170,
+          "required": 28.3544921875,
+          "insideCell": true,
+          "documentFits": true
+        },
+        {
+          "viewport": 390,
+          "available": 170,
+          "required": 28.3544921875,
+          "insideCell": true,
+          "documentFits": true
+        },
+        {
+          "viewport": 360,
+          "available": 170,
+          "required": 28.3544921875,
+          "insideCell": true,
+          "documentFits": true
+        }
+      ],
+      "html_sha256": "4079a2ec5ad34b0fc02de3701590c4a47b869676f99e0c59537c5f6986622767",
+      "supabase_transport": "Interceptado con datos ficticios; sin escritura real"
+    },
+    "publication": "HTML preparado; publicación Google y comprobación con sesión real pendientes"
+  }
+}

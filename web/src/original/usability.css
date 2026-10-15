@@ -280,6 +280,27 @@
   font-size: 14px;
   min-height: 40px;
 }
+/* Con el detalle abierto, la regla antigua reducía Trailer a 82 px y cortaba incluso T0132.
+   El desplazamiento queda dentro de la tabla cuando no caben ambas columnas de la vista. */
+@media (min-width: 1180px) {
+  .panel-internal
+    #table-view:has(#table-detail-panel:not([hidden]))
+    .table-section {
+    min-width: 0;
+  }
+  .panel-internal
+    #table-view:has(#table-detail-panel:not([hidden]))
+    .loads-table {
+    min-width: 820px;
+  }
+  .panel-internal
+    #table-view:has(#table-detail-panel:not([hidden]))
+    .loads-table
+    colgroup
+    .c-trailer {
+    width: 154px;
+  }
+}
 .panel-internal .action-trailer {
   white-space: normal;
   overflow: visible;

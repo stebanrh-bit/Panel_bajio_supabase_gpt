@@ -1,0 +1,912 @@
+{
+  "date": "2026-10-15",
+  "timezone": "America/Mexico_City",
+  "base_commit": "c4bbadec545c08e4588ed962a4a1c249efd37012",
+  "counts": {
+    "mejoras": 30,
+    "cambios": 30,
+    "funciones": 30
+  },
+  "options": [
+    {
+      "id": "M01",
+      "proposal": "Escapar todo dato dinámico antes de insertarlo en HTML",
+      "benefit": "Que una carga con símbolos se vea como texto y no cree elementos HTML.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H01",
+      "category": "mejora"
+    },
+    {
+      "id": "M02",
+      "proposal": "Proteger los CSV contra fórmulas inesperadas",
+      "benefit": "Exportar texto seguro para Excel sin convertir importes negativos válidos en texto.",
+      "priority": "P1",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H02",
+      "category": "mejora"
+    },
+    {
+      "id": "M03",
+      "proposal": "Mostrar en el historial el retiro de incidencias",
+      "benefit": "Conservar visible quién retiró la incidencia, cuándo y cuál era.",
+      "priority": "P1",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H03",
+      "category": "mejora"
+    },
+    {
+      "id": "M04",
+      "proposal": "Completar el respaldo de datos y comprobar una restauración",
+      "benefit": "Incluir las tablas actuales del radar y preferencias; verificar recuperación en una base de prueba.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "H04",
+      "category": "mejora"
+    },
+    {
+      "id": "M05",
+      "proposal": "Consultar en Supabase solo las rutas y ubicaciones necesarias",
+      "benefit": "Evitar descargar el catálogo entero para calcular o abrir un trayecto.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H05",
+      "category": "mejora"
+    },
+    {
+      "id": "M06",
+      "proposal": "Guardar las distancias por sentido del recorrido",
+      "benefit": "Distinguir origen→destino de destino→origen; no presentar la ruta inversa como medición exacta.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "H06",
+      "category": "mejora"
+    },
+    {
+      "id": "M07",
+      "proposal": "Implementar actualizaciones incrementales reales de cargas",
+      "benefit": "Traer altas, cambios y salidas del listado sin descargar todas las cargas activas.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H07",
+      "category": "mejora"
+    },
+    {
+      "id": "M08",
+      "proposal": "Traer únicamente el último comentario de cada carga",
+      "benefit": "Una consulta de resumen en vez de descargar todo el historial de comentarios.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H08",
+      "category": "mejora"
+    },
+    {
+      "id": "M09",
+      "proposal": "Contar incidencias en la base de datos",
+      "benefit": "Enviar cantidades por carga sin descargar sus descripciones completas para los contadores.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H07",
+      "category": "mejora"
+    },
+    {
+      "id": "M10",
+      "proposal": "Filtrar las comunicaciones por cliente desde Supabase",
+      "benefit": "Consultar solo comunicaciones de las cargas del cliente solicitado.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H09",
+      "category": "mejora"
+    },
+    {
+      "id": "M11",
+      "proposal": "Paginar los historiales y cargarlos al abrirlos",
+      "benefit": "Evitar descargar historiales completos de cargas y apartados en cada refresco.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H10",
+      "category": "mejora"
+    },
+    {
+      "id": "M12",
+      "proposal": "Filtrar tareas por estado y periodo en el servidor",
+      "benefit": "Cargar primero tareas abiertas y consultar las antiguas bajo demanda.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H11",
+      "category": "mejora"
+    },
+    {
+      "id": "M13",
+      "proposal": "Aplicar límites de bitácoras y cierres en la consulta",
+      "benefit": "Solicitar los últimos registros directamente en lugar de descargar todo y recortar.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H11",
+      "category": "mejora"
+    },
+    {
+      "id": "M14",
+      "proposal": "Procesar Excel pesado fuera del hilo de la pantalla",
+      "benefit": "Mantener el panel utilizable mientras se lee y convierte un archivo permitido.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H12",
+      "category": "mejora"
+    },
+    {
+      "id": "M15",
+      "proposal": "Buscar la cuenta de acceso mediante una consulta específica",
+      "benefit": "Dejar de leer todos los perfiles para resolver un solo usuario.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H13",
+      "category": "mejora"
+    },
+    {
+      "id": "M16",
+      "proposal": "Reforzar límites de acceso y caducar intentos antiguos",
+      "benefit": "Complementar el bloqueo por usuario con control global y limpieza de registros sin uso.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H13",
+      "category": "mejora"
+    },
+    {
+      "id": "M17",
+      "proposal": "Usar revisiones de datos en vez de recuentos completos para detectar cambios",
+      "benefit": "Reducir el trabajo de cada refresco de las marcas de actualización.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H14",
+      "category": "mejora"
+    },
+    {
+      "id": "M18",
+      "proposal": "Coordinar el refresco entre pestañas y adaptarlo a la actividad",
+      "benefit": "Evitar varias pestañas de una cuenta preguntando lo mismo cada minuto.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H14",
+      "category": "mejora"
+    },
+    {
+      "id": "M19",
+      "proposal": "Seleccionar solo las columnas requeridas por cada pantalla",
+      "benefit": "Separar resúmenes ligeros y datos completos del expediente.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H05,H07,H11",
+      "category": "mejora"
+    },
+    {
+      "id": "M20",
+      "proposal": "Reducir el tamaño del código publicado conservando fuentes legibles",
+      "benefit": "Optimizar la entrega de producción sin perder archivos fuente comentados para mantenimiento.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H15; decidir si se compacta el artefacto generado",
+      "category": "mejora"
+    },
+    {
+      "id": "M21",
+      "proposal": "Generar o cargar solo la vista y los lectores que se están usando",
+      "benefit": "Evitar cargar desde el inicio el código de los tres portales y del lector de archivos.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H15; conservar alojamiento Google y enlace actual",
+      "category": "mejora"
+    },
+    {
+      "id": "M22",
+      "proposal": "Actualizar únicamente los componentes visuales afectados",
+      "benefit": "Reducir reconstrucciones de tablas y recorridos generales del observador del DOM.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H15",
+      "category": "mejora"
+    },
+    {
+      "id": "M23",
+      "proposal": "Añadir índices después de medir las consultas más usadas",
+      "benefit": "Probar índices de historial y rutas con EXPLAIN y datos representativos.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓/↑",
+      "evidence_or_dependency": "H16; índices ahorran lectura pero ocupan espacio",
+      "category": "mejora"
+    },
+    {
+      "id": "M24",
+      "proposal": "Definir retención y archivo de historiales e importaciones",
+      "benefit": "Controlar crecimiento sin borrar auditoría ni evidencias necesarias por defecto.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H17; requiere acordar periodos y recuperación",
+      "category": "mejora"
+    },
+    {
+      "id": "M25",
+      "proposal": "Poner tiempo máximo y cancelación a consultas externas",
+      "benefit": "Una búsqueda nueva o un servicio caído no debe dejar búsquedas antiguas ocupadas indefinidamente.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H18",
+      "category": "mejora"
+    },
+    {
+      "id": "M26",
+      "proposal": "Establecer presupuesto diario del cálculo de Google",
+      "benefit": "Coordinar trabajos programados y recálculos manuales dentro de una reserva de cuota.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H18; el límite actual es por lote y depende también de otros usos de Google",
+      "category": "mejora"
+    },
+    {
+      "id": "M27",
+      "proposal": "Clasificar fallos y conservar métricas de ejecución sin secretos",
+      "benefit": "Distinguir cuota, autorización y guardado; registrar duración, intentos y recuperaciones.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "H18",
+      "category": "mejora"
+    },
+    {
+      "id": "M28",
+      "proposal": "Automatizar pruebas, compilación y verificación del paquete en cada cambio",
+      "benefit": "Impedir publicar un HTML, SQL o ZIP desactualizado.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H19",
+      "category": "mejora"
+    },
+    {
+      "id": "M29",
+      "proposal": "Ampliar las pruebas adversariales y validar permisos con cuentas reales de prueba",
+      "benefit": "Cubrir HTML, CSV, datos límite y aislamiento; complementar la simulación existente.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H01,H02,H19",
+      "category": "mejora"
+    },
+    {
+      "id": "M30",
+      "proposal": "Dividir el script principal y documentar qué código está activo",
+      "benefit": "Facilitar cambios pequeños y conservar los originales como referencia claramente identificada.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H15,H19",
+      "category": "mejora"
+    },
+    {
+      "id": "C01",
+      "proposal": "Unificar palabras: carga, unidad, trailer y cita",
+      "benefit": "Evitar términos mezclados en inglés y español en la misma operación.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Interfaz interna y portales",
+      "category": "cambio"
+    },
+    {
+      "id": "C02",
+      "proposal": "Ordenar Inicio como un plan de trabajo del día",
+      "benefit": "Destacar lo urgente, lo que toca después y el trabajo futuro.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Ajustar la presentación actual, que ya agrupa por carga",
+      "category": "cambio"
+    },
+    {
+      "id": "C03",
+      "proposal": "Acordar estatus y transiciones por etapa",
+      "benefit": "Reducir cambios ambiguos y definir cuándo se puede avanzar, regresar o cancelar.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Decisión operativa; conservar compatibilidad con los estatus importados",
+      "category": "cambio"
+    },
+    {
+      "id": "C04",
+      "proposal": "Distinguir etapa, prioridad y condición de atención",
+      "benefit": "Evitar que el color de la tarjeta se confunda con el estatus del viaje.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Actualmente conviven estatus, colores y alertas",
+      "category": "cambio"
+    },
+    {
+      "id": "C05",
+      "proposal": "Usar una distribución uniforme en todas las ventanas",
+      "benefit": "Homogeneizar etiquetas, espacio, cierre, desplazamiento y posición de Guardar.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Extender los ajustes ya aplicados a solicitudes y tareas",
+      "category": "cambio"
+    },
+    {
+      "id": "C06",
+      "proposal": "Mantener avisos no urgentes dentro de la campana al capturar",
+      "benefit": "Evitar que notificaciones de fondo cubran campos; conservar errores visibles.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Extender el criterio ya aplicado a algunos formularios",
+      "category": "cambio"
+    },
+    {
+      "id": "C07",
+      "proposal": "Nombrar de forma uniforme revisión operativa y seguimiento personal",
+      "benefit": "Reconocer sus dos plazos independientes en todas las ventanas.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "No fusionar los dos recordatorios existentes",
+      "category": "cambio"
+    },
+    {
+      "id": "C08",
+      "proposal": "Separar mensaje preparado, envío confirmado y respuesta recibida",
+      "benefit": "Hacer explícito qué acción realizó realmente la persona.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Cambio del flujo manual de comunicación, no prueba de entrega automática",
+      "category": "cambio"
+    },
+    {
+      "id": "C09",
+      "proposal": "Cambiar documentos de una casilla a estados operativos acordados",
+      "benefit": "Distinguir pendiente, recibido, validado y rechazado cuando la operación lo necesite.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Hoy existen principalmente indicadores de recibido/enviado",
+      "category": "cambio"
+    },
+    {
+      "id": "C10",
+      "proposal": "Separar el rol real Supervisor de los permisos de Admin",
+      "benefit": "Decidir qué puede administrar Abraham y qué queda reservado al administrador.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H20; no inferir autorización a partir del texto del perfil",
+      "category": "cambio"
+    },
+    {
+      "id": "C11",
+      "proposal": "Definir si el CSR puede consultar todo o solo sus clientes",
+      "benefit": "Alinear visibilidad y permisos reales con la política que elijas.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H20; el filtro de persona actual no equivale a aislamiento por RLS",
+      "category": "cambio"
+    },
+    {
+      "id": "C12",
+      "proposal": "Estandarizar qué debe contener cada cierre de turno",
+      "benefit": "Exigir pendientes críticos, responsable y siguiente acción, conservando el resumen automático.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Cambio de procedimiento del cierre existente",
+      "category": "cambio"
+    },
+    {
+      "id": "C13",
+      "proposal": "Definir cuándo vence, se renueva y se completa cada tipo de aviso",
+      "benefit": "Documentar reglas únicas para evitar renovaciones accidentales o expectativas distintas.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Revisión del significado de acciones existentes, no eliminación de pendientes",
+      "category": "cambio"
+    },
+    {
+      "id": "C14",
+      "proposal": "Mostrar validación de campos junto al dato que falta",
+      "benefit": "Aplicar el mismo lenguaje y ubicación del error en todos los formularios.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Conservar siempre la validación de Supabase",
+      "category": "cambio"
+    },
+    {
+      "id": "C15",
+      "proposal": "Mostrar la vista previa de importación por carga y campo",
+      "benefit": "Permitir comprender el cambio exacto antes de confirmar, además de los totales actuales.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "La vista previa ya existe; cambia su nivel de detalle",
+      "category": "cambio"
+    },
+    {
+      "id": "C16",
+      "proposal": "Explicar qué datos manuales se conservarán al importar",
+      "benefit": "Hacer visibles las reglas de protección antes de aplicar el archivo.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "No quitar la protección ni resolver conflictos de manera silenciosa",
+      "category": "cambio"
+    },
+    {
+      "id": "C17",
+      "proposal": "Mostrar fuente y fecha del cálculo junto a las millas",
+      "benefit": "Identificar Google, OSM y estimación y la vigencia del dato utilizado.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "La fuente ya se muestra; uniformar fecha y explicación",
+      "category": "cambio"
+    },
+    {
+      "id": "C18",
+      "proposal": "Separar carga relacionada y referencia libre del apartado",
+      "benefit": "Relacionar un número real cuando exista y conservar notas libres aparte.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "El CSR externo de VG permanece como captura manual",
+      "category": "cambio"
+    },
+    {
+      "id": "C19",
+      "proposal": "Estandarizar nombres y alias de clientes",
+      "benefit": "Evitar que diferencias de escritura fragmenten filtros, asignaciones y reportes.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Revisar nombres existentes antes de fusionar clientes",
+      "category": "cambio"
+    },
+    {
+      "id": "C20",
+      "proposal": "Elegir explícitamente la zona horaria operativa",
+      "benefit": "Distinguir la hora de despacho de la hora local del origen o destino.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Actualmente parte de la presentación usa el horario del dispositivo",
+      "category": "cambio"
+    },
+    {
+      "id": "C21",
+      "proposal": "Hacer visibles los filtros activos y un patrón común para limpiarlos",
+      "benefit": "Evitar interpretar una lista filtrada como registros perdidos.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Conservar filtros existentes de cada sección",
+      "category": "cambio"
+    },
+    {
+      "id": "C22",
+      "proposal": "Uniformar fechas, horas y valores sin información",
+      "benefit": "Usar el mismo formato legible y distinguir sin fecha, cero y pendiente.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Extender reglas existentes sin alterar instantes guardados",
+      "category": "cambio"
+    },
+    {
+      "id": "C23",
+      "proposal": "Ordenar las columnas por decisión operativa",
+      "benefit": "Priorizar carga, cliente, etapa y próximo compromiso; relegar detalles secundarios.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Cambio de orden y jerarquía de la tabla actual",
+      "category": "cambio"
+    },
+    {
+      "id": "C24",
+      "proposal": "Pedir motivo y explicar el efecto de cancelar, liberar o retirar",
+      "benefit": "Unificar las acciones sensibles con confirmaciones concretas y auditoría.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "No sustituye la validación de autor y versión existente",
+      "category": "cambio"
+    },
+    {
+      "id": "C25",
+      "proposal": "Usar acceso por usuario escrito sin publicar el directorio del equipo",
+      "benefit": "Reducir información expuesta en la pantalla de acceso.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H13; decisión de comodidad frente a exposición del directorio",
+      "category": "cambio"
+    },
+    {
+      "id": "C26",
+      "proposal": "Dar a Gerencia accesos individuales en lugar de una contraseña compartida",
+      "benefit": "Identificar y revocar a cada persona de consulta.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "El acceso actual de Vista Gerencia usa vista-gerencia",
+      "category": "cambio"
+    },
+    {
+      "id": "C27",
+      "proposal": "Acordar qué detalle de una incidencia se publica al cliente",
+      "benefit": "Separar el texto de operación interna del mensaje destinado al cliente.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "H20; hoy el portal recibe incidencias activas mediante una lista explícita",
+      "category": "cambio"
+    },
+    {
+      "id": "C28",
+      "proposal": "Usar una revisión de prueba antes de cada publicación Google",
+      "benefit": "Comprobar la misma versión y sus pasos de activación antes de sustituir la publicación habitual.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Proceso de publicación; no promesa de acceso real desde Codex",
+      "category": "cambio"
+    },
+    {
+      "id": "C29",
+      "proposal": "Normalizar tipos y reglas de campos entre interfaz y base",
+      "benefit": "Migrar gradualmente booleanos y fechas heredados a contratos coherentes.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Requiere migración compatible, ensayo de restauración y pruebas de importación",
+      "category": "cambio"
+    },
+    {
+      "id": "C30",
+      "proposal": "Crear instrucciones cortas por rol con ejemplos reales",
+      "benefit": "Ayudar a Admin, Supervisor, CSR y Cliente a completar sus tareas habituales.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Complementar las guías de instalación y la ayuda actual",
+      "category": "cambio"
+    },
+    {
+      "id": "F01",
+      "proposal": "Adjuntar POD, BOL y otros documentos privados",
+      "benefit": "Consultar el archivo real desde la carga con acceso controlado.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Requiere Storage, reglas de acceso y política de tamaños/retención",
+      "category": "funcion"
+    },
+    {
+      "id": "F02",
+      "proposal": "Controlar vigencia y vencimiento de documentos",
+      "benefit": "Avisar antes de caducidad de permisos o documentación relevante.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Estados de documentos acordados en C09",
+      "category": "funcion"
+    },
+    {
+      "id": "F03",
+      "proposal": "Configurar SLA por cliente",
+      "benefit": "Definir plazos y metas diferentes para avisos, respuesta y seguimiento.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "El cálculo SLA actual no constituye un configurador por cliente",
+      "category": "funcion"
+    },
+    {
+      "id": "F04",
+      "proposal": "Escalar pendientes sin atender al responsable de supervisión",
+      "benefit": "Derivar tareas críticas según plazo y responsable.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Depende de C10, C11 y reglas operativas explícitas",
+      "category": "funcion"
+    },
+    {
+      "id": "F05",
+      "proposal": "Crear tareas recurrentes",
+      "benefit": "Programar revisiones diarias o semanales sin volver a capturarlas.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Nueva programación, distinta de los recordatorios de una carga",
+      "category": "funcion"
+    },
+    {
+      "id": "F06",
+      "proposal": "Agregar plantillas de checklist y dependencias de tareas",
+      "benefit": "No olvidar pasos y ordenar el trabajo que depende de otro.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Nueva estructura para tareas, además de su nota",
+      "category": "funcion"
+    },
+    {
+      "id": "F07",
+      "proposal": "Solicitar y aprobar recargos con evidencia",
+      "benefit": "Documentar autorización, importe y responsable antes de cerrar el cargo.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "El indicador actual de recargos no es un flujo de aprobación",
+      "category": "funcion"
+    },
+    {
+      "id": "F08",
+      "proposal": "Enviar alertas programadas con el panel cerrado",
+      "benefit": "Recibir avisos por un canal externo autorizado aunque no esté abierta la página.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Diferente de las notificaciones actuales del navegador; requiere elegir proveedor/canal",
+      "category": "funcion"
+    },
+    {
+      "id": "F09",
+      "proposal": "Enviar reportes semanales automáticamente por correo",
+      "benefit": "Entregar resúmenes programados por cliente y destinatario.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Hoy existen exportaciones manuales; requiere permisos y cuotas de correo",
+      "category": "funcion"
+    },
+    {
+      "id": "F10",
+      "proposal": "Integrar WhatsApp con confirmaciones reales de entrega",
+      "benefit": "Registrar el resultado del proveedor en vez de depender solo de la marca manual.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "API externa, consentimiento de destinatarios y posible costo adicional",
+      "category": "funcion"
+    },
+    {
+      "id": "F11",
+      "proposal": "Conectar telemetría de Samsara u otro proveedor",
+      "benefit": "Actualizar ubicación sin pegar coordenadas manualmente.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Requiere acceso autorizado a la API y conocer sus cuotas",
+      "category": "funcion"
+    },
+    {
+      "id": "F12",
+      "proposal": "Detectar llegada y salida mediante geocercas",
+      "benefit": "Generar eventos al entrar o salir de una instalación.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Depende de F11 o de otra fuente de posición",
+      "category": "funcion"
+    },
+    {
+      "id": "F13",
+      "proposal": "Calcular rutas con restricciones de camión",
+      "benefit": "Considerar altura, peso y vías restringidas con un proveedor adecuado.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Los modos driving actuales no garantizan rutas autorizadas para camión",
+      "category": "funcion"
+    },
+    {
+      "id": "F14",
+      "proposal": "Planear disponibilidad del conductor según horas de servicio",
+      "benefit": "Estimar si el operador puede llegar según jornada y descanso.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "La etiqueta HOS actual no es un cálculo de disponibilidad",
+      "category": "funcion"
+    },
+    {
+      "id": "F15",
+      "proposal": "Manejar viajes con múltiples paradas",
+      "benefit": "Registrar varias recolecciones, entregas y compromisos dentro de una carga.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Modelo nuevo de paradas y adaptación del calendario",
+      "category": "funcion"
+    },
+    {
+      "id": "F16",
+      "proposal": "Detectar conflictos y capacidad de citas por instalación",
+      "benefit": "Evitar programaciones incompatibles en una misma ventana o andén.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Requiere catálogo de instalaciones y capacidad acordada",
+      "category": "funcion"
+    },
+    {
+      "id": "F17",
+      "proposal": "Administrar disponibilidad de unidades y trailers",
+      "benefit": "Identificar equipo libre, asignado, en patio o en mantenimiento.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Distinto de los campos de texto de unidad y trailer de cada carga",
+      "category": "funcion"
+    },
+    {
+      "id": "F18",
+      "proposal": "Guardar una agenda opcional de contactos externos de VG",
+      "benefit": "Consultar datos de contacto sin convertirlos en usuarios ni forzar la selección del CSR.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Conservar siempre la captura manual del CSR externo solicitada por el usuario",
+      "category": "funcion"
+    },
+    {
+      "id": "F19",
+      "proposal": "Guardar contactos de transportista y conductor por carga",
+      "benefit": "Facilitar llamadas y seguimiento operativo con acceso controlado.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Requiere definir qué datos personales se guardan y quién los consulta",
+      "category": "funcion"
+    },
+    {
+      "id": "F20",
+      "proposal": "Estimar rentabilidad del regreso y de cada trayecto",
+      "benefit": "Comparar ingresos con combustible, peajes y millas vacías.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Los campos actuales de millas, RPM y cargos no incluyen este modelo completo",
+      "category": "funcion"
+    },
+    {
+      "id": "F21",
+      "proposal": "Controlar facturación y cobro de cargos",
+      "benefit": "Seguir de autorizado a facturado y pagado, con referencias.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Nueva función administrativa, separada de F07",
+      "category": "funcion"
+    },
+    {
+      "id": "F22",
+      "proposal": "Permitir al cliente confirmar lectura o recepción de un aviso",
+      "benefit": "Distinguir que el cliente lo revisó de que el CSR lo marcó enviado.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Confirmación explícita en el Portal Cliente",
+      "category": "funcion"
+    },
+    {
+      "id": "F23",
+      "proposal": "Configurar secciones y datos públicos por cliente",
+      "benefit": "Adaptar la experiencia del portal sin exponer notas o cargos internos.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Requiere reglas verificadas en servidor, no solo ocultar componentes",
+      "category": "funcion"
+    },
+    {
+      "id": "F24",
+      "proposal": "Exportar o suscribir el calendario mediante iCalendar",
+      "benefit": "Consultar compromisos en Google Calendar u otra agenda compatible.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Enlaces o feeds con acceso revocable y alcance limitado",
+      "category": "funcion"
+    },
+    {
+      "id": "F25",
+      "proposal": "Sincronizar vistas guardadas entre dispositivos",
+      "benefit": "Conservar las preferencias al cambiar de computadora o teléfono.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Las vistas actuales se guardan localmente en el navegador",
+      "category": "funcion"
+    },
+    {
+      "id": "F26",
+      "proposal": "Guardar borradores sin conexión y revisarlos antes de enviarlos",
+      "benefit": "Recuperar una captura interrumpida sin aplicar cambios automáticamente.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Separar borradores por cuenta y resolver versiones al reconectar",
+      "category": "funcion"
+    },
+    {
+      "id": "F27",
+      "proposal": "Reconocer archivos ya importados por su huella",
+      "benefit": "Advertir que el mismo contenido ya se procesó y localizar su resultado.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Complementa la detección actual de cargas repetidas y filas sin cambios",
+      "category": "funcion"
+    },
+    {
+      "id": "F28",
+      "proposal": "Agregar una pantalla administrativa de respaldos y recuperación",
+      "benefit": "Descargar, verificar y ensayar una restauración con controles explícitos.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Primero corregir y probar M04; no restaurar directamente sobre producción",
+      "category": "funcion"
+    },
+    {
+      "id": "F29",
+      "proposal": "Mostrar un centro de salud del portal",
+      "benefit": "Consultar versión, errores recientes y cola de millas desde Administración.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Datos operativos limitados; no exponer secretos ni tokens de administración",
+      "category": "funcion"
+    },
+    {
+      "id": "F30",
+      "proposal": "Registrar aceptación del cierre por el siguiente turno",
+      "benefit": "Confirmar quién recibió el trabajo y qué pendientes tomó.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Amplía el cierre existente con recepción explícita y responsable",
+      "category": "funcion"
+    }
+  ]
+}

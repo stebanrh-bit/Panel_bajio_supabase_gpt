@@ -1278,6 +1278,159 @@ try {
   } finally {
     await reservedPage.close();
   }
+  // Los dos accesos laterales tienen destinos distintos y abren las secciones guardadas cerradas.
+  // Las entregas sin POD tampoco se ofrecen para vincular: terminar el viaje no depende del POD.
+  const originalLoadCount = rawLoads.length;
+  rawLoads.push(
+    ...[
+      "DELIVERED",
+      "COMPLETED",
+      "Entregado",
+      "Completado",
+      "Cancelado.",
+      "TONU",
+    ].map((status, index) => ({
+      load: "FINALIZADA-" + index,
+      customer: "ACME",
+      status,
+      archived: false,
+      pod_sent: "false",
+      recargos_vg: "true",
+      updated_at: stamp,
+    })),
+    {
+      load: "ARCHIVADA",
+      customer: "ACME",
+      status: "Cargando",
+      archived: true,
+      updated_at: stamp,
+    },
+  );
+  const navigationPage = await newPage(false);
+  try {
+    await navigationPage.locator('[data-home-tab="turno"]').click();
+    for (const id of ["pendientes", "bitacora-asignados", "bitacora"])
+      await navigationPage.locator(`#${id}-toggle`).click();
+    await navigationPage.locator('[data-page="operation"]').click();
+    const requestsButton = navigationPage.locator(
+      '[data-page-scroll="home:group-pendientes"]',
+    );
+    const tasksButton = navigationPage.locator(
+      '[data-page-scroll="home:group-bitacora"]',
+    );
+    await requestsButton.click();
+    assert.equal(await requestsButton.getAttribute("aria-current"), "page");
+    assert.equal(
+      await navigationPage
+        .locator("#pendientes-toggle")
+        .getAttribute("aria-expanded"),
+      "true",
+    );
+    assert.equal(
+      await navigationPage.locator("#group-pendientes").isVisible(),
+      true,
+    );
+    assert.equal(
+      await navigationPage.locator("#group-bitacora").isVisible(),
+      false,
+    );
+    assert.equal(
+      await navigationPage.locator("#shift-brief").isVisible(),
+      false,
+    );
+    await navigationPage
+      .locator(`[data-vincular-pendiente="${pendingRow.id}"]`)
+      .click();
+    const available = await navigationPage
+      .locator("#vincular-load-select option")
+      .evaluateAll((options) => options.map((option) => option.value));
+    assert.deepEqual(available.sort(), ["VISUAL-001", "VISUAL-002"]);
+    await navigationPage.locator("#vincular-load-search").fill("FINALIZADA");
+    assert.equal(
+      await navigationPage.locator("#vincular-load-select").inputValue(),
+      "",
+    );
+    assert.equal(
+      await navigationPage.locator("#vincular-submit").isDisabled(),
+      true,
+    );
+    await navigationPage.locator("#vincular-load-search").fill("VISUAL-002");
+    assert.equal(
+      await navigationPage.locator("#vincular-submit").isEnabled(),
+      true,
+    );
+    // Es una lista (size=8): el usuario debe elegir una opción, no se selecciona por filtrar.
+    await navigationPage
+      .locator("#vincular-load-select")
+      .selectOption("VISUAL-002");
+    await navigationPage.locator("#vincular-load-search").fill("VISUAL");
+    assert.equal(
+      await navigationPage.locator("#vincular-load-select").inputValue(),
+      "VISUAL-002",
+    );
+    await navigationPage.locator("#vincular-close").click();
+    await tasksButton.click();
+    assert.equal(await tasksButton.getAttribute("aria-current"), "page");
+    assert.equal(await requestsButton.getAttribute("aria-current"), null);
+    assert.equal(
+      await navigationPage.locator("#group-pendientes").isVisible(),
+      false,
+    );
+    for (const id of ["bitacora-asignados", "bitacora"]) {
+      assert.equal(
+        await navigationPage.locator(`#group-${id}`).isVisible(),
+        true,
+      );
+      assert.equal(
+        await navigationPage
+          .locator(`#${id}-toggle`)
+          .getAttribute("aria-expanded"),
+        "true",
+      );
+    }
+    await navigationPage.locator("#bitacora-add-btn").click();
+    await navigationPage
+      .getByRole("combobox", { name: "Asignar a:", exact: true })
+      .waitFor();
+    assert.equal(
+      await navigationPage
+        .getByRole("combobox", { name: "Asignar a:", exact: true })
+        .isVisible(),
+      true,
+    );
+    assert.deepEqual(
+      await navigationPage
+        .locator("[data-bitacora-load-option]")
+        .evaluateAll((options) =>
+          options.map((option) => option.dataset.bitacoraLoadOption).sort(),
+        ),
+      ["VISUAL-001", "VISUAL-002"],
+    );
+    await navigationPage.locator("#bitacora-close").click();
+    await navigationPage.locator('[data-home-tab="turno"]').click();
+    for (const id of ["group-pendientes", "group-bitacora", "shift-brief"])
+      assert.equal(await navigationPage.locator(`#${id}`).isVisible(), true);
+    await navigationPage.setViewportSize({ width: 360, height: 844 });
+    await navigationPage.locator('[data-movil="mas"]').click();
+    await requestsButton.click();
+    assert.equal(
+      await navigationPage.locator("#group-pendientes").isVisible(),
+      true,
+    );
+    assert.equal(
+      await navigationPage.locator("#group-bitacora").isVisible(),
+      false,
+    );
+    assert.equal(
+      await navigationPage.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+      true,
+    );
+  } finally {
+    await navigationPage.close();
+    rawLoads.splice(originalLoadCount);
+  }
   // Regresión de usabilidad: los controles desplazados siguen operando y no pierden datos.
   const ux = await newPage(false);
   try {
@@ -1648,6 +1801,60 @@ try {
     );
     await ux.screenshot({
       path: "/tmp/panel-original-comparison/trailer-completo.png",
+    });
+    // Caso reportado: T0132 debe caber en el editor con el detalle abierto, también en laptop.
+    await trailerCell.locator(".trailer-full-value").click();
+    await ux.locator("#table-detail-panel:not([hidden])").waitFor();
+    await trailerCell.locator("summary").click();
+    assert.equal(await ux.locator("#table-detail-panel").isVisible(), true);
+    await trailerCell.locator("input").fill("T0132");
+    const shortTrailerSaved = ux.waitForResponse(
+      (response) =>
+        response.request().method() === "PATCH" &&
+        response.url().includes("/loads?"),
+    );
+    await trailerCell.locator("input").press("Tab");
+    await shortTrailerSaved;
+    await ux
+      .locator("#table-detail-load-label")
+      .filter({ hasText: "T0132" })
+      .waitFor();
+    assert.doesNotMatch(
+      await ux.locator("#table-detail-load-label").innerText(),
+      /TRAILER-BAJIO/,
+    );
+    for (const width of [1533, 1440, 1180, 1024, 390, 360]) {
+      await ux.setViewportSize({ width, height: 900 });
+      const editor = await trailerCell.locator("input").evaluate((input) => {
+        const style = getComputedStyle(input);
+        const context = document.createElement("canvas").getContext("2d");
+        context.font = style.font;
+        const cell = input.closest("td").getBoundingClientRect();
+        const box = input.getBoundingClientRect();
+        return {
+          available:
+            input.clientWidth -
+            parseFloat(style.paddingLeft) -
+            parseFloat(style.paddingRight),
+          required: context.measureText(input.value).width,
+          insideCell: box.right <= cell.right && box.left >= cell.left,
+          documentFits: document.documentElement.scrollWidth <= innerWidth,
+        };
+      });
+      assert.ok(
+        editor.available > editor.required,
+        `T0132 recortado a ${width}px`,
+      );
+      assert.ok(
+        editor.insideCell && editor.documentFits,
+        `Editor fuera de su espacio a ${width}px`,
+      );
+      usabilityLayouts.push({ trailerEditor: { viewport: width, ...editor } });
+    }
+    await ux.setViewportSize({ width: 1533, height: 900 });
+    await ux.screenshot({
+      path: "/tmp/panel-original-comparison/trailer-detalle-T0132.png",
+      animations: "disabled",
     });
     await ux.locator("#view-toggle-btn").click();
     await ux
