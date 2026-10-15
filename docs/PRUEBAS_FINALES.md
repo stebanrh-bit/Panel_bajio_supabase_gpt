@@ -1,6 +1,6 @@
 # Pruebas finales, una por una
 
-Realizar después de instalar SQL 004–009, la función `panel-accounts` y la nueva versión de Google. Registrar cada resultado y corregir un fallo antes de continuar. El usuario ya confirmó el acceso y la apariencia original; las demás verificaciones siguen pendientes, incluyendo la actualización de supervisor como CSR.
+Realizar después de instalar SQL 004–010, la función `panel-accounts` y la nueva versión de Google. Registrar cada resultado y corregir un fallo antes de continuar. El usuario ya confirmó el acceso y la apariencia original; las demás verificaciones siguen pendientes, incluyendo la actualización de supervisor como CSR.
 
 Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABILIDAD.md): las acciones de cuenta están en el menú del nombre; Administración tiene secciones y la edición de tarjetas se despliega. Las pruebas reales pendientes de esta tabla se conservan aunque las pruebas locales hayan pasado.
 
@@ -37,6 +37,8 @@ Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABIL
 | 29 | Abrir/cerrar Solicitudes y tareas y registrar una solicitud | Encabezados alineados; campos legibles; fecha clara; guarda y se puede comentar/vincular | Pendiente |
 | 30 | Registrar y editar una tarea desde escritorio y móvil | Búsqueda, selección de cargas, responsable, fecha y color accesibles; persiste; editar conserva responsable | Pendiente |
 | 31 | Calendario: elegir cliente y Pickup/Cruce/Entrega/Load apartado; cambiar semana y limpiar | Solo aparecen movimientos del tipo y cliente elegidos; filtros se conservan entre semanas; apartados sin relación tienen opción separada; abre registros y funciona en móvil | Pendiente |
+| 32 | Activar millas automáticas, guardar un trayecto OSM y ejecutar un lote | Un activador por hora; Google se guarda en Supabase conservando OSM; al volver a buscar se muestra Google; funciona con el panel cerrado | Pendiente |
+| 33 | Repetir activación, detener y reactivar; recálculo manual | No duplica activadores de la cuenta; detener conserva datos; corrección manual persiste y tiene prioridad | Pendiente |
 
 ## Última etapa: cuentas y permisos
 

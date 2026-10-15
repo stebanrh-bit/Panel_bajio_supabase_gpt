@@ -13137,7 +13137,7 @@
   var radarOrigenKey_ = "";
   var radarNotaPunto_ = ""; // "punto más cercano en nuestra base" cuando el origen son coordenadas
   var radarDist_ = {}; // llaveOrigen → { llaveDestino: { millas, horas } } (hoja + nuevas)
-  var radarDistCargadas_ = {}; // llaveOrigen → true cuando ya se leyó la hoja para ese origen
+  var radarDistCargadas_ = {}; // llaveOrigen → última lectura; refrescar para recoger resultados de Google.
   var radarRutaSinDato_ = {}; // 'o>d' que OSRM no pudo rutear en esta sesión
   var radarRutaOcupado_ = false;
   var radarUltimaRuta_ = 0;
@@ -13320,13 +13320,16 @@
       };
       siguiente();
     };
-    if (radarDistCargadas_[oKey]) {
+    if (
+      radarDistCargadas_[oKey] &&
+      Date.now() - radarDistCargadas_[oKey] < 60000
+    ) {
       seguir();
       return;
     }
     google.script.run
       .withSuccessHandler(function (res) {
-        radarDistCargadas_[oKey] = true;
+        radarDistCargadas_[oKey] = Date.now();
         radarDist_[oKey] = Object.assign(
           radarDist_[oKey] || {},
           (res && res.items) || {},
@@ -13334,7 +13337,7 @@
         seguir();
       })
       .withFailureHandler(function () {
-        radarDistCargadas_[oKey] = true;
+        radarDistCargadas_[oKey] = 0;
         seguir();
       })
       .getDistancias(oKey, myRealIdentity, myPassword);
@@ -14295,6 +14298,7 @@
             millas: guardada.millas,
             horas: guardada.horas,
             fuente: guardada.fuente || "osm",
+            googleEstado: guardada.googleEstado || "pending",
             key: guardada.key,
             recta: recta,
             deBase: true,
@@ -14486,8 +14490,10 @@
             : "Búsqueda nueva — guardada en la base de datos") +
           "</span> " +
           (m.fuente !== "google"
-            ? '<span class="dir-fuente pendiente" title="El proceso automático la completa con Google Maps y desde entonces queda fija">Millas de Google: pendientes</span> '
-            : '<span class="dir-fuente base">✓ Millas de Google (fijas)</span> ')) +
+            ? m.googleEstado === "no_route"
+              ? '<span class="dir-fuente pendiente">Google no encontró ruta; se conserva OSM</span> '
+              : '<span class="dir-fuente pendiente" title="El proceso por hora completa los trayectos cuando está activado y hay cuota. Un administrador también puede recalcularlos.">Millas de Google: pendientes</span> '
+            : '<span class="dir-fuente base">✓ Millas de Google guardadas</span> ')) +
       '<a class="link-btn" target="_blank" rel="noopener" href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=' +
       o.lat +
       "%2C" +
@@ -14636,6 +14642,7 @@
           dirUltima_.m.millas = r.dato.millas;
           dirUltima_.m.horas = r.dato.horas;
           dirUltima_.m.fuente = "google";
+          dirUltima_.m.googleEstado = "ok";
           renderDirResultado_();
           dirCargarHistorial_();
           showToast(

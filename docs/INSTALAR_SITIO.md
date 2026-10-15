@@ -23,7 +23,7 @@ El ZIP `entregables/panel-bajio-sitio.zip` contiene estos mismos archivos, las i
 4. Pégalo en la consulta nueva y pulsa **Run**.
 5. Continúa cuando la consulta termine correctamente.
 
-El archivo reúne SQL 004–009 en una sola transacción y requiere 001, 002 y 003, ya utilizados en tu panel. Se puede repetir sin borrar los registros existentes. No vuelvas a ejecutar SQL 001 y no elimines tablas. Si aparece un error, conserva la página que ya funciona y comparte únicamente el texto del error.
+El archivo reúne SQL 004–010 en una sola transacción y requiere 001, 002 y 003, ya utilizados en tu panel. Se puede repetir sin borrar los registros existentes. No vuelvas a ejecutar SQL 001 y no elimines tablas. Si aparece un error, conserva la página que ya funciona y comparte únicamente el texto del error.
 
 ## 2. Instalar la función de cuentas en Supabase
 
@@ -88,3 +88,7 @@ Seguiremos [PRUEBAS_FINALES.md](PRUEBAS_FINALES.md), una prueba por vez. Las pru
 ![Inicio original conectado a Supabase, con datos de prueba](imagenes/panel-home.png)
 
 ![Operación original conectada a Supabase, con datos de prueba](imagenes/panel-operation.png)
+
+## Millas Google automáticas
+
+Después de instalar el sitio, sigue [MILLAS_GOOGLE_AUTOMATICAS.md](MILLAS_GOOGLE_AUTOMATICAS.md) para vincular y activar el procesamiento por hora. Si ya tenías SQL 004–009 instalado, aplica únicamente SQL 010 y actualiza Code.gs e index.html; no es necesario desplegar de nuevo `panel-accounts`. Instalar el SQL por sí solo no crea un activador en Google.

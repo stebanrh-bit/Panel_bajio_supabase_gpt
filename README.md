@@ -9,7 +9,9 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 ## Estado actual
 
-[Mejoras de usabilidad aplicadas](docs/MEJORAS_USABILIDAD.md): Inicio con una fila por carga; tarjetas con edición desplegable; Administración por secciones; lectura, móvil, teclado y confirmación de guardado mejorados. Pasaron 95 pruebas automáticas y 38 comparaciones visuales; el build compila 129 módulos. Solicitudes y tareas tienen desplegables alineados y formularios con campos agrupados. El calendario semanal filtra por cliente y por Pickup, Cruce, Entrega o Load apartado. El listado muestra el trailer completo y el historial presenta nombres legibles con valores Antes/Ahora. Para activarlas en el proyecto existente, reemplazar solo el HTML Google y publicar una nueva versión.
+**Millas Google automáticas:** [guía de activación](docs/MILLAS_GOOGLE_AUTOMATICAS.md). Completa trayectos OSM pendientes en lotes de hasta 20 cada hora, con pausa por cuota y recuperación de trabajos. Para el sitio existente requiere SQL 010, actualizar Code.gs e index.html y vincular/activar el proceso desde el editor Google. El repositorio actualizado no activa el proceso remoto por sí mismo.
+
+[Mejoras de usabilidad aplicadas](docs/MEJORAS_USABILIDAD.md): Inicio con una fila por carga; tarjetas con edición desplegable; Administración por secciones; lectura, móvil, teclado y confirmación de guardado mejorados. Pasaron 107 pruebas automáticas y 38 comparaciones visuales; el build compila 129 módulos. Solicitudes y tareas tienen desplegables alineados y formularios con campos agrupados. El calendario semanal filtra por cliente y por Pickup, Cruce, Entrega o Load apartado. El listado muestra el trailer completo y el historial presenta nombres legibles con valores Antes/Ahora. Para activarlas en el proyecto existente, reemplazar solo el HTML Google y publicar una nueva versión.
 
 [Revisión de funcionamiento y usabilidad del 15 de octubre](docs/REVISION_USABILIDAD_2026-10-15.md): 81 pruebas y 35 comparaciones correctas. Se detectaron problemas de desbordamiento en Administración y Cargas móvil, foco de teclado y etiquetas de campos; el informe propone correcciones y simplificaciones priorizadas. Son recomendaciones pendientes de implementar.
 
@@ -19,7 +21,7 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 La entrada de `web/` reutiliza las tres interfaces originales en `web/src/original/`. Sus 97 acciones se conectan a Supabase mediante adaptadores comentados. Incluye administración de cuentas Auth a través de `panel-accounts`, cargas, comentarios/incidencias, pendientes, bitácora/cierres, apartados, seguimiento, plantillas, calendario, indicadores, importación/deshacer, radar compartido y ambos portales. Consulta [la comparación y sus límites](docs/COMPARACION_ORIGINAL.md).
 
-El proyecto existente requiere la actualización conjunta SQL 004–009, desplegar `panel-accounts` y activar la nueva versión del mismo proyecto Google. Sigue **docs/INSTALAR_SITIO.md**; no repitas SQL 001. Los módulos anteriores de `web/src/features/` permanecen como servicios reutilizables y referencia de la migración. No se ejecuta el backend Sheets de la raíz.
+El proyecto existente requiere la actualización conjunta SQL 004–010, desplegar `panel-accounts` y activar la nueva versión del mismo proyecto Google. Sigue **docs/INSTALAR_SITIO.md**; no repitas SQL 001. Los módulos anteriores de `web/src/features/` permanecen como servicios reutilizables y referencia de la migración. No se ejecuta el backend Sheets de la raíz.
 
 Auth/RLS/RPC verifican permisos y autores. Admin y CSR escriben; manager consulta; clientes reciben únicamente los campos de sus cargas autorizadas. La sesión no almacena contraseñas. Los estados y versiones conservan los expedientes y evitan sobrescrituras. Las pruebas reales entre cuentas y en Google quedan para el final, por petición del usuario.
 
@@ -27,7 +29,7 @@ Esteban también puede trabajar como CSR manteniendo administración y comprobar
 
 ## Referencia: crear un proyecto nuevo
 
-El proyecto del usuario ya existe. Para actualizarlo, usar la guía de instalación enlazada arriba. Estos pasos iniciales se conservan para una instalación desde cero; después se aplica la actualización 004–009 y se instala `panel-accounts`.
+El proyecto del usuario ya existe. Para actualizarlo, usar la guía de instalación enlazada arriba. Estos pasos iniciales se conservan para una instalación desde cero; después se aplica la actualización 004–010 y se instala `panel-accounts`.
 
 1. Abre https://supabase.com y entra en Dashboard.
 2. Crea una organización si no tienes una y pulsa **New project**.
@@ -107,7 +109,7 @@ Las pruebas de interfaz con DOM simulado detectaron una lista vacía al crear so
 
 El usuario pidió dejar las pruebas manuales con otras cuentas para el final porque solo dispone de su cuenta y no tiene otro correo. Esta decisión permite continuar el desarrollo; el acceso real entre cuentas sigue pendiente de verificar. Las pruebas locales de permisos ya pasaron. Creación, vinculación y cancelación con persistencia fueron confirmadas por el usuario.
 
-1. Instalar SQL 004–009 y `panel-accounts` en Supabase.
+1. Instalar SQL 004–010 y `panel-accounts` en Supabase.
 2. Actualizar Code.gs e index.html y activar una nueva versión del mismo enlace Google.
 3. Recorrer las pruebas finales de la interfaz original, una por una.
 4. Comprobar al final el acceso entre cuentas y los portales cliente/gerencia.

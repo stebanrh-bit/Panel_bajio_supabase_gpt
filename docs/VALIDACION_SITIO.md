@@ -1,12 +1,12 @@
 # Validación de la interfaz original con Supabase
 
-Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubre de 2026. No representan una actualización de la publicación Google ni ejecución remota de SQL 004–009. Las consultas remotas de la revisión fueron de lectura. [Mejoras actuales e instalación](MEJORAS_USABILIDAD.md), [revisión de usabilidad previa](REVISION_USABILIDAD_2026-10-15.md) e [informe general anterior](REVISION_COMPLETA_2026-10-14.md).
+Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubre de 2026. No representan una actualización de la publicación Google ni ejecución remota de SQL 004–010. Las consultas remotas de la revisión fueron de lectura. [Mejoras actuales e instalación](MEJORAS_USABILIDAD.md), [revisión de usabilidad previa](REVISION_USABILIDAD_2026-10-15.md) e [informe general anterior](REVISION_COMPLETA_2026-10-14.md).
 
 | Comprobación | Resultado |
 | --- | --- |
 | Panel original publicado | HTML recuperado; árbol JavaScript idéntico al `PanelScript.html` de la raíz |
 | Portal Cliente y Vista Gerencia originales | Plantillas recuperadas de sus páginas publicadas |
-| `npm --cache /tmp/panel-npm-cache test` | 95 pruebas aprobadas; 0 fallidas y 0 omitidas |
+| `npm --cache /tmp/panel-npm-cache test` | 107 pruebas aprobadas; 0 fallidas y 0 omitidas |
 | `npm --cache /tmp/panel-npm-cache run build` | Compilación de 129 módulos correcta, incluyendo lector XLSX y mejoras de usabilidad |
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
@@ -20,6 +20,9 @@ Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubr
 | Chromium: Trailer e historial | Identificador largo completo, edición y persistencia; campos legibles, Antes/Ahora, cero y confirmaciones; metadatos internos omitidos y contenido HTML mostrado como texto |
 | Chromium: solicitudes y tareas | Tres comparaciones nuevas: secciones cerradas y formularios de alta; abrir/cerrar con teclado, preferencia al recargar, contador propio, fecha legible, validaciones y envío de campos correctos al transporte interceptado; edición conserva responsable; ventanas y Guardar accesibles a 360 y 390 px |
 | Chromium: calendario semanal | Tipos exclusivos y combinación con cliente; apartados asociados y sin cliente identificado; navegación entre semanas conservando filtros; limpiar y abrir registros; teclado y móvil a 360/390 px sin desbordamiento |
+| Cola Google en PostgreSQL local | Seis casos: permisos mínimos y secreto, reservas sin duplicados, recuperación de reserva vencida, cuota y reintentos, conservación OSM/sin ruta/valores inválidos, prioridad manual e instalación repetible |
+| Proceso Google simulado y lectura del radar | Cinco pruebas: suma de tramos y escritura confirmada, parada por cuota, tiempo máximo y bloqueo, vinculación sin publicar secreto y activador único, preferencia del resultado Google guardado |
+| Activador Maps real | Pendiente: instalar SQL 010, vincular hash y activar en Google según MILLAS_GOOGLE_AUTOMATICAS.md; no ejecutado contra producción |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
 | Chromium: archivos reales | CSV, XLSX y XLS; vista previa, cancelar sin guardar, fechas inválidas, ceros iniciales, booleanos, duplicados y persistencia al confirmar |
 | Supabase remoto | Auth y directorio responden 200; 13 tablas privadas, administración de cuentas y RPC del portal rechazan peticiones sin sesión con 401 |
@@ -41,7 +44,7 @@ Las seis pruebas de usabilidad adicionales comprueban agrupación sin mutar dato
 
 Las pruebas conservadas de los módulos anteriores verifican también importación XLSX/CSV, deshacer, archivo, pendientes, turnos y Maps. El puente Google se comprueba con servicios simulados: verifica JWT y rol antes de consumir Maps y suma todos los tramos de carretera.
 
-El 14 de octubre se comprobó de nuevo el enlace Google tras la actualización informada por el usuario. La respuesta inicial es 302 hacia accounts.google.com: sin iniciar sesión no se puede recorrer el interior de esa publicación. Esta observación precisa el bloqueo anterior CONNECT 403; no demuestra un fallo de la aplicación. Faltan activar la corrección del importador y comprobar las operaciones con sesión real, el iframe Google, mapas, cuotas y otros roles, según [PRUEBAS_FINALES.md](PRUEBAS_FINALES.md). Las automatizaciones externas TCI y los activadores del backend antiguo no se instalaron; los límites están en [COMPARACION_ORIGINAL.md](COMPARACION_ORIGINAL.md).
+El 14 de octubre se comprobó de nuevo el enlace Google tras la actualización informada por el usuario. La respuesta inicial es 302 hacia accounts.google.com: sin iniciar sesión no se puede recorrer el interior de esa publicación. Esta observación precisa el bloqueo anterior CONNECT 403; no demuestra un fallo de la aplicación. Faltan activar la corrección del importador y comprobar las operaciones con sesión real, el iframe Google, mapas, cuotas y otros roles, según [PRUEBAS_FINALES.md](PRUEBAS_FINALES.md). La cola automática de millas está preparada para Supabase y Apps Script, con [activación remota pendiente](MILLAS_GOOGLE_AUTOMATICAS.md). La integración TCI y los otros activadores del backend antiguo no se instalaron; los límites están en [COMPARACION_ORIGINAL.md](COMPARACION_ORIGINAL.md).
 
 ## Repetir la comprobación
 

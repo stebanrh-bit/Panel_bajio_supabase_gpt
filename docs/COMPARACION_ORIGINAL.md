@@ -14,7 +14,7 @@ La entrega reemplaza la aproximación visual anterior con las plantillas, CSS, l
 | Calendario e indicadores, SLA y exportación del reporte | Interfaz original; SLA desde el cambio pendiente más reciente |
 | Pendientes, comentarios, vinculación y bitácora/histórico | Ventanas originales; transacciones, autores y versiones del servidor |
 | Apartados, revisiones, estados e historial | Ventana original; conservación del expediente al retirarlo |
-| Radar, Excel compartido, coordenadas, direcciones exactas y búsquedas guardadas | Interfaz original; tablas compartidas y recálculo manual Google |
+| Radar, Excel compartido, coordenadas, direcciones exactas y búsquedas guardadas | Interfaz original; tablas compartidas, recálculo manual Google y proceso automático por hora preparado con SQL 010 y activación en Google |
 | Avisos, mensajes múltiples, confirmación y selector de persona | Controles originales |
 | Identidad, cambio de contraseña, clave de administración y Gestionar CSR | Diseño original; Supabase Auth y función de cuentas protegida |
 | Portal Cliente: login, embarques, detalle, documentos, incidencias y avisos públicos | Plantilla original; cliente de la sesión y campos permitidos por RPC |
@@ -40,4 +40,4 @@ El usuario pidió después simplificar Inicio por la confusión entre recordator
 
 Las capturas se comparan localmente con los mismos datos ficticios. El navegador aplica un margen máximo de 50 píxeles para variaciones de suavizado en bordes; no se cambian las posiciones, fuentes, tamaños ni colores del original. No se transfirieron cargas ni contraseñas del proyecto original.
 
-Maps real, Supabase Auth real, el iframe Google, otros roles y las cuotas se validan después de instalar. Se conservan las dependencias originales de Inter, SheetJS, Leaflet, Nominatim y OSRM. La integración TCI con una hoja externa y los activadores de mantenimiento/archivado/certificación horaria no se instalaron en la nueva arquitectura. No se declara equivalencia de esas automatizaciones externas ni de los permisos heredados del backend Sheets.
+Maps real, Supabase Auth real, el iframe Google, otros roles y las cuotas se validan después de instalar. Se conservan las dependencias originales de Inter, SheetJS, Leaflet, Nominatim y OSRM. La certificación de millas por hora tiene ahora una adaptación a Supabase: [instalación y activación pendientes en Google](MILLAS_GOOGLE_AUTOMATICAS.md). La integración TCI con una hoja externa y los otros activadores de mantenimiento/archivado no se instalaron en la nueva arquitectura. No se declara equivalencia de esas automatizaciones externas ni de los permisos heredados del backend Sheets.

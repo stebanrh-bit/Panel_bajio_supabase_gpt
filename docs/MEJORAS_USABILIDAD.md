@@ -2,6 +2,8 @@
 
 Esta actualización aplica la simplificación autorizada tras la revisión de usabilidad. Conserva el logo, los colores, los expedientes, las cuentas y las funciones. El nuevo HTML incluye los cambios; la publicación de Google se actualiza con los pasos del final.
 
+Esta guía cubre los cambios de interfaz. La automatización de millas Google también modifica el servidor y requiere [sus pasos de activación](MILLAS_GOOGLE_AUTOMATICAS.md), además del HTML.
+
 ## Inicio: una sola fila por carga
 
 Cada carga reúne su prioridad, el aviso al cliente y sus revisiones. Los filtros **Todas**, **Revisiones y seguimientos** y **Avisar al cliente** permiten ver el trabajo de cada tipo sin repetir la carga en tres listas.
@@ -89,7 +91,7 @@ Solo se reemplaza el HTML. Se conservan `Code.gs`, la función de cuentas y las 
 
 ## Comprobaciones
 
-La entrega terminó con **95 pruebas aprobadas, 0 fallidas y 0 omitidas**, **129 módulos compilados** y **38 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
+La entrega terminó con **107 pruebas aprobadas, 0 fallidas y 0 omitidas**, **129 módulos compilados** y **38 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
 
 La entrega se comprueba con la suite automática, la compilación y el verificador del paquete. Chromium recorre las pantallas y los flujos existentes con datos ficticios y transporte Supabase interceptado. Además comprueba:
 

@@ -11,6 +11,8 @@ export function radarMethods(ctx) {
     millas: Number(row.google_miles ?? row.miles),
     horas: Number(row.google_hours ?? row.hours),
     fuente: row.google_miles == null ? "osm" : "google",
+    googleEstado:
+      row.google_state || (row.google_miles == null ? "pending" : "ok"),
     osm: row.google_miles == null ? undefined : Number(row.miles),
   });
   return {
@@ -28,15 +30,13 @@ export function radarMethods(ctx) {
     guardarCoordenadas: async (list) => {
       ctx.staff(true);
       const result = await ctx.rpc("ops_original_places", {
-        p_places: list
-          .slice(0, 200)
-          .map((row) => ({
-            key: row.key,
-            kind: "city",
-            text: [row.ciudad, row.estado].filter(Boolean).join(", "),
-            lat: row.lat,
-            lon: row.lon,
-          })),
+        p_places: list.slice(0, 200).map((row) => ({
+          key: row.key,
+          kind: "city",
+          text: [row.ciudad, row.estado].filter(Boolean).join(", "),
+          lat: row.lat,
+          lon: row.lon,
+        })),
       });
       return { ok: true, guardadas: result };
     },
@@ -128,9 +128,7 @@ export function radarMethods(ctx) {
     recalcularMillasGoogle: async (key) => {
       ctx.staff(true);
       if (ctx.profile.role !== "admin")
-        throw Error(
-          "Recalcular millas requiere permisos de administración.",
-        );
+        throw Error("Recalcular millas requiere permisos de administración.");
       const [points, distances] = await Promise.all([places(), routes()]);
       const route = distances.find((row) => row.route_key === key);
       if (!route) throw Error("Ese trayecto no está guardado.");
