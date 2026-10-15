@@ -13,6 +13,7 @@ import * as guidance from "./guidance.js";
 import guidanceStyles from "./guidance.css?raw";
 import * as usability from "./usability.js";
 import usabilityStyles from "./usability.css?raw";
+import * as history from "./history.js";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -26,6 +27,7 @@ async function start() {
   window.panelFiles = files;
   window.panelGuidance = guidance;
   window.panelUsability = usability;
+  window.panelHistory = history;
   const portal =
     window.PANEL_VIEW ||
     new URLSearchParams(location.search).get("portal") ||

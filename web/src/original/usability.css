@@ -239,6 +239,82 @@
   margin: 12px 0;
   color: var(--ink-soft);
 }
+.card-commitment > span {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+/* La celda muestra el identificador completo; el editor se despliega por separado. */
+.panel-internal .loads-table {
+  min-width: 1320px;
+}
+.panel-internal .loads-table colgroup .c-trailer {
+  width: 220px;
+}
+.panel-internal .loads-table th[data-sort="trailer"] {
+  overflow: visible;
+  white-space: normal;
+}
+.panel-internal .loads-table td.t-trailer {
+  white-space: normal;
+  overflow: visible;
+}
+.trailer-full-value {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.table-trailer-edit {
+  margin-top: 8px;
+}
+.table-trailer-edit > summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--accent);
+}
+.panel-internal .table-trailer-edit .t-trailer-input {
+  width: 100%;
+  min-width: 0;
+  font-size: 14px;
+  min-height: 40px;
+}
+.panel-internal .action-trailer {
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+.history-change-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 0;
+}
+.history-change-values > div {
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.history-change-values dt {
+  color: var(--ink-soft);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.history-change-values dd {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .history-change-values {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .panel-internal .card .comments-row {
   flex-wrap: wrap;
 }

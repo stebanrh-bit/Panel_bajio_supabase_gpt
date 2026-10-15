@@ -51,6 +51,8 @@ def main():
         'imagenes/panel-operation.png':ROOT/'docs/imagenes/panel-operation.png',
         'imagenes/panel-administracion.png':ROOT/'docs/imagenes/panel-administracion.png',
         'imagenes/panel-cargas-movil.png':ROOT/'docs/imagenes/panel-cargas-movil.png',
+        'imagenes/trailer-completo.png':ROOT/'docs/imagenes/trailer-completo.png',
+        'imagenes/historial-legible.png':ROOT/'docs/imagenes/historial-legible.png',
         'importacion-prueba.csv':ROOT/'entregables/importacion-prueba.csv',
     }
     zip_path=ROOT/'entregables/panel-bajio-sitio.zip'

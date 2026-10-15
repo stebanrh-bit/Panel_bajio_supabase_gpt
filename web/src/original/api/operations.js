@@ -3,6 +3,7 @@ import { createPendingLoadsService } from "../../features/pending-loads/service.
 import { createReservedLoadsService } from "../../features/reserved-loads/service.js";
 import { createShiftsService } from "../../features/shifts/service.js";
 import { prepareIncident } from "../../features/incidents/rules.js";
+import { loadHistoryItems } from "../history.js";
 import {
   json,
   date,
@@ -180,32 +181,14 @@ export function operationMethods(ctx) {
     },
     getHistorialLoad: async (load) => {
       ctx.staff();
-      const items = (
+      const records = (
         await rows(
           "load_history",
           (query) => query.eq("load", load),
           "changed_at",
         )
-      )
-        .reverse()
-        .flatMap((row) =>
-          Object.keys(row.after_data || {})
-            .filter(
-              (field) =>
-                !["updated_at", "updated_by", "created_at"].includes(field) &&
-                String(row.before_data?.[field] ?? "") !==
-                  String(row.after_data[field] ?? ""),
-            )
-            .map((field) => ({
-              id: `${row.id}:${field}`,
-              load,
-              timestamp: row.changed_at,
-              campo: field,
-              valor_anterior: row.before_data?.[field] ?? "",
-              valor_nuevo: row.after_data[field],
-              usuario: name(row.actor),
-            })),
-        );
+      ).reverse();
+      const items = loadHistoryItems(records, load, name);
       return { ok: true, items };
     },
     getComunicaciones: async (load) => {
@@ -526,14 +509,12 @@ export function operationMethods(ctx) {
       ctx.staff();
       return {
         ok: true,
-        items: (await shifts.closures())
-          .slice(0, 30)
-          .map((row) => ({
-            id: row.id,
-            csr: name(row.created_by),
-            creado_en: row.created_at,
-            texto: row.body,
-          })),
+        items: (await shifts.closures()).slice(0, 30).map((row) => ({
+          id: row.id,
+          csr: name(row.created_by),
+          creado_en: row.created_at,
+          texto: row.body,
+        })),
       };
     },
     enviarCierreTurno: async (body) => {

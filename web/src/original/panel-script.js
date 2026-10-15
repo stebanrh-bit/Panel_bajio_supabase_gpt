@@ -4388,11 +4388,15 @@
       rec.load +
       "</span>" +
       "</td>" +
-      '<td class="t-truck"><input class="field-input t-trailer-input" type="text" placeholder="—" value="' +
+      '<td class="t-truck t-trailer"><span class="trailer-full-value" data-trailer-value>' +
+      esc(rec.trailer || "Sin asignar") +
+      '</span><details class="table-trailer-edit"><summary>Editar trailer</summary><input class="field-input t-trailer-input" type="text" placeholder="—" value="' +
       esc(rec.trailer) +
       '" data-trailer-load="' +
       rec.load +
-      '" title="Trailer"></td>' +
+      '" aria-label="Editar trailer" title="' +
+      esc(rec.trailer || "Trailer") +
+      '"></details></td>' +
       '<td class="t-customer" title="' +
       esc(rec.customer) +
       '">' +
@@ -7929,19 +7933,18 @@
     e.innerHTML =
       '<div class="ws-timeline comm-history-list">' +
       groupedTimelineHtml_(a, function (x, dt) {
-        var antes = x.valor_anterior ? esc(x.valor_anterior) : "<i>(vacío)</i>";
-        var despues = x.valor_nuevo ? esc(x.valor_nuevo) : "<i>(vacío)</i>";
+        var change = window.panelHistory.presentHistoryChange(x, fmtDateTime);
         return (
           '<div class="ws-event comm-history-event"><div class="comm-history-head"><span class="comm-history-type">' +
-          esc(x.campo || "Cambio") +
+          esc(change.label) +
           '</span></div><div class="ws-event-meta">' +
           esc(fmtTimeOnly_(dt)) +
           (x.usuario ? " · " + esc(x.usuario) : "") +
-          '</div><div class="ws-event-reason">' +
-          antes +
-          " → " +
-          despues +
-          "</div></div>"
+          '</div><dl class="history-change-values"><div><dt>Antes</dt><dd>' +
+          esc(change.before) +
+          "</dd></div><div><dt>Ahora</dt><dd>" +
+          esc(change.after) +
+          "</dd></div></dl></div>"
         );
       }) +
       "</div>";
@@ -9778,6 +9781,10 @@
       var rec = recPorLoad_(load);
       var prev = rec ? rec.trailer : null;
       if (rec) rec.trailer = val;
+      var fullValue = input
+        .closest("td")
+        ?.querySelector("[data-trailer-value]");
+      if (fullValue) fullValue.textContent = val || "Sin asignar";
       guardarConVerificacion_(
         function () {
           showToast("Trailer actualizado — Carga " + load, "good");
@@ -9785,6 +9792,7 @@
         function (err) {
           if (rec) rec.trailer = prev;
           input.value = prev || "";
+          if (fullValue) fullValue.textContent = prev || "Sin asignar";
           showToast("No se pudo guardar el trailer: " + err.message, "error");
         },
       ).saveTrailer(load, val, myRealIdentity, myPassword);

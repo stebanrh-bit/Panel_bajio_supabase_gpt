@@ -9,7 +9,7 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 ## Estado actual
 
-[Mejoras de usabilidad aplicadas](docs/MEJORAS_USABILIDAD.md): Inicio con una fila por carga; tarjetas con edición desplegable; Administración por secciones; lectura, móvil, teclado y confirmación de guardado mejorados. Pasaron 87 pruebas automáticas y 35 comparaciones visuales; el build compila 127 módulos. Para activarlas en el proyecto existente, reemplazar solo el HTML Google y publicar una nueva versión.
+[Mejoras de usabilidad aplicadas](docs/MEJORAS_USABILIDAD.md): Inicio con una fila por carga; tarjetas con edición desplegable; Administración por secciones; lectura, móvil, teclado y confirmación de guardado mejorados. Pasaron 91 pruebas automáticas y 35 comparaciones visuales; el build compila 128 módulos. El listado muestra el trailer completo y el historial presenta nombres legibles con valores Antes/Ahora. Para activarlas en el proyecto existente, reemplazar solo el HTML Google y publicar una nueva versión.
 
 [Revisión de funcionamiento y usabilidad del 15 de octubre](docs/REVISION_USABILIDAD_2026-10-15.md): 81 pruebas y 35 comparaciones correctas. Se detectaron problemas de desbordamiento en Administración y Cargas móvil, foco de teclado y etiquetas de campos; el informe propone correcciones y simplificaciones priorizadas. Son recomendaciones pendientes de implementar.
 

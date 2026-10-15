@@ -32,6 +32,8 @@ Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABIL
 | 24 | Ventanas usando Tab/Shift+Tab y Escape | El foco permanece dentro; al cerrar vuelve al origen | Pendiente |
 | 25 | Administración y Cargas desde móvil, con detalles desplegados | Todas las secciones accesibles y página sin desbordamiento horizontal | Pendiente |
 | 26 | Confirmación de cambios y mensajes de error | Distingue Guardando, Guardado y Error; no oculta errores sin intervención | Pendiente |
+| 27 | Guardar un Trailer largo en una carga de prueba y recargar | Valor completo en listado de tabla y tarjeta; Editar trailer conserva la edición | Pendiente |
+| 28 | Abrir Historial después de cambiar estatus, Trailer y una confirmación | Nombres legibles, autor y fecha; Antes/Ahora claros; cero y No enviado no aparecen vacíos | Pendiente |
 
 ## Última etapa: cuentas y permisos
 

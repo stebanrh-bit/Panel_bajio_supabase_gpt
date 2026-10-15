@@ -24,6 +24,14 @@ Las tarjetas muestran carga, cliente, ruta, estatus, unidad y cita de entrega. *
 
 Se mantienen los controles originales y sus manejadores. Los cambios siguen pasando por las mismas verificaciones de Supabase.
 
+## Corrección de Trailer e historial
+
+El listado reserva más espacio al Trailer y muestra su valor completo, en varias líneas cuando hace falta. **Editar trailer** despliega el campo de edición; el valor visible se actualiza al guardar y se restaura si el servidor rechaza el cambio. También se permite el salto de línea en las tarjetas.
+
+En **Expediente → Historial → Cambios**, cada cambio usa un nombre de trabajo como **Estatus**, **POD enviado al cliente** o **Seguimiento programado**, junto al autor y la fecha. Los bloques **Antes** y **Ahora** distinguen el valor anterior del nuevo. Las confirmaciones se leen como Enviado/No enviado o Confirmado/No confirmado; un cero sigue siendo cero y una ausencia se indica como Sin información. La creación de la carga aparece una sola vez.
+
+Los nombres técnicos y metadatos de sincronización se omiten de esta presentación. La auditoría guardada en Supabase se conserva íntegra. Ejemplos con datos ficticios: [Trailer completo](imagenes/trailer-completo.png) e [historial legible](imagenes/historial-legible.png).
+
 ## Administración por secciones
 
 | Sección | Contenido |
@@ -59,11 +67,12 @@ Solo se reemplaza el HTML. Se conservan `Code.gs`, la función de cuentas y las 
 
 ## Comprobaciones
 
-La entrega terminó con **87 pruebas aprobadas, 0 fallidas y 0 omitidas**, **127 módulos compilados** y **35 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
+La entrega terminó con **91 pruebas aprobadas, 0 fallidas y 0 omitidas**, **128 módulos compilados** y **35 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
 
 La entrega se comprueba con la suite automática, la compilación y el verificador del paquete. Chromium recorre las pantallas y los flujos existentes con datos ficticios y transporte Supabase interceptado. Además comprueba:
 
 - Una fila por carga en Inicio y filtros por tipo de acción.
+- Trailer largo completo en tabla y tarjetas, guardado y persistencia; historial con valores Antes/Ahora, cero y confirmaciones, sin nombres técnicos ni ejecución de HTML en los valores.
 - Dos plazos independientes al revisar tránsito o completar un seguimiento.
 - Tab/Shift+Tab dentro de Comentarios y el expediente, ventanas anidadas, Escape y retorno al botón de origen.
 - Edición desde una tarjeta desplegada, confirmación del servidor y persistencia al recargar.
@@ -78,6 +87,7 @@ Capturas: [Inicio](imagenes/panel-home.png), [Cargas](imagenes/panel-operation.p
 
 ## Archivos fuente
 
+- `web/src/original/history.js`: selección de cambios operativos y traducción de campos y valores para el historial, sin alterar los registros guardados.
 - `web/src/original/usability.js`: presentación agrupada, fechas, etiquetas, ventanas, secciones administrativas y estado de guardado. Los nombres visibles no autorizan operaciones.
 - `web/src/original/usability.css`: lectura, tamaños, ventanas y distribución móvil del panel interno.
 - `web/src/original/panel-script.js`: integra la lista de atención y mantiene las acciones originales de las tarjetas.

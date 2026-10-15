@@ -9,6 +9,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { originalPage } from "../web/src/original/page.js";
 import config from "../web/src/original/config.js";
+import { loadHistoryItems } from "../web/src/original/history.js";
 const { chromium } = await import(
   pathToFileURL(
     (process.env.PANEL_BROWSER_TOOLS || "/tmp/panel-browser-tools") +
@@ -97,6 +98,40 @@ const rawLoads = [
 ];
 const name = (id) =>
   profiles.find((row) => row.id === id)?.display_name || id || "";
+const rawHistory = [
+  {
+    id: "h-create",
+    load: "VISUAL-001",
+    actor: adminId,
+    changed_at: "2026-10-07T18:00:00Z",
+    before_data: null,
+    after_data: { status: "Cargando", trailer: "R-210" },
+  },
+  {
+    id: "h-change",
+    load: "VISUAL-001",
+    actor: csrId,
+    changed_at: stamp,
+    before_data: {
+      status: "Cargando",
+      trailer: "R-210",
+      pod_sent: false,
+      charges: 0,
+      next_review_at: "",
+      truck_source: "archivo",
+      next_review_note: "",
+    },
+    after_data: {
+      status: "En transito",
+      trailer: "TRAILER-COMPLETO-12345678901234567890",
+      pod_sent: true,
+      charges: 125,
+      next_review_at: future,
+      truck_source: "manual",
+      next_review_note: "<img src=x onerror=alert(1)>",
+    },
+  },
+];
 const legacyLoads = rawLoads.map((raw, index) => ({
   ...raw,
   updated_by: name(raw.updated_by),
@@ -233,7 +268,10 @@ const fixtures = {
   getBitacoraAdmin: { ok: true, items: [] },
   getComments: "[]",
   getIncidencias: "[]",
-  getHistorialLoad: { ok: true, items: [] },
+  getHistorialLoad: {
+    ok: true,
+    items: loadHistoryItems([...rawHistory].reverse(), "VISUAL-001", name),
+  },
   getComunicaciones: { ok: true, items: [] },
   getComunicacionesPorCliente: { ok: true, items: [] },
   getRadarExcel: { ok: true, excel: null },
@@ -287,7 +325,9 @@ const helperSource = (
   "\n" +
   (await read("web/src/original/people.js")) +
   "\n" +
-  (await read("web/src/original/usability.js"))
+  (await read("web/src/original/usability.js")) +
+  "\n" +
+  (await read("web/src/original/history.js"))
 ).replace(/^export /gm, "");
 const goldenHtml =
   "<!doctype html><html><head>" +
@@ -296,7 +336,7 @@ const goldenHtml =
   original.body +
   "<script>(function(){" +
   helperSource +
-  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelUsability.mountUsability(document);})()</script>" +
+  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelUsability.mountUsability(document);})()</script>" +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
   "<script>window.panelGuidance.mountGuidance(document);</script>" +
   "</body></html>";
@@ -391,7 +431,8 @@ async function newPage(
           result = [row];
         } else
           result = load ? rawLoads.find((row) => row.load === load) : rawLoads;
-      } else if (table === "customer_assignments") result = customerAssignments;
+      } else if (table === "load_history") result = rawHistory;
+      else if (table === "customer_assignments") result = customerAssignments;
       else if (table === "ops_assign_customer") {
         const input = request.postDataJSON();
         assert.equal(input.p_owner, adminId);
@@ -1041,6 +1082,34 @@ try {
       ),
       true,
     );
+    await ux.locator('[data-workspace-tab="historial"]').click();
+    const history = ux.locator("#workspace-historial-cambios");
+    await history.filter({ hasText: "POD enviado al cliente" }).waitFor();
+    const podEvent = history
+      .locator(".comm-history-event")
+      .filter({ hasText: "POD enviado al cliente" });
+    assert.deepEqual(await podEvent.locator("dd").allTextContents(), [
+      "No enviado",
+      "Enviado",
+    ]);
+    assert.equal(
+      await history
+        .locator(".comm-history-event")
+        .filter({ hasText: "Cargos" })
+        .locator("dd")
+        .first()
+        .textContent(),
+      "0",
+    );
+    assert.doesNotMatch(
+      await history.innerText(),
+      /truck_source|next_review_at|valor_anterior/,
+    );
+    assert.equal(await history.locator("img").count(), 0);
+    assert.match(await history.innerText(), /<img src=x/);
+    await ux.screenshot({
+      path: "/tmp/panel-original-comparison/historial-legible.png",
+    });
     await ux.keyboard.press("Escape");
     await ux.locator("#workspace-backdrop.show").waitFor({ state: "hidden" });
     const card = ux.locator('#page-operation .card[data-load="VISUAL-001"]');
@@ -1100,6 +1169,54 @@ try {
     assert.equal(rawLoads[0].truck, "T-UX");
     await ux.locator("#ux-save-feedback button").click();
     await ux.unroute("**/rest/v1/loads?*");
+    // El identificador completo se lee fuera del editor y persiste al volver a cargar.
+    const oldTrailer = rawLoads[0].trailer;
+    const longTrailer = "TRAILER-BAJIO-123456789012345678901234567890";
+    await ux.locator("#view-toggle-btn").click();
+    const trailerCell = ux.locator(
+      '#table-body tr[data-load="VISUAL-001"] .t-trailer',
+    );
+    await trailerCell.locator("summary").click();
+    const trailerSaved = ux.waitForResponse(
+      (response) =>
+        response.request().method() === "PATCH" &&
+        response.url().includes("/loads?"),
+    );
+    await trailerCell.locator("input").fill(longTrailer);
+    await trailerCell.locator("input").press("Tab");
+    await trailerSaved;
+    assert.equal(rawLoads[0].trailer, longTrailer);
+    await ux.reload();
+    await ux.locator('[data-page="operation"]').click();
+    await ux.locator("#view-toggle-btn").click();
+    await trailerCell
+      .locator(".trailer-full-value")
+      .filter({ hasText: longTrailer })
+      .waitFor();
+    const trailerLayout = await trailerCell
+      .locator(".trailer-full-value")
+      .evaluate((el) => ({
+        scroll: el.scrollWidth,
+        width: el.clientWidth,
+        whiteSpace: getComputedStyle(el).whiteSpace,
+      }));
+    assert.ok(trailerLayout.scroll <= trailerLayout.width);
+    assert.equal(trailerLayout.whiteSpace, "normal");
+    assert.equal(
+      await ux
+        .locator('th[data-sort="trailer"]')
+        .evaluate((el) => el.scrollWidth <= el.clientWidth),
+      true,
+    );
+    await ux.screenshot({
+      path: "/tmp/panel-original-comparison/trailer-completo.png",
+    });
+    await ux.locator("#view-toggle-btn").click();
+    await ux
+      .locator(
+        '#page-operation .card[data-load="VISUAL-001"] .card-extra > summary',
+      )
+      .click();
     // El ancho debe funcionar también con los campos editables desplegados.
     for (const width of [390, 360]) {
       await ux.setViewportSize({ width, height: 844 });
@@ -1153,6 +1270,7 @@ try {
     });
     await ux.locator("#csr-close").click();
     rawLoads[0].truck = oldTruck;
+    rawLoads[0].trailer = oldTrailer;
   } finally {
     await ux.close();
   }
