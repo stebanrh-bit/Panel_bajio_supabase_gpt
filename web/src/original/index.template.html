@@ -699,9 +699,8 @@
       <div class="csr-form ap-form" style="flex-direction:column; align-items:stretch;">
         <div class="ap-fila">
           <label>Load apartado *<input type="text" id="ap-load" placeholder="Ej. 845210" autocomplete="off"></label>
-          <label>CSR que lo tiene<input type="text" id="ap-csr" placeholder="CSR en Vanguard" list="ap-csr-lista" autocomplete="off"></label>
+          <label>CSR en Vanguard (captura manual)<input type="text" id="ap-csr" placeholder="Nombre del CSR en VG" maxlength="500" autocomplete="off" aria-describedby="ap-csr-help"><small class="who-hint" id="ap-csr-help">Escribe el nombre de la persona que tiene este load en VG.</small></label>
         </div>
-        <datalist id="ap-csr-lista"></datalist>
         <div class="ap-fila">
           <label>Origen<input type="text" id="ap-origen" placeholder="Ciudad, estado"></label>
           <label>Destino (donde entrega)<input type="text" id="ap-destino" placeholder="Ciudad, estado"></label>

@@ -44,6 +44,12 @@ El contador de **Tareas que registraste** cuenta únicamente tus tareas abiertas
 
 Capturas con datos ficticios: [Nueva solicitud](imagenes/nueva-solicitud.png), [Nueva tarea](imagenes/nueva-tarea.png) y [Tarea en móvil](imagenes/nueva-tarea-movil.png).
 
+## Apartar load para regreso: CSR externo de Vanguard
+
+**CSR en Vanguard (captura manual)** es texto libre: escribe el nombre de la persona que tiene el load en VG, aunque no exista entre los usuarios del panel. El formulario no ofrece el directorio interno ni copia automáticamente el CSR asignado al cliente cuando se abre desde Radar. Al editar, conserva el texto guardado. Las tarjetas y el resumen identifican ese dato como **CSR en VG**.
+
+El nombre no crea una cuenta ni cambia asignaciones o permisos del panel. Se conserva el autor autenticado del apartado. No requiere SQL adicional ni cambiar Code.gs: para esta corrección solo se actualiza el HTML publicado. [Formulario de captura manual](imagenes/apartado-csr-vg-manual.png).
+
 ## Calendario semanal: cliente y tipo de movimiento
 
 **Cliente** permite ver el plan de un solo cliente o de todos los clientes del alcance actual. Los botones **Pickup**, **Cruce**, **Entrega** y **Load apartado** muestran exclusivamente el tipo elegido; los demás movimientos desaparecen del calendario. Solo hay un tipo seleccionado a la vez. **Todos** recupera todos los tipos para el cliente elegido; **Limpiar filtros** recupera todos los clientes y tipos.

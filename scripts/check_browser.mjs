@@ -1166,6 +1166,118 @@ try {
     reservedRow.own_load = previousCalendarData.own;
     await calendarPage.close();
   }
+  // El CSR de un apartado es texto de VG, independiente de las personas y asignaciones del panel.
+  const reservedPage = await newPage(false);
+  let reservedRecords = [reservedRow],
+    reservedSaves = [];
+  try {
+    await reservedPage.route("**/rest/v1/reserved_loads**", (route) =>
+      route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify(reservedRecords),
+      }),
+    );
+    await reservedPage.route(
+      "**/rest/v1/rpc/save_reserved_load",
+      async (route) => {
+        const input = route.request().postDataJSON();
+        reservedSaves.push(input);
+        const record = {
+          ...reservedRow,
+          ...input.p_values,
+          id:
+            input.p_id ||
+            `77777777-7777-4777-8777-${String(reservedSaves.length).padStart(12, "0")}`,
+          created_by: adminId,
+          updated_by: adminId,
+        };
+        reservedRecords = [
+          ...reservedRecords.filter((row) => row.id !== record.id),
+          record,
+        ];
+        await route.fulfill({
+          contentType: "application/json",
+          body: JSON.stringify(record),
+        });
+      },
+    );
+    await reservedPage.locator('[data-page="apartados"]').click();
+    await reservedPage.locator("#apartado-nuevo").click();
+    assert.equal(await reservedPage.locator("#ap-csr").inputValue(), "");
+    assert.equal(
+      await reservedPage.locator("#ap-csr").getAttribute("list"),
+      null,
+    );
+    assert.equal(await reservedPage.locator("#ap-csr-lista").count(), 0);
+    await reservedPage.locator("#ap-load").fill("VG-EXTERNO-001");
+    await reservedPage.locator("#ap-csr").fill("Alicia Vanguard externa");
+    await reservedPage.locator("#ap-origen").fill("Laredo, TX");
+    await reservedPage.locator("#ap-destino").fill("Dallas, TX");
+    await reservedPage.locator("#apartado-guardar").click();
+    await reservedPage
+      .locator("#apartado-backdrop.show")
+      .waitFor({ state: "hidden" });
+    assert.equal(
+      reservedSaves[0].p_values.csr_owner,
+      "Alicia Vanguard externa",
+    );
+    assert.equal(reservedSaves[0].p_id, null);
+    await reservedPage.reload();
+    await reservedPage.locator('[data-page="apartados"]').click();
+    const newId = reservedRecords.at(-1).id;
+    await reservedPage
+      .locator(`[data-apartado-id="${newId}"]`)
+      .filter({ hasText: "CSR en VG: Alicia Vanguard externa" })
+      .waitFor();
+    await reservedPage
+      .locator(`[data-ap-accion="editar"][data-ap-id="${newId}"]`)
+      .click();
+    assert.equal(
+      await reservedPage.locator("#ap-csr").inputValue(),
+      "Alicia Vanguard externa",
+    );
+    await reservedPage.evaluate(() =>
+      document
+        .querySelectorAll("#toast-container .toast")
+        .forEach((node) => node.remove()),
+    );
+    await reservedPage.screenshot({
+      path: "/tmp/panel-original-comparison/apartado-csr-vg-manual.png",
+    });
+    await reservedPage.locator("#apartado-cerrar").click();
+    // Desde Radar tampoco debe proponer el CSR que tiene asignado el cliente en el panel.
+    await reservedPage.route("https://router.project-osrm.org/**", (route) =>
+      route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          code: "Ok",
+          routes: [{ distance: 1609.344, duration: 60 }],
+        }),
+      }),
+    );
+    await reservedPage.locator('[data-page="radar"]').click();
+    await reservedPage.locator("#radar-ver").selectOption("todas");
+    await reservedPage.locator("#radar-origen").fill("Laredo, TX");
+    await reservedPage.locator("#radar-calcular").click();
+    await reservedPage.locator('[data-radar-apartar="VISUAL-001"]').click();
+    assert.equal(
+      await reservedPage.locator("#ap-load").inputValue(),
+      "VISUAL-001",
+    );
+    assert.equal(await reservedPage.locator("#ap-csr").inputValue(), "");
+    await reservedPage.locator("#ap-csr").fill("Roberto equipo VG");
+    await reservedPage.locator("#apartado-guardar").click();
+    await reservedPage
+      .locator("#apartado-backdrop.show")
+      .waitFor({ state: "hidden" });
+    assert.equal(reservedSaves[1].p_values.csr_owner, "Roberto equipo VG");
+    assert.equal(
+      await reservedPage.evaluate(() => window.panelApi.profile.display_name),
+      "Esteban",
+    );
+  } finally {
+    await reservedPage.close();
+  }
   // Regresión de usabilidad: los controles desplazados siguen operando y no pierden datos.
   const ux = await newPage(false);
   try {

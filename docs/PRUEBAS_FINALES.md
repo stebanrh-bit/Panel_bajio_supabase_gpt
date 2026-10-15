@@ -37,8 +37,9 @@ Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABIL
 | 29 | Abrir/cerrar Solicitudes y tareas y registrar una solicitud | Encabezados alineados; campos legibles; fecha clara; guarda y se puede comentar/vincular | Pendiente |
 | 30 | Registrar y editar una tarea desde escritorio y móvil | Búsqueda, selección de cargas, responsable, fecha y color accesibles; persiste; editar conserva responsable | Pendiente |
 | 31 | Calendario: elegir cliente y Pickup/Cruce/Entrega/Load apartado; cambiar semana y limpiar | Solo aparecen movimientos del tipo y cliente elegidos; filtros se conservan entre semanas; apartados sin relación tienen opción separada; abre registros y funciona en móvil | Pendiente |
-| 32 | Activar millas automáticas, guardar un trayecto OSM y ejecutar un lote | Un activador por hora; Google se guarda en Supabase conservando OSM; al volver a buscar se muestra Google; funciona con el panel cerrado | Pendiente |
+| 32 | Activar millas automáticas, guardar un trayecto OSM y ejecutar un lote | Un activador por hora; Google se guarda en Supabase conservando OSM; al volver a buscar se muestra Google; funciona con el panel cerrado | Usuario confirmó activación y primer lote de 4 completados el 15 de octubre; falta confirmar ejecución programada y lectura desde el radar |
 | 33 | Repetir activación, detener y reactivar; recálculo manual | No duplica activadores de la cuenta; detener conserva datos; corrección manual persiste y tiene prioridad | Pendiente |
+| 34 | Apartar un load con CSR de VG que no sea usuario del panel; repetir desde Radar | Captura manual sin directorio ni asignación automática; nombre persiste al recargar y editar; autor del apartado sigue siendo la cuenta autenticada | Pendiente |
 
 ## Última etapa: cuentas y permisos
 

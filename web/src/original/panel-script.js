@@ -11881,7 +11881,7 @@
     for (var i = 1; i <= 4; i++)
       stepper += "<i" + (i <= paso ? ' class="on"' : "") + "></i>";
     var ruta = [ap.origen, ap.destino].filter(Boolean).join(" → ");
-    var sub = [ap.csr_dueno ? "CSR: " + ap.csr_dueno : "", ruta]
+    var sub = [ap.csr_dueno ? "CSR en VG: " + ap.csr_dueno : "", ruta]
       .filter(Boolean)
       .join(" · ");
     if (ap.creado_por && ap.creado_por !== myRealIdentity)
@@ -12279,11 +12279,6 @@
       document.getElementById("ap-frecuencia").value = "3";
     document.getElementById("ap-nota").value = ap ? ap.nota : "";
     document.getElementById("apartado-error").style.display = "none";
-    document.getElementById("ap-csr-lista").innerHTML = (personas || [])
-      .map(function (p) {
-        return '<option value="' + esc(p.nombre) + '">';
-      })
-      .join("");
     document.getElementById("apartado-backdrop").classList.add("show");
     setTimeout(function () {
       document.getElementById("ap-load").focus();
@@ -13743,7 +13738,7 @@
       };
       var d = pd(r.delivery_appt);
       poner("ap-load", r.load);
-      poner("ap-csr", radarCsrDe_(r.customer));
+      // El CSR externo de VG se captura manualmente; no copiar la asignación del panel.
       poner("ap-origen", radarLugar_(r.origin_city, r.origin_state));
       poner("ap-destino", radarLugar_(r.dest_city, r.dest_state));
       poner(
@@ -15727,7 +15722,7 @@
         frecuencia: ap.frecuencia_horas,
       };
       var detalle = [
-        ap.csr_dueno ? "CSR " + ap.csr_dueno : "",
+        ap.csr_dueno ? "CSR en VG " + ap.csr_dueno : "",
         ap.destino,
         ap.mi_carga ? "Mi carga: " + ap.mi_carga : "",
       ]

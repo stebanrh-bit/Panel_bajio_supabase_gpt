@@ -78,3 +78,5 @@ Los nombres que debes elegir en el selector no llevan guion bajo final. Estos ac
 Las pruebas locales verifican permisos de las RPC, reserva y recuperación de trabajos, pausa por cuota, conservación de OSM, resultados fuera de rango, prioridad manual y repetición de SQL. Los servicios Google simulados verifican suma de tramos, cuota, fallos de escritura, tiempo máximo, preparación sin publicar secretos y activador único.
 
 El activador real, las autorizaciones, las cuotas y la ejecución contra tu Supabase requieren los pasos anteriores. No se han activado ni validado remotamente desde Codex.
+
+Confirmación del usuario, 15 de octubre de 2026 a las 11:46 (Ciudad de México): activación por hora y primer lote con `status: ok`, `claimed: 4`, `completed: 4`, `noRoute: 0`, `retry: 0`, `stale: 0`, `deferred: 0`. Esto confirma la activación y el lote inicial; falta observar una ejecución posterior programada y comprobar los resultados desde el radar.
