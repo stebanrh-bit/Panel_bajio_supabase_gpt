@@ -1,0 +1,314 @@
+{
+  "fecha_local": "2026-10-15",
+  "zona_horaria_del_usuario": "America/Mexico_City",
+  "commit_revisado": "2acacef",
+  "alcance": "Revisión de código y escenarios con datos ficticios; comprobaciones remotas sin sesión y sin escritura.",
+  "suite": {
+    "pruebas": 81,
+    "aprobadas": 81,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "build": {
+    "modulos": 125,
+    "correcto": true
+  },
+  "tipos_panel_accounts": {
+    "correcto": true,
+    "tls": "Autoridades del sistema"
+  },
+  "entrega_reproducible": {
+    "correcta": true
+  },
+  "navegador": {
+    "screenshots": [
+      "inicio",
+      "mi-turno",
+      "operacion",
+      "workspace-operacion",
+      "workspace-tracking",
+      "workspace-comunicacion",
+      "workspace-documentos",
+      "workspace-incidencias",
+      "workspace-historial",
+      "comentarios",
+      "incidencias",
+      "tabla",
+      "calendario",
+      "indicadores",
+      "apartados",
+      "radar",
+      "historico",
+      "selector-usuario",
+      "cambiar-contrasena",
+      "clave-administracion",
+      "ventana-kpi-detail",
+      "ventana-pendiente",
+      "ventana-bitacora",
+      "ventana-vincular",
+      "ventana-recordatorio",
+      "ventana-apartado",
+      "ventana-multimsg",
+      "ventana-confirmar",
+      "movil-inicio",
+      "client-dashboard",
+      "client-detalle",
+      "client-movil",
+      "manager-dashboard",
+      "manager-detalle",
+      "manager-movil"
+    ],
+    "incidentSaves": 1,
+    "importPreviews": 6,
+    "importSaves": 1,
+    "requests": 241,
+    "errors": []
+  },
+  "teclado": {
+    "focusPath": [
+      {
+        "id": "comments-submit",
+        "inside": true
+      },
+      {
+        "id": "",
+        "inside": false
+      },
+      {
+        "id": "",
+        "inside": false
+      },
+      {
+        "id": "",
+        "inside": false
+      },
+      {
+        "id": "",
+        "inside": false
+      }
+    ],
+    "escapeClosed": true
+  },
+  "disposicion": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 1024
+      },
+      "box": {
+        "top": 112,
+        "bottom": 920,
+        "clientHeight": 819,
+        "scrollHeight": 1131,
+        "overflowY": "visible"
+      },
+      "fields": 33,
+      "sections": [
+        {
+          "title": "Agregar persona",
+          "top": 166,
+          "bottom": 414
+        },
+        {
+          "title": "Asignar cliente a CSR",
+          "top": 429,
+          "bottom": 529
+        },
+        {
+          "title": "Cambiar contraseña de acceso",
+          "top": 544,
+          "bottom": 633
+        },
+        {
+          "title": "Cuentas del Portal Cliente",
+          "top": 649,
+          "bottom": 863
+        },
+        {
+          "title": "Contraseña de la Vista Gerencia",
+          "top": 879,
+          "bottom": 961
+        },
+        {
+          "title": "Cuentas bloqueadas",
+          "top": 977,
+          "bottom": 1064
+        },
+        {
+          "title": "Importación de Excel",
+          "top": 1080,
+          "bottom": 1125
+        },
+        {
+          "title": "Bitácora de admin",
+          "top": 1141,
+          "bottom": 1227
+        }
+      ]
+    },
+    "mobile": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "box": {
+        "top": 88,
+        "bottom": 759,
+        "clientHeight": 675,
+        "scrollHeight": 1342,
+        "overflowY": "visible"
+      },
+      "fields": 33,
+      "sections": [
+        {
+          "title": "Agregar persona",
+          "top": 142,
+          "bottom": 430
+        },
+        {
+          "title": "Asignar cliente a CSR",
+          "top": 445,
+          "bottom": 545
+        },
+        {
+          "title": "Cambiar contraseña de acceso",
+          "top": 561,
+          "bottom": 680
+        },
+        {
+          "title": "Cuentas del Portal Cliente",
+          "top": 696,
+          "bottom": 1004
+        },
+        {
+          "title": "Contraseña de la Vista Gerencia",
+          "top": 1020,
+          "bottom": 1120
+        },
+        {
+          "title": "Cuentas bloqueadas",
+          "top": 1136,
+          "bottom": 1241
+        },
+        {
+          "title": "Importación de Excel",
+          "top": 1257,
+          "bottom": 1302
+        },
+        {
+          "title": "Bitácora de admin",
+          "top": 1318,
+          "bottom": 1423
+        }
+      ]
+    },
+    "mobileLoads": {
+      "width": 390,
+      "scrollWidth": 413,
+      "overflowElements": [
+        {
+          "id": "",
+          "tag": "INPUT",
+          "class": "v field-input",
+          "right": 413
+        },
+        {
+          "id": "",
+          "tag": "INPUT",
+          "class": "v field-input",
+          "right": 413
+        },
+        {
+          "id": "",
+          "tag": "INPUT",
+          "class": "v field-input",
+          "right": 413
+        },
+        {
+          "id": "",
+          "tag": "INPUT",
+          "class": "v field-input",
+          "right": 413
+        }
+      ]
+    }
+  },
+  "muestra_de_controles": [
+    {
+      "pantalla": "inicio",
+      "ancho": 1440,
+      "controles_renderizados": 27,
+      "fuente_minima_px": 11.52,
+      "controles_con_fuente_menor_12px": 5,
+      "sin_nombre_ni_placeholder": []
+    },
+    {
+      "pantalla": "operacion",
+      "ancho": 1440,
+      "controles_renderizados": 79,
+      "fuente_minima_px": 10.72,
+      "controles_con_fuente_menor_12px": 17,
+      "sin_nombre_ni_placeholder": [
+        "v field-input",
+        "v field-input",
+        "v field-input",
+        "v field-input",
+        "v field-input",
+        "v field-input",
+        "v field-input",
+        "v field-input"
+      ]
+    },
+    {
+      "pantalla": "movil-inicio",
+      "ancho": 390,
+      "controles_renderizados": 21,
+      "fuente_minima_px": 9.92,
+      "controles_con_fuente_menor_12px": 10,
+      "sin_nombre_ni_placeholder": []
+    }
+  ],
+  "comprobaciones_remotas": [
+    {
+      "servicio": "Auth",
+      "http": 200
+    },
+    {
+      "servicio": "Directorio",
+      "http": 200,
+      "cuentas_conocidas": [
+        {
+          "nombre": "Esteban",
+          "rol_interno": "Supervisor"
+        },
+        {
+          "nombre": "Abraham",
+          "rol_interno": "Supervisor"
+        }
+      ]
+    },
+    {
+      "servicio": "Cargas sin sesión",
+      "http": 401,
+      "destino": null
+    },
+    {
+      "servicio": "Perfiles sin sesión",
+      "http": 401,
+      "destino": null
+    },
+    {
+      "servicio": "Google",
+      "http": 302,
+      "destino": "accounts.google.com"
+    }
+  ],
+  "limites": [
+    "Los controles renderizados incluyen elementos fuera de la primera pantalla; no son acciones únicas.",
+    "La comparación visual no equivale a una certificación de usabilidad o accesibilidad.",
+    "El inventario temporal inicial completó 36 estados, pero falló al resolver una ruta de fixture desde /tmp. El verificador original se ejecutó después y terminó correctamente.",
+    "Base Auth simulada; SDK y manejador reales con transporte de prueba; sin sesiones privadas de producción.",
+    "Google autenticado, usuarios reales y cuotas Maps pendientes.",
+    "Propuestas sin cambios en la aplicación ni en datos o permisos."
+  ]
+}
