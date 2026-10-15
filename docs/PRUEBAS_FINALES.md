@@ -2,11 +2,13 @@
 
 Realizar después de instalar SQL 004–009, la función `panel-accounts` y la nueva versión de Google. Registrar cada resultado y corregir un fallo antes de continuar. El usuario ya confirmó el acceso y la apariencia original; las demás verificaciones siguen pendientes, incluyendo la actualización de supervisor como CSR.
 
+Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABILIDAD.md): las acciones de cuenta están en el menú del nombre; Administración tiene secciones y la edición de tarjetas se despliega. Las pruebas reales pendientes de esta tabla se conservan aunque las pruebas locales hayan pasado.
+
 | Orden | Prueba | Resultado esperado | Estado real |
 | --- | --- | --- | --- |
 | 1 | Entrar con Esteban y su contraseña actual | Login original, mismo enlace Google y mismas cargas Supabase | Confirmado por el usuario antes del ajuste de supervisor como CSR |
 | 2 | Inicio/Por atender/Solicitudes y tareas y selector de persona | Paneles originales, jornada, pendientes y cierres | Pendiente |
-| 3 | Operación, filtros, búsqueda, tarjetas/tabla, densidad y vistas guardadas | Mismos controles y ventanas del original | Pendiente |
+| 3 | Cargas, búsqueda, tarjetas/tabla y Más filtros y opciones | Controles conservados; edición de tarjetas accesible en Más detalles y edición | Pendiente |
 | 4 | Abrir una carga y recorrer las seis pestañas del Workspace | Datos correctos en cada pestaña | Pendiente |
 | 5 | Cambiar truck/trailer, tracking, citas, salida y cruce en una carga de prueba | Guarda, persiste al recargar y deja historial | Pendiente |
 | 6 | Cambiar estatus y programar recordatorio/revisión | Reglas y avisos originales, fechas correctas | Pendiente |
@@ -27,6 +29,9 @@ Realizar después de instalar SQL 004–009, la función `panel-accounts` y la n
 | 21 | Cerrar sesión, entrar de nuevo y navegar desde móvil | Login correcto; no quedan datos de otra sesión | Pendiente |
 | 22 | Asignar clientes a Esteban y alternar Esteban · CSR / Todos | Vista propia y general con la misma cuenta; conserva administración | Pendiente |
 | 23 | Revisiones y seguimientos: programados, vencidos y acciones | Revisar tránsito mantiene el seguimiento personal; completarlo conserva la revisión de tránsito | Pendiente |
+| 24 | Ventanas usando Tab/Shift+Tab y Escape | El foco permanece dentro; al cerrar vuelve al origen | Pendiente |
+| 25 | Administración y Cargas desde móvil, con detalles desplegados | Todas las secciones accesibles y página sin desbordamiento horizontal | Pendiente |
+| 26 | Confirmación de cambios y mensajes de error | Distingue Guardando, Guardado y Error; no oculta errores sin intervención | Pendiente |
 
 ## Última etapa: cuentas y permisos
 

@@ -1,5 +1,7 @@
 # Esteban: administración, operación y prueba del portal
 
+En la entrega de usabilidad, **Administrar** abre secciones: **Personas**, **Clientes y asignaciones**, **Accesos**, **Importaciones** y **Bitácora**. Para asignarte clientes o crear cuentas del portal, entra en **Clientes y asignaciones**. Las opciones de contraseña y salida están dentro del menú de tu cuenta en el encabezado. [Guía actualizada](MEJORAS_USABILIDAD.md).
+
 La cuenta Esteban se identifica como **Admin** (`admin` en Supabase). Puede recibir clientes y trabajar sus cargas como CSR. No hay que cambiarle los permisos ni crear otra cuenta interna.
 
 La cuenta Abraham se identifica como **Supervisor**. El directorio remoto confirmó que ambas cuentas tienen actualmente el mismo rol `admin`; esta actualización cambia sus etiquetas visibles y conserva esos permisos.
@@ -20,7 +22,7 @@ No hace falta repetir SQL, borrar datos ni desplegar `panel-accounts` de nuevo.
 ## Operar tus cargas como CSR
 
 1. Importa el archivo de cargas. Los clientes aparecerán en los selectores cuando se hayan guardado sus cargas.
-2. Abre **Administrar (Gestionar CSR)** y entra con tu contraseña personal de Esteban.
+2. Abre **Administrar**, entra con tu contraseña personal y selecciona **Clientes y asignaciones**.
 3. En **Asignar cliente a CSR**, selecciona **Esteban**, el cliente que atenderás y pulsa **Asignar**. Repite para tus demás clientes.
 4. Abre el selector **¿Quién eres?** y selecciona **Esteban · CSR**. Esta opción aparece al tener clientes asignados o cargas seguidas.
 5. La vista muestra tus clientes y las cargas que sigues. Los comentarios y cambios siguen firmados por tu misma cuenta Esteban.
@@ -32,7 +34,7 @@ La asignación persiste al actualizar. Al iniciar sesión o recargar, la vista d
 
 Utiliza una cuenta de cliente de prueba para comprobar sus permisos reales. No cambies el rol de Esteban a Cliente.
 
-1. Desde **Gestionar CSR**, busca **Cuentas del Portal Cliente**.
+1. Desde **Administrar → Clientes y asignaciones**, busca **Cuentas del Portal Cliente**.
 2. Escribe un nombre distinto, por ejemplo **Esteban Prueba Cliente**, elige el cliente que quieres revisar, usa **esteban-prueba-cliente** como usuario y define una contraseña de al menos ocho caracteres. Guárdala en privado.
 3. Pulsa **Guardar cuenta**. No requiere otro correo.
 4. Abre una **ventana privada/incógnito**, para conservar tu sesión de administrador en la ventana normal.

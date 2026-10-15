@@ -11,6 +11,8 @@ import * as people from "./people.js";
 import * as files from "./files.js";
 import * as guidance from "./guidance.js";
 import guidanceStyles from "./guidance.css?raw";
+import * as usability from "./usability.js";
+import usabilityStyles from "./usability.css?raw";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -23,6 +25,7 @@ async function start() {
   window.panelPeople = people;
   window.panelFiles = files;
   window.panelGuidance = guidance;
+  window.panelUsability = usability;
   const portal =
     window.PANEL_VIEW ||
     new URLSearchParams(location.search).get("portal") ||
@@ -34,7 +37,7 @@ async function start() {
       client: clientTemplate,
       manager: managerTemplate,
     }[view],
-    styles: styles + "\n" + guidanceStyles,
+    styles: styles + "\n" + guidanceStyles + "\n" + usabilityStyles,
     script,
     config,
     view,
@@ -84,6 +87,7 @@ async function start() {
     document.head.append(mobile);
   }
   document.body.innerHTML = page.body;
+  if (view === "internal") usability.mountUsability(document);
   for (const source of page.scripts) {
     const tag = document.createElement("script");
     tag.textContent = source;

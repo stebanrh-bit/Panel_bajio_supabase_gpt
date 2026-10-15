@@ -2,6 +2,8 @@
 
 Esta entrega simplifica Inicio por petición del usuario. Conserva los colores, las ventanas y las funciones; cambia la organización, las etiquetas y la orientación. No cambia las reglas de Supabase ni elimina datos.
 
+**Actualización del 15 de octubre:** los avisos y revisiones se reúnen ahora en una sola fila por carga. Los filtros permiten ver cada tipo; las próximas fechas se despliegan dentro de esa misma fila. Consulta [las mejoras de usabilidad](MEJORAS_USABILIDAD.md) para la navegación actual.
+
 ## ¿Los recordatorios tienen vigencia?
 
 Tienen una **fecha de vencimiento**, que indica cuándo hay que actuar. Vencer no borra el recordatorio ni lo da por resuelto.

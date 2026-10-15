@@ -4,6 +4,8 @@ El panel conserva sus funciones principales y pasa las pruebas disponibles, pero
 
 Se revisó la rama `supabase-inicial`, con código base `2acacef`. Este documento entrega hallazgos y propuestas: no modifica la aplicación publicada, las cuentas ni los datos.
 
+**Entrega posterior autorizada por el usuario:** las correcciones de ventanas, teclado, campos y móvil, junto con la simplificación de Inicio, tarjetas, Administración, cuenta y guardado, se implementaron después de esta revisión. Consulta [MEJORAS_USABILIDAD.md](MEJORAS_USABILIDAD.md) y los resultados actuales en [VALIDACION_SITIO.md](VALIDACION_SITIO.md). Las mediciones siguientes conservan el estado anterior para que pueda compararse; los permisos de cuentas se mantienen.
+
 ## Qué se comprobó
 
 | Área | Evidencia de esta revisión |

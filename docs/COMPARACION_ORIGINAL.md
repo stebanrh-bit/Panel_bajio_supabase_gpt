@@ -1,5 +1,7 @@
 # Comparación y adaptación del original
 
+Tras la comparación inicial, el usuario autorizó simplificar la interfaz. La entrega actual incorpora [las mejoras de usabilidad](MEJORAS_USABILIDAD.md): organización de Inicio, tarjetas, Administración y cuenta, además de lectura, teclado y móvil. Conserva las funciones originales, pero ya no se presenta como una copia visual exacta del panel anterior.
+
 Se recuperó el HTML público del panel original y de sus rutas `?portal=cliente` y `?portal=gerencia`. La estructura JavaScript del panel publicado coincide con `PanelScript.html` del repositorio al comparar el árbol de sintaxis sin posiciones ni comentarios. El enlace de nuestra publicación devuelve CONNECT 403 desde Codex; ese bloqueo no permite inspeccionar su estado actual y no establece un fallo del sitio.
 
 La entrega reemplaza la aproximación visual anterior con las plantillas, CSS, logos y JavaScript originales. El adaptador de `web/src/original/api/` conserva 97 acciones: 91 del panel interno, incluyendo las dos llamadas condicionales Seguir/Dejar de seguir, y seis de los portales. La cadena de callbacks original se conecta a Supabase; el servicio real de Google se conserva para Maps.

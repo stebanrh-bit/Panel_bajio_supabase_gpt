@@ -276,14 +276,18 @@ const original = originalPage({
   styles:
     (await read("web/src/original/panel-styles.css")) +
     "\n" +
-    (await read("web/src/original/guidance.css")),
+    (await read("web/src/original/guidance.css")) +
+    "\n" +
+    (await read("web/src/original/usability.css")),
   script: await read("web/src/original/panel-script.js"),
   config,
 });
 const helperSource = (
   (await read("web/src/original/guidance.js")) +
   "\n" +
-  (await read("web/src/original/people.js"))
+  (await read("web/src/original/people.js")) +
+  "\n" +
+  (await read("web/src/original/usability.js"))
 ).replace(/^export /gm, "");
 const goldenHtml =
   "<!doctype html><html><head>" +
@@ -292,7 +296,7 @@ const goldenHtml =
   original.body +
   "<script>(function(){" +
   helperSource +
-  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};})()</script>" +
+  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelUsability.mountUsability(document);})()</script>" +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
   "<script>window.panelGuidance.mountGuidance(document);</script>" +
   "</body></html>";
@@ -309,6 +313,7 @@ let incidentSaves = 0;
 let importPreviews = 0,
   importSaves = 0,
   previewedRecords = [];
+const usabilityLayouts = [];
 const incidents = [];
 const customerAssignments = [
   {
@@ -696,6 +701,7 @@ try {
     await both((page) => page.locator("#who-toggle-btn").click());
     await compare("selector-usuario");
     await both((page) => page.locator("#who-drawer-close").click());
+    await both((page) => page.locator("#ux-account-menu > summary").click());
     await both((page) => page.locator("#session-change-pw-btn").click());
     await compare("cambiar-contrasena");
     await both((page) => page.locator("#identity-close").click());
@@ -783,8 +789,9 @@ try {
     });
     await page.locator("#incidencia-submit").click();
     await page
-      .getByText("Ingresa una categoría para registrar la incidencia.", {
-        exact: false,
+      .locator("#ux-save-feedback")
+      .filter({
+        hasText: "Ingresa una categoría para registrar la incidencia.",
       })
       .waitFor();
     assert.equal(incidentSaves, 0);
@@ -827,6 +834,7 @@ try {
     await compare("movil-inicio");
     // Salir debe limpiar la sesión y mostrar el selector de identidad sin errores.
     await pages[1].setViewportSize({ width: 1440, height: 1024 });
+    await pages[1].locator("#ux-account-menu > summary").click();
     await pages[1].locator("#session-logout-btn").click();
     await pages[1].locator("#identity-backdrop.show").waitFor();
     assert.equal(
@@ -864,6 +872,7 @@ try {
     await own.locator("#csr-pw-input").fill("Solo-prueba-local");
     await own.locator("#csr-pw-submit").click();
     await own.locator("#csr-backdrop.show").waitFor();
+    await own.locator('[data-admin-section="customers"]').click();
     await own.locator("#csr-asig-csr").selectOption("Esteban");
     await own.locator("#csr-asig-cliente").selectOption("ACME");
     await own.locator("#csr-asignar-btn").click();
@@ -936,6 +945,216 @@ try {
     );
   } finally {
     await supervisorPage.close();
+  }
+  // Regresión de usabilidad: los controles desplazados siguen operando y no pierden datos.
+  const ux = await newPage(false);
+  try {
+    assert.equal(
+      await ux.locator('[data-attention-load="VISUAL-001"]').count(),
+      1,
+    );
+    await ux.locator('[data-attention-filter="notify"]').click();
+    assert.equal(
+      await ux.locator('[data-attention-load="VISUAL-001"]').count(),
+      1,
+    );
+    await ux.locator('[data-attention-filter="all"]').click();
+    await ux.locator('[data-page="operation"]').click();
+    const openComments = ux
+      .locator('#page-operation [data-comments-load="VISUAL-001"]')
+      .first();
+    await openComments.click();
+    await ux.locator("#comments-textarea").focus();
+    for (let i = 0; i < 8; i++) {
+      await ux.keyboard.press("Tab");
+      assert.equal(
+        await ux.evaluate(() =>
+          document
+            .getElementById("comments-backdrop")
+            .contains(document.activeElement),
+        ),
+        true,
+      );
+    }
+    await ux.keyboard.press("Shift+Tab");
+    assert.equal(
+      await ux.evaluate(() =>
+        document
+          .getElementById("comments-backdrop")
+          .contains(document.activeElement),
+      ),
+      true,
+    );
+    await ux.keyboard.press("Escape");
+    await ux.locator("#comments-backdrop.show").waitFor({ state: "hidden" });
+    assert.equal(
+      await ux.evaluate(() =>
+        document.activeElement.getAttribute("data-comments-load"),
+      ),
+      "VISUAL-001",
+    );
+    // El expediente también es modal; un comentario abierto desde él debe quedar encima.
+    await ux
+      .locator('#page-operation [data-workspace-load="VISUAL-001"]')
+      .first()
+      .click();
+    await ux.locator('#workspace-backdrop[aria-hidden="false"]').waitFor();
+    await ux.locator("#workspace-close").focus();
+    for (let i = 0; i < 8; i++) {
+      await ux.keyboard.press("Tab");
+      assert.equal(
+        await ux.evaluate(() =>
+          document
+            .getElementById("workspace-backdrop")
+            .contains(document.activeElement),
+        ),
+        true,
+      );
+    }
+    await ux.locator('[data-ws-comments="VISUAL-001"]').click();
+    await ux.locator("#ws-inline-comment-text").waitFor();
+    await ux.locator("[data-inline-close=ws-inline-comment]").click();
+    await ux.locator("#workspace-close").focus();
+    await ux.keyboard.press("n");
+    await ux.locator("#comments-backdrop.show").waitFor();
+    assert.equal(
+      await ux.evaluate(
+        () =>
+          Number(
+            getComputedStyle(document.getElementById("comments-backdrop"))
+              .zIndex,
+          ) >
+          Number(
+            getComputedStyle(document.getElementById("workspace-backdrop"))
+              .zIndex,
+          ),
+      ),
+      true,
+    );
+    await ux.keyboard.press("Escape");
+    await ux.locator("#comments-backdrop.show").waitFor({ state: "hidden" });
+    assert.equal(
+      await ux.evaluate(() =>
+        document
+          .getElementById("workspace-backdrop")
+          .contains(document.activeElement),
+      ),
+      true,
+    );
+    await ux.keyboard.press("Escape");
+    await ux.locator("#workspace-backdrop.show").waitFor({ state: "hidden" });
+    const card = ux.locator('#page-operation .card[data-load="VISUAL-001"]');
+    assert.equal(await card.locator(".card-extra").getAttribute("open"), null);
+    await card.locator(".card-extra > summary").click();
+    const dateLabel = await card
+      .locator("[data-pickup-appt-load]")
+      .getAttribute("aria-labelledby");
+    assert.ok(dateLabel);
+    assert.match(
+      await ux.locator("#" + dateLabel).textContent(),
+      /recolección/,
+    );
+    const oldTruck = rawLoads[0].truck;
+    const saved = ux.waitForResponse(
+      (response) =>
+        response.request().method() === "PATCH" &&
+        response.url().includes("/loads?"),
+    );
+    await card.locator('[data-truck-load="VISUAL-001"]').fill("T-UX");
+    await card.locator('[data-truck-load="VISUAL-001"]').press("Tab");
+    await saved;
+    await ux.locator('#ux-save-feedback[data-state="saved"]').waitFor();
+    assert.equal(rawLoads[0].truck, "T-UX");
+    await ux.reload();
+    await ux.locator('[data-page="operation"]').click();
+    await ux
+      .locator('#page-operation .card[data-load="VISUAL-001"] .card-commitment')
+      .filter({ hasText: "T-UX" })
+      .waitFor();
+    await ux
+      .locator(
+        '#page-operation .card[data-load="VISUAL-001"] .card-extra > summary',
+      )
+      .click();
+    // Un fallo real del transporte de prueba permanece visible y no modifica el registro.
+    await ux.route("**/rest/v1/loads?*", (route) => {
+      if (route.request().method() === "PATCH")
+        return route.fulfill({
+          status: 409,
+          contentType: "application/json",
+          body: JSON.stringify({
+            message: "El registro cambió. Revisa antes de guardar.",
+          }),
+        });
+      return route.fallback();
+    });
+    const field = ux.locator('#page-operation [data-truck-load="VISUAL-001"]');
+    await field.fill("NO-GUARDAR");
+    await field.press("Tab");
+    await ux.locator('#ux-save-feedback[data-state="error"]').waitFor();
+    await ux.waitForTimeout(3000);
+    assert.equal(
+      await ux.locator('#ux-save-feedback[data-state="error"]').isVisible(),
+      true,
+    );
+    assert.equal(rawLoads[0].truck, "T-UX");
+    await ux.locator("#ux-save-feedback button").click();
+    await ux.unroute("**/rest/v1/loads?*");
+    // El ancho debe funcionar también con los campos editables desplegados.
+    for (const width of [390, 360]) {
+      await ux.setViewportSize({ width, height: 844 });
+      usabilityLayouts.push(
+        await ux.evaluate(() => ({
+          viewport: innerWidth,
+          documentWidth: document.documentElement.scrollWidth,
+        })),
+      );
+      assert.equal(
+        await ux.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+        true,
+      );
+    }
+    await ux.screenshot({
+      path: "/tmp/panel-original-comparison/usabilidad-movil.png",
+    });
+    await ux.locator('[data-movil="mas"]').click();
+    await ux.locator("#sidebar-manage-csr-btn").click();
+    await ux.locator("#csr-pw-input").fill("Solo-prueba-local");
+    await ux.locator("#csr-pw-submit").click();
+    await ux.locator("#csr-backdrop.show").waitFor();
+    await ux.locator("#csr-new-nombre").fill("Borrador sin guardar");
+    for (const key of ["customers", "access", "imports", "history", "people"]) {
+      await ux.locator(`[data-admin-section="${key}"]`).click();
+      assert.equal(
+        (await ux.locator("#csr-backdrop .csr-section:visible").count()) > 0,
+        true,
+      );
+    }
+    assert.equal(
+      await ux.locator("#csr-new-nombre").inputValue(),
+      "Borrador sin guardar",
+    );
+    const layout = await ux
+      .locator("#csr-backdrop .modal-box")
+      .evaluate((box) => ({
+        bottom: box.getBoundingClientRect().bottom,
+        overflow: getComputedStyle(box).overflowY,
+        width: document.documentElement.scrollWidth,
+        viewport: innerWidth,
+      }));
+    assert.ok(layout.bottom <= 844);
+    assert.equal(layout.overflow, "auto");
+    assert.ok(layout.width <= layout.viewport);
+    usabilityLayouts.push({ administration: layout });
+    await ux.screenshot({
+      path: "/tmp/panel-original-comparison/usabilidad-admin-movil.png",
+    });
+    await ux.locator("#csr-close").click();
+    rawLoads[0].truck = oldTruck;
+  } finally {
+    await ux.close();
   }
   // Selección de archivos reales mediante el botón y los callbacks originales.
   const importPage = pages[0];
@@ -1027,7 +1246,7 @@ try {
   assert.equal(previewedRecords[0].customer, "ULTIMO");
   await importPage
     .locator("#confirmar-backdrop")
-    .filter({ hasText: "Loads repetidos en el archivo" })
+    .filter({ hasText: "Cargas repetidas en el archivo" })
     .waitFor();
   await importPage.locator("#confirmar-cancelar").click();
   await importPage
@@ -1064,7 +1283,7 @@ try {
   rawLoads[0].next_review_at = "2026-10-08T16:00:00Z";
   await importPage.reload();
   await importPage
-    .locator("#home-recordatorio-count")
+    .locator("#attention-reminder-count")
     .filter({ hasText: "2 por atender" })
     .waitFor();
   await importPage.locator("#home-guide summary").click();
@@ -1082,7 +1301,7 @@ try {
     )
     .click();
   await importPage
-    .locator("#home-recordatorio-count")
+    .locator("#attention-reminder-count")
     .filter({ hasText: "1 por atender" })
     .waitFor();
   assert.equal(rawLoads[0].next_review_at, beforeRead);
@@ -1091,12 +1310,12 @@ try {
     .locator('[data-home-reminder-complete="VISUAL-001"]')
     .click();
   await importPage
-    .locator("#home-recordatorio-count")
+    .locator("#attention-reminder-count")
     .filter({ hasText: "0 por atender" })
     .waitFor();
   assert.equal(rawLoads[0].next_review_at, "");
   assert.equal(rawLoads[0].recordatorio_fecha, "2026-10-08T21:00:00.000Z");
-  await importPage.locator("#home-reminders-upcoming summary").click();
+  await importPage.locator(".home-reminders-upcoming summary").click();
   await importPage.locator('[data-reminder-kind="transit"]').waitFor();
   await importPage.setViewportSize({ width: 390, height: 844 });
   assert.equal(
@@ -1121,6 +1340,7 @@ try {
         importSaves,
         requests: requests.length,
         errors,
+        usabilityLayouts,
       },
       null,
       2,

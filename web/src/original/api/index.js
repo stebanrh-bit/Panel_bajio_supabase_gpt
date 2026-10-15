@@ -5,7 +5,12 @@ import { radarMethods } from "./radar.js";
 import { importMethods } from "./imports.js";
 
 /** Cadena compatible con la UI original, sin reemplazar el servicio real de Google Maps. */
-export function createRunner(methods, epoch = () => 0) {
+export function createRunner(methods, epoch = () => 0, observe = () => {}) {
+  let nextOperationId = 0;
+  // Las lecturas y el acceso no se presentan como guardados. Nunca se publican argumentos:
+  // algunas acciones de cuentas reciben contraseñas y deben mantenerse privadas.
+  const writes =
+    /^(save|add|remove|set|guardar|quitar|asignar|seguir|dejarSeguir|registrar|mark|clear|confirmar|vincular|cambiar|revisar|eliminar|editar|resolver|enviar|deshacer|desbloquear|change|importLoads|recalcular)/;
   const loginMethods = new Set([
     "verifyIdentityLogin",
     "checkClientLogin",
@@ -23,19 +28,31 @@ export function createRunner(methods, epoch = () => 0) {
             return (callback) => chain(success, callback);
           return (...args) => {
             const stamp = epoch();
+            const id = ++nextOperationId;
+            const write = writes.test(String(property));
+            const announce = (phase, message) => {
+              if (write && stamp === epoch()) observe({ id, phase, message });
+            };
             Promise.resolve()
               .then(() => {
                 if (typeof methods[property] !== "function")
                   throw Error(`Acción desconocida: ${String(property)}`);
+                announce("start");
                 return methods[property](...args);
               })
               .then(
                 (result) => {
-                  if (stamp === epoch() || loginMethods.has(property))
+                  if (stamp === epoch() || loginMethods.has(property)) {
+                    announce(
+                      result?.ok === false ? "error" : "success",
+                      result?.error,
+                    );
                     success?.(result);
+                  }
                 },
                 (error) => {
                   if (stamp === epoch() || loginMethods.has(property)) {
+                    announce("error", error.message);
                     if (failure) failure(error);
                     else if (success)
                       success({ ok: false, error: error.message });
@@ -58,6 +75,10 @@ export function createRunner(methods, epoch = () => 0) {
   return chain();
 }
 export function createOriginalApi(client) {
+  const announce = (detail) => {
+    if (typeof window !== "undefined")
+      window.dispatchEvent(new CustomEvent("panel:save", { detail }));
+  };
   const ctx = createContext(client);
   const operations = operationMethods(ctx);
   const team = teamMethods(ctx, operations);
@@ -107,10 +128,13 @@ export function createOriginalApi(client) {
     };
   };
   return {
-    run: createRunner(methods, () => ctx.epoch),
+    run: createRunner(methods, () => ctx.epoch, announce),
     methods,
     restore: ctx.restore,
-    logout: ctx.logout,
+    logout: async () => {
+      await ctx.logout();
+      announce({ phase: "reset" });
+    },
     get profile() {
       return ctx.profile;
     },

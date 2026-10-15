@@ -71,7 +71,7 @@
       <div class="header-titles">
         <h1>Panel de control</h1>
         <p class="eyebrow">Balance Scorecard Bajío</p>
-        <p class="panel-owner" id="panel-owner-caption" hidden>Estás en el panel de: <b id="panel-owner-name"></b></p>
+        <p class="panel-owner" id="panel-owner-caption" hidden>Vista: <b id="panel-owner-name"></b></p>
       </div>
     </div>
     <div class="meta" id="meta-box">
@@ -95,7 +95,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15l3 3 3-3"></path></svg>
       </button>
       <input type="file" id="file-input" accept=".xlsx,.xls,.csv" hidden>
-      <button class="file-btn" type="button" id="manage-csr-btn" hidden>Gestionar CSR</button>
+      <button class="file-btn" type="button" id="manage-csr-btn" hidden>Administración</button>
     </div>
     <span class="import-status" id="import-status" role="status"></span>
   </header>
@@ -130,7 +130,7 @@
 <section class="home-command" id="home-command">
   <div class="home-command-head">
     <div class="home-command-title"><h1>Mi operación</h1><p>Lo que requiere tu atención ahora.</p></div>
-    <div class="home-global-search"><input id="home-search" type="text" placeholder="Buscar load, cliente, trailer, WO, comentario…" autocomplete="off" aria-label="Buscar en todas tus cargas"><div class="search-resultados" id="home-search-resultados" role="listbox" hidden></div></div>
+    <div class="home-global-search"><input id="home-search" type="text" placeholder="Buscar carga, cliente, remolque, WO, comentario…" autocomplete="off" aria-label="Buscar en todas tus cargas"><div class="search-resultados" id="home-search-resultados" role="listbox" hidden></div></div>
   </div>
   <div class="home-tabs">
     <button type="button" class="home-tab-btn active" data-home-tab="ahora">Por atender</button>
@@ -159,12 +159,19 @@
       </div>
       <div class="action-center-count" id="action-center-count">0</div>
     </div>
+    <div class="attention-filters" aria-label="Filtrar acciones de Inicio">
+      <button type="button" class="ws-btn" data-attention-filter="all" aria-pressed="true">Todas</button>
+      <button type="button" class="ws-btn" data-attention-filter="review" aria-pressed="false">Revisiones y seguimientos</button>
+      <button type="button" class="ws-btn" data-attention-filter="notify" aria-pressed="false">Avisar al cliente</button>
+      <span id="attention-reminder-count" class="home-section-help"></span>
+    </div>
+    <p class="home-section-help" id="home-timezone"></p>
     <div class="action-list" id="action-center-list"></div>
   </section>
 
 
-<section class="home-mini-panel home-mini-panel-wide" id="group-recordatorios"><div class="home-mini-head"><h3>Revisiones y seguimientos</h3><span id="home-recordatorio-count">0 por atender</span></div><p class="home-section-help">Por atender significa que la fecha ya llegó o falta programarla. Las próximas fechas están en Programados.</p><div class="home-mini-list" id="home-recordatorios"></div></section>
-<section class="home-mini-panel"><div class="home-mini-head"><h3>Avisar al cliente</h3><span id="home-comm-count">0 pendientes</span><button type="button" class="ws-btn" data-abrir-multi-msg>Preparar aviso de varias cargas</button></div><p class="home-section-help">El panel registra el aviso; envíalo por tu canal habitual y después confirma que ya avisaste.</p><div class="home-mini-list" id="home-communications"></div></section>
+<section class="home-mini-panel home-mini-panel-wide" id="group-recordatorios" hidden><div class="home-mini-head"><h3>Revisiones y seguimientos</h3><span id="home-recordatorio-count">0 por atender</span></div><p class="home-section-help">Por atender significa que la fecha ya llegó o falta programarla. Las próximas fechas están en Programados.</p><div class="home-mini-list" id="home-recordatorios"></div></section>
+<section class="home-mini-panel" hidden><div class="home-mini-head"><h3>Avisar al cliente</h3><span id="home-comm-count">0 pendientes</span><button type="button" class="ws-btn" data-abrir-multi-msg>Preparar aviso de varias cargas</button></div><p class="home-section-help">El panel registra el aviso; envíalo por tu canal habitual y después confirma que ya avisaste.</p><div class="home-mini-list" id="home-communications"></div></section>
 <details class="home-more" id="home-more-info"><summary>Agenda y resumen de la operación</summary>
 <div class="home-summary-kpis">    <div class="home-priority-kpi clear" data-kpi-detail="clear"><span class="home-n" id="home-clear">0</span><div><b>AL DÍA</b><small>Operación en orden</small></div></div>
     <div class="home-priority-kpi" data-kpi-detail="today"><span class="home-n" id="journey-today">0</span><div><b>ENTREGAS HOY</b><small>Con cita de entrega hoy</small></div></div>
@@ -200,7 +207,7 @@
       <div class="brief-actions"><button class="ws-btn" type="button" id="brief-copy">Copiar resumen</button><button class="ws-btn primary" type="button" id="handoff-toggle">Preparar cierre de turno</button></div></div>
     <div class="brief-summary" id="brief-summary">Cargando resumen…</div>
     <div class="brief-kpis"><div class="brief-kpi"><b id="brief-active">0</b><span>Activas</span></div><div class="brief-kpi"><b id="brief-now">0</b><span>Atender ahora</span></div><div class="brief-kpi"><b id="brief-client">0</b><span>Cliente pendiente</span></div><div class="brief-kpi"><b id="brief-today">0</b><span>Entregas hoy</span></div><div class="brief-kpi"><b id="brief-overdue">0</b><span>Revisiones vencidas</span></div></div>
-    <div class="handoff-box" id="handoff-box" hidden><h3 class="ws-section-title">Cierre / Handoff de turno</h3><textarea class="handoff-text" id="handoff-text" aria-label="Texto del cierre de turno"></textarea><div class="brief-actions" style="margin-top:.55rem"><button class="ws-btn" id="handoff-regenerate" type="button">Regenerar</button><button class="ws-btn" id="handoff-copy" type="button">Copiar handoff</button><button class="ws-btn primary" id="handoff-send" type="button">Enviar</button></div><div class="handoff-list" id="handoff-list"></div></div>
+    <div class="handoff-box" id="handoff-box" hidden><h3 class="ws-section-title">Cierre de turno</h3><textarea class="handoff-text" id="handoff-text" aria-label="Texto del cierre de turno"></textarea><div class="brief-actions" style="margin-top:.55rem"><button class="ws-btn" id="handoff-regenerate" type="button">Regenerar</button><button class="ws-btn" id="handoff-copy" type="button">Copiar handoff</button><button class="ws-btn primary" id="handoff-send" type="button">Enviar</button></div><div class="handoff-list" id="handoff-list"></div></div>
   </section>
 <div class="home-secondary-grid"><section class="group" id="group-pendientes">
     <h2>
@@ -238,7 +245,7 @@
 </div>
 
 <div class="page-view" id="page-operation" hidden>
-  <div class="operation-page-head"><div><h1>Operación completa</h1><p>Consulta, filtra y administra todas las cargas de la operación.</p></div><div class="operation-head-right"><button class="ws-btn" id="export-operation-report-btn">Exportar reporte (CSV)</button><div class="operation-meta" id="operation-meta"></div></div></div>
+  <div class="operation-page-head"><div><h1>Cargas</h1><p>Consulta, filtra y administra todas las cargas de la operación.</p></div><div class="operation-head-right"><button class="ws-btn" id="export-operation-report-btn">Exportar reporte (CSV)</button><div class="operation-meta" id="operation-meta"></div></div></div>
   <div class="stats" id="stats">
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:80px;height:0.7rem;"></div></div>
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:60px;height:0.7rem;"></div></div>
@@ -257,7 +264,7 @@
     <select class="cliente-filter" id="cliente-filter" aria-label="Filtrar por cliente">
       <option value="">Todos los clientes</option>
     </select>
-    <input class="search" id="search" type="text" placeholder="Buscar load, cliente, trailer…" title="Busca por load, cliente, ciudad, truck o trailer">
+    <input class="search" id="search" type="text" placeholder="Buscar carga, cliente, remolque…" title="Busca por carga, cliente, ciudad, unidad o remolque">
     <button class="file-btn" type="button" id="view-toggle-btn">Vista tabla</button>
     <button class="file-btn" type="button" data-abrir-multi-msg title="Un solo mensaje para varias cargas de un cliente">Mensaje a cliente</button>
     <button class="file-btn file-btn-sec" type="button" id="masivo-btn" title="Elegir varias cargas para cambiarles el estatus o marcar POD de una vez">Seleccionar varias</button>
@@ -480,9 +487,9 @@
 
 
   <div class="workspace-backdrop" id="workspace-backdrop" aria-hidden="true">
-    <aside class="workspace-panel" role="dialog" aria-modal="true">
-      <div class="workspace-head"><div class="workspace-head-row"><div><div class="workspace-kicker">Load Workspace</div><h2 class="workspace-title" id="workspace-title">Load</h2><div class="workspace-route" id="workspace-route"></div></div><div class="workspace-follow" id="workspace-follow"></div><button type="button" class="workspace-close" id="workspace-close">×</button></div></div>
-      <div class="workspace-tabs" id="workspace-tabs"><button class="workspace-tab active" data-workspace-tab="operacion">Operación</button><button class="workspace-tab" data-workspace-tab="tracking">Tracking</button><button class="workspace-tab" data-workspace-tab="comunicacion">Comunicación</button><button class="workspace-tab" data-workspace-tab="documentos">Documentos</button><button class="workspace-tab" data-workspace-tab="incidencias">Incidencias</button><button class="workspace-tab" data-workspace-tab="historial">Historial</button></div>
+    <aside class="workspace-panel" role="dialog" aria-modal="true" aria-labelledby="workspace-title">
+      <div class="workspace-head"><div class="workspace-head-row"><div><div class="workspace-kicker">Expediente de carga</div><h2 class="workspace-title" id="workspace-title">Carga</h2><div class="workspace-route" id="workspace-route"></div></div><div class="workspace-follow" id="workspace-follow"></div><button type="button" class="workspace-close" id="workspace-close">×</button></div></div>
+      <div class="workspace-tabs" id="workspace-tabs"><button class="workspace-tab active" data-workspace-tab="operacion">Operación</button><button class="workspace-tab" data-workspace-tab="tracking">Seguimiento</button><button class="workspace-tab" data-workspace-tab="comunicacion">Comunicación</button><button class="workspace-tab" data-workspace-tab="documentos">Documentos</button><button class="workspace-tab" data-workspace-tab="incidencias">Incidencias</button><button class="workspace-tab" data-workspace-tab="historial">Historial</button></div>
       <div class="workspace-body" id="workspace-body"></div>
     </aside>
   </div>
@@ -573,7 +580,7 @@
   <div class="modal-backdrop" id="pendiente-backdrop">
     <div class="modal-box" style="max-width:420px;">
       <div class="modal-head">
-        <span class="modal-title">Nuevo registro sin load</span>
+        <span class="modal-title">Nueva solicitud sin carga confirmada</span>
         <button type="button" class="modal-close" id="pendiente-close">&times;</button>
       </div>
       <div class="csr-form" style="flex-direction:column; align-items:stretch;">
@@ -597,7 +604,7 @@
       <div class="csr-form" style="flex-direction:column; align-items:stretch;">
         <textarea id="bitacora-nota" rows="3" placeholder="¿Qué queda pendiente?"></textarea>
         <div class="field-label">Load(s) <span style="color:var(--ink-faint);font-weight:400">— opcional; sin load queda como pendiente general del turno</span></div>
-        <input type="text" id="bitacora-load-search" placeholder="Buscar load o cliente…" autocomplete="off">
+        <input type="text" id="bitacora-load-search" placeholder="Buscar carga o cliente…" autocomplete="off">
         <div class="bitacora-load-selected" id="bitacora-load-selected"></div>
         <div class="bitacora-load-list" id="bitacora-load-select"></div>
         <div class="field-label">Fecha de seguimiento (opcional)</div>
@@ -625,13 +632,13 @@
   <div class="modal-backdrop" id="vincular-backdrop">
     <div class="modal-box" style="max-width:420px;">
       <div class="modal-head">
-        <span class="modal-title">Vincular a un load</span>
+        <span class="modal-title">Vincular a una carga</span>
         <button type="button" class="modal-close" id="vincular-close">&times;</button>
       </div>
       <p class="recordatorio-note" id="vincular-note"></p>
       <div class="csr-form" style="flex-direction:column; align-items:stretch;">
-        <input type="text" id="vincular-load-search" placeholder="Buscar load o cliente…" autocomplete="off">
-        <select id="vincular-load-select" aria-label="Load a vincular" size="8"></select>
+        <input type="text" id="vincular-load-search" placeholder="Buscar carga o cliente…" autocomplete="off">
+        <select id="vincular-load-select" aria-label="Carga a vincular" size="8"></select>
       </div>
       <div class="csr-pw-error" id="vincular-error" style="display:none;">Elige un load.</div>
       <button type="button" class="csr-btn" id="vincular-submit" style="margin-top:0.6rem;">Vincular y combinar comentarios</button>
@@ -753,7 +760,7 @@
   <div class="modal-backdrop" id="csr-backdrop">
     <div class="modal-box csr-modal-box">
       <div class="modal-head">
-        <span class="modal-title">Gestionar CSR</span>
+        <span class="modal-title">Administración</span>
         <button type="button" class="modal-close" id="csr-close">&times;</button>
       </div>
 
@@ -761,7 +768,7 @@
         <h3>Agregar persona</h3>
         <div class="csr-form">
           <input type="text" id="csr-new-nombre" placeholder="Nombre">
-          <input type="email" id="csr-new-correo" placeholder="Correo de Google">
+          <input type="email" id="csr-new-correo" placeholder="Correo de contacto (opcional)">
           <select id="csr-new-rol" aria-label="Rol de la persona nueva">
             <option value="CSR">CSR</option>
             <option value="Seguimiento">General</option>
@@ -826,7 +833,7 @@
       </div>
 
       <div class="csr-section">
-        <h3>Importación de Excel</h3>
+        <h3>Importación de cargas</h3><p class="home-section-help">Selecciona CSV o Excel. Verás una vista previa antes de guardar.</p><button type="button" class="ws-btn" id="ux-admin-import">Seleccionar archivo</button>
         <div id="deshacer-import-box" class="who-hint">Cargando…</div>
       </div>
 

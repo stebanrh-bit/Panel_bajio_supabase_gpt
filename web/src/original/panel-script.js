@@ -561,7 +561,65 @@
           .replace(/"/g, "&quot;");
   }
 
-  /** Dos plazos diferentes pueden corresponder a una carga; se muestran con nombre propio. */
+  /** Acción de un plazo concreto. Una revisión nunca completa el seguimiento personal. */
+  function homeReminderHtml(entry) {
+    var r = entry.row;
+    var state =
+      entry.state === "sinfecha"
+        ? "Falta fecha"
+        : entry.state === "vencido"
+          ? "Vencido"
+          : "Programado";
+    var when =
+      entry.when && !isNaN(Date.parse(entry.when))
+        ? (entry.state === "vencido" ? "Venció: " : "Fecha: ") +
+          fmtDateTime(entry.when)
+        : "Revisa la carga y programa una fecha.";
+    var action = "";
+    var role = window.panelApi.profile && window.panelApi.profile.role;
+    if (role === "admin" || role === "csr") {
+      if (entry.kind === "transit")
+        action =
+          '<button type="button" class="ws-btn" data-recordatorio-revisar="' +
+          esc(r.load) +
+          '">Ya revisé (+3 h)</button>';
+      else if (entry.kind === "status")
+        action =
+          '<button type="button" class="ws-btn" data-recordatorio-edit="' +
+          esc(r.load) +
+          '" data-recordatorio-status="' +
+          esc(r.status) +
+          '">Cambiar fecha</button>';
+      else
+        action =
+          '<button type="button" class="ws-btn" data-home-reminder-complete="' +
+          esc(r.load) +
+          '">Completar seguimiento</button>';
+    }
+    return (
+      '<div class="ux-reminder-row" data-reminder-kind="' +
+      entry.kind +
+      '" data-reminder-load="' +
+      esc(r.load) +
+      '"><div><div class="ux-reminder-title"><span class="ux-reminder-kind">' +
+      esc(entry.label) +
+      '</span><span class="ux-state ' +
+      entry.state +
+      '">' +
+      state +
+      '</span></div><div class="ux-reminder-meta">' +
+      esc(when) +
+      (entry.kind === "transit"
+        ? " · Se repite cada 3 horas."
+        : " · No se borra al vencer.") +
+      (entry.note ? "<br>" + esc(entry.note) : "") +
+      '</div></div><div class="ux-reminder-actions">' +
+      action +
+      "</div></div>"
+    );
+  }
+
+  /** Contador compatible con los avisos; las acciones se dibujan una sola vez en Inicio. */
   function renderHomeReminders(rows) {
     var entries = window.panelGuidance.reminderEntries(
       rows,
@@ -571,116 +629,41 @@
     var due = entries.filter(function (entry) {
       return entry.needsAction;
     });
-    var upcoming = entries.filter(function (entry) {
-      return !entry.needsAction;
-    });
     var count = document.getElementById("home-recordatorio-count");
-    if (count)
-      count.textContent =
-        due.length + " por atender · " + upcoming.length + " programados";
-    var box = document.getElementById("home-recordatorios");
-    if (!box) return;
-    function row(entry) {
-      var r = entry.row;
-      var state =
-        entry.state === "sinfecha"
-          ? "Falta fecha"
-          : entry.state === "vencido"
-            ? "Vencido"
-            : "Programado";
-      var when =
-        entry.when && !isNaN(Date.parse(entry.when))
-          ? (entry.state === "vencido" ? "Venció: " : "Fecha: ") +
-            fmtDateTime(entry.when)
-          : "Revisa la carga y programa una fecha.";
-      var action = "";
-      var role = window.panelApi.profile && window.panelApi.profile.role;
-      if (role === "admin" || role === "csr") {
-        if (entry.kind === "transit")
-          action =
-            '<button type="button" class="ws-btn" data-recordatorio-revisar="' +
-            esc(r.load) +
-            '">Ya revisé (+3 h)</button>';
-        else if (entry.kind === "status")
-          action =
-            '<button type="button" class="ws-btn" data-recordatorio-edit="' +
-            esc(r.load) +
-            '" data-recordatorio-status="' +
-            esc(r.status) +
-            '">Cambiar fecha</button>';
-        else
-          action =
-            '<button type="button" class="ws-btn" data-home-reminder-complete="' +
-            esc(r.load) +
-            '">Completar seguimiento</button>';
-      }
-      return (
-        '<article class="ux-reminder-row" data-reminder-kind="' +
-        entry.kind +
-        '" data-reminder-load="' +
-        esc(r.load) +
-        '"><div><div class="ux-reminder-title"><b>Carga ' +
-        esc(r.load) +
-        "</b><span>" +
-        esc(r.customer || "Sin cliente") +
-        '</span><span class="ux-state ' +
-        entry.state +
-        '">' +
-        state +
-        '</span></div><div class="ux-reminder-kind">' +
-        esc(entry.label) +
-        '</div><div class="ux-reminder-meta">' +
-        esc(when) +
-        (entry.kind === "transit"
-          ? " · Se repite cada 3 horas."
-          : " · No se borra al vencer.") +
-        (entry.note ? "<br>" + esc(entry.note) : "") +
-        '</div></div><div class="ux-reminder-actions">' +
-        action +
-        '<button type="button" class="ws-btn" data-home-open="' +
-        esc(r.load) +
-        '">Ver carga</button></div></article>'
-      );
-    }
-    box.innerHTML =
-      (due.length
-        ? due.map(row).join("")
-        : '<div class="action-empty">Sin revisiones vencidas ni fechas por programar.</div>') +
-      (upcoming.length
-        ? '<details class="home-reminders-upcoming" id="home-reminders-upcoming"><summary>Programados (' +
-          upcoming.length +
-          "): ver próximas fechas</summary>" +
-          upcoming.map(row).join("") +
-          "</details>"
-        : "");
+    var label =
+      due.length +
+      " por atender · " +
+      (entries.length - due.length) +
+      " programados";
+    if (count) count.textContent = label;
+    var visibleCount = document.getElementById("attention-reminder-count");
+    if (visibleCount) visibleCount.textContent = label;
   }
 
-  document
-    .getElementById("home-recordatorios")
-    .addEventListener("click", function (event) {
-      var button = event.target.closest("[data-home-reminder-complete]");
-      if (!button) return;
-      var rec = currentData.find(function (row) {
-        return row.load === button.getAttribute("data-home-reminder-complete");
-      });
-      if (!rec) return;
-      ensureLoggedIn(function () {
-        button.disabled = true;
-        guardarConVerificacion_(
-          function () {
-            rec.next_review_at = "";
-            rec.next_review_note = "";
-            rec.next_review_by = "";
-            render(currentData);
-            showToast("Seguimiento completado · Carga " + rec.load, "good");
-          },
-          function (error) {
-            button.disabled = false;
-            showToast("No se pudo completar: " + error.message, "error");
-          },
-        ).clearNextReview(rec.load, myRealIdentity, myPassword);
-      });
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-home-reminder-complete]");
+    if (!button) return;
+    var rec = currentData.find(function (row) {
+      return row.load === button.getAttribute("data-home-reminder-complete");
     });
+    if (!rec) return;
+    ensureLoggedIn(function () {
+      button.disabled = true;
+      guardarConVerificacion_(
+        function () {
+          rec.next_review_at = "";
+          rec.next_review_note = "";
+          rec.next_review_by = "";
+          render(currentData);
+          showToast("Seguimiento completado · Carga " + rec.load, "good");
+        },
+        function (error) {
+          button.disabled = false;
+          showToast("No se pudo completar: " + error.message, "error");
+        },
+      ).clearNextReview(rec.load, myRealIdentity, myPassword);
+    });
+  });
 
   /** Tag de recordatorio. Dos variantes:
    * - Manual (Descompuesta / En resguardo / Patio permisionario): muestra la fecha que alguien
@@ -783,6 +766,7 @@
     var id = ++accionesConDeshacerSeq_,
       terminado = false,
       timer;
+    window.panelUsability.pendingChange(id, true);
     var container = document.getElementById("toast-container");
     var el = document.createElement("div");
     el.className = "toast toast-undo";
@@ -811,6 +795,7 @@
       terminado = true;
       clearTimeout(timer);
       delete accionesConDeshacer_[id];
+      window.panelUsability.pendingChange(id, false);
       quitarAviso();
       commit();
     }
@@ -819,6 +804,7 @@
       terminado = true;
       clearTimeout(timer);
       delete accionesConDeshacer_[id];
+      window.panelUsability.pendingChange(id, false);
       quitarAviso();
       revertir();
       showToast("Cambio deshecho", "good");
@@ -846,7 +832,7 @@
 
   /** Copia el número de load al portapapeles (doble clic sobre el load, en tabla o tarjeta). */
   function copyLoadToClipboard(load) {
-    copyTextGeneric(load, "Load " + load + " copiado");
+    copyTextGeneric(load, "Carga " + load + " copiado");
   }
 
   function copyTextGeneric(text, successMessage) {
@@ -1073,7 +1059,7 @@
       '">' +
       '<div class="card-top">' +
       "<div>" +
-      '<span class="load-id">Load <span class="t-load-num" data-load-copy="' +
+      '<span class="load-id">Carga <span class="t-load-num" data-load-copy="' +
       esc(rec.load) +
       '" title="Doble clic para copiar">' +
       esc(rec.load) +
@@ -1100,7 +1086,7 @@
         : "") +
       (tieneRecordatorio(rec.status) ? recordatorioTagHtml(rec) : "") +
       "</div>" +
-      '<select class="status-select" aria-label="Estatus del load ' +
+      '<select class="status-select" aria-label="Estatus de la carga ' +
       rec.load +
       '" data-status-load="' +
       rec.load +
@@ -1112,8 +1098,19 @@
       "</div>" +
       alertBannerHtml(rec) +
       clientCommunicationHtml(rec) +
+      '<div class="card-commitment"><span>Unidad: ' +
+      esc(
+        [rec.truck, rec.trailer].filter(Boolean).join(" / ") || "Sin asignar",
+      ) +
+      "</span><span>Entrega: " +
+      esc(
+        rec.delivery_appt
+          ? fmtDateTime(rec.delivery_appt)
+          : "Sin fecha programada",
+      ) +
+      '</span></div><details class="card-extra"><summary>Más detalles y edición</summary>' +
       '<div class="card-mid">' +
-      '<div class="field"><div class="k">Pickup cita</div><input class="v field-input" type="datetime-local" value="' +
+      '<div class="field"><div class="k">Cita de recolección</div><input class="v field-input" type="datetime-local" value="' +
       apptDatetimeLocalValue(rec.pickup_appt) +
       '" data-pickup-appt-load="' +
       rec.load +
@@ -1179,6 +1176,7 @@
           "</div>"
         : "") +
       updatedLineHtml(rec) +
+      "</details>" +
       '<div class="comments-row">' +
       '<button type="button" class="workspace-open-btn" data-workspace-load="' +
       rec.load +
@@ -1191,6 +1189,7 @@
       '">' +
       incidenciasBtnLabel(rec) +
       "</button>" +
+      '<details class="card-secondary-actions"><summary>Más acciones</summary><div class="ux-advanced-content">' +
       '<button type="button" class="incidencias-btn" data-pendiente-turno-load="' +
       rec.load +
       '">Marcar pendiente</button>' +
@@ -1198,6 +1197,7 @@
       rec.load +
       '">Asignar a alguien en especial</button>' +
       colorSwatchesHtml(rec) +
+      "</div></details>" +
       "</div>" +
       "</article>"
     );
@@ -1394,7 +1394,7 @@
   }
   function loadDetailLine_(r) {
     return (
-      "Load " +
+      "Carga " +
       (r.load || "—") +
       " | " +
       (r.customer || "Sin cliente") +
@@ -1440,7 +1440,7 @@
     lines.push("", "PRIORIDADES PARA CONTINUAR");
     snap.items.slice(0, 12).forEach(function (x) {
       lines.push(
-        "- Load " +
+        "- Carga " +
           x.rec.load +
           " | " +
           (x.rec.customer || "Sin cliente") +
@@ -1466,7 +1466,7 @@
     if (openBit.length) {
       lines.push("", "BITÁCORA ABIERTA");
       openBit.slice(0, 10).forEach(function (b) {
-        lines.push("- Load " + (b.load || "—") + " | " + b.nota);
+        lines.push("- Carga " + (b.load || "—") + " | " + b.nota);
       });
     }
     if (!snap.items.length && !openBit.length)
@@ -1544,7 +1544,7 @@
       out.push("- Avisé al cliente: " + avisados.length);
       avisados.slice(0, 15).forEach(function (r) {
         out.push(
-          "  · Load " +
+          "  · Carga " +
             r.load +
             " | " +
             (r.customer || "") +
@@ -1557,7 +1557,7 @@
       out.push("- Actualicé: " + editadas.length);
       editadas.slice(0, 15).forEach(function (r) {
         out.push(
-          "  · Load " +
+          "  · Carga " +
             r.load +
             " | " +
             (r.customer || "") +
@@ -1570,7 +1570,7 @@
       out.push("- Comenté: " + comentadas.length);
       comentadas.slice(0, 10).forEach(function (k) {
         out.push(
-          "  · Load " +
+          "  · Carga " +
             k +
             " | " +
             String(ultimosComentarios[k].text || "")
@@ -1583,7 +1583,7 @@
       out.push("- Pendientes de bitácora atendidos: " + bitResueltas.length);
       bitResueltas.slice(0, 10).forEach(function (b) {
         out.push(
-          "  · Load " +
+          "  · Carga " +
             (b.load || "—") +
             " | " +
             String(b.nota || "").slice(0, 80),
@@ -1660,7 +1660,7 @@
     marcarPanelesVacios_();
   })();
   function completarAccesibilidad_() {
-    pintarComentariosRapidos_(); // los paneles de comentario del Load Workspace se dibujan después
+    pintarComentariosRapidos_(); // los paneles de comentario del Expediente de carga se dibujan después
     document
       .querySelectorAll(".modal-box, .who-drawer")
       .forEach(function (box) {
@@ -1774,7 +1774,7 @@
             return (
               '<div class="deliv-card"><div class="deliv-card-top"><span class="hm-time">' +
               esc(d ? fmtDateTime(d) : "—") +
-              '</span><span class="hm-load">Load ' +
+              '</span><span class="hm-load">Carga ' +
               esc(r.load) +
               '</span><span class="deliv-customer">' +
               esc(r.customer || "—") +
@@ -1813,7 +1813,7 @@
             return (
               '<div class="deliv-card"><div class="deliv-card-top"><span class="hm-time">' +
               esc(d ? fmtDateTime(d) : "—") +
-              '</span><span class="hm-load">Load ' +
+              '</span><span class="hm-load">Carga ' +
               esc(r.load) +
               '</span><span class="deliv-customer">' +
               esc(r.customer || "—") +
@@ -1864,7 +1864,7 @@
             );
           })
         : '<div class="action-empty">✓ No hay comunicaciones pendientes.</div>';
-    renderHomeReminders(scoped);
+    renderHomeReminders(actionCenterScope(data));
     var conIncidencias = scoped
       .filter(function (r) {
         return Number(r.incidenciasCount) > 0;
@@ -2017,7 +2017,7 @@
       .map(function (r) {
         var loadKey = esc(r.load);
         var row =
-          '<div class="home-mini-row cruce-row"><span class="hm-load">Load ' +
+          '<div class="home-mini-row cruce-row"><span class="hm-load">Carga ' +
           loadKey +
           '</span><span class="hm-soft">' +
           esc(r.customer || "Sin cliente") +
@@ -2073,8 +2073,8 @@
         renderHomeCommand(currentData);
         showToast(
           confirmado
-            ? "Cruce confirmado — Load " + load
-            : "Cruce reprogramado — Load " + load,
+            ? "Cruce confirmado — Carga " + load
+            : "Cruce reprogramado — Carga " + load,
           "good",
         );
       })
@@ -2192,7 +2192,7 @@
         var detail = r.atencionCargas
           .map(function (rec) {
             return (
-              '<div class="carga-csr-detail-row"><span class="hm-load">Load ' +
+              '<div class="carga-csr-detail-row"><span class="hm-load">Carga ' +
               esc(rec.load) +
               '</span><span class="hm-soft">' +
               esc(rec.customer || "Sin cliente") +
@@ -2389,7 +2389,7 @@
         .slice(0, 6)
         .map(function (x) {
           return (
-            '<div class="handoff-item"><b>Load ' +
+            '<div class="handoff-item"><b>Carga ' +
             esc(x.rec.load) +
             "</b><span>" +
             esc(
@@ -2611,61 +2611,147 @@
       "</div></div>"
     );
   }
+  var homeAttentionFilter = "all";
+  /** Una fila por carga: prioridad, comunicación y revisiones conservan sus acciones propias. */
   function renderActionCenter(data, journey) {
     var list = document.getElementById("action-center-list");
     if (!list) return;
     var j = journey || computeActiveJourney(data);
-    var active = j.active,
-      actions = j.items;
-    var today = active.filter(function (r) {
+    var scoped = actionCenterScope(data).filter(function (r) {
+      return (
+        !r.archived &&
+        !isCanceladaFinalizada(r) &&
+        !isCancelledStatus(r.status) &&
+        !isArchived(r)
+      );
+    });
+    var reminders = window.panelGuidance.reminderEntries(
+      scoped,
+      Date.now(),
+      PANEL_CONFIG,
+    );
+    var groups = window.panelUsability.attentionGroups(
+      scoped,
+      j.items,
+      reminders,
+    );
+    document.getElementById("journey-today").textContent = j.active.filter(
+      function (r) {
         return isSameLocalDay(r.delivery_appt, new Date());
-      }).length,
-      stale = active.filter(function (r) {
+      },
+    ).length;
+    document.getElementById("journey-stale").textContent = j.active.filter(
+      function (r) {
         return hoursSince(r.updated_at) >= 3;
-      }).length;
-    document.getElementById("journey-today").textContent = today;
-    document.getElementById("journey-stale").textContent = stale;
-    document.getElementById("action-center-count").textContent = actions.length;
-    if (!actions.length) {
-      list.innerHTML =
-        '<div class="action-empty">Sin acciones pendientes. La operación activa está al día.</div>';
-      return;
-    }
-    var defs = [
-      ["now", "🔴 Atender ahora", "Acción inmediata"],
-      ["review", "🟠 Revisar", "Validar durante el turno"],
-      ["monitor", "🟡 Monitorear", "Seguimiento preventivo"],
-    ];
-    list.innerHTML =
-      '<div class="action-groups">' +
-      defs
-        .map(function (d) {
-          var arr = actions.filter(function (x) {
-            return x.bucket === d[0];
-          });
-          if (!arr.length) return "";
-          return (
-            '<section class="action-group"><div class="action-group-head"><span>' +
-            d[1] +
-            " · " +
-            arr.length +
-            "</span><small>" +
-            d[2] +
-            "</small></div>" +
-            htmlListaConMas_("ac-" + d[0], arr, 8, renderActionRow) +
-            "</section>"
-          );
-        })
-        .join("") +
-      "</div>";
+      },
+    ).length;
+    document.getElementById("action-center-count").textContent =
+      groups.length + (groups.length === 1 ? " carga" : " cargas");
+    var filtered = groups.filter(function (entry) {
+      if (homeAttentionFilter === "review") return entry.reminders.length > 0;
+      if (homeAttentionFilter === "notify")
+        return !!entry.row.client_notify_pending;
+      return true;
+    });
+    list.innerHTML = filtered.length
+      ? htmlListaConMas_(
+          "attention-" + homeAttentionFilter,
+          filtered,
+          8,
+          function (entry) {
+            var r = entry.row;
+            var due = entry.reminders.filter(function (item) {
+              return item.needsAction;
+            });
+            var upcoming = entry.reminders.filter(function (item) {
+              return !item.needsAction;
+            });
+            var labels = {
+              now: "Urgente",
+              review: "Revisar en el turno",
+              monitor: "En seguimiento",
+              scheduled: "Programada",
+            };
+            return (
+              '<article class="attention-load" data-attention-load="' +
+              esc(r.load) +
+              '"><div class="attention-load-header"><h3>Carga ' +
+              esc(r.load) +
+              "</h3><span>" +
+              esc(r.customer || "Sin cliente") +
+              '</span><span class="ux-state">' +
+              labels[entry.bucket] +
+              '</span><button type="button" class="ws-btn" data-home-open="' +
+              esc(r.load) +
+              '">Abrir expediente</button></div>' +
+              (entry.reasons.some(function (reason) {
+                return (
+                  reason.kind !== "notify" &&
+                  !reason.text.startsWith("Seguimiento ")
+                );
+              })
+                ? '<div class="action-reasons">' +
+                  entry.reasons
+                    .filter(function (reason) {
+                      return (
+                        reason.kind !== "notify" &&
+                        !reason.text.startsWith("Seguimiento ")
+                      );
+                    })
+                    .map(function (reason) {
+                      return (
+                        '<span class="action-reason-chip">' +
+                        esc(reason.text) +
+                        "</span>"
+                      );
+                    })
+                    .join("") +
+                  "</div>"
+                : "") +
+              (r.client_notify_pending
+                ? '<div class="attention-notify"><span>Avisar al cliente: ' +
+                  esc(r.client_notify_reason || "Actualización operativa") +
+                  '</span><button type="button" class="ws-btn" data-home-comm="' +
+                  esc(r.load) +
+                  '">Preparar aviso</button></div>'
+                : "") +
+              due.map(homeReminderHtml).join("") +
+              (upcoming.length
+                ? '<details class="home-reminders-upcoming"><summary>Próximas revisiones (' +
+                  upcoming.length +
+                  ")</summary>" +
+                  upcoming.map(homeReminderHtml).join("") +
+                  "</details>"
+                : "") +
+              "</article>"
+            );
+          },
+        )
+      : '<div class="action-empty">' +
+        (groups.length
+          ? "Sin cargas para este filtro."
+          : "Sin acciones pendientes. La operación activa está al día.") +
+        "</div>";
+    renderHomeReminders(scoped);
   }
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-attention-filter]");
+    if (!button) return;
+    homeAttentionFilter = button.getAttribute("data-attention-filter");
+    document
+      .querySelectorAll("[data-attention-filter]")
+      .forEach(function (item) {
+        item.setAttribute("aria-pressed", String(item === button));
+      });
+    renderActionCenter(currentData);
+  });
 
   function kpiSimpleRowHtml(r, note) {
     return (
       '<div class="action-row"><div class="action-row-top">' +
       '<span class="action-load" data-journey-load="' +
       esc(r.load) +
-      '">Load ' +
+      '">Carga ' +
       esc(r.load) +
       "</span>" +
       (r.trailer
@@ -2692,7 +2778,7 @@
       '<div class="action-row"><div class="action-row-top">' +
       '<span class="action-load" data-journey-load="' +
       esc(r.load) +
-      '">Load ' +
+      '">Carga ' +
       esc(r.load) +
       "</span>" +
       (r.trailer
@@ -2851,14 +2937,14 @@
       document.getElementById("handoff-text").value = handoffText(
         shiftSnapshot(currentData),
       );
-      showToast("Handoff actualizado", "good");
+      showToast("Cierre de turno actualizado", "good");
     });
   document
     .getElementById("handoff-copy")
     .addEventListener("click", function () {
       copyTextGeneric(
         document.getElementById("handoff-text").value,
-        "Handoff copiado",
+        "Cierre de turno copiado",
       );
     });
   document
@@ -2926,7 +3012,7 @@
     refreshAlertCountdowns();
   }
 
-  // Load seleccionado en la vista de tabla (su detalle se muestra en el panel fijo de abajo —
+  // Carga seleccionado en la vista de tabla (su detalle se muestra en el panel fijo de abajo —
   // ver renderTableDetailPanel). El panel rehace el HTML de la tabla completa cada vez que llega
   // un dato nuevo (autoRefresh cada 60s, o cualquier guardado optimista: estatus, POD, recargos,
   // etc.); guardar esto aparte (y no solo una clase en el DOM) es lo que permite que el panel de
@@ -2947,7 +3033,7 @@
   var currentFilter = "all";
   var currentSearch = "";
   var currentClienteFiltro = ""; // nombre de cliente (minúsculas) o '' = todos
-  // Load al que se le dio clic desde un "Load XXXX" de la Bitácora de turno — se fuerza a que se
+  // Carga al que se le dio clic desde un "Carga XXXX" de la Bitácora de turno — se fuerza a que se
   // vea en el listado aunque no pase el filtro normal de CSR/cliente (ver abrirLoadDesdeBitacora),
   // porque un pendiente de turno puede estar ligado a un load de otro CSR distinto al que lo ve.
   var forcedVisibleLoad = null;
@@ -3167,7 +3253,7 @@
       (b.load
         ? '<button type="button" class="pod-pending-tag bitacora-load-link" style="background:var(--surface-2); color:var(--ink-faint);" data-open-bitacora-load="' +
           esc(b.load) +
-          '" title="Abrir esta carga para editarla o comentar">Load ' +
+          '" title="Abrir esta carga para editarla o comentar">Carga ' +
           esc(b.load) +
           "</button>"
         : "") +
@@ -3568,7 +3654,7 @@
     wrap.innerHTML = bitacoraLoadsSeleccionados
       .map(function (l) {
         return (
-          '<span class="bitacora-load-chip">Load ' +
+          '<span class="bitacora-load-chip">Carga ' +
           esc(l) +
           '<button type="button" data-bitacora-load-remove="' +
           esc(l) +
@@ -4120,7 +4206,7 @@
         ? sel.options[sel.selectedIndex].textContent
         : load;
       confirmarModal_(
-        "¿Combinar con el Load " + opcionTexto + "?",
+        "¿Combinar con el Carga " + opcionTexto + "?",
         "Se van a pasar su nota y todos sus comentarios al historial de ese load, y este registro pendiente se va a eliminar. <b>No se puede deshacer.</b>",
         "Sí, combinar",
         function () {
@@ -4141,7 +4227,7 @@
           loadPendientes();
           loadUltimosComentarios();
           showToast(
-            "Vinculado a Load " + load + " — comentarios combinados",
+            "Vinculado a Carga " + load + " — comentarios combinados",
             "good",
           );
         } else {
@@ -4312,7 +4398,7 @@
       '">' +
       esc(rec.customer || "—") +
       "</td>" +
-      '<td><select class="status-select t-status-select" aria-label="Estatus del load ' +
+      '<td><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
       rec.load +
       '" data-status-load="' +
       rec.load +
@@ -4373,7 +4459,7 @@
       '" data-truck-load="' +
       rec.load +
       '"></div>' +
-      '<div class="field"><div class="k">Pickup cita</div><input class="v field-input" type="datetime-local" value="' +
+      '<div class="field"><div class="k">Cita de recolección</div><input class="v field-input" type="datetime-local" value="' +
       apptDatetimeLocalValue(rec.pickup_appt) +
       '" data-pickup-appt-load="' +
       rec.load +
@@ -4463,7 +4549,7 @@
       return;
     }
     document.getElementById("table-detail-load-label").textContent =
-      "Load " +
+      "Carga " +
       rec.load +
       (rec.trailer ? " — " + rec.trailer : "") +
       " — " +
@@ -5006,7 +5092,7 @@
     }, 2200);
   }
 
-  /** Al hacer clic en el "Load XXXX" de una tarjeta de la Bitácora de turno, te lleva directo a
+  /** Al hacer clic en el "Carga XXXX" de una tarjeta de la Bitácora de turno, te lleva directo a
    * esa carga en el listado (tabla o tarjetas, según la vista activa) para poder editarla o
    * comentarla — aunque el load sea de un cliente/CSR fuera de tu filtro normal, no coincida con
    * tu búsqueda, o esté en una pestaña distinta a la activa (ver forcedVisibleLoad). No toca tu
@@ -5096,11 +5182,17 @@
     var ownerName = document.getElementById("panel-owner-name");
     if (!ownerCaption || !ownerName) return;
     if (currentWho) {
+      var selectedPerson = personas.find(function (person) {
+        return person.nombre === currentWho;
+      });
       ownerName.textContent =
-        currentWho + (currentOperationalScope ? " · CSR" : "");
+        selectedPerson?.rol === "Supervisor" && !currentOperationalScope
+          ? "Toda la operación"
+          : currentWho + (currentOperationalScope ? " · CSR" : "");
       ownerCaption.hidden = false;
     } else {
-      ownerCaption.hidden = true;
+      ownerName.textContent = "Toda la operación";
+      ownerCaption.hidden = !myRealIdentity;
     }
   }
 
@@ -6140,7 +6232,11 @@
             document.getElementById("csr-new-correo").value = "";
             loadPersonasYAsignaciones();
             showToast(
-              "Persona agregada: " + nombre + " (" + rolLabel(rol, nombre) + ")",
+              "Persona agregada: " +
+                nombre +
+                " (" +
+                rolLabel(rol, nombre) +
+                ")",
               "good",
             );
           } else {
@@ -6391,7 +6487,7 @@
         loads
           .slice(0, 40)
           .map(function (l) {
-            return "Load " + esc(l);
+            return "Carga " + esc(l);
           })
           .join(", ") +
           (loads.length > 40 ? "…" : "") +
@@ -6671,35 +6767,7 @@
   }
 
   function fmtDateTime(d) {
-    if (!d) return "";
-    var dt = d instanceof Date ? d : new Date(d);
-    if (isNaN(dt.getTime())) return String(d);
-    var months = [
-      "ene",
-      "feb",
-      "mar",
-      "abr",
-      "may",
-      "jun",
-      "jul",
-      "ago",
-      "sep",
-      "oct",
-      "nov",
-      "dic",
-    ];
-    var pad2 = function (n) {
-      return (n < 10 ? "0" : "") + n;
-    };
-    return (
-      dt.getDate() +
-      " " +
-      months[dt.getMonth()] +
-      ", " +
-      pad2(dt.getHours()) +
-      ":" +
-      pad2(dt.getMinutes())
-    );
+    return d ? window.panelUsability.formatMoment(d) : "";
   }
 
   function renderComments(raw) {
@@ -6734,7 +6802,7 @@
    * necesitan un identificador de texto (número de load, o el id del pendiente), así que se
    * reutiliza tal cual — lo único que cambia es el encabezado. */
 
-  // ===== V3 Load Workspace =====
+  // ===== V3 Expediente de carga =====
   var workspaceCurrentLoad = null,
     workspaceCurrentTab = "operacion";
   var workspaceHistorialSubTab = "cambios";
@@ -6794,7 +6862,7 @@
     workspaceCurrentLoad = String(load);
     workspaceCurrentTab = tab || "operacion";
     document.getElementById("workspace-title").textContent =
-      "Load " + r.load + " · " + (r.customer || "Sin cliente");
+      "Carga " + r.load + " · " + (r.customer || "Sin cliente");
     document.getElementById("workspace-route").textContent =
       (r.origin_city || "—") +
       ", " +
@@ -7025,7 +7093,7 @@
   }
   function workspaceOperationHtml(r) {
     var citas =
-      wsBox("Pickup cita", wsDate(r.pickup_appt)) +
+      wsBox("Cita de recolección", wsDate(r.pickup_appt)) +
       wsBox("Pickup actual", wsDate(r.pickup_actual)) +
       wsBox("Entrega cita", wsDate(r.delivery_appt)) +
       wsBox("Entrega actual", wsDate(r.delivery_actual));
@@ -7044,13 +7112,13 @@
       wsBox("Salida México", wsDate(r.salida_mexico_fecha)) +
       wsBox("Cruce aduana", wsDate(r.cruce_usa_fecha));
     var unidad =
-      manualFieldHtml(r, "truck", "Truck") +
+      manualFieldHtml(r, "truck", "Unidad") +
       manualFieldHtml(r, "trailer", "Trailer") +
       wsBox("Work order", r.work_order);
     // El estatus se cambia aquí mismo con el mismo selector de las tarjetas (mismo manejador
     // delegado: recordatorios, revisión de tránsito, aviso al cliente y "Deshacer").
     return (
-      '<div class="ws-status-line"><select class="status-select ws-status-select" aria-label="Estatus del load ' +
+      '<div class="ws-status-line"><select class="status-select ws-status-select" aria-label="Estatus de la carga ' +
       esc(r.load) +
       '" title="Cambiar estatus" data-status-load="' +
       esc(r.load) +
@@ -7118,7 +7186,7 @@
       faltaDe_(r.load).html +
       "</div></div>" +
       '<div class="ws-grid">' +
-      wsBox("Truck", r.truck) +
+      wsBox("Unidad", r.truck) +
       wsBox("Trailer", r.trailer) +
       wsBox("Estatus", r.status) +
       wsBox("Última actualización", wsDate(r.updated_at), true) +
@@ -7126,7 +7194,7 @@
     );
   }
 
-  // ---- "¿Cuánto le falta?" (Load Workspace → Tracking) ----
+  // ---- "¿Cuánto le falta?" (Expediente de carga → Tracking) ----
   // Coordenadas de la unidad → millas por carretera (OSRM, gratis) hasta la ciudad destino de la
   // carga → hora de llegada con la regla del equipo (millas ÷ 48), comparada con la cita de entrega.
   // Si OSRM no responde, se estima con la línea recta × 1.2. El punto y el trayecto se guardan en la
@@ -7309,7 +7377,7 @@
       var f = faltaUltimo_;
       guardarConVerificacion_(
         function () {
-          showToast("Comentario guardado en el Load " + f.load, "good");
+          showToast("Comentario guardado en el Carga " + f.load, "good");
           loadUltimosComentarios();
         },
         function (err) {
@@ -7344,7 +7412,7 @@
         canal === "Email"
           ? "mailto:?subject=" +
             encodeURIComponent(
-              "Actualización Load " + (workspaceCurrentLoad || ""),
+              "Actualización Carga " + (workspaceCurrentLoad || ""),
             ) +
             "&body=" +
             encodeURIComponent(msgEl.value)
@@ -7504,7 +7572,7 @@
     { key: "reason", label: "Motivo" },
     { key: "crossing", label: "Cruce aduana" },
     { key: "destination", label: "Destino" },
-    { key: "truck", label: "Truck" },
+    { key: "truck", label: "Unidad" },
     { key: "trailer", label: "Trailer" },
     { key: "tracking", label: "Tracking" },
     { key: "customer", label: "Cliente" },
@@ -7581,7 +7649,7 @@
         ? wsDate(r.delivery_appt)
         : "pendiente por confirmar";
     var vals = {
-      load: "Load " + r.load,
+      load: "Carga " + r.load,
       work_order: r.work_order || "—",
       status: r.status || "Sin estatus",
       route:
@@ -8018,7 +8086,7 @@
       "Load",
       "Cliente",
       "Estatus",
-      "Pickup cita",
+      "Cita de recolección",
       "Entrega cita",
       "Salida planta",
       "Cruce aduana",
@@ -8416,7 +8484,10 @@
             r.tracking_link = url;
             render(currentData);
             renderWorkspace();
-            showToast(url ? "Tracking guardado" : "Tracking eliminado", "good");
+            showToast(
+              url ? "Seguimiento guardado" : "Seguimiento eliminado",
+              "good",
+            );
           })
           .withFailureHandler(function (err) {
             showToast("No se pudo guardar: " + err.message, "error");
@@ -8681,7 +8752,7 @@
             render(currentData);
             renderWorkspace();
             showToast(
-              (field === "truck" ? "Truck" : "Trailer") +
+              (field === "truck" ? "Unidad" : "Trailer") +
                 " guardado como dato manual",
               "good",
             );
@@ -9389,7 +9460,7 @@
           google.script.run
             .withSuccessHandler(renderIncidencias)
             .getIncidencias(load, myRealIdentity, myPassword);
-          showToast("Incidencia registrada — Load " + load, "good");
+          showToast("Incidencia registrada — Carga " + load, "good");
         })
         .withFailureHandler(function (err) {
           btn.disabled = false;
@@ -9623,7 +9694,7 @@
         }
         render(currentData);
         if (workspaceCurrentLoad === String(ctx.load)) renderWorkspace();
-        showToast("Recordatorio programado — Load " + ctx.load, "good");
+        showToast("Recordatorio programado — Carga " + ctx.load, "good");
         guardarConVerificacion_(null, function (err) {
           if (rec && prev) {
             rec.status = prev.status;
@@ -9643,7 +9714,7 @@
           rec.recordatorio_fecha = fechaISO;
         }
         render(currentData);
-        showToast("Recordatorio actualizado — Load " + ctx.load, "good");
+        showToast("Recordatorio actualizado — Carga " + ctx.load, "good");
         guardarConVerificacion_(null, function (err) {
           if (rec && prev) {
             rec.recordatorio_fecha = prev.recordatorio_fecha;
@@ -9684,7 +9755,7 @@
       if (rec) rec.truck = val;
       guardarConVerificacion_(
         function () {
-          showToast("Truck actualizado — Load " + load, "good");
+          showToast("Truck actualizado — Carga " + load, "good");
         },
         function (err) {
           if (rec) rec.truck = prev;
@@ -9709,7 +9780,7 @@
       if (rec) rec.trailer = val;
       guardarConVerificacion_(
         function () {
-          showToast("Trailer actualizado — Load " + load, "good");
+          showToast("Trailer actualizado — Carga " + load, "good");
         },
         function (err) {
           if (rec) rec.trailer = prev;
@@ -9720,7 +9791,7 @@
       return;
     }
 
-    // Pickup cita / Entrega cita: mismo mecanismo que truck/trailer — se pueden ajustar aquí
+    // Cita de recolección / Entrega cita: mismo mecanismo que truck/trailer — se pueden ajustar aquí
     // mismo (ej. el cliente mueve la cita) y el documento sigue mandando en el próximo import
     // si trae una fecha para ese load (ver savePickupAppt/saveDeliveryAppt e importLoads).
     if ((input = e.target.closest("[data-pickup-appt-load]"))) {
@@ -9746,7 +9817,7 @@
         });
       guardarConVerificacion_(
         function () {
-          showToast("Pickup cita actualizada — Load " + load, "good");
+          showToast("Cita de recolección actualizada — Carga " + load, "good");
         },
         function (err) {
           if (rec) rec.pickup_appt = prev;
@@ -9790,7 +9861,7 @@
         });
       guardarConVerificacion_(
         function () {
-          showToast("Entrega cita actualizada — Load " + load, "good");
+          showToast("Entrega cita actualizada — Carga " + load, "good");
         },
         function (err) {
           if (rec) rec.delivery_appt = prev;
@@ -9839,7 +9910,7 @@
         }
         guardarConVerificacion_(
           function () {
-            showToast("Salida planta actualizada — Load " + load, "good");
+            showToast("Salida planta actualizada — Carga " + load, "good");
             if (cb) cb();
           },
           function (err) {
@@ -9887,7 +9958,7 @@
         }
         guardarConVerificacion_(
           function () {
-            showToast("Cruce actualizado — Load " + load, "good");
+            showToast("Cruce actualizado — Carga " + load, "good");
             if (cb) cb();
           },
           function (err) {
@@ -9953,7 +10024,10 @@
         render(currentData);
         if (workspaceCurrentLoad === String(load)) renderWorkspace();
         accionConDeshacer_(
-          "En tránsito (revisión en " + AUTO_REVIEW_HOURS + "h) — Load " + load,
+          "En tránsito (revisión en " +
+            AUTO_REVIEW_HOURS +
+            "h) — Carga " +
+            load,
           function () {
             guardarConVerificacion_(null, function (err) {
               restoreStatusFields_(load, prevSnapAuto);
@@ -9989,7 +10063,7 @@
       if (workspaceCurrentLoad === String(load)) renderWorkspace();
 
       accionConDeshacer_(
-        "Estatus: " + val + " — Load " + load,
+        "Estatus: " + val + " — Carga " + load,
         function () {
           guardarConVerificacion_(null, function (err) {
             restoreStatusFields_(load, prevSnap);
@@ -10025,8 +10099,8 @@
       render(currentData);
       showToast(
         sent
-          ? "POD marcado como enviado — Load " + load
-          : "POD desmarcado — Load " + load,
+          ? "POD marcado como enviado — Carga " + load
+          : "POD desmarcado — Carga " + load,
         "good",
       );
 
@@ -10055,10 +10129,10 @@
       render(currentData);
       showToast(
         val
-          ? "Recargos marcados como ingresados en VG — Load " +
+          ? "Recargos marcados como ingresados en VG — Carga " +
               load +
               " pasa a Canceladas/Finalizadas"
-          : "Recargos desmarcados — Load " + load,
+          : "Recargos desmarcados — Carga " + load,
         "good",
       );
 
@@ -10094,7 +10168,7 @@
     return SIGUE_;
   }
 
-  /** Clics: abrir el Load Workspace, documentos, pendiente de turno y "ya avisé al cliente". */
+  /** Clics: abrir el Expediente de carga, documentos, pendiente de turno y "ya avisé al cliente". */
   function clicWorkspaceYAvisos_(e) {
     var btn;
 
@@ -10132,7 +10206,7 @@
       showToast(
         (docNewVal ? "Marcado: " : "Desmarcado: ") +
           (DOC_ITEM_LABELS[docField] || docField) +
-          " — Load " +
+          " — Carga " +
           docLoad,
         "good",
       );
@@ -10222,7 +10296,7 @@
             render(currentData);
             if (workspaceCurrentLoad === String(notifyLoad)) renderWorkspace();
             showToast(
-              "Cliente marcado como notificado — Load " + notifyLoad,
+              "Cliente marcado como notificado — Carga " + notifyLoad,
               "good",
             );
           })
@@ -10280,7 +10354,7 @@
       showToast(
         "Revisión registrada — próxima en " +
           AUTO_REVIEW_HOURS +
-          " horas — Load " +
+          " horas — Carga " +
           load,
         "good",
       );
@@ -10311,8 +10385,8 @@
       render(currentData);
       showToast(
         color
-          ? "Color asignado — Load " + load
-          : "Color quitado — Load " + load,
+          ? "Color asignado — Carga " + load
+          : "Color quitado — Carga " + load,
         "good",
       );
 
@@ -10768,7 +10842,7 @@
                       '. Asígnalos en "Gestionar CSR".</p>'
                     : "") +
                   (p.duplicadosEnArchivo && p.duplicadosEnArchivo.length
-                    ? '<p class="aviso-fuerte">Loads repetidos en el archivo (se queda el último): ' +
+                    ? '<p class="aviso-fuerte">Cargas repetidas en el archivo (se queda el último): ' +
                       p.duplicadosEnArchivo.map(esc).join(", ") +
                       "</p>"
                     : "") +
@@ -10981,7 +11055,7 @@
       ["Load", r.load],
       ["Cliente", r.customer],
       ["Trailer", r.trailer],
-      ["Truck", r.truck],
+      ["Unidad", r.truck],
       ["WO", r.work_order],
       ["Estatus", r.status],
       ["Origen", r.origin_city],
@@ -11040,7 +11114,7 @@
           '" data-idx="' +
           i +
           '">' +
-          "<b>Load " +
+          "<b>Carga " +
           marcar_(r.load, q) +
           "</b> · " +
           marcar_(r.customer || "Sin cliente", q) +
@@ -11269,7 +11343,7 @@
             '"' +
             (marcado ? " checked" : "") +
             ">" +
-            "<b>Load " +
+            "<b>Carga " +
             esc(r.load) +
             '</b><span class="hm-soft">' +
             esc(r.status || "Sin estatus") +
@@ -11302,7 +11376,7 @@
     var lineas = sel.map(function (r) {
       var ent = pd(r.delivery_appt);
       return (
-        "• Load " +
+        "• Carga " +
         r.load +
         " — " +
         (r.status || "En proceso") +
@@ -11536,7 +11610,7 @@
                       hh +
                       " · " +
                       esc(x.etiqueta) +
-                      " · Load " +
+                      " · Carga " +
                       esc(x.ap.load) +
                       "<small>" +
                       esc(APARTADO_ESTADOS_[x.ap.estado] || "") +
@@ -11552,7 +11626,7 @@
                     hh +
                     " · " +
                     esc(x.etiqueta) +
-                    " · Load " +
+                    " · Carga " +
                     esc(x.r.load) +
                     "<small>" +
                     esc(x.r.customer || "") +
@@ -11763,7 +11837,7 @@
       '" data-apartado-id="' +
       esc(ap.id) +
       '">' +
-      '<div class="ap-head"><div><b>Load ' +
+      '<div class="ap-head"><div><b>Carga ' +
       esc(ap.load) +
       "</b><small>" +
       esc(sub || "Sin datos del viaje") +
@@ -12005,9 +12079,9 @@
         accion === "revisar"
           ? "Revisión registrada — próxima: " +
               fmtDateTime(res.apartado.proxima_revision) +
-              " — Load " +
+              " — Carga " +
               ap.load
-          : "Load " + ap.load + ": " + APARTADO_ESTADOS_[res.apartado.estado],
+          : "Carga " + ap.load + ": " + APARTADO_ESTADOS_[res.apartado.estado],
         "good",
       );
     };
@@ -12122,7 +12196,7 @@
     if (d && !isNaN(d.getTime()))
       poner("ap-fecha-entrega", toDatetimeLocalValue(d));
     showToast(
-      "Datos tomados del Load " + rec.load + " en la hoja Loads",
+      "Datos tomados del Carga " + rec.load + " en la hoja Loads",
       "good",
     );
   });
@@ -12185,7 +12259,7 @@
           showToast(
             (datos.id
               ? "Apartado actualizado"
-              : "Load " + datos.load + " apartado") +
+              : "Carga " + datos.load + " apartado") +
               " — próxima revisión: " +
               fmtDateTime(res.apartado.proxima_revision),
             "good",
@@ -13335,7 +13409,7 @@
             g.xs
               .map(function (x) {
                 return (
-                  "Load " + esc(x.r.load) + " · " + esc(radarMillasTxt_(x))
+                  "Carga " + esc(x.r.load) + " · " + esc(radarMillasTxt_(x))
                 );
               })
               .join("<br>"),
@@ -13761,7 +13835,7 @@
         })
         .map(function (x) {
           return (
-            "Load " +
+            "Carga " +
             x.r.load +
             " — " +
             radarOrigenTxt_ +
@@ -14533,7 +14607,7 @@
         urg
           .map(function (x) {
             return (
-              '<div class="ind-urgente"><b>Load ' +
+              '<div class="ind-urgente"><b>Carga ' +
               esc(x.rec.load) +
               '</b><span class="hm-soft">' +
               esc(x.rec.customer || "") +
@@ -14958,7 +15032,7 @@
               esc(x.nota) +
               ' <span style="color:var(--ink-faint)">— ' +
               esc(x.creado_por) +
-              (x.load ? " · Load " + esc(x.load) : "") +
+              (x.load ? " · Carga " + esc(x.load) : "") +
               "</span></li>"
             );
           })
@@ -15375,7 +15449,7 @@
   }
 
   function avisoLoad_(rec) {
-    return "Load " + rec.load + (rec.customer ? " · " + rec.customer : "");
+    return "Carga " + rec.load + (rec.customer ? " · " + rec.customer : "");
   }
 
   /** Todo lo que hoy amerita un aviso, con un id estable (mismo motivo = mismo id). */
@@ -15536,7 +15610,7 @@
               tipo: "apr",
               sev: ap.estado === "broker" ? "critical" : "warn",
               titulo:
-                "Load apartado " +
+                "Carga apartado " +
                 ap.load +
                 " · " +
                 (APARTADO_PREGUNTA_[ap.estado] || "Revisar"),
@@ -15724,7 +15798,7 @@
           rec.recordatorio_fecha = res.recordatorio_fecha;
         quitarAviso_(a.id);
         render(currentData);
-        showToast("Cliente marcado como avisado — Load " + rec.load, "good");
+        showToast("Cliente marcado como avisado — Carga " + rec.load, "good");
       }, fallo).markClientNotified(rec.load, myRealIdentity, myPassword);
     } else if (accion === "revisado") {
       guardarConVerificacion_(function () {
@@ -15733,7 +15807,7 @@
         rec.next_review_by = "";
         quitarAviso_(a.id);
         render(currentData);
-        showToast("Revisión registrada — Load " + rec.load, "good");
+        showToast("Revisión registrada — Carga " + rec.load, "good");
       }, fallo).clearNextReview(rec.load, myRealIdentity, myPassword);
     } else if (accion === "transito") {
       var fechaISO = new Date(
@@ -15746,7 +15820,7 @@
         showToast(
           "Revisión registrada — próxima en " +
             AUTO_REVIEW_HOURS +
-            " h — Load " +
+            " h — Carga " +
             rec.load,
           "good",
         );
@@ -16185,7 +16259,7 @@
 
   // Atajos de teclado (no aplican mientras escribes en un campo):
   //   /  buscar (en Operación completa, su buscador; en cualquier otra página, la búsqueda global)
-  //   N  nuevo comentario de la carga abierta (Load Workspace o detalle de la tabla)
+  //   N  nuevo comentario de la carga abierta (Expediente de carga o detalle de la tabla)
   //   R  actualizar ahora      ?  ver esta lista      Esc  cerrar lo que esté abierto
   function hayModalAbierto_() {
     return !!document.querySelector(

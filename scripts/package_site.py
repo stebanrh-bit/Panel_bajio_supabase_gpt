@@ -41,6 +41,7 @@ def main():
         'REVISION_COMPLETA_2026-10-14.md':ROOT/'docs/REVISION_COMPLETA_2026-10-14.md',
         'ADMINISTRADOR_Y_CSR.md':ROOT/'docs/ADMINISTRADOR_Y_CSR.md',
         'INICIO_Y_RECORDATORIOS.md':ROOT/'docs/INICIO_Y_RECORDATORIOS.md',
+        'MEJORAS_USABILIDAD.md':ROOT/'docs/MEJORAS_USABILIDAD.md',
         'Code.gs':ROOT/'google-apps-script/Code-sitio.gs',
         'appsscript.json':ROOT/'google-apps-script/appsscript.json',
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',
@@ -48,6 +49,8 @@ def main():
         'PRUEBAS_FINALES.md':ROOT/'docs/PRUEBAS_FINALES.md',
         'imagenes/panel-home.png':ROOT/'docs/imagenes/panel-home.png',
         'imagenes/panel-operation.png':ROOT/'docs/imagenes/panel-operation.png',
+        'imagenes/panel-administracion.png':ROOT/'docs/imagenes/panel-administracion.png',
+        'imagenes/panel-cargas-movil.png':ROOT/'docs/imagenes/panel-cargas-movil.png',
         'importacion-prueba.csv':ROOT/'entregables/importacion-prueba.csv',
     }
     zip_path=ROOT/'entregables/panel-bajio-sitio.zip'

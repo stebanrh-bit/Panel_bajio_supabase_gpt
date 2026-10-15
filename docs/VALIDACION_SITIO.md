@@ -1,19 +1,22 @@
 # Validación de la interfaz original con Supabase
 
-Comprobaciones actualizadas en Codex el 14 de octubre de 2026. No representan una actualización de la publicación Google ni ejecución remota de SQL 004–009. La revisión remota fue de lectura, sin modificar datos. [Informe de la revisión general](REVISION_COMPLETA_2026-10-14.md) y [mejora posterior de Inicio](INICIO_Y_RECORDATORIOS.md).
+Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubre de 2026. No representan una actualización de la publicación Google ni ejecución remota de SQL 004–009. Las consultas remotas de la revisión fueron de lectura. [Mejoras actuales e instalación](MEJORAS_USABILIDAD.md), [revisión de usabilidad previa](REVISION_USABILIDAD_2026-10-15.md) e [informe general anterior](REVISION_COMPLETA_2026-10-14.md).
 
 | Comprobación | Resultado |
 | --- | --- |
 | Panel original publicado | HTML recuperado; árbol JavaScript idéntico al `PanelScript.html` de la raíz |
 | Portal Cliente y Vista Gerencia originales | Plantillas recuperadas de sus páginas publicadas |
-| `npm --cache /tmp/panel-npm-cache test` | 81 pruebas aprobadas; 0 fallidas y 0 omitidas |
-| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 125 módulos correcta, incluyendo lector XLSX y orientación de Inicio |
+| `npm --cache /tmp/panel-npm-cache test` | 87 pruebas aprobadas; 0 fallidas y 0 omitidas |
+| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 127 módulos correcta, incluyendo lector XLSX y mejoras de usabilidad |
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
 | Chromium: comparación visual | 35 parejas de presentación prevista y entrega con datos ficticios independientes; escritorio y móvil; Inicio simplificado por petición del usuario |
 | Chromium: administrador también CSR | Esteban se identifica como Admin y Abraham como Supervisor, con sus permisos conservados; asignación desde el formulario, persistencia al recargar, vista propia y Todos sin perder el rol ni los controles administrativos |
 | Chromium: incidencia | Categoría vacía rechazada sin insertar; registro válido persiste al recargar |
 | Chromium: revisiones y seguimientos | Plazos independientes, tránsito +3 h, completar seguimiento sin eliminar el otro plazo, próximas fechas y móvil sin desbordamiento |
+| Chromium: usabilidad | Una fila por carga; Tab/Shift+Tab dentro de Comentarios y el expediente, ventanas anidadas, Escape y retorno al origen; edición desplegable con persistencia; secciones administrativas conservan borradores |
+| Chromium: guardado rechazado | Respuesta 409 simulada no cambia la carga; error permanece visible más de 3 segundos y requiere descarte explícito |
+| Chromium: ancho y ventanas | Cargas a 360 y 390 px, también con edición abierta; Administración dentro del alto disponible y con desplazamiento interno |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
 | Chromium: archivos reales | CSV, XLSX y XLS; vista previa, cancelar sin guardar, fechas inválidas, ceros iniciales, booleanos, duplicados y persistencia al confirmar |
 | Supabase remoto | Auth y directorio responden 200; 13 tablas privadas, administración de cuentas y RPC del portal rechazan peticiones sin sesión con 401 |
@@ -25,7 +28,9 @@ Las pruebas PostgreSQL usan PGlite con identidades y roles Auth simulados. Cubre
 
 Las pruebas de cuentas ejecutan el manejador de la función Edge con el SDK Supabase real y transporte interceptado. Cubren acceso por nombre, privacidad del directorio, comprobación del rol administrativo, cambios de contraseña sin secretos en la auditoría, conservación de contraseña al editar un cliente, desactivación frente a retirada, bloqueo por cinco fallos y desbloqueo administrativo. Estas pruebas no autentican contra el proyecto real.
 
-El navegador compara el HTML generado con la presentación prevista usando datos independientes equivalentes. Inicio distingue Por atender / Solicitudes y tareas por petición del usuario; no se declara igualdad visual con el Inicio anterior. Incluye tarjetas y tabla, seis pestañas del expediente, calendario, indicadores, radar, históricos, administración, ventanas y los dos portales. Admite como máximo 50 píxeles de diferencia de suavizado por captura; las fuentes externas se sustituyen por la misma respuesta en ambos lados. Las capturas y resultados quedan en `/tmp/panel-original-comparison/`. Dos capturas de la entrega se incluyen en `docs/imagenes/` y el ZIP.
+El navegador compara el HTML generado con la presentación prevista usando datos independientes equivalentes. Inicio agrupa las acciones por carga; tarjetas, Administración y cuenta se simplificaron por petición del usuario. No se declara igualdad visual con la interfaz anterior. Incluye tarjetas y tabla, seis pestañas del expediente, calendario, indicadores, radar, históricos, ventanas y los dos portales. Admite como máximo 50 píxeles de diferencia de suavizado por captura; las fuentes externas se sustituyen por la misma respuesta en ambos lados. Las capturas y resultados quedan en `/tmp/panel-original-comparison/`. Capturas de la entrega se incluyen en `docs/imagenes/` y el ZIP. El resultado JSON agrega las mediciones de ancho y de la ventana administrativa de la ejecución.
+
+Las seis pruebas de usabilidad adicionales comprueban agrupación sin mutar datos, fechas sin hora, conservación de controles y borradores entre secciones, etiquetas asociadas, errores concurrentes persistentes, montaje con encabezados anidados y eventos de guardado sin argumentos sensibles. La accesibilidad se comprueba para esos casos; no se presenta como certificación completa con lector de pantalla.
 
 Las pruebas conservadas de los módulos anteriores verifican también importación XLSX/CSV, deshacer, archivo, pendientes, turnos y Maps. El puente Google se comprueba con servicios simulados: verifica JWT y rol antes de consumir Maps y suma todos los tramos de carretera.
 

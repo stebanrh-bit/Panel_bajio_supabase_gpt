@@ -1,0 +1,370 @@
+/* Ajustes compartidos de lectura. Se limitan al panel interno y conservan su identidad. */
+.panel-internal {
+  font-size: 15px;
+}
+.panel-internal [hidden] {
+  display: none !important;
+}
+.panel-internal .wrap,
+.panel-internal .page-view,
+.panel-internal .card,
+.panel-internal .field,
+.panel-internal .review-field {
+  min-width: 0;
+}
+.panel-internal button,
+.panel-internal input,
+.panel-internal select,
+.panel-internal textarea {
+  font-size: 14px;
+}
+.panel-internal input:not([type="checkbox"]):not([type="radio"]),
+.panel-internal select,
+.panel-internal textarea {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.panel-internal .field-input {
+  width: 100%;
+}
+.panel-internal .field .k,
+.panel-internal .field-label,
+.panel-internal .eyebrow,
+.panel-internal .tracking-note,
+.panel-internal .who-hint,
+.panel-internal .home-section-help,
+.panel-internal .nav-label,
+.panel-internal .action-reason-chip,
+.panel-internal .updated-line,
+.panel-internal .ux-reminder-meta,
+.panel-internal .ux-state {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.panel-internal .ws-btn,
+.panel-internal .chip,
+.panel-internal .file-btn,
+.panel-internal .comments-btn,
+.panel-internal .incidencias-btn,
+.panel-internal .workspace-open-btn,
+.panel-internal .csr-btn,
+.panel-internal .hdr-mini-btn {
+  min-height: 40px;
+  white-space: normal;
+}
+.panel-internal .status-select {
+  min-height: 36px;
+  font-size: 14px;
+}
+.panel-internal #sidebar .who-toggle-label {
+  display: none;
+}
+.card-secondary-actions > summary {
+  cursor: pointer;
+  padding: 8px 4px;
+  font-size: 14px;
+}
+#ux-account-menu > summary::after {
+  content: " ▾";
+  color: var(--ink-soft);
+}
+.panel-internal .modal-backdrop {
+  padding: 16px;
+  overflow: hidden;
+  z-index: 1500;
+}
+.panel-internal .who-drawer-backdrop {
+  z-index: 1500;
+}
+.panel-internal #toast-container {
+  z-index: 2000;
+}
+.panel-internal .modal-box {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  min-height: 0;
+}
+.panel-internal .modal-box > * {
+  flex-shrink: 0;
+}
+.panel-internal .modal-head {
+  position: sticky;
+  top: -1px;
+  z-index: 2;
+  background: var(--surface);
+  padding: 10px 0;
+  margin-top: -8px;
+}
+.panel-internal .modal-close {
+  min-width: 40px;
+  min-height: 40px;
+}
+.panel-internal #csr-backdrop .modal-box {
+  max-width: 800px;
+}
+.ux-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 16px;
+}
+.ux-admin-tabs [aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.panel-internal .csr-form {
+  gap: 12px;
+  align-items: flex-end;
+}
+.ux-form-field {
+  display: flex;
+  flex: 1 1 180px;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+.ux-form-field > span {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.ux-form-field > input,
+.ux-form-field > select,
+.ux-form-field > textarea {
+  width: 100%;
+  min-height: 40px;
+}
+.panel-internal .csr-list {
+  max-height: 40vh;
+}
+#ux-account-menu {
+  position: relative;
+}
+#ux-account-menu > summary {
+  cursor: pointer;
+  list-style: none;
+}
+#ux-account-menu > summary::-webkit-details-marker {
+  display: none;
+}
+#ux-account-menu .session-chip {
+  border-radius: 10px;
+  gap: 8px;
+  min-height: 40px;
+}
+#session-chip-role {
+  font-size: 13px;
+  color: var(--accent);
+}
+.ux-account-actions {
+  position: absolute;
+  z-index: 30;
+  display: grid;
+  gap: 8px;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 210px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+}
+#ux-save-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  background: var(--surface);
+}
+#ux-save-feedback[data-state="error"] {
+  border-color: var(--critical);
+  color: var(--critical);
+}
+#ux-save-feedback[data-state="saving"] {
+  color: var(--info);
+}
+#ux-save-feedback[data-state="saved"] {
+  color: var(--good, #4ade80);
+}
+#ux-advanced-filters {
+  margin: 12px 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+}
+#ux-advanced-filters > summary {
+  cursor: pointer;
+  font-size: 14px;
+}
+.ux-advanced-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+}
+.ux-advanced-content .vistas-bar {
+  flex-basis: 100%;
+}
+.card-extra {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.card-extra > summary {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink-soft);
+  padding: 6px 0;
+}
+.card-extra .card-mid {
+  margin-top: 12px;
+}
+.card-commitment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 14px;
+  margin: 12px 0;
+  color: var(--ink-soft);
+}
+.panel-internal .card .comments-row {
+  flex-wrap: wrap;
+}
+.attention-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+}
+.attention-filters [aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.attention-load {
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+.attention-load-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.attention-load-header h3 {
+  font-size: 16px;
+  margin: 0;
+}
+.attention-load-header > .ws-btn {
+  margin-left: auto;
+}
+.attention-load .ux-reminder-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  font-size: 14px;
+  padding: 12px 0;
+}
+.attention-load .ux-reminder-kind {
+  font-size: 14px;
+}
+.attention-load .action-reasons {
+  padding: 10px 0 0;
+}
+.attention-notify {
+  padding: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-soft);
+}
+.attention-notify > span {
+  flex: 1 1 220px;
+}
+.panel-internal :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .panel-internal .wrap {
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 100px;
+  }
+  .panel-internal .card-mid,
+  .panel-internal .review-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel-internal .card-top {
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .panel-internal .card-top > div {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .panel-internal .card-top .status-select {
+    width: 100%;
+    max-width: 100%;
+  }
+  .panel-internal .ws-btn,
+  .panel-internal .chip,
+  .panel-internal .file-btn,
+  .panel-internal .comments-btn,
+  .panel-internal .incidencias-btn,
+  .panel-internal .workspace-open-btn,
+  .panel-internal .csr-btn,
+  .panel-internal .hdr-mini-btn,
+  .panel-internal summary {
+    min-height: 44px;
+  }
+  .panel-internal .home-tab-btn,
+  .panel-internal .movil-nav button {
+    font-size: 13px;
+  }
+  .panel-internal .modal-backdrop {
+    padding: 8px;
+  }
+  .panel-internal .modal-box {
+    max-height: calc(100dvh - 16px);
+    padding: 16px;
+    width: 100%;
+  }
+  .panel-internal #identity-modal-box.gate-mode {
+    width: 100%;
+  }
+  .panel-internal .csr-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .panel-internal .csr-form > *,
+  .panel-internal .csr-form .ux-form-field {
+    flex: initial;
+    width: 100%;
+    min-width: 0;
+  }
+  .attention-load .ux-reminder-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .attention-load-header > .ws-btn {
+    margin-left: 0;
+  }
+  .ux-admin-tabs {
+    gap: 6px;
+  }
+  #ux-save-feedback {
+    flex-wrap: wrap;
+  }
+}
