@@ -189,7 +189,7 @@ function googleRoadRoute_(origin, destination) {
 }
 
 // ===== Millas Google en segundo plano =====
-// Todas las funciones nuevas terminan en _: google.script.run no puede invocarlas desde la página.
+// El núcleo termina en _ y permanece privado. Los accesos visibles del editor verifican la cuenta Google.
 const GOOGLE_MILES_TOKEN_PROPERTY_ = "PANEL_MAPS_WORKER_TOKEN";
 const GOOGLE_MILES_LAST_RUN_PROPERTY_ = "PANEL_MAPS_LAST_RUN";
 const GOOGLE_MILES_HANDLER_ = "procesarMillasGoogle_";
@@ -248,7 +248,7 @@ function googleMilesRpc_(name, values) {
   );
   if (!token)
     throw new Error(
-      "Ejecuta prepararMillasGoogle_ y vincula su SQL en Supabase primero.",
+      "Ejecuta prepararMillasGoogle y vincula su SQL en Supabase primero.",
     );
   const response = UrlFetchApp.fetch(SUPABASE_URL_ + "/rest/v1/rpc/" + name, {
     method: "post",
@@ -264,7 +264,7 @@ function googleMilesRpc_(name, values) {
     throw new Error(
       "Supabase no aceptó la operación de millas (HTTP " +
         code +
-        "). Revisa SQL 010 y la vinculación de prepararMillasGoogle_.",
+        "). Revisa SQL 010 y la vinculación de prepararMillasGoogle.",
     );
   return JSON.parse(response.getContentText());
 }
@@ -386,7 +386,7 @@ function procesarMillasGoogle_() {
     // No registrar respuestas, credenciales o payloads. El editor permite verificar la vinculación por separado.
     summary.status = "connection_error";
     Logger.log(
-      "No se completó el lote. Revisa la conexión de Supabase con estadoMillasGoogle_.",
+      "No se completó el lote. Revisa la conexión de Supabase con estadoMillasGoogle.",
     );
   } finally {
     summary.deferred =
@@ -406,4 +406,47 @@ function procesarMillasGoogle_() {
     }
   }
   return summary;
+}
+
+/**
+ * Accesos visibles en el selector del editor.
+ * La publicación debe ejecutarse como su propietario (ver INSTALAR_SITIO.md).
+ * Un visitante anónimo u otra cuenta activa no puede ejecutar estas acciones como el propietario.
+ */
+function requireGoogleMilesEditor_() {
+  try {
+    const active = Session.getActiveUser().getEmail();
+    const effective = Session.getEffectiveUser().getEmail();
+    if (active && effective && active === effective) return;
+  } catch (error) {
+    // Ante una identidad no disponible, rechazar antes de leer propiedades o consumir servicios.
+  }
+  throw new Error(
+    "Abre el editor de Google Apps Script con tu cuenta para ejecutar esta acción.",
+  );
+}
+
+function prepararMillasGoogle() {
+  requireGoogleMilesEditor_();
+  return prepararMillasGoogle_();
+}
+
+function activarMillasGoogle() {
+  requireGoogleMilesEditor_();
+  return activarMillasGoogle_();
+}
+
+function estadoMillasGoogle() {
+  requireGoogleMilesEditor_();
+  return estadoMillasGoogle_();
+}
+
+function procesarMillasGoogle() {
+  requireGoogleMilesEditor_();
+  return procesarMillasGoogle_();
+}
+
+function desactivarMillasGoogle() {
+  requireGoogleMilesEditor_();
+  return desactivarMillasGoogle_();
 }

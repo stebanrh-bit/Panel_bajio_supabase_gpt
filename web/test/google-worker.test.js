@@ -24,6 +24,8 @@ function worker({
   busy = false,
   fail = "",
   stepTime = 0,
+  activeUser = "owner@local.test",
+  effectiveUser = "owner@local.test",
 } = {}) {
   const properties = new Map([["PANEL_MAPS_WORKER_TOKEN", token]]),
     logs = [],
@@ -46,6 +48,10 @@ function worker({
       static now() {
         return clock;
       }
+    },
+    Session: {
+      getActiveUser: () => ({ getEmail: () => activeUser }),
+      getEffectiveUser: () => ({ getEmail: () => effectiveUser }),
     },
     LockService: {
       getScriptLock: () => ({
@@ -281,4 +287,30 @@ test("radar: prefiere el resultado Google guardado y conserva OSM cuando no hay 
   assert.equal(result.items.c.millas, 200);
   assert.equal(result.items.c.fuente, "osm");
   assert.equal(result.items.c.googleEstado, "no_route");
+});
+
+test("selector Google: accesos visibles verifican identidad antes de preparar o ejecutar el proceso", () => {
+  const names = [
+    "prepararMillasGoogle",
+    "activarMillasGoogle",
+    "estadoMillasGoogle",
+    "procesarMillasGoogle",
+    "desactivarMillasGoogle",
+  ];
+  for (const activeUser of ["", "otra-cuenta@local.test"]) {
+    const denied = worker({ activeUser });
+    for (const name of names)
+      assert.throws(() => denied.context[name](), /Abre el editor/);
+    assert.equal(denied.calls.length, 0);
+    assert.equal(denied.logs.length, 0);
+    assert.equal(denied.triggers.length, 0);
+    assert.equal(denied.stats().mapsCalls, 0);
+  }
+  const allowed = worker({ jobs: [] });
+  assert.equal(allowed.context.prepararMillasGoogle().configured, true);
+  allowed.context.activarMillasGoogle();
+  assert.equal(allowed.context.estadoMillasGoogle().triggers, 1);
+  assert.equal(allowed.context.procesarMillasGoogle().status, "ok");
+  allowed.context.desactivarMillasGoogle();
+  assert.equal(allowed.triggers.length, 0);
 });

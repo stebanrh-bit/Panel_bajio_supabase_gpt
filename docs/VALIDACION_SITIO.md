@@ -6,7 +6,7 @@ Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubr
 | --- | --- |
 | Panel original publicado | HTML recuperado; árbol JavaScript idéntico al `PanelScript.html` de la raíz |
 | Portal Cliente y Vista Gerencia originales | Plantillas recuperadas de sus páginas publicadas |
-| `npm --cache /tmp/panel-npm-cache test` | 107 pruebas aprobadas; 0 fallidas y 0 omitidas |
+| `npm --cache /tmp/panel-npm-cache test` | 108 pruebas aprobadas; 0 fallidas y 0 omitidas |
 | `npm --cache /tmp/panel-npm-cache run build` | Compilación de 129 módulos correcta, incluyendo lector XLSX y mejoras de usabilidad |
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
@@ -21,7 +21,7 @@ Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubr
 | Chromium: solicitudes y tareas | Tres comparaciones nuevas: secciones cerradas y formularios de alta; abrir/cerrar con teclado, preferencia al recargar, contador propio, fecha legible, validaciones y envío de campos correctos al transporte interceptado; edición conserva responsable; ventanas y Guardar accesibles a 360 y 390 px |
 | Chromium: calendario semanal | Tipos exclusivos y combinación con cliente; apartados asociados y sin cliente identificado; navegación entre semanas conservando filtros; limpiar y abrir registros; teclado y móvil a 360/390 px sin desbordamiento |
 | Cola Google en PostgreSQL local | Seis casos: permisos mínimos y secreto, reservas sin duplicados, recuperación de reserva vencida, cuota y reintentos, conservación OSM/sin ruta/valores inválidos, prioridad manual e instalación repetible |
-| Proceso Google simulado y lectura del radar | Cinco pruebas: suma de tramos y escritura confirmada, parada por cuota, tiempo máximo y bloqueo, vinculación sin publicar secreto y activador único, preferencia del resultado Google guardado |
+| Proceso Google simulado y lectura del radar | Seis pruebas: accesos visibles del editor con comprobación de identidad, suma de tramos y escritura confirmada, parada por cuota, tiempo máximo y bloqueo, vinculación sin publicar secreto y activador único, preferencia del resultado Google guardado |
 | Activador Maps real | Pendiente: instalar SQL 010, vincular hash y activar en Google según MILLAS_GOOGLE_AUTOMATICAS.md; no ejecutado contra producción |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
 | Chromium: archivos reales | CSV, XLSX y XLS; vista previa, cancelar sin guardar, fechas inválidas, ceros iniciales, booleanos, duplicados y persistencia al confirmar |
