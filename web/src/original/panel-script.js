@@ -3114,7 +3114,7 @@
       "</div>" +
       (p.fecha_estimada
         ? '<div class="field"><div class="k">Fecha estimada</div><div class="v small">' +
-          esc(p.fecha_estimada) +
+          esc(window.panelUsability.formatMoment(p.fecha_estimada, true)) +
           "</div></div>"
         : "") +
       (p.nota
@@ -3132,7 +3132,7 @@
       '">Comentarios</button>' +
       '<button type="button" class="csr-btn" data-vincular-pendiente="' +
       esc(p.id) +
-      '">Ya tiene load — vincular</button>' +
+      '">Vincular a una carga</button>' +
       "</div>" +
       "</article>"
     );
@@ -3151,8 +3151,8 @@
       el.innerHTML =
         '<div class="comments-empty">' +
         (myRealIdentity
-          ? "Sin registros pendientes de load tuyos."
-          : "Verifica tu identidad para ver tus pendientes de load.") +
+          ? "No tienes solicitudes sin carga confirmada."
+          : "Inicia sesión para ver tus solicitudes.") +
         "</div>";
       resetRenderState("pendientes-list");
       return;
@@ -3289,7 +3289,6 @@
     var abiertos = bitacora.filter(function (b) {
       return !b.resuelto;
     }).length;
-    document.getElementById("count-bitacora").textContent = abiertos;
     var badgeB = document.getElementById("sidebar-badge-bitacora");
     if (badgeB) {
       badgeB.textContent = abiertos > 99 ? "99+" : String(abiertos);
@@ -3324,6 +3323,13 @@
       return !b.creado_por || b.creado_por === myRealIdentity;
     });
 
+    // El contador del encabezado corresponde a las tareas propias; el lateral reúne todas.
+    document.getElementById("count-bitacora").textContent = propios.filter(
+      function (b) {
+        return !b.resuelto;
+      },
+    ).length;
+
     var elAsig = document.getElementById("bitacora-asignados-list");
     var countAsig = document.getElementById("count-bitacora-asignados");
     var abiertosAsig = asignados.filter(function (b) {
@@ -3332,7 +3338,7 @@
     if (countAsig) countAsig.textContent = abiertosAsig;
     if (!asignados.length) {
       elAsig.innerHTML =
-        '<div class="comments-empty">Nadie te ha asignado pendientes de turno.</div>';
+        '<div class="comments-empty">No tienes tareas asignadas.</div>';
       resetRenderState("bitacora-asignados-list");
     } else {
       diffRenderContainer(
@@ -3350,8 +3356,8 @@
       el.innerHTML =
         '<div class="comments-empty">' +
         (myRealIdentity
-          ? "Sin pendientes de turno propios."
-          : "Verifica tu identidad para ver tus pendientes de turno.") +
+          ? "Todavía no has registrado tareas."
+          : "Inicia sesión para ver tus tareas.") +
         "</div>";
       resetRenderState("bitacora-list");
     } else {
@@ -3648,7 +3654,7 @@
     var wrap = document.getElementById("bitacora-load-selected");
     if (!bitacoraLoadsSeleccionados.length) {
       wrap.innerHTML =
-        '<span class="bitacora-load-selected-empty">Sin loads elegidos todavía.</span>';
+        '<span class="bitacora-load-selected-empty">Sin cargas seleccionadas. Se guardará como tarea general.</span>';
       return;
     }
     wrap.innerHTML = bitacoraLoadsSeleccionados
@@ -3710,10 +3716,10 @@
     document
       .querySelectorAll("#bitacora-color-swatches .color-swatch")
       .forEach(function (sw) {
-        sw.classList.toggle(
-          "selected",
-          sw.getAttribute("data-color") === bitacoraColorSeleccionado,
-        );
+        var selected =
+          sw.getAttribute("data-color") === bitacoraColorSeleccionado;
+        sw.classList.toggle("selected", selected);
+        sw.setAttribute("aria-pressed", String(selected));
       });
   }
 
@@ -3744,13 +3750,16 @@
     bitacoraAutoAssignCsr =
       !existing && autoAssignCsr ? String(autoAssignCsr) : "";
     document.getElementById("bitacora-modal-title").textContent = existing
-      ? "Editar pendiente de turno"
+      ? "Editar tarea de turno"
       : bitacoraAutoAssignCsr
-        ? "Marcar pendiente de turno"
-        : "Nuevo pendiente de turno";
+        ? "Asignar tarea de turno"
+        : "Nueva tarea de turno";
     document.getElementById("bitacora-nota").value = existing
       ? existing.nota
       : "";
+    document.getElementById("bitacora-load-help").textContent = existing
+      ? "Elige una carga para esta tarea o deja la selección vacía para una tarea general."
+      : "Sin selección, se guarda como tarea general. Si eliges varias cargas, se crea una tarea por cada una.";
     bitacoraLoadOpciones = currentData.slice();
     bitacoraLoadsSeleccionados =
       existing && existing.load
@@ -3800,10 +3809,10 @@
       if (myRealIdentity) sel.value = myRealIdentity;
     }
     document.getElementById("bitacora-turno-note").textContent = existing
-      ? "El turno y a quién está asignado se quedan igual que cuando se creó — solo se edita la nota, el load, la fecha de seguimiento y el color."
+      ? "Actualiza la descripción, la carga, la fecha o el color. El turno y el responsable se conservan."
       : bitacoraAutoAssignCsr
-        ? "El turno se anota solo, según la hora en que guardes esto."
-        : "El turno se anota solo, según la hora en que guardes esto. Déjatelo a ti mismo si es algo urgente que tienes que hacer hoy, o asígnaselo a quien le toque el siguiente turno (o a quien vaya a cubrir el fin de semana). Puedes elegir varios loads a la vez — por ejemplo al cerrar tu turno — y se crea un pendiente por cada uno, con la misma nota, fecha de seguimiento y persona asignada, para que se puedan ir resolviendo por separado.";
+        ? "El turno se registra automáticamente al guardar."
+        : "Describe el trabajo pendiente y elige quién lo atenderá. El turno se registra automáticamente al guardar.";
     document.getElementById("bitacora-error").style.display = "none";
     document.getElementById("bitacora-backdrop").classList.add("show");
     document.getElementById("bitacora-nota").focus();
@@ -3887,7 +3896,7 @@
       var nota = document.getElementById("bitacora-nota").value.trim();
       if (!nota) {
         document.getElementById("bitacora-error").textContent =
-          "Escribe la nota.";
+          "Describe la tarea.";
         document.getElementById("bitacora-error").style.display = "";
         document.getElementById("bitacora-nota").focus();
         return;

@@ -53,6 +53,9 @@ def main():
         'imagenes/panel-cargas-movil.png':ROOT/'docs/imagenes/panel-cargas-movil.png',
         'imagenes/trailer-completo.png':ROOT/'docs/imagenes/trailer-completo.png',
         'imagenes/historial-legible.png':ROOT/'docs/imagenes/historial-legible.png',
+        'imagenes/nueva-solicitud.png':ROOT/'docs/imagenes/nueva-solicitud.png',
+        'imagenes/nueva-tarea.png':ROOT/'docs/imagenes/nueva-tarea.png',
+        'imagenes/nueva-tarea-movil.png':ROOT/'docs/imagenes/nueva-tarea-movil.png',
         'importacion-prueba.csv':ROOT/'entregables/importacion-prueba.csv',
     }
     zip_path=ROOT/'entregables/panel-bajio-sitio.zip'

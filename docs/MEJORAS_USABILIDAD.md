@@ -32,6 +32,16 @@ En **Expediente → Historial → Cambios**, cada cambio usa un nombre de trabaj
 
 Los nombres técnicos y metadatos de sincronización se omiten de esta presentación. La auditoría guardada en Supabase se conserva íntegra. Ejemplos con datos ficticios: [Trailer completo](imagenes/trailer-completo.png) e [historial legible](imagenes/historial-legible.png).
 
+## Solicitudes y tareas: desplegables y formularios
+
+Las tres secciones se apilan con el mismo encabezado, contador y flecha; el botón de alta queda separado del control de abrir/cerrar. Cada sección incluye una explicación breve. Al cerrarla se ocultan sus tarjetas y su explicación; se conserva la preferencia del navegador. Las tarjetas se distribuyen según el espacio disponible, sin dejar media fila vacía cuando hay una sola.
+
+**Nueva solicitud** organiza cliente, origen, destino, fecha y nota con etiquetas visibles. **Nueva tarea** agrupa descripción, búsqueda y selección de cargas, fecha, responsable y color. Los colores también se identifican por texto. En móvil se usa una columna y desplazamiento dentro de la ventana para llegar a Guardar. Mientras están abiertos estos formularios, los avisos de fondo y las confirmaciones temporales se apartan para no tapar campos ni Guardar; vuelven a mostrarse al cerrar si siguen vigentes. Los mensajes de error y Deshacer conservan su visibilidad. Se conservan los controles y las acciones de comentarios, vinculación, edición y seguimiento.
+
+El contador de **Tareas que registraste** cuenta únicamente tus tareas abiertas; **Tareas asignadas a ti** mantiene su contador separado. Las fechas estimadas de las solicitudes se muestran con el mes escrito. La edición de una tarea conserva el responsable y el turno originales.
+
+Capturas con datos ficticios: [Nueva solicitud](imagenes/nueva-solicitud.png), [Nueva tarea](imagenes/nueva-tarea.png) y [Tarea en móvil](imagenes/nueva-tarea-movil.png).
+
 ## Administración por secciones
 
 | Sección | Contenido |
@@ -67,11 +77,12 @@ Solo se reemplaza el HTML. Se conservan `Code.gs`, la función de cuentas y las 
 
 ## Comprobaciones
 
-La entrega terminó con **91 pruebas aprobadas, 0 fallidas y 0 omitidas**, **128 módulos compilados** y **35 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
+La entrega terminó con **91 pruebas aprobadas, 0 fallidas y 0 omitidas**, **128 módulos compilados** y **38 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
 
 La entrega se comprueba con la suite automática, la compilación y el verificador del paquete. Chromium recorre las pantallas y los flujos existentes con datos ficticios y transporte Supabase interceptado. Además comprueba:
 
 - Una fila por carga en Inicio y filtros por tipo de acción.
+- Desplegables de solicitudes/tareas con teclado y preferencia conservada al recargar; altas con validación y envío de los campos correctos; edición con responsable conservado; ventanas sin desbordamiento a 360 y 390 px.
 - Trailer largo completo en tabla y tarjetas, guardado y persistencia; historial con valores Antes/Ahora, cero y confirmaciones, sin nombres técnicos ni ejecución de HTML en los valores.
 - Dos plazos independientes al revisar tránsito o completar un seguimiento.
 - Tab/Shift+Tab dentro de Comentarios y el expediente, ventanas anidadas, Escape y retorno al botón de origen.

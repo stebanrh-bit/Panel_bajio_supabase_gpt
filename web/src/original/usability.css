@@ -444,3 +444,290 @@
     flex-wrap: wrap;
   }
 }
+
+/* Solicitudes y tareas: secciones apiladas con un encabezado estable al desplegar. */
+.panel-internal .home-secondary-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+.panel-internal .home-secondary-grid > .group {
+  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.panel-internal .home-secondary-grid .group > h2 {
+  margin: 0;
+  padding: 12px 16px;
+  gap: 12px;
+  background: var(--surface-2);
+  text-transform: none;
+  letter-spacing: 0;
+  flex-wrap: wrap;
+}
+.panel-internal .home-secondary-grid .group-toggle {
+  flex: 1 1 260px;
+  min-width: 0;
+  min-height: 44px;
+  text-align: left;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.turno-group-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.panel-internal .home-secondary-grid .group-toggle-arrow {
+  color: var(--accent);
+}
+.panel-internal .home-secondary-grid .add-btn {
+  margin: 0;
+  min-height: 40px;
+  padding: 8px 14px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+}
+.turno-group-help {
+  margin: 16px 16px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.panel-internal .home-secondary-grid .cards {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.panel-internal .home-secondary-grid .cards > .comments-empty {
+  grid-column: 1 / -1;
+  padding: 16px;
+  margin: 0;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  font-style: normal;
+  font-size: 14px;
+}
+.panel-internal
+  .home-secondary-grid
+  .collapsed
+  > :is(.cards, .turno-group-help) {
+  display: none;
+}
+.panel-internal .home-secondary-grid .collapsed .group-toggle-arrow {
+  transform: rotate(-90deg);
+}
+.panel-internal .home-secondary-grid .card-top {
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+.panel-internal .home-secondary-grid .card-top > div:first-child {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.panel-internal .home-secondary-grid :is(.notes, .route, .t-comment-ts) {
+  overflow-wrap: anywhere;
+}
+.panel-internal .home-secondary-grid .comments-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.panel-internal .home-secondary-grid .comments-row > button {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+}
+/* La cuadrícula evita que flex-basis de las etiquetas agregue huecos verticales. */
+.panel-internal .modal-box.turno-modal {
+  max-width: 640px;
+}
+.panel-internal .csr-form.turno-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+  margin: 20px 0;
+}
+.turno-form > * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.turno-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.turno-field-wide {
+  grid-column: 1 / -1;
+}
+.panel-internal .turno-field > :is(input, textarea, select) {
+  width: 100%;
+  min-width: 0;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+.turno-form-help {
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+.turno-load-picker,
+.turno-colors {
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.turno-load-picker > legend,
+.turno-colors > legend {
+  padding: 0 6px;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.turno-load-picker .bitacora-load-selected {
+  margin: 12px 0;
+}
+.panel-internal .turno-load-picker .bitacora-load-option {
+  min-height: 44px;
+  padding: 10px;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.turno-load-picker .bitacora-load-option > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.turno-load-picker .bitacora-load-option > input {
+  flex-shrink: 0;
+}
+.turno-assignment-note {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.turno-colors .color-swatches {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.panel-internal .turno-colors .color-swatch {
+  --task-color: var(--ink-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: auto;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+}
+.turno-colors .color-swatch::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--task-color);
+}
+.panel-internal .turno-colors .sw-critical {
+  --task-color: var(--critical);
+}
+.panel-internal .turno-colors .sw-warn {
+  --task-color: var(--warn);
+}
+.panel-internal .turno-colors .sw-good {
+  --task-color: var(--good);
+}
+.panel-internal .turno-colors .sw-info {
+  --task-color: var(--info);
+}
+.panel-internal .turno-colors .color-swatch.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.turno-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.panel-internal .turno-form-actions > .csr-btn {
+  padding: 10px 20px;
+  min-height: 44px;
+}
+@media (max-width: 900px) {
+  .panel-internal .home-secondary-grid .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .panel-internal .csr-form.turno-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel-internal .home-secondary-grid .group > h2 {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .panel-internal .home-secondary-grid .group-toggle {
+    flex-basis: 100%;
+  }
+  .panel-internal .home-secondary-grid .add-btn {
+    width: 100%;
+  }
+  .panel-internal .home-secondary-grid .cards {
+    padding: 12px;
+  }
+  .panel-internal .turno-form-actions > .csr-btn {
+    width: 100%;
+  }
+}
+
+.panel-internal .home-secondary-grid .group-toggle .count {
+  background: var(--surface);
+  min-width: 26px;
+  padding: 2px 8px;
+  text-align: center;
+}
+
+/* En estos formularios el encabezado cubre el borde superior al desplazarse. */
+.panel-internal .modal-box.turno-modal {
+  padding: 0 22px 20px;
+}
+.panel-internal .turno-modal .modal-head {
+  top: 0;
+  margin-top: 0;
+  padding: 16px 0 12px;
+}
+/* Los avisos de fondo se vuelven a ver al cerrar. Los errores y Deshacer siguen visibles. */
+.panel-internal:has(#pendiente-backdrop.show, #bitacora-backdrop.show)
+  #toast-container
+  :is(.toast-aviso, .toast-good):not(.toast-undo) {
+  display: none;
+}
+@media (max-width: 640px) {
+  .panel-internal .modal-box.turno-modal {
+    padding: 0 16px 16px;
+  }
+}

@@ -211,30 +211,33 @@
   </section>
 <div class="home-secondary-grid"><section class="group" id="group-pendientes">
     <h2>
-      <button type="button" class="group-toggle" id="pendientes-toggle" aria-expanded="true">
-        <span class="group-toggle-arrow">&#9662;</span> Solicitudes sin carga confirmada <span class="count" id="count-pendientes">0</span>
+      <button type="button" class="group-toggle" id="pendientes-toggle" aria-expanded="true" aria-controls="pendientes-list">
+        <span class="group-toggle-arrow">&#9662;</span> <span class="turno-group-title">Solicitudes sin carga confirmada</span> <span class="count" id="count-pendientes">0</span>
       </button>
       <button type="button" class="csr-btn add-btn" id="pendiente-add-btn">+ Nueva solicitud</button>
     </h2>
+    <p class="turno-group-help">Solicitudes que esperan confirmación. Cuando tengas el número de carga, vincúlalo aquí.</p>
     <div class="cards" id="pendientes-list"></div>
   </section>
 
   <section class="group" id="group-bitacora-asignados">
     <h2>
-      <button type="button" class="group-toggle" id="bitacora-asignados-toggle" aria-expanded="true">
-        <span class="group-toggle-arrow">&#9662;</span> Tareas asignadas a ti <span class="count" id="count-bitacora-asignados">0</span>
+      <button type="button" class="group-toggle" id="bitacora-asignados-toggle" aria-expanded="true" aria-controls="bitacora-asignados-list">
+        <span class="group-toggle-arrow">&#9662;</span> <span class="turno-group-title">Tareas asignadas a ti</span> <span class="count" id="count-bitacora-asignados">0</span>
       </button>
     </h2>
+    <p class="turno-group-help">Trabajo que otras personas te asignaron para dar seguimiento.</p>
     <div class="cards" id="bitacora-asignados-list"></div>
   </section>
 
   <section class="group" id="group-bitacora">
     <h2>
-      <button type="button" class="group-toggle" id="bitacora-toggle" aria-expanded="true">
-        <span class="group-toggle-arrow">&#9662;</span> Tareas que registraste <span class="count" id="count-bitacora">0</span>
+      <button type="button" class="group-toggle" id="bitacora-toggle" aria-expanded="true" aria-controls="bitacora-list">
+        <span class="group-toggle-arrow">&#9662;</span> <span class="turno-group-title">Tareas que registraste</span> <span class="count" id="count-bitacora">0</span>
       </button>
       <button type="button" class="csr-btn add-btn" id="bitacora-add-btn">+ Nueva tarea</button>
     </h2>
+    <p class="turno-group-help">Tareas que creaste para ti o para otra persona del equipo.</p>
     <div class="cards" id="bitacora-list"></div>
   </section>
 
@@ -577,55 +580,60 @@
     </div>
   </div>
 
+  <!-- Formularios de turno: etiquetas visibles y campos agrupados; los IDs conservan sus acciones. -->
   <div class="modal-backdrop" id="pendiente-backdrop">
-    <div class="modal-box" style="max-width:420px;">
+    <div class="modal-box turno-modal">
       <div class="modal-head">
         <span class="modal-title">Nueva solicitud sin carga confirmada</span>
-        <button type="button" class="modal-close" id="pendiente-close">&times;</button>
+        <button type="button" class="modal-close" id="pendiente-close" aria-label="Cerrar solicitud">&times;</button>
       </div>
-      <div class="csr-form" style="flex-direction:column; align-items:stretch;">
-        <input type="text" id="pendiente-cliente" placeholder="Cliente">
-        <input type="text" id="pendiente-origen" placeholder="Origen (ciudad, estado)">
-        <input type="text" id="pendiente-destino" placeholder="Destino (ciudad, estado)">
-        <input type="date" id="pendiente-fecha" aria-label="Fecha estimada">
-        <textarea id="pendiente-nota" rows="3" placeholder="Nota (opcional)"></textarea>
+      <p class="turno-form-help">Registra lo que te pidió el cliente. Podrás vincular la solicitud cuando se confirme la carga.</p>
+      <div class="csr-form turno-form">
+        <label class="turno-field turno-field-wide">Cliente<input type="text" id="pendiente-cliente" placeholder="Nombre del cliente"></label>
+        <label class="turno-field">Origen<input type="text" id="pendiente-origen" placeholder="Ciudad, estado"></label>
+        <label class="turno-field">Destino<input type="text" id="pendiente-destino" placeholder="Ciudad, estado"></label>
+        <label class="turno-field turno-field-wide">Fecha estimada (opcional)<input type="date" id="pendiente-fecha"></label>
+        <label class="turno-field turno-field-wide">Nota (opcional)<textarea id="pendiente-nota" rows="3" placeholder="Detalles que debe conocer el equipo"></textarea></label>
       </div>
-      <button type="button" class="csr-btn" id="pendiente-submit" style="margin-top:0.6rem;">Guardar</button>
+      <div class="turno-form-actions"><button type="button" class="csr-btn" id="pendiente-submit">Guardar solicitud</button></div>
     </div>
   </div>
 
   <div class="modal-backdrop" id="bitacora-backdrop">
-    <div class="modal-box" style="max-width:420px;">
+    <div class="modal-box turno-modal">
       <div class="modal-head">
-        <span class="modal-title" id="bitacora-modal-title">Nuevo pendiente de turno</span>
-        <button type="button" class="modal-close" id="bitacora-close">&times;</button>
+        <span class="modal-title" id="bitacora-modal-title">Nueva tarea de turno</span>
+        <button type="button" class="modal-close" id="bitacora-close" aria-label="Cerrar tarea">&times;</button>
       </div>
-      <p class="recordatorio-note" id="bitacora-turno-note"></p>
-      <div class="csr-form" style="flex-direction:column; align-items:stretch;">
-        <textarea id="bitacora-nota" rows="3" placeholder="¿Qué queda pendiente?"></textarea>
-        <div class="field-label">Load(s) <span style="color:var(--ink-faint);font-weight:400">— opcional; sin load queda como pendiente general del turno</span></div>
-        <input type="text" id="bitacora-load-search" placeholder="Buscar carga o cliente…" autocomplete="off">
-        <div class="bitacora-load-selected" id="bitacora-load-selected"></div>
-        <div class="bitacora-load-list" id="bitacora-load-select"></div>
-        <div class="field-label">Fecha de seguimiento (opcional)</div>
-        <input type="date" id="bitacora-fecha-seguimiento" aria-label="Fecha de seguimiento">
+      <p class="turno-form-help" id="bitacora-turno-note"></p>
+      <div class="csr-form turno-form">
+        <label class="turno-field turno-field-wide">¿Qué hay que hacer?<textarea id="bitacora-nota" rows="3" placeholder="Describe la tarea y el resultado que esperas"></textarea></label>
+        <fieldset class="turno-load-picker turno-field-wide">
+          <legend>Cargas relacionadas (opcional)</legend>
+          <p class="turno-form-help" id="bitacora-load-help">Sin selección, se guarda como tarea general. Si eliges varias cargas, se crea una tarea por cada una.</p>
+          <label class="turno-field">Buscar carga o cliente<input type="text" id="bitacora-load-search" placeholder="Número de carga o nombre del cliente" autocomplete="off"></label>
+          <div class="bitacora-load-selected" id="bitacora-load-selected" aria-live="polite"></div>
+          <div class="bitacora-load-list" id="bitacora-load-select"></div>
+        </fieldset>
+        <label class="turno-field">Fecha de seguimiento (opcional)<input type="date" id="bitacora-fecha-seguimiento"></label>
         <div id="bitacora-asignado-wrap">
-          <div class="field-label">Asignar pendiente a</div>
-          <select id="bitacora-asignado" aria-label="Asignar pendiente a"></select>
+          <label class="turno-field">Responsable<select id="bitacora-asignado"></select></label>
         </div>
-        <div class="field-label" id="bitacora-asignado-fixed-label" style="display:none;">Asignado a: <b id="bitacora-asignado-fixed"></b> (no se puede reasignar al editar)</div>
-        <div class="field-label who-hint" id="bitacora-asignado-auto-label" style="display:none;">Se le asignará a quien esté dando seguimiento a <b id="bitacora-asignado-auto-csr"></b> — ahorita o en cuanto alguien lo empiece a seguir. Si no lo sigue nadie todavía, igual se guarda.</div>
-        <div class="field-label">Color de la tarjeta (opcional)</div>
-        <div class="color-swatches" id="bitacora-color-swatches">
-          <button type="button" class="color-swatch sw-neutral selected" data-color="" title="Sin color"></button>
-          <button type="button" class="color-swatch sw-critical" data-color="critical" title="Urgente"></button>
-          <button type="button" class="color-swatch sw-warn" data-color="warn" title="Atención"></button>
-          <button type="button" class="color-swatch sw-good" data-color="good" title="Resuelto / OK"></button>
-          <button type="button" class="color-swatch sw-info" data-color="info" title="Informativo"></button>
-        </div>
+        <div class="turno-assignment-note turno-field-wide" id="bitacora-asignado-fixed-label" style="display:none;">Asignado a: <b id="bitacora-asignado-fixed"></b>. El responsable se conserva al editar.</div>
+        <div class="turno-assignment-note turno-field-wide" id="bitacora-asignado-auto-label" style="display:none;">Se asignará a quien dé seguimiento a <b id="bitacora-asignado-auto-csr"></b>. Si todavía nadie lo sigue, la tarea se guarda de todos modos.</div>
+        <fieldset class="turno-colors turno-field-wide">
+          <legend>Color de la tarjeta (opcional)</legend>
+          <div class="color-swatches" id="bitacora-color-swatches">
+            <button type="button" class="color-swatch sw-neutral selected" data-color="" title="Sin color">Sin color</button>
+            <button type="button" class="color-swatch sw-critical" data-color="critical" title="Urgente">Urgente</button>
+            <button type="button" class="color-swatch sw-warn" data-color="warn" title="Atención">Atención</button>
+            <button type="button" class="color-swatch sw-good" data-color="good" title="Resuelto / OK">Resuelto / OK</button>
+            <button type="button" class="color-swatch sw-info" data-color="info" title="Informativo">Informativo</button>
+          </div>
+        </fieldset>
       </div>
-      <div class="csr-pw-error" id="bitacora-error" style="display:none;">Escribe la nota.</div>
-      <button type="button" class="csr-btn" id="bitacora-submit" style="margin-top:0.6rem;">Guardar</button>
+      <div class="csr-pw-error" id="bitacora-error" style="display:none;" role="alert">Describe la tarea.</div>
+      <div class="turno-form-actions"><button type="button" class="csr-btn" id="bitacora-submit">Guardar tarea</button></div>
     </div>
   </div>
 

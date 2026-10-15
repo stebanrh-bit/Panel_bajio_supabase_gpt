@@ -10,7 +10,7 @@ Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubr
 | `npm --cache /tmp/panel-npm-cache run build` | Compilación de 128 módulos correcta, incluyendo lector XLSX y mejoras de usabilidad |
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
-| Chromium: comparación visual | 35 parejas de presentación prevista y entrega con datos ficticios independientes; escritorio y móvil; Inicio simplificado por petición del usuario |
+| Chromium: comparación visual | 38 parejas de presentación prevista y entrega con datos ficticios independientes; escritorio y móvil; Inicio simplificado por petición del usuario |
 | Chromium: administrador también CSR | Esteban se identifica como Admin y Abraham como Supervisor, con sus permisos conservados; asignación desde el formulario, persistencia al recargar, vista propia y Todos sin perder el rol ni los controles administrativos |
 | Chromium: incidencia | Categoría vacía rechazada sin insertar; registro válido persiste al recargar |
 | Chromium: revisiones y seguimientos | Plazos independientes, tránsito +3 h, completar seguimiento sin eliminar el otro plazo, próximas fechas y móvil sin desbordamiento |
@@ -18,6 +18,7 @@ Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubr
 | Chromium: guardado rechazado | Respuesta 409 simulada no cambia la carga; error permanece visible más de 3 segundos y requiere descarte explícito |
 | Chromium: ancho y ventanas | Cargas a 360 y 390 px, también con edición abierta; Administración dentro del alto disponible y con desplazamiento interno |
 | Chromium: Trailer e historial | Identificador largo completo, edición y persistencia; campos legibles, Antes/Ahora, cero y confirmaciones; metadatos internos omitidos y contenido HTML mostrado como texto |
+| Chromium: solicitudes y tareas | Tres comparaciones nuevas: secciones cerradas y formularios de alta; abrir/cerrar con teclado, preferencia al recargar, contador propio, fecha legible, validaciones y envío de campos correctos al transporte interceptado; edición conserva responsable; ventanas y Guardar accesibles a 360 y 390 px |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
 | Chromium: archivos reales | CSV, XLSX y XLS; vista previa, cancelar sin guardar, fechas inválidas, ceros iniciales, booleanos, duplicados y persistencia al confirmar |
 | Supabase remoto | Auth y directorio responden 200; 13 tablas privadas, administración de cuentas y RPC del portal rechazan peticiones sin sesión con 401 |

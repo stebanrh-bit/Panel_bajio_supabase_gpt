@@ -689,6 +689,26 @@ try {
     await compare("inicio");
     await both((page) => page.locator("[data-home-tab=turno]").click());
     await compare("mi-turno");
+    // Los tres desplegables y las ventanas de alta comparten una presentación legible.
+    for (const id of ["pendientes", "bitacora-asignados", "bitacora"]) {
+      await both((page) => page.locator(`#${id}-toggle`).click());
+      await both(async (page) => {
+        assert.equal(
+          await page.locator(`#${id}-toggle`).getAttribute("aria-expanded"),
+          "false",
+        );
+        assert.equal(await page.locator(`#${id}-list`).isVisible(), false);
+      });
+    }
+    await compare("turno-secciones-cerradas");
+    for (const id of ["pendientes", "bitacora-asignados", "bitacora"])
+      await both((page) => page.locator(`#${id}-toggle`).click());
+    await both((page) => page.locator("#pendiente-add-btn").click());
+    await compare("nueva-solicitud");
+    await both((page) => page.locator("#pendiente-close").click());
+    await both((page) => page.locator("#bitacora-add-btn").click());
+    await compare("nueva-tarea");
+    await both((page) => page.locator("#bitacora-close").click());
     await both((page) => page.locator("[data-page=operation]").click());
     await both((page) =>
       page.locator("[data-workspace-load=VISUAL-001]").first().waitFor(),
@@ -990,6 +1010,153 @@ try {
   // Regresión de usabilidad: los controles desplazados siguen operando y no pierden datos.
   const ux = await newPage(false);
   try {
+    await ux.locator('[data-home-tab="turno"]').click();
+    assert.equal(await ux.locator("#count-bitacora").innerText(), "0");
+    assert.equal(
+      await ux.locator("#count-bitacora-asignados").innerText(),
+      "1",
+    );
+    // Cerrar con teclado y recargar conserva la preferencia y permite volver a abrir.
+    await ux.locator("#pendientes-toggle").focus();
+    await ux.keyboard.press("Enter");
+    await ux.reload();
+    await ux.locator('[data-home-tab="turno"]').click();
+    assert.equal(
+      await ux.locator("#pendientes-toggle").getAttribute("aria-expanded"),
+      "false",
+    );
+    await ux.locator("#pendientes-toggle").click();
+    assert.equal(await ux.locator("#pendientes-list").isVisible(), true);
+    assert.doesNotMatch(
+      await ux.locator("#pendientes-list").innerText(),
+      /T18:00:00Z/,
+    );
+    let submittedRequest = null,
+      submittedTask = null;
+    await ux.route("**/rest/v1/pending_loads**", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      submittedRequest = route.request().postDataJSON();
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          ...pendingRow,
+          ...submittedRequest,
+          id: "request-ui-only",
+        }),
+      });
+    });
+    await ux.route("**/rest/v1/rpc/ops_save_tasks", async (route) => {
+      submittedTask = route.request().postDataJSON();
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify([
+          { ...taskRow, id: "task-ui-only", created_by: adminId },
+        ]),
+      });
+    });
+    await ux.locator("#pendiente-add-btn").click();
+    await ux.locator("#pendiente-submit").click();
+    assert.equal(submittedRequest, null); // Un cliente vacío no dispara un guardado.
+    await ux
+      .locator("#pendiente-backdrop")
+      .getByLabel("Cliente", { exact: true })
+      .fill("Cliente de prueba");
+    await ux
+      .locator("#pendiente-backdrop")
+      .getByLabel("Origen", { exact: true })
+      .fill("León, Guanajuato");
+    await ux
+      .locator("#pendiente-backdrop")
+      .getByLabel("Destino", { exact: true })
+      .fill("Laredo, Texas");
+    await ux.locator("#pendiente-fecha").fill("2026-10-09");
+    await ux
+      .locator("#pendiente-nota")
+      .fill("Esperar confirmación del cliente");
+    await ux.locator("#pendiente-submit").click();
+    await ux.locator("#pendiente-backdrop.show").waitFor({ state: "hidden" });
+    assert.equal(submittedRequest.customer, "Cliente de prueba");
+    assert.equal(submittedRequest.origin, "León, Guanajuato");
+    assert.equal(submittedRequest.destination, "Laredo, Texas");
+    // La edición conserva el responsable y la carga originales; cerrarla no cambia datos.
+    await ux.locator(`[data-edit-bitacora="${taskRow.id}"]`).click();
+    assert.equal(
+      await ux.locator("#bitacora-asignado-wrap").isVisible(),
+      false,
+    );
+    assert.equal(
+      await ux.locator("#bitacora-asignado-fixed").innerText(),
+      "Esteban",
+    );
+    assert.equal(await ux.locator("#bitacora-nota").inputValue(), taskRow.note);
+    await ux.locator("#bitacora-close").click();
+    await ux.locator("#bitacora-add-btn").click();
+    await ux.locator("#bitacora-submit").click();
+    assert.equal(submittedTask, null); // Se conserva la validación de la descripción.
+    await ux.locator("#bitacora-nota").fill("Confirmar documentos");
+    await ux.locator("#bitacora-load-search").fill("VISUAL-001");
+    await ux.locator('[data-bitacora-load-option="VISUAL-001"]').click();
+    await ux.locator('#bitacora-color-swatches [data-color="warn"]').click();
+    await ux.locator("#bitacora-fecha-seguimiento").fill("2026-10-09");
+    await ux.locator("#bitacora-asignado").selectOption("Ana");
+    await ux.locator("#bitacora-submit").click();
+    await ux.locator("#bitacora-backdrop.show").waitFor({ state: "hidden" });
+    assert.equal(submittedTask.p_values.note, "Confirmar documentos");
+    assert.deepEqual(submittedTask.p_values.loads, ["VISUAL-001"]);
+    assert.equal(submittedTask.p_values.assigned_to, csrId);
+    assert.equal(submittedTask.p_values.color, "warn");
+    for (const width of [390, 360]) {
+      await ux.setViewportSize({ width, height: 844 });
+      for (const [trigger, overlay, close] of [
+        ["pendiente-add-btn", "pendiente-backdrop", "pendiente-close"],
+        ["bitacora-add-btn", "bitacora-backdrop", "bitacora-close"],
+      ]) {
+        await ux.locator(`#${trigger}`).click();
+        const layout = await ux
+          .locator(`#${overlay} .modal-box`)
+          .evaluate((box) => ({
+            width: box.clientWidth,
+            scroll: box.scrollWidth,
+            height: box.getBoundingClientRect().height,
+            page: document.documentElement.scrollWidth,
+            screen: innerWidth,
+          }));
+        assert.ok(
+          layout.scroll <= layout.width,
+          `${overlay}: desbordamiento a ${width}px`,
+        );
+        assert.ok(layout.height <= 844 && layout.page <= layout.screen);
+        await ux
+          .locator(`#${overlay} .turno-form-actions button`)
+          .scrollIntoViewIfNeeded();
+        assert.equal(
+          await ux
+            .locator(`#${overlay} .turno-form-actions button`)
+            .isVisible(),
+          true,
+        );
+        assert.equal(
+          await ux
+            .locator(`#${overlay} .turno-form-actions button`)
+            .evaluate((button) => {
+              const rect = button.getBoundingClientRect();
+              const top = document.elementFromPoint(
+                rect.x + rect.width / 2,
+                rect.y + rect.height / 2,
+              );
+              return button === top || button.contains(top);
+            }),
+          true,
+          "Guardar debe poder pulsarse sin que los avisos de fondo lo tapen",
+        );
+        await ux.screenshot({
+          path: `/tmp/panel-original-comparison/${overlay}-${width}.png`,
+        });
+        await ux.locator(`#${close}`).click();
+      }
+    }
+    await ux.setViewportSize({ width: 1440, height: 1024 });
+    await ux.locator('[data-home-tab="ahora"]').click();
     assert.equal(
       await ux.locator('[data-attention-load="VISUAL-001"]').count(),
       1,
