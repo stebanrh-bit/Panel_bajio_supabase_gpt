@@ -1,25 +1,10 @@
--- VISTA PREVIA: este archivo NO elimina ni modifica datos de la aplicación.
--- PANEL BAJÍO · LIMPIEZA PUNTUAL DEL 15 DE OCTUBRE DE 2026.
--- No es una migración: no agregar a actualizar_sitio.sql ni al arranque del sitio.
--- Ejecutar completo en Supabase > SQL Editor con el rol postgres.
--- Solo trata las cargas y los registros asociados; conserva cuentas, permisos y mapas.
--- Solicitudes/tareas generales y apartados externos sin relación con cargas eliminadas quedan intactos.
-begin;
-set local lock_timeout = '5s';
-set local statement_timeout = '60s';
-set local row_security = off;
-
--- Evita que una importación o edición cambie los datos durante esta transacción.
-select pg_advisory_xact_lock(607031);
-lock table public.loads, public.comments, public.incidents, public.load_history,
-  public.communications, public.load_followers, public.shift_tasks, public.shift_task_history,
-  public.pending_loads, public.pending_load_comments, public.pending_load_history,
-  public.reserved_loads, public.reserved_load_history, public.import_rows, public.import_batches,
-  public.admin_events, public.radar_sources, public.original_radar in share row exclusive mode;
-
--- Lista exacta del usuario: 64 números únicos, incluido 844090 en la segunda columna.
-create temporary table pb_conservar (load text primary key) on commit drop;
-insert into pb_conservar(load) values
+-- VISTA PREVIA · 64 CARGAS · Solo lectura; no crea tablas temporales.
+-- Copiar todo en Supabase > SQL Editor > New query > Run (rol postgres).
+-- Faltantes de tu lista debe indicar 0; cargas encontradas debe indicar 64.
+-- Todo se consulta en una sola sentencia y con la misma fotografía de los datos.
+with
+pb_conservar(load) as (
+values
   ('839445'), ('839453'), ('839454'), ('839995'), ('839996'), ('839997'), ('839998'), ('839994'),
   ('840598'), ('840600'), ('840720'), ('840721'), ('840722'), ('840723'), ('841140'), ('841431'),
   ('841757'), ('841758'), ('842233'), ('842232'), ('841947'), ('842234'), ('842382'), ('842362'),
@@ -27,61 +12,40 @@ insert into pb_conservar(load) values
   ('843855'), ('843106'), ('844224'), ('844223'), ('843107'), ('843108'), ('843121'), ('843122'),
   ('845121'), ('845120'), ('845704'), ('845309'), ('844408'), ('845690'), ('845515'), ('845122'),
   ('845941'), ('845942'), ('845943'), ('845517'), ('845709'), ('845496'), ('845516'), ('845520'),
-  ('843516'), ('845679'), ('844304'), ('844745'), ('845667'), ('844090'), ('845562'), ('845112');
-
--- Todas las demás cargas, incluidas las archivadas, son candidatas al borrado.
-create temporary table pb_eliminar on commit drop as
+  ('843516'), ('845679'), ('844304'), ('844745'), ('845667'), ('844090'), ('845562'), ('845112')
+),
+pb_eliminar as (
 select l.load from public.loads l
-where not exists (select 1 from pb_conservar k where k.load = l.load);
-create temporary table pb_tareas_eliminar on commit drop as
-select t.id from public.shift_tasks t join pb_eliminar d on d.load = t.load;
-create temporary table pb_solicitudes_eliminar on commit drop as
-select p.id from public.pending_loads p join pb_eliminar d on d.load = p.linked_load;
-
--- Un apartado puede mencionar varias cargas en su referencia libre own_load.
--- Si está relacionado con alguna protegida, se conserva completo, también su historial.
-create temporary table pb_apartados_conservar on commit drop as
+where not exists (select 1 from pb_conservar k where k.load = l.load)
+),
+pb_tareas_eliminar as (
+select t.id from public.shift_tasks t join pb_eliminar d on d.load = t.load
+),
+pb_solicitudes_eliminar as (
+select p.id from public.pending_loads p join pb_eliminar d on d.load = p.linked_load
+),
+pb_apartados_conservar as (
 select r.id from public.reserved_loads r where exists (
   select 1 from pb_conservar k where k.load = r.load
     or k.load = any(regexp_split_to_array(r.own_load, '[^0-9]+'))
-);
-create temporary table pb_apartados_eliminar on commit drop as
+)
+),
+pb_apartados_eliminar as (
 select r.id from public.reserved_loads r where not exists (
   select 1 from pb_apartados_conservar k where k.id = r.id
 ) and exists (
   select 1 from pb_eliminar d where d.load = r.load
     or d.load = any(regexp_split_to_array(r.own_load, '[^0-9]+'))
-);
-
--- La importación compartida con cargas protegidas permanece tal como estaba.
-create temporary table pb_lotes_eliminar on commit drop as
+)
+),
+pb_lotes_eliminar as (
 select b.id from public.import_batches b
 where exists (select 1 from public.import_rows r where r.batch_id = b.id)
   and not exists (
     select 1 from public.import_rows r join pb_conservar k on k.load = r.load
     where r.batch_id = b.id
-  );
-
--- Radar es un archivo independiente: quitar solo filas que identifiquen cargas eliminadas.
--- El contenido y orden de las filas conservadas no cambian; ubicaciones/rutas no se tocan.
-create temporary table pb_radar_fuentes on commit drop as
-select s.id, coalesce(jsonb_agg(e.value order by e.ord) filter (where not exists (
-  select 1 from pb_eliminar d where d.load = e.value ->> 'load'
-)), '[]'::jsonb) as records
-from public.radar_sources s
-cross join lateral jsonb_array_elements(s.records) with ordinality e(value, ord)
-group by s.id
-having bool_or(exists (select 1 from pb_eliminar d where d.load = e.value ->> 'load'));
-create temporary table pb_radar_original on commit drop as
-select s.singleton, coalesce(jsonb_agg(e.value order by e.ord) filter (where not exists (
-  select 1 from pb_eliminar d where d.load = e.value ->> 'load'
-)), '[]'::jsonb) as records
-from public.original_radar s
-cross join lateral jsonb_array_elements(s.records) with ordinality e(value, ord)
-group by s.singleton
-having bool_or(exists (select 1 from pb_eliminar d where d.load = e.value ->> 'load'));
-
--- En Results: Faltantes debe ser 0. Si no lo es, no ejecutar el archivo de borrado.
+  )
+)
 select * from (
   select 'CONTROL'::text as grupo, 'Cargas solicitadas'::text as concepto,
     count(*) as cantidad, 'La lista debe contener 64 numeros'::text as detalle from pb_conservar
@@ -113,4 +77,3 @@ select * from (
   union all select 'ELIMINAR', 'Filas de archivos Radar', (select count(*) from public.radar_sources s cross join lateral jsonb_array_elements(s.records) e(value) where exists (select 1 from pb_eliminar d where d.load=e.value->>'load')), ''
   union all select 'ELIMINAR', 'Filas del Radar actual', (select count(*) from public.original_radar s cross join lateral jsonb_array_elements(s.records) e(value) where exists (select 1 from pb_eliminar d where d.load=e.value->>'load')), ''
  ) resumen order by grupo, concepto;
-rollback;

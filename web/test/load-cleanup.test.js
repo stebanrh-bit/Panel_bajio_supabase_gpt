@@ -58,9 +58,10 @@ const sameRows = (actual, expected, name) =>
 test("limpieza: ambos archivos contienen exactamente los 64 números autorizados", () => {
   assert.equal(new Set(KEEP).size, 64);
   for (const sql of [previewSql, deleteSql]) {
-    const values = sql.match(
-      /insert into pb_conservar\(load\) values\n([\s\S]*?);/,
-    )[1];
+    const values =
+      sql === previewSql
+        ? sql.match(/pb_conservar\(load\) as \(\nvalues\n([\s\S]*?)\n\)/)[1]
+        : sql.match(/insert into pb_conservar\(load\) values\n([\s\S]*?);/)[1];
     const ids = [...values.matchAll(/\('(\d+)'\)/g)].map((match) => match[1]);
     assert.deepEqual(ids.sort(), [...KEEP].sort());
   }
@@ -472,6 +473,32 @@ test("limpieza de cargas: vista previa, conservación exacta y reversión real e
         const clean = await snapshot(db);
         await db.exec(deleteSql);
         assert.deepEqual(await snapshot(db), clean);
+      },
+    );
+    await context.test(
+      "el bloque funciona por sí solo con autocommit y la consulta final no usa tablas temporales",
+      async () => {
+        const protectedRows = await snapshot(db);
+        await db.exec("insert into loads(load) values('BORRAR-AUTOCOMMIT')");
+        const block = deleteSql.match(
+          /do \$limpieza\$[\s\S]*?\$limpieza\$;/,
+        )[0];
+        const resultSql = deleteSql.slice(
+          deleteSql.indexOf(block) + block.length,
+        );
+        // Envíos separados: la tabla temporal debe desaparecer al confirmar el único bloque.
+        await db.query(block);
+        assert.equal(
+          (
+            await db.query(
+              "select to_regclass('pg_temp.pb_conservar') as relation",
+            )
+          ).rows[0].relation,
+          null,
+        );
+        const result = await db.query(resultSql);
+        assert.equal(Number(result.rows[0].cargas_conservadas), 64);
+        assert.deepEqual(await snapshot(db), protectedRows);
       },
     );
     await context.test(

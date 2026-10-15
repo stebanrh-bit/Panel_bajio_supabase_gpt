@@ -4,21 +4,27 @@ Limpieza puntual solicitada por Esteban el 15 de octubre de 2026. Los archivos y
 
 Este procedimiento se ejecuta manualmente en **Supabase → SQL Editor** con el rol **postgres**. No es una migración ni una actualización de Google Apps Script. Los archivos de mantenimiento no se incluyen en la instalación ni se ejecutan al arrancar el sitio.
 
+## Corrección del error «relation pb_conservar does not exist»
+
+Ese error indica que una sentencia no pudo encontrar la tabla temporal; por sí solo no permite identificar qué parte se envió o qué ocurrió antes. La versión actual de borrado crea, consulta y retira sus objetos temporales dentro de un único bloque `DO $limpieza$ … $limpieza$;`. La consulta final solo lee `public.loads`. La vista previa usa WITH y no crea tablas temporales.
+
+Si un intento anterior dejó una transacción abierta o en error, ejecuta primero `ROLLBACK;` en SQL Editor. Esto no revierte cambios que ya se hubieran confirmado. Después usa una consulta nueva, reemplaza todo su contenido por el archivo actualizado y ejecuta el bloque completo. El editor puede ejecutar solo el texto seleccionado: antes de pulsar Run, quita cualquier selección parcial.
+
 ## Paso 1: consultar el alcance
 
 1. Abre [01_vista_previa_conservar_64.sql](https://raw.githubusercontent.com/stebanrh-bit/Panel_bajio_supabase_gpt/supabase-inicial/supabase/maintenance/01_vista_previa_conservar_64.sql).
 2. Copia **todo el archivo**, abre **SQL Editor → New query**, pégalo y pulsa **Run**.
 3. En Results, verifica que **Cargas encontradas, con todos sus datos = 64** y **Faltantes de tu lista = 0**. La fila de faltantes muestra los números ausentes si los hubiera.
-4. Las filas ELIMINAR muestran las cantidades que se borrarían por tipo de registro. Esta consulta termina con ROLLBACK y no cambia los datos del panel.
+4. Las filas ELIMINAR muestran las cantidades que se borrarían por tipo de registro. Esta versión es una sola consulta de lectura con WITH: no usa tablas temporales ni cambia los datos del panel.
 
 ## Paso 2: efectuar el borrado
 
 1. Abre [02_eliminar_excepto_64.sql](https://raw.githubusercontent.com/stebanrh-bit/Panel_bajio_supabase_gpt/supabase-inicial/supabase/maintenance/02_eliminar_excepto_64.sql).
 2. Copia **todo el archivo**, pégalo en otra **New query** y pulsa **Run**. Durante la operación evita hacer otras importaciones o ediciones.
-3. El resultado final debe indicar **Limpieza completada** y **cargas_conservadas = 64**, junto con sus números.
+3. El resultado final debe indicar **Cargas actuales en la base** y **cargas_conservadas = 64**, junto con sus números.
 4. Actualiza el panel con **Ctrl+Shift+R**. No necesitas publicar otra versión del HTML ni modificar Code.gs.
 
-**El segundo archivo elimina definitivamente las demás cargas y sus registros asociados; no las mueve al archivo.** La transacción permite revertir un error antes de confirmar, pero no deshacer un borrado ya confirmado con COMMIT.
+**El segundo archivo elimina definitivamente las demás cargas y sus registros asociados; no las mueve al archivo.** El bloque DO ejecuta toda la operación como una sola sentencia. Un error revierte sus cambios; terminar correctamente confirma el borrado cuando se usa autocommit.
 
 Si falta cualquiera de las cargas autorizadas, el SQL se detiene. Si hay un error de ejecución, no ejecutes fragmentos para continuar: los cambios del bloque no se confirman. Ejecuta `ROLLBACK;` antes de reintentar y revisa el mensaje que produjo el fallo.
 
@@ -61,13 +67,13 @@ No se hacen búsquedas de texto para borrar comentarios o cierres solo porque co
 
 ## Verificación y límites
 
-**Resultado local:** 9 comprobaciones específicas aprobadas; suite completa con 117 pruebas aprobadas, 0 fallidas y 0 omitidas.
+**Resultado local de la versión corregida:** 10 comprobaciones específicas aprobadas; suite completa con 118 pruebas aprobadas, 0 fallidas y 0 omitidas. Incluye la ejecución del bloque por separado con autocommit y la comprobación de que la consulta final funciona después de desaparecer las tablas temporales.
 
 Los archivos se prueban con las diez migraciones del repositorio en PostgreSQL local (PGlite), con datos ficticios. No se ha leído ni modificado el proyecto Supabase del usuario durante esta preparación.
 
 Las pruebas comparan los valores completos de los registros, no solo sus cantidades. Cubren la lista exacta; vista previa sin cambios y cantidades equivalentes al borrado real; error por carga ausente; error de una clave foránea no prevista después de borrar hijos; intento de un trigger de modificar una carga protegida; conservación de registros compartidos y generales; Radar vacío; repetición sin cambiar fechas, autores ni datos.
 
-El SQL comprueba de nuevo los registros protegidos dentro de la transacción. Si cambió cualquiera de ellos, lanza una excepción antes de COMMIT. Respeta claves foráneas y triggers; una dependencia desconocida causa un error y evita confirmar el borrado. Los bloqueos y tiempos máximos acotan la operación, pero no sustituyen comprobar el esquema del proyecto real si difiere de las migraciones.
+El SQL comprueba de nuevo los registros protegidos dentro de la transacción. Si cambió cualquiera de ellos, lanza una excepción antes de terminar el bloque. Respeta claves foráneas y triggers; una dependencia desconocida causa un error y evita confirmar el borrado. Los bloqueos y tiempos máximos acotan la operación, pero no sustituyen comprobar el esquema del proyecto real si difiere de las migraciones.
 
 Para repetir las comprobaciones específicas desde la raíz del repositorio:
 
