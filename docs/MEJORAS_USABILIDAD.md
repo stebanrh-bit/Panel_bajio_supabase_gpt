@@ -42,6 +42,18 @@ El contador de **Tareas que registraste** cuenta únicamente tus tareas abiertas
 
 Capturas con datos ficticios: [Nueva solicitud](imagenes/nueva-solicitud.png), [Nueva tarea](imagenes/nueva-tarea.png) y [Tarea en móvil](imagenes/nueva-tarea-movil.png).
 
+## Calendario semanal: cliente y tipo de movimiento
+
+**Cliente** permite ver el plan de un solo cliente o de todos los clientes del alcance actual. Los botones **Pickup**, **Cruce**, **Entrega** y **Load apartado** muestran exclusivamente el tipo elegido; los demás movimientos desaparecen del calendario. Solo hay un tipo seleccionado a la vez. **Todos** recupera todos los tipos para el cliente elegido; **Limpiar filtros** recupera todos los clientes y tipos.
+
+Los filtros se conservan al usar **Anterior**, **Siguiente** y **Esta semana**. El rango de fechas indica la semana completa; el resumen y los contadores por día corresponden a los resultados visibles. Los números en los botones indican los movimientos disponibles de cada tipo para el cliente y la semana elegidos. Una carga con pickup, cruce y entrega cuenta como tres movimientos. Sin coincidencias, se muestra un mensaje explícito y se mantienen los siete días.
+
+Para identificar al cliente de un apartado se usa el campo **Mi carga** cuando coincide con una carga visible o con un nombre de cliente conocido. Si no hay una relación identificable, se agrupa en **Sin cliente identificado**; no se adivina a partir de notas. Los apartados relacionados con un cliente se incluyen al filtrar por ese cliente. Las cargas canceladas y los apartados cerrados conservan su exclusión original del calendario.
+
+Al pulsar un movimiento se conserva el acceso al expediente o al apartado. El filtrado es local: no escribe ni cambia fechas, registros o permisos, y no modifica los filtros del listado de Cargas. La semana abierta se actualiza cuando llegan cambios de cargas o apartados. Las opciones y botones se adaptan al móvil.
+
+Capturas con datos ficticios: [Cliente y Entrega](imagenes/calendario-cliente-entrega.png) y [calendario en móvil](imagenes/calendario-movil.png).
+
 ## Administración por secciones
 
 | Sección | Contenido |
@@ -77,11 +89,12 @@ Solo se reemplaza el HTML. Se conservan `Code.gs`, la función de cuentas y las 
 
 ## Comprobaciones
 
-La entrega terminó con **91 pruebas aprobadas, 0 fallidas y 0 omitidas**, **128 módulos compilados** y **38 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
+La entrega terminó con **95 pruebas aprobadas, 0 fallidas y 0 omitidas**, **129 módulos compilados** y **38 comparaciones visuales correctas**, además de los flujos de usabilidad, guardado e importación. En las mediciones de Cargas, el documento quedó en 390 px para un ancho de 390, y 360 px para un ancho de 360. Administración permaneció dentro del alto disponible, con `overflow-y: auto`.
 
 La entrega se comprueba con la suite automática, la compilación y el verificador del paquete. Chromium recorre las pantallas y los flujos existentes con datos ficticios y transporte Supabase interceptado. Además comprueba:
 
 - Una fila por carga en Inicio y filtros por tipo de acción.
+- Calendario con dos clientes: tipos exclusivos, combinación con cliente, apartados relacionados y sin cliente identificado, semana anterior/siguiente/actual, limpiar filtros, abrir registros y móvil a 360/390 px.
 - Desplegables de solicitudes/tareas con teclado y preferencia conservada al recargar; altas con validación y envío de los campos correctos; edición con responsable conservado; ventanas sin desbordamiento a 360 y 390 px.
 - Trailer largo completo en tabla y tarjetas, guardado y persistencia; historial con valores Antes/Ahora, cero y confirmaciones, sin nombres técnicos ni ejecución de HTML en los valores.
 - Dos plazos independientes al revisar tránsito o completar un seguimiento.
@@ -98,6 +111,7 @@ Capturas: [Inicio](imagenes/panel-home.png), [Cargas](imagenes/panel-operation.p
 
 ## Archivos fuente
 
+- `web/src/original/calendar.js`: claves de cliente, identificación del cliente de un apartado y filtrado sin modificar los datos.
 - `web/src/original/history.js`: selección de cambios operativos y traducción de campos y valores para el historial, sin alterar los registros guardados.
 - `web/src/original/usability.js`: presentación agrupada, fechas, etiquetas, ventanas, secciones administrativas y estado de guardado. Los nombres visibles no autorizan operaciones.
 - `web/src/original/usability.css`: lectura, tamaños, ventanas y distribución móvil del panel interno.

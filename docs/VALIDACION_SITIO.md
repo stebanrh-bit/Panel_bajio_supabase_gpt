@@ -6,8 +6,8 @@ Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubr
 | --- | --- |
 | Panel original publicado | HTML recuperado; árbol JavaScript idéntico al `PanelScript.html` de la raíz |
 | Portal Cliente y Vista Gerencia originales | Plantillas recuperadas de sus páginas publicadas |
-| `npm --cache /tmp/panel-npm-cache test` | 91 pruebas aprobadas; 0 fallidas y 0 omitidas |
-| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 128 módulos correcta, incluyendo lector XLSX y mejoras de usabilidad |
+| `npm --cache /tmp/panel-npm-cache test` | 95 pruebas aprobadas; 0 fallidas y 0 omitidas |
+| `npm --cache /tmp/panel-npm-cache run build` | Compilación de 129 módulos correcta, incluyendo lector XLSX y mejoras de usabilidad |
 | `deno check supabase/functions/panel-accounts/index.ts` | Tipos y dependencias correctos usando las autoridades TLS del sistema |
 | Acciones de las tres interfaces | 97 acciones tienen adaptadores; incluye Seguir/Dejar de seguir |
 | Chromium: comparación visual | 38 parejas de presentación prevista y entrega con datos ficticios independientes; escritorio y móvil; Inicio simplificado por petición del usuario |
@@ -19,6 +19,7 @@ Comprobaciones de la entrega de usabilidad actualizadas en Codex el 15 de octubr
 | Chromium: ancho y ventanas | Cargas a 360 y 390 px, también con edición abierta; Administración dentro del alto disponible y con desplazamiento interno |
 | Chromium: Trailer e historial | Identificador largo completo, edición y persistencia; campos legibles, Antes/Ahora, cero y confirmaciones; metadatos internos omitidos y contenido HTML mostrado como texto |
 | Chromium: solicitudes y tareas | Tres comparaciones nuevas: secciones cerradas y formularios de alta; abrir/cerrar con teclado, preferencia al recargar, contador propio, fecha legible, validaciones y envío de campos correctos al transporte interceptado; edición conserva responsable; ventanas y Guardar accesibles a 360 y 390 px |
+| Chromium: calendario semanal | Tipos exclusivos y combinación con cliente; apartados asociados y sin cliente identificado; navegación entre semanas conservando filtros; limpiar y abrir registros; teclado y móvil a 360/390 px sin desbordamiento |
 | Chromium: salida | Cierre de sesión vuelve al selector y elimina la identidad; sin errores JavaScript |
 | Chromium: archivos reales | CSV, XLSX y XLS; vista previa, cancelar sin guardar, fechas inválidas, ceros iniciales, booleanos, duplicados y persistencia al confirmar |
 | Supabase remoto | Auth y directorio responden 200; 13 tablas privadas, administración de cuentas y RPC del portal rechazan peticiones sin sesión con 401 |
@@ -31,6 +32,8 @@ Las pruebas PostgreSQL usan PGlite con identidades y roles Auth simulados. Cubre
 Las pruebas de cuentas ejecutan el manejador de la función Edge con el SDK Supabase real y transporte interceptado. Cubren acceso por nombre, privacidad del directorio, comprobación del rol administrativo, cambios de contraseña sin secretos en la auditoría, conservación de contraseña al editar un cliente, desactivación frente a retirada, bloqueo por cinco fallos y desbloqueo administrativo. Estas pruebas no autentican contra el proyecto real.
 
 El navegador compara el HTML generado con la presentación prevista usando datos independientes equivalentes. Inicio agrupa las acciones por carga; tarjetas, Administración y cuenta se simplificaron por petición del usuario. No se declara igualdad visual con la interfaz anterior. Incluye tarjetas y tabla, seis pestañas del expediente, calendario, indicadores, radar, históricos, ventanas y los dos portales. Admite como máximo 50 píxeles de diferencia de suavizado por captura; las fuentes externas se sustituyen por la misma respuesta en ambos lados. Las capturas y resultados quedan en `/tmp/panel-original-comparison/`. Capturas de la entrega se incluyen en `docs/imagenes/` y el ZIP. El resultado JSON agrega las mediciones de ancho y de la ventana administrativa de la ejecución.
+
+Cuatro pruebas de calendario verifican claves de cliente sin colisiones, reconocimiento exacto de carga/cliente para un apartado, ausencia de inferencias fuera del alcance y filtrado combinado sin mutar registros ni fechas.
 
 Cuatro pruebas de historial verifican la selección de cambios operativos, creación resumida, valores falsos y cero, fechas, autor y adaptador de consulta; conservan los registros de entrada y la comprobación de acceso del personal.
 

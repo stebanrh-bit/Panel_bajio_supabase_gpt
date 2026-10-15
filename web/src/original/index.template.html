@@ -350,9 +350,25 @@
 
 <!-- Calendario de la semana: pickups, cruces y entregas por día (ver renderCalendario_). -->
 <div class="page-view" id="page-calendario" hidden>
-  <div class="operation-page-head"><div><h1>Calendario de la semana</h1><p>Pickups, cruces y entregas de tus cargas, día por día. Da clic en una para abrirla.</p></div>
+  <div class="operation-page-head"><div><h1>Calendario de la semana</h1><p>Planea pickups, cruces, entregas y cargas apartadas. Filtra el plan y abre un registro para ver su detalle.</p></div>
     <div class="cal-nav"><button type="button" class="ws-btn" id="cal-prev" aria-label="Semana anterior">‹ Anterior</button><button type="button" class="ws-btn" id="cal-hoy">Esta semana</button><button type="button" class="ws-btn" id="cal-next" aria-label="Semana siguiente">Siguiente ›</button></div></div>
-  <div class="cal-leyenda"><span class="cal-chip t-pickup">Pickup</span><span class="cal-chip t-cruce">Cruce</span><span class="cal-chip t-entrega">Entrega</span><span class="cal-chip t-apartado">Load apartado</span></div>
+  <!-- Los filtros solo cambian la vista; Todos recupera los cuatro tipos de movimiento. -->
+  <div class="cal-filters">
+    <label class="cal-client-field">Cliente<select id="cal-cliente"><option value="">Todos los clientes</option></select></label>
+    <div class="cal-type-field"><span id="cal-type-label">Mostrar movimientos</span>
+      <div class="cal-leyenda" role="group" aria-labelledby="cal-type-label">
+        <button type="button" class="cal-type-btn" data-cal-type="all" aria-pressed="true">Todos <span data-cal-count="all">0</span></button>
+        <button type="button" class="cal-type-btn t-pickup" data-cal-type="pickup" aria-pressed="false">Pickup <span data-cal-count="pickup">0</span></button>
+        <button type="button" class="cal-type-btn t-cruce" data-cal-type="cruce" aria-pressed="false">Cruce <span data-cal-count="cruce">0</span></button>
+        <button type="button" class="cal-type-btn t-entrega" data-cal-type="entrega" aria-pressed="false">Entrega <span data-cal-count="entrega">0</span></button>
+        <button type="button" class="cal-type-btn t-apartado" data-cal-type="apartado" aria-pressed="false">Load apartado <span data-cal-count="apartado">0</span></button>
+      </div>
+    </div>
+    <button type="button" class="ws-btn" id="cal-reset">Limpiar filtros</button>
+  </div>
+  <p class="cal-filter-help">Selecciona un tipo para ver solo esos movimientos. Los apartados sin un cliente identificado aparecen en «Sin cliente identificado».</p>
+  <div class="cal-summary"><h2 id="cal-week-title"></h2><span id="cal-result" role="status" aria-live="polite"></span></div>
+  <p class="cal-no-results" id="cal-no-results" hidden>No hay movimientos esta semana para los filtros seleccionados.</p>
   <div class="cal-grid" id="cal-grid"></div>
 </div>
 

@@ -327,7 +327,9 @@ const helperSource = (
   "\n" +
   (await read("web/src/original/usability.js")) +
   "\n" +
-  (await read("web/src/original/history.js"))
+  (await read("web/src/original/history.js")) +
+  "\n" +
+  (await read("web/src/original/calendar.js"))
 ).replace(/^export /gm, "");
 const goldenHtml =
   "<!doctype html><html><head>" +
@@ -336,7 +338,7 @@ const goldenHtml =
   original.body +
   "<script>(function(){" +
   helperSource +
-  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelUsability.mountUsability(document);})()</script>" +
+  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelCalendar={calendarClientKey,reservationCalendarClient,filterCalendarEvents};window.panelUsability.mountUsability(document);})()</script>" +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
   "<script>window.panelGuidance.mountGuidance(document);</script>" +
   "</body></html>";
@@ -1006,6 +1008,163 @@ try {
     );
   } finally {
     await supervisorPage.close();
+  }
+  // Calendario real con dos clientes: los filtros ocultan los demás eventos y no alteran datos.
+  const previousCalendarData = {
+    crossing: rawLoads[0].cruce_usa_fecha,
+    delivery: rawLoads[1].delivery_appt,
+    own: reservedRow.own_load,
+  };
+  rawLoads[0].cruce_usa_fecha = future;
+  rawLoads[1].delivery_appt = future;
+  reservedRow.own_load = "VISUAL-001";
+  const calendarPage = await newPage(false);
+  try {
+    await calendarPage.locator('[data-page="calendario"]').click();
+    await calendarPage.locator("[data-cal-apartado]").waitFor();
+    assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 5);
+    for (const [type, count] of [
+      ["pickup", 1],
+      ["cruce", 1],
+      ["entrega", 2],
+      ["apartado", 1],
+    ]) {
+      await calendarPage.locator(`[data-cal-type="${type}"]`).click();
+      assert.equal(
+        await calendarPage.locator("#cal-grid .cal-chip").count(),
+        count,
+      );
+      assert.equal(
+        await calendarPage.locator(`#cal-grid .t-${type}`).count(),
+        count,
+      );
+      assert.equal(
+        await calendarPage
+          .locator(`[data-cal-type="${type}"]`)
+          .getAttribute("aria-pressed"),
+        "true",
+      );
+      assert.equal(
+        await calendarPage
+          .locator('[data-cal-type][aria-pressed="true"]')
+          .count(),
+        1,
+      );
+    }
+    await calendarPage.locator("#cal-cliente").selectOption({ label: "ACME" });
+    assert.equal(
+      await calendarPage.locator("#cal-grid [data-cal-apartado]").count(),
+      1,
+    );
+    await calendarPage.locator('[data-cal-type="entrega"]').click();
+    assert.deepEqual(
+      await calendarPage
+        .locator("#cal-grid [data-cal-load]")
+        .evaluateAll((nodes) => nodes.map((node) => node.dataset.calLoad)),
+      ["VISUAL-001"],
+    );
+    await calendarPage.locator("#cal-next").click();
+    assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 0);
+    assert.equal(
+      await calendarPage.locator("#cal-no-results").isVisible(),
+      true,
+    );
+    assert.equal(
+      await calendarPage.locator("#cal-cliente").inputValue(),
+      "client:acme",
+    );
+    assert.equal(
+      await calendarPage
+        .locator('[data-cal-type="entrega"]')
+        .getAttribute("aria-pressed"),
+      "true",
+    );
+    await calendarPage.locator("#cal-hoy").click();
+    assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 1);
+    await calendarPage.locator("#cal-prev").click();
+    assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 0);
+    await calendarPage.locator("#cal-next").click();
+    assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 1);
+    await calendarPage.evaluate(() =>
+      document
+        .querySelectorAll("#toast-container .toast")
+        .forEach((node) => node.remove()),
+    );
+    await calendarPage.screenshot({
+      path: "/tmp/panel-original-comparison/calendario-cliente-entrega.png",
+    });
+    await calendarPage.locator("#cal-grid [data-cal-load]").click();
+    await calendarPage.locator("#workspace-backdrop.show").waitFor();
+    await calendarPage.locator("#workspace-close").click();
+    await calendarPage
+      .locator("#cal-cliente")
+      .selectOption({ label: "OTRO CLIENTE" });
+    assert.deepEqual(
+      await calendarPage
+        .locator("#cal-grid [data-cal-load]")
+        .evaluateAll((nodes) => nodes.map((node) => node.dataset.calLoad)),
+      ["VISUAL-002"],
+    );
+    await calendarPage.locator("#cal-reset").click();
+    assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 5);
+    // Un apartado sin relación identificable no se mezcla con los clientes conocidos.
+    reservedRow.own_load = "Sin referencia";
+    await calendarPage.reload();
+    await calendarPage.locator('[data-page="calendario"]').click();
+    await calendarPage.locator("[data-cal-apartado]").waitFor();
+    await calendarPage
+      .locator("#cal-cliente")
+      .selectOption({ label: "Sin cliente identificado" });
+    assert.equal(
+      await calendarPage.locator("#cal-grid [data-cal-apartado]").count(),
+      1,
+    );
+    assert.equal(
+      await calendarPage.locator("#cal-grid [data-cal-load]").count(),
+      0,
+    );
+    await calendarPage.locator("#cal-grid [data-cal-apartado]").click();
+    assert.equal(
+      await calendarPage.locator("#page-apartados").isVisible(),
+      true,
+    );
+    await calendarPage.locator('[data-page="calendario"]').click();
+    await calendarPage.locator("#cal-reset").click();
+    for (const width of [390, 360]) {
+      await calendarPage.setViewportSize({ width, height: 844 });
+      const pickup = calendarPage.locator('[data-cal-type="pickup"]');
+      await pickup.focus();
+      await calendarPage.keyboard.press("Space");
+      assert.equal(
+        await calendarPage.locator("#cal-grid .cal-chip").count(),
+        1,
+      );
+      assert.equal(
+        await calendarPage.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+        true,
+      );
+      await calendarPage.locator("#cal-reset").click();
+      await calendarPage.evaluate(() =>
+        document
+          .querySelectorAll("#toast-container .toast")
+          .forEach((node) => node.remove()),
+      );
+      await calendarPage.screenshot({
+        path: `/tmp/panel-original-comparison/calendario-movil-${width}.png`,
+        fullPage: true,
+      });
+    }
+  } finally {
+    if (previousCalendarData.crossing === undefined)
+      delete rawLoads[0].cruce_usa_fecha;
+    else rawLoads[0].cruce_usa_fecha = previousCalendarData.crossing;
+    if (previousCalendarData.delivery === undefined)
+      delete rawLoads[1].delivery_appt;
+    else rawLoads[1].delivery_appt = previousCalendarData.delivery;
+    reservedRow.own_load = previousCalendarData.own;
+    await calendarPage.close();
   }
   // Regresión de usabilidad: los controles desplazados siguen operando y no pierden datos.
   const ux = await newPage(false);

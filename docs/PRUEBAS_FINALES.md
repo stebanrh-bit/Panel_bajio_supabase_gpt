@@ -36,6 +36,7 @@ Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABIL
 | 28 | Abrir Historial después de cambiar estatus, Trailer y una confirmación | Nombres legibles, autor y fecha; Antes/Ahora claros; cero y No enviado no aparecen vacíos | Pendiente |
 | 29 | Abrir/cerrar Solicitudes y tareas y registrar una solicitud | Encabezados alineados; campos legibles; fecha clara; guarda y se puede comentar/vincular | Pendiente |
 | 30 | Registrar y editar una tarea desde escritorio y móvil | Búsqueda, selección de cargas, responsable, fecha y color accesibles; persiste; editar conserva responsable | Pendiente |
+| 31 | Calendario: elegir cliente y Pickup/Cruce/Entrega/Load apartado; cambiar semana y limpiar | Solo aparecen movimientos del tipo y cliente elegidos; filtros se conservan entre semanas; apartados sin relación tienen opción separada; abre registros y funciona en móvil | Pendiente |
 
 ## Última etapa: cuentas y permisos
 

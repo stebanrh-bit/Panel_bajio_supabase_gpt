@@ -56,6 +56,8 @@ def main():
         'imagenes/nueva-solicitud.png':ROOT/'docs/imagenes/nueva-solicitud.png',
         'imagenes/nueva-tarea.png':ROOT/'docs/imagenes/nueva-tarea.png',
         'imagenes/nueva-tarea-movil.png':ROOT/'docs/imagenes/nueva-tarea-movil.png',
+        'imagenes/calendario-cliente-entrega.png':ROOT/'docs/imagenes/calendario-cliente-entrega.png',
+        'imagenes/calendario-movil.png':ROOT/'docs/imagenes/calendario-movil.png',
         'importacion-prueba.csv':ROOT/'entregables/importacion-prueba.csv',
     }
     zip_path=ROOT/'entregables/panel-bajio-sitio.zip'

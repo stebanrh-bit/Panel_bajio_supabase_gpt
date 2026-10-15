@@ -3010,6 +3010,7 @@
     wireCardEvents();
     applyFilters();
     refreshAlertCountdowns();
+    if (!document.getElementById("page-calendario").hidden) renderCalendario_();
   }
 
   // Carga seleccionado en la vista de tabla (su detalle se muestra en el panel fijo de abajo —
@@ -11533,6 +11534,8 @@
     });
 
   // ===== Calendario de la semana =====
+  var calTipo_ = "all",
+    calCliente_ = ""; // Filtros locales, independientes del listado de Cargas.
   var calSemana_ = 0; // 0 = esta semana, -1 la anterior, +1 la siguiente
   function lunesDe_(d) {
     var x = new Date(d);
@@ -11553,7 +11556,8 @@
       dias.push(d);
       porDia[d.toDateString()] = [];
     }
-    actionCenterScope(currentData).forEach(function (r) {
+    var scope = actionCenterScope(currentData);
+    scope.forEach(function (r) {
       if (isCancelledStatus(r.status)) return;
       [
         ["pickup", r.pickup_appt, "Pickup"],
@@ -11568,7 +11572,13 @@
           f.getDate(),
         ).toDateString();
         if (porDia[k])
-          porDia[k].push({ tipo: ev[0], etiqueta: ev[2], fecha: f, r: r });
+          porDia[k].push({
+            tipo: ev[0],
+            etiqueta: ev[2],
+            fecha: f,
+            r: r,
+            customer: r.customer || "",
+          });
       });
     });
     // Loads apartados activos: cruce, entrega en destino y la fecha de mi carga.
@@ -11592,9 +11602,83 @@
             etiqueta: ev[1],
             fecha: f,
             ap: ap,
+            customer: window.panelCalendar.reservationCalendarClient(ap, scope),
           });
       });
     });
+    // Opciones tomadas exclusivamente del alcance visible del usuario; no consulta otros clientes.
+    var clients = new Map();
+    function addClient(name) {
+      var key = window.panelCalendar.calendarClientKey(name);
+      if (!clients.has(key))
+        clients.set(
+          key,
+          String(name || "").trim() || "Sin cliente identificado",
+        );
+    }
+    scope.forEach(function (r) {
+      if (!isCancelledStatus(r.status)) addClient(r.customer);
+    });
+    apartados.forEach(function (ap) {
+      if (!apartadoCerrado_(ap))
+        addClient(window.panelCalendar.reservationCalendarClient(ap, scope));
+    });
+    if (calCliente_ && !clients.has(calCliente_)) calCliente_ = "";
+    var clientSelect = document.getElementById("cal-cliente");
+    clientSelect.innerHTML =
+      '<option value="">Todos los clientes</option>' +
+      Array.from(clients.entries())
+        .sort(function (a, b) {
+          return a[1].localeCompare(b[1], "es-MX");
+        })
+        .map(function (entry) {
+          return (
+            '<option value="' +
+            esc(entry[0]) +
+            '">' +
+            esc(entry[1]) +
+            "</option>"
+          );
+        })
+        .join("");
+    clientSelect.value = calCliente_;
+    var counts = { all: 0, pickup: 0, cruce: 0, entrega: 0, apartado: 0 },
+      visible = 0;
+    dias.forEach(function (day) {
+      var key = day.toDateString();
+      window.panelCalendar
+        .filterCalendarEvents(porDia[key], "all", calCliente_)
+        .forEach(function (event) {
+          counts.all++;
+          counts[event.tipo]++;
+        });
+      porDia[key] = window.panelCalendar.filterCalendarEvents(
+        porDia[key],
+        calTipo_,
+        calCliente_,
+      );
+      visible += porDia[key].length;
+    });
+    document.querySelectorAll("[data-cal-type]").forEach(function (button) {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.calType === calTipo_),
+      );
+    });
+    document.querySelectorAll("[data-cal-count]").forEach(function (count) {
+      count.textContent = counts[count.dataset.calCount];
+    });
+    document.getElementById("cal-week-title").textContent =
+      window.panelUsability.formatMoment(dias[0], true) +
+      " — " +
+      window.panelUsability.formatMoment(dias[6], true);
+    document.getElementById("cal-result").textContent =
+      visible +
+      (visible === 1 ? " movimiento" : " movimientos") +
+      (calCliente_
+        ? " · " + clients.get(calCliente_)
+        : " · Todos los clientes");
+    document.getElementById("cal-no-results").hidden = visible > 0;
     var nombres = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
       hoy = new Date().toDateString();
     grid.innerHTML = dias
@@ -11630,6 +11714,11 @@
                       " · Carga " +
                       esc(x.ap.load) +
                       "<small>" +
+                      esc(
+                        x.customer
+                          ? x.customer + " · "
+                          : "Sin cliente identificado · ",
+                      ) +
                       esc(APARTADO_ESTADOS_[x.ap.estado] || "") +
                       (x.ap.mi_carga ? " · " + esc(x.ap.mi_carga) : "") +
                       "</small></button>"
@@ -11658,6 +11747,23 @@
       })
       .join("");
   }
+  document
+    .getElementById("cal-cliente")
+    .addEventListener("change", function (event) {
+      calCliente_ = event.target.value;
+      renderCalendario_();
+    });
+  document.querySelectorAll("[data-cal-type]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      calTipo_ = button.dataset.calType;
+      renderCalendario_();
+    });
+  });
+  document.getElementById("cal-reset").addEventListener("click", function () {
+    calTipo_ = "all";
+    calCliente_ = "";
+    renderCalendario_();
+  });
   document.getElementById("cal-prev").addEventListener("click", function () {
     calSemana_--;
     renderCalendario_();
@@ -11936,6 +12042,7 @@
 
   function renderApartados_() {
     badgeApartados_();
+    if (!document.getElementById("page-calendario").hidden) renderCalendario_();
     var cont = document.getElementById("apartados-lista");
     if (!cont) return;
     var filtro = document.getElementById("apartados-filtro").value;
