@@ -6,7 +6,7 @@ Fecha: 16 de octubre de 2026. Base de trabajo: `f77366f`, rama `supabase-inicial
 
 | Comprobación | Resultado |
 | --- | --- |
-| `npm --prefix web test` | 143 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
+| `npm --prefix web test` | 145 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
 | `npm --prefix web run build` | Compila panel interno, cliente, gerencia y lector. |
 | `python scripts/package_site.py --check` | Verifica correspondencia exacta entre SQL 004–012, los cuatro archivos HTML generados y el contenido del ZIP. |
 | `node scripts/check_browser.mjs --legacy-xls` | 38 comparaciones de pantallas/ventanas; flujo de incidencia, cierre de sesión, Admin como CSR, CSV/XLSX/XLS, recordatorios independientes y móvil. Sin errores JS. |
@@ -47,3 +47,8 @@ Seguir [INSTALAR_SITIO.md](INSTALAR_SITIO.md): SQL completo, volver a desplegar 
 Después seguir [PRUEBAS_FINALES.md](PRUEBAS_FINALES.md), una prueba por vez. Ahí se comprueban autorizaciones y activadores de Google, red y cuotas reales, otras cuentas, cliente y gerencia. El envío externo permanece apagado hasta elegir canal; no se agregó un proveedor ni un remitente. Las reglas de transición y el escalamiento empiezan sin imponer una política nueva.
 
 ![Organizar turno con datos de prueba](imagenes/organizar-turno.png)
+
+
+## Corrección del lector del Radar
+
+Se corrigió el transporte de lector.html por HtmlService: HTML válido con JSON, extracción del programa antes de iniciar el Worker y errores legibles. La prueba `check_organization_browser.mjs --reader-files` comprueba adicionalmente XLSX y XLS con el puente Google simulado, archivos reales y PostgreSQL efímero. Se elimina la copia local antes de recargar, para verificar la recuperación desde la base. La cuenta Google real y la instalación de la corrección no se validan desde este entorno. [Evidencia](evidencia-radar-lector-2026-10-16.json) · [Instalación de dos archivos](CORRECCION_RADAR_LECTOR_2026-10-16.md).

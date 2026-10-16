@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Empaqueta el frontend estático para Google HtmlService, sin alterar el backend."""
 import argparse
+import json
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 import re
@@ -43,6 +44,15 @@ def package_html(read):
     html = html.replace('</body>', '<script type="module">\n' + js + '\n</script></body>', 1)
     html = '\n'.join(line.rstrip() for line in html.splitlines()) + '\n'
     return '<!-- Generado por scripts/package_google.py; los ajustes se hacen en web/. -->\n' + html
+
+def package_reader(source):
+    """Guardar JavaScript como datos en HTML válido para que HtmlService no lo analice como etiquetas."""
+    encoded = (json.dumps(source, ensure_ascii=True)
+               .replace('<', r'\u003c').replace('>', r'\u003e').replace('&', r'\u0026'))
+    return ('<!doctype html>\n<html><head><meta charset="utf-8"></head><body>\n'
+            '<!-- Recurso generado: el navegador extrae el texto y lo ejecuta solo en su Worker. -->\n'
+            '<script id="panel-reader-source" type="application/json">' + encoded + '</script>\n'
+            '</body></html>\n')
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

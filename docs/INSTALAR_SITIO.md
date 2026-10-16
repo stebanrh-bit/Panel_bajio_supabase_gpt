@@ -4,7 +4,13 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Si Radar muestra «Contenido HTML incorrecto»
+
+Actualiza **index.html y lector.html juntos** siguiendo [la corrección del lector](CORRECCION_RADAR_LECTOR_2026-10-16.md). Esta corrección se aplica después de la entrega de las 49 opciones y conserva tu enlace.
+
 ## Si ya instalaste las 49 opciones
+
+La guía de un solo archivo siguiente corresponde a la corrección anterior de tareas. Para el error del lector de Radar, utiliza la guía de dos archivos de arriba.
 
 Para corregir la pestaña de tareas vacía y quitar Contactos VG, sigue [esta actualización de un solo archivo](CORRECCION_TAREAS_2026-10-16.md). Los pasos completos de abajo corresponden a una instalación de la entrega completa.
 
@@ -59,7 +65,7 @@ La cuenta Esteban conserva su contraseña actual de Supabase. La contraseña par
 3. Abre **index.html**. Selecciona todo y pega TODO el archivo del enlace 4. El nombre en Google sigue siendo **index**.
 4. Pulsa **+ → HTML** y crea **index-cliente**. Pega TODO el enlace 5. Si ya existe, reemplaza su contenido.
 5. Crea del mismo modo **index-gerencia** y pega TODO el enlace 6.
-6. Crea **lector** y pega TODO el enlace 7, aunque su contenido se vea como JavaScript. Google lo guarda como `lector.html`.
+6. Crea **lector** y pega TODO el enlace 7. Es un HTML generado que contiene el lector como datos; copia el documento completo. Google lo guarda como `lector.html`.
 7. Guarda los cinco archivos: **Code.gs**, **index.html**, **index-cliente.html**, **index-gerencia.html** y **lector.html**.
 
 Las vistas ahora están separadas y el lector se carga solo cuando se usa. Los HTML son archivos generados y comprimidos; las fuentes legibles y comentadas están en `web/src/original/`. No copies fragmentos ni agregues etiquetas al lector. El antiguo `Code.gs` de la raíz del repositorio pertenece a la versión con Sheets; para esta instalación se usa **Code-sitio.gs**.

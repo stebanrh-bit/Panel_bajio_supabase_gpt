@@ -91,3 +91,10 @@ La restauración se ensayó en bases efímeras separadas, con identidades simula
 Confirmado por el usuario en su sitio publicado: aparecen Organizar turno y Guía de uso; su perfil dice Admin; Mis clientes filtra y Limpiar filtros recupera la operación; el plan de Inicio permite abrir la carga correcta; el trailer se ve completo en listado/editor con el detalle abierto; el CSR manual y la referencia libre del apartado persisten.
 
 El contacto de prueba se guardó, pero el usuario pidió retirar Contactos VG. Esa sección y el selector se eliminaron de la entrega, conservando los registros existentes. Después reportó vacía la pestaña Tareas y checklist. Se corrigieron la consulta y la presentación de lista vacía; se agregó Nueva tarea de turno dentro de la ventana. **Pendiente de instalar esta corrección y repetir la séptima prueba**. No se da el checklist por aprobado en producción.
+
+
+## Pruebas manuales suspendidas y reparación del lector
+
+El usuario pidió suspender la ronda de pruebas manuales hasta nuevo aviso. Confirmó que funciona la corrección de Tareas y checklist, pero no se da por confirmado el guardado de pasos obligatorios.
+
+Después reportó el error «Contenido HTML incorrecto» al cargar el documento de Radar. Se preparó la corrección del lector y se comprobó automáticamente la importación de XLSX/XLS con persistencia en PostgreSQL efímero. **Pendiente de copiar index.html y lector.html a Google y publicar la nueva versión.** Esto no reanuda la ronda de aceptación manual.

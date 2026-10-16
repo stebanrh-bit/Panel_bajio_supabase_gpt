@@ -257,10 +257,13 @@
       "implementation": [
         "web/src/original/files.js",
         "web/src/original/reader-worker.js",
-        "google-apps-script/Code-sitio.gs"
+        "google-apps-script/Code-sitio.gs",
+        "scripts/package_google.py: package_reader"
       ],
       "validation": [
-        "scripts/check_browser.mjs --legacy-xls: CSV/XLSX/XLS en Worker, vista previa e importación"
+        "scripts/check_browser.mjs --legacy-xls: CSV/XLSX/XLS en Worker, vista previa e importación",
+        "web/test/reader-source.test.js: contenedor de HtmlService, Unicode y error/reintento",
+        "docs/evidencia-radar-lector-2026-10-16.json: Radar XLSX/XLS con puente Google simulado y persistencia"
       ],
       "result": "CSV/XLSX/XLS se procesan en Worker con progreso, cancelación y límite de tiempo."
     },
@@ -995,7 +998,7 @@
   "recorded_date": "2026-10-16",
   "production_changed": false,
   "validation_summary": {
-    "unit_integration_passed": 143,
+    "unit_integration_passed": 145,
     "failed": 0,
     "skipped": 0,
     "organization_browser_flows": 8,
@@ -1010,5 +1013,13 @@
     "fix": "Consulta de tareas abiertas al abrir; mensaje sin registros, Nueva tarea de turno y errores visibles.",
     "scope_change": "Retirar Contactos VG de la interfaz y su selector; conservar CSR manual y datos existentes.",
     "production_acceptance": "Primera a sexta pruebas confirmadas; séptima pendiente de nueva actualización."
+  },
+  "manual_testing": "Suspendidas hasta nuevo aviso por petición del usuario; no dar por aprobados pasos no confirmados.",
+  "radar_reader_fix": {
+    "date": "2026-10-16",
+    "report": "Exception: Contenido HTML incorrecto seguido del código del lector",
+    "fix": "Entregar lector como JSON dentro de HTML válido y extraer el programa antes de iniciar Worker.",
+    "validation": "web/test/reader-source.test.js y scripts/check_organization_browser.mjs --reader-files; XLSX/XLS reales guardados y recuperados de PostgreSQL efímero sin copia local.",
+    "installation": "Actualizar index.html y lector.html juntos en Google; pendiente en producción."
   }
 }

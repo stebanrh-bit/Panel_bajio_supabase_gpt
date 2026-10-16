@@ -372,7 +372,12 @@ var RADAR_CONOCIDAS_ = {
   function radarLeerExcel_(file) {
     radarEstado_("Leyendo " + file.name + "…");
     window.panelFiles
-      .parseLoadFile(file, null, { raw: true })
+      .parseLoadFile(file, null, {
+        raw: true,
+        onProgress: function (message) {
+          radarEstado_(message);
+        },
+      })
       .then(function (rows) {
         try {
           // Se guardan TODAS las filas con destino (también las que no están en Broker, para la

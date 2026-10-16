@@ -6,8 +6,8 @@
   "current_artifacts": [
     {
       "file": "google-apps-script/index-sitio.html",
-      "bytes": 830028,
-      "gzip_bytes_estimated": 233251
+      "bytes": 830454,
+      "gzip_bytes_estimated": 233416
     },
     {
       "file": "google-apps-script/index-cliente.html",
@@ -21,8 +21,8 @@
     },
     {
       "file": "google-apps-script/lector.html",
-      "bytes": 71056,
-      "gzip_bytes_estimated": 20590
+      "bytes": 76939,
+      "gzip_bytes_estimated": 21152
     }
   ],
   "internal_html_reduction_percent": 56.8,

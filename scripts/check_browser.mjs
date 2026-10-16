@@ -1105,8 +1105,11 @@ try {
   const previousCalendarData = {
     crossing: rawLoads[0].cruce_usa_fecha,
     delivery: rawLoads[1].delivery_appt,
+    customer: rawLoads[1].customer,
     own: reservedRow.own_load,
   };
+  // Esta prueba prepara sus dos clientes también en el modo --imports-only.
+  rawLoads[1].customer = "OTRO CLIENTE";
   rawLoads[0].cruce_usa_fecha = future;
   rawLoads[1].delivery_appt = future;
   reservedRow.own_load = "VISUAL-001";
@@ -1255,6 +1258,7 @@ try {
     if (previousCalendarData.delivery === undefined)
       delete rawLoads[1].delivery_appt;
     else rawLoads[1].delivery_appt = previousCalendarData.delivery;
+    rawLoads[1].customer = previousCalendarData.customer;
     reservedRow.own_load = previousCalendarData.own;
     await calendarPage.close();
   }

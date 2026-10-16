@@ -1,0 +1,8 @@
+{
+  "environment": "Chromium y Worker reales, puente Google simulado, PostgreSQL efímero. Sin acceso al Supabase del usuario.",
+  "checks": [
+    "Radar XLSX: lectura por puente Google, dos registros guardados y recuperados al recargar",
+    "Radar XLS: lectura por puente Google, dos registros guardados y recuperados al recargar"
+  ],
+  "errors": []
+}

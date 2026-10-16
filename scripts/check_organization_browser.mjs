@@ -9,6 +9,7 @@ const { chromium } = await import(
       "/node_modules/playwright-core/index.mjs",
   )
 );
+const readerFiles = process.argv.includes("--reader-files");
 const files = (
   await readdir(new URL("../supabase/migrations/", import.meta.url))
 )
@@ -104,7 +105,14 @@ try {
           for (const [key, value] of url.searchParams)
             if (!["select", "order", "limit", "offset", "or"].includes(key)) {
               if (value.startsWith("eq.")) {
-                values.push(value.slice(3));
+                const equalValue = value.slice(3);
+                values.push(
+                  ["singleton", "active", "visible", "archived"].includes(
+                    key,
+                  ) && ["true", "false"].includes(equalValue)
+                    ? equalValue === "true"
+                    : equalValue,
+                );
                 where.push(quote(key) + "=$" + values.length);
               } else if (value === "is.null")
                 where.push(quote(key) + " is null");
@@ -167,6 +175,15 @@ try {
       }
     },
   );
+  if (readerFiles) {
+    const legacy = await readFile(
+      process.env.PANEL_SHEETJS_FILE || "/tmp/panel-audit-sheetjs.js",
+    );
+    await context.route(
+      "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+      (r) => r.fulfill({ contentType: "application/javascript", body: legacy }),
+    );
+  }
   const page = await context.newPage();
   page.on("pageerror", (e) => errors.push(e.message));
   await page.addInitScript(
@@ -383,6 +400,103 @@ try {
   checks.push(
     "Carga, cliente, estatus, trailer y color adversos permanecen como texto",
   );
+  if (readerFiles) {
+    // Simular el puente nativo de Apps Script: devuelve el mismo HTML estático de lector.html.
+    // Las lecturas se ejecutan en Workers reales y los guardados en PostgreSQL efímero.
+    const html = await readFile(
+      new URL("../google-apps-script/lector.html", import.meta.url),
+      "utf8",
+    );
+    assert.ok(html.startsWith("<!doctype html>"));
+    await page.addInitScript(
+      ({ html }) => {
+        const chain = (success, failure) => ({
+          withSuccessHandler: (callback) => chain(callback, failure),
+          withFailureHandler: (callback) => chain(success, callback),
+          panelFileReader() {
+            window.readerFetches = (window.readerFetches || 0) + 1;
+            Promise.resolve()
+              .then(() => success(html))
+              .catch(failure);
+          },
+        });
+        window.google = { script: { run: chain() } };
+      },
+      { html },
+    );
+    const radarChecks = [];
+    for (const extension of ["xlsx", "xls"]) {
+      await page.reload();
+      await page
+        .locator("#identity-backdrop.show")
+        .waitFor({ state: "hidden" });
+      await page.locator("[data-page=radar]").click();
+      const chooser = page.waitForEvent("filechooser");
+      await page.locator("#radar-subir").click();
+      const saved = page.waitForResponse(
+        (response) =>
+          response.url().endsWith("/rpc/ops_original_radar") &&
+          response.request().method() === "POST",
+      );
+      await (
+        await chooser
+      ).setFiles(
+        new URL("../web/test/fixtures/radar." + extension, import.meta.url)
+          .pathname,
+      );
+      assert.equal((await saved).status(), 200);
+      await page
+        .locator("#radar-fuente")
+        .filter({ hasText: "radar." + extension })
+        .waitFor();
+      const record = (
+        await db.query("select * from original_radar where singleton")
+      ).rows[0];
+      assert.equal(record.records.length, 2);
+      assert.deepEqual(
+        record.records.map((r) => r.load),
+        ["RADAR-001", "RADAR-002"],
+      );
+      assert.equal(record.records[0].ciudad, "Laredo");
+      assert.equal(record.records[0].regresos, "Broker");
+      assert.equal(await page.evaluate(() => window.readerFetches), 1);
+      await page.evaluate(() => localStorage.removeItem("bajio_radar_excel"));
+      await page.reload();
+      await page
+        .locator("#identity-backdrop.show")
+        .waitFor({ state: "hidden" });
+      await page.locator("[data-page=radar]").click();
+      await page
+        .locator("#radar-fuente")
+        .filter({ hasText: "radar." + extension })
+        .waitFor();
+      radarChecks.push(
+        "Radar " +
+          extension.toUpperCase() +
+          ": lectura por puente Google, dos registros guardados y recuperados al recargar",
+      );
+    }
+    await writeFile(
+      new URL(
+        "../docs/evidencia-radar-lector-2026-10-16.json",
+        import.meta.url,
+      ),
+      JSON.stringify(
+        {
+          environment:
+            "Chromium y Worker reales, puente Google simulado, PostgreSQL efímero. Sin acceso al Supabase del usuario.",
+          checks: radarChecks,
+          errors,
+        },
+        null,
+        2,
+      ) + "\n",
+    );
+    console.log(
+      radarChecks.length +
+        " archivos Excel de Radar verificados con el contenedor de Google.",
+    );
+  }
   assert.deepEqual(errors, []);
   await writeFile(
     new URL("../docs/evidencia-organizacion-49.json", import.meta.url),

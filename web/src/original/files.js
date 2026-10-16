@@ -1,23 +1,46 @@
 /** El lector se descarga al seleccionar un archivo, sin incluirlo en el arranque. */
 let sourcePromise;
 let sequence = 0;
+const readerUpdateMessage =
+  "No se pudo cargar el lector de archivos. Actualiza index.html y lector.html en Google Apps Script y publica una nueva versión.";
+
+/** El código viaja como JSON dentro de HTML válido; nunca ejecutar el contenedor como JavaScript. */
+export function decodeReaderSource(html) {
+  const match = String(html).match(
+    /<script id="panel-reader-source" type="application\/json">([\s\S]*?)<\/script>/,
+  );
+  if (!match) throw Error(readerUpdateMessage);
+  try {
+    const source = JSON.parse(match[1]);
+    if (typeof source !== "string" || !source.trim()) throw Error();
+    return source;
+  } catch {
+    throw Error(readerUpdateMessage);
+  }
+}
+
 async function workerSource() {
   if (!sourcePromise)
     sourcePromise = (async () => {
       const native = globalThis.google?.script?.run;
-      if (native)
-        return new Promise((resolve, reject) =>
+      let html;
+      if (native) {
+        html = await new Promise((resolve, reject) =>
           native
             .withSuccessHandler(resolve)
             .withFailureHandler(reject)
             .panelFileReader(),
         );
-      const response = await fetch(new URL("./lector.html", location.href));
-      if (!response.ok) throw Error("No se pudo cargar el lector de archivos.");
-      return response.text();
-    })().catch((error) => {
+      } else {
+        const response = await fetch(new URL("./lector.html", location.href));
+        if (!response.ok) throw Error(readerUpdateMessage);
+        html = await response.text();
+      }
+      return decodeReaderSource(html);
+    })().catch(() => {
       sourcePromise = null;
-      throw error;
+      // HtmlService puede incluir el programa completo en su excepción; mostrar una acción clara.
+      throw Error(readerUpdateMessage);
     });
   return sourcePromise;
 }

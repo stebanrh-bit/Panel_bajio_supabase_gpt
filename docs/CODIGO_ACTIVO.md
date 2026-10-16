@@ -8,7 +8,7 @@
 - `api/`: adaptadores de operaciones, equipo, importación, radar y organización. `context.js` guarda sesiones, versiones y cachés por cuenta.
 - `organization.js`, `dialogs.js`, `validation.js`: pantallas nuevas y formularios compartidos.
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
-- `files.js` inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
+- `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
 - `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–012, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
@@ -38,4 +38,4 @@ node scripts/measure_queries.mjs
 node scripts/rehearse_backup.mjs /ruta/privada/respaldo.json
 ```
 
-Para navegador, servir `google-apps-script/` localmente y ejecutar `scripts/check_browser.mjs --legacy-xls` y `scripts/check_organization_browser.mjs`, con Chromium y `playwright-core` disponibles. Ambos interceptan Supabase; el segundo usa PostgreSQL efímero. Los requisitos y rutas de herramientas están al principio de esos scripts. Nunca se requieren contraseñas o `service_role` para estas pruebas.
+Para navegador, servir `google-apps-script/` localmente y ejecutar `scripts/check_browser.mjs --legacy-xls` y `scripts/check_organization_browser.mjs`, con Chromium y `playwright-core` disponibles. La opción `--reader-files` de `check_organization_browser.mjs` además verifica XLSX/XLS del Radar con el puente Google simulado y los archivos sintéticos `web/test/fixtures/radar.*`; requiere la biblioteca heredada almacenada en `PANEL_SHEETJS_FILE` (por defecto `/tmp/panel-audit-sheetjs.js`). Ambos interceptan Supabase; el segundo usa PostgreSQL efímero. Los requisitos y rutas de herramientas están al principio de esos scripts. Nunca se requieren contraseñas o `service_role` para estas pruebas.

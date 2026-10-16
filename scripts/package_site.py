@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
-from package_google import package_html
+from package_google import package_html, package_reader
 
 ROOT=Path(__file__).resolve().parents[1]
 MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql']
@@ -31,7 +31,7 @@ def main():
     }
     for view,label in [('client','cliente'),('manager','gerencia')]:
         targets[ROOT/('google-apps-script/index-'+label+'.html')]=package_html(lambda path,v=view:(ROOT/'web/dist'/v/path).read_text())
-    targets[ROOT/'google-apps-script/lector.html']=(ROOT/'web/dist/reader/lector.js').read_text()
+    targets[ROOT/'google-apps-script/lector.html']=package_reader((ROOT/'web/dist/reader/lector.js').read_text())
     for path,content in targets.items():
         if args.check:
             if not path.exists() or path.read_text()!=content: raise SystemExit('Entrega desactualizada: '+str(path.relative_to(ROOT)))
@@ -66,6 +66,8 @@ def main():
         'evidencia-entrega-49.json':ROOT/'docs/evidencia-entrega-49.json',
         'VALIDACION_49_OPCIONES.md':ROOT/'docs/VALIDACION_49_OPCIONES.md',
         'CORRECCION_TAREAS_2026-10-16.md':ROOT/'docs/CORRECCION_TAREAS_2026-10-16.md',
+        'CORRECCION_RADAR_LECTOR_2026-10-16.md':ROOT/'docs/CORRECCION_RADAR_LECTOR_2026-10-16.md',
+        'evidencia-radar-lector-2026-10-16.json':ROOT/'docs/evidencia-radar-lector-2026-10-16.json',
         'imagenes/organizar-turno.png':ROOT/'docs/imagenes/organizar-turno.png',
         'INSTALAR_SITIO.md':ROOT/'docs/INSTALAR_SITIO.md',
         'PRUEBAS_FINALES.md':ROOT/'docs/PRUEBAS_FINALES.md',
