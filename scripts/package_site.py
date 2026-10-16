@@ -6,10 +6,10 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from package_google import package_html
 
 ROOT=Path(__file__).resolve().parents[1]
-MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql']
+MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql']
 
 def combined_sql():
-    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–010.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
+    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–012.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
     for name in MIGRATIONS:
         content=(ROOT/'supabase/migrations'/name).read_text()
         lines=content.splitlines()
@@ -27,13 +27,19 @@ def main():
     args=parser.parse_args()
     targets={
         ROOT/'supabase/actualizar_sitio.sql':combined_sql(),
-        ROOT/'google-apps-script/index-sitio.html':package_html(lambda path:(ROOT/'web/dist'/path).read_text()),
+        ROOT/'google-apps-script/index-sitio.html':package_html(lambda path:(ROOT/'web/dist/internal'/path).read_text()),
     }
+    for view,label in [('client','cliente'),('manager','gerencia')]:
+        targets[ROOT/('google-apps-script/index-'+label+'.html')]=package_html(lambda path,v=view:(ROOT/'web/dist'/v/path).read_text())
+    targets[ROOT/'google-apps-script/lector.html']=(ROOT/'web/dist/reader/lector.js').read_text()
     for path,content in targets.items():
         if args.check:
             if not path.exists() or path.read_text()!=content: raise SystemExit('Entrega desactualizada: '+str(path.relative_to(ROOT)))
         else: path.write_text(content)
     files={
+        'index-cliente.html':ROOT/'google-apps-script/index-cliente.html',
+        'index-gerencia.html':ROOT/'google-apps-script/index-gerencia.html',
+        'lector.html':ROOT/'google-apps-script/lector.html',
         'index.html':ROOT/'google-apps-script/index-sitio.html',
         'panel-accounts/index.ts':ROOT/'supabase/functions/panel-accounts/index.ts',
         'COMPARACION_ORIGINAL.md':ROOT/'docs/COMPARACION_ORIGINAL.md',
@@ -50,6 +56,16 @@ def main():
         '010_google_miles_worker.sql':ROOT/'supabase/migrations/010_google_miles_worker.sql',
         'MILLAS_GOOGLE_AUTOMATICAS.md':ROOT/'docs/MILLAS_GOOGLE_AUTOMATICAS.md',
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',
+        'ENTREGA_49_OPCIONES.md':ROOT/'docs/ENTREGA_49_OPCIONES.md',
+        'MANUAL_POR_ROL.md':ROOT/'docs/MANUAL_POR_ROL.md',
+        'CODIGO_ACTIVO.md':ROOT/'docs/CODIGO_ACTIVO.md',
+        'IMPLEMENTACION_49_OPCIONES.json':ROOT/'docs/IMPLEMENTACION_49_OPCIONES.json',
+        'evidencia-consultas-49.json':ROOT/'docs/evidencia-consultas-49.json',
+        'evidencia-organizacion-49.json':ROOT/'docs/evidencia-organizacion-49.json',
+        'evidencia-visual-49.json':ROOT/'docs/evidencia-visual-49.json',
+        'evidencia-entrega-49.json':ROOT/'docs/evidencia-entrega-49.json',
+        'VALIDACION_49_OPCIONES.md':ROOT/'docs/VALIDACION_49_OPCIONES.md',
+        'imagenes/organizar-turno.png':ROOT/'docs/imagenes/organizar-turno.png',
         'INSTALAR_SITIO.md':ROOT/'docs/INSTALAR_SITIO.md',
         'PRUEBAS_FINALES.md':ROOT/'docs/PRUEBAS_FINALES.md',
         'imagenes/panel-home.png':ROOT/'docs/imagenes/panel-home.png',

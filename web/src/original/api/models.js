@@ -95,6 +95,8 @@ export const taskModel = (row, name) => ({
   creado_por: name(row.created_by),
   creado_en: row.created_at,
   resuelto: row.state === "resolved",
+  cancelado: row.state === "cancelled",
+  motivo_cancelacion: row.cancel_reason || "",
   resuelto_en: row.resolved_at || "",
   color: row.color,
   fecha_seguimiento: row.follow_up_at || "",
@@ -103,6 +105,9 @@ export const reservedModel = (row, name, history = []) => ({
   id: row.id,
   load: row.load,
   csr_dueno: row.csr_owner,
+  related_load: row.related_load || "",
+  free_reference: row.free_reference || "",
+  vg_contact_id: row.vg_contact_id || "",
   origen: row.origin,
   destino: row.destination,
   fecha_cruce: row.crossing_at || "",
@@ -121,12 +126,17 @@ export const reservedModel = (row, name, history = []) => ({
     ts: item.changed_at,
     por: name(item.actor),
     txt:
-      ({
-        created: "Apartó el load",
-        edited: "Editó los datos",
-        state_changed: "Cambió el estado",
-        reviewed: "Revisó",
-      }[item.event] || item.event) + (item.note ? ": " + item.note : ""),
+      (item.event === "edited" &&
+      item.after_data?.hidden &&
+      !item.before_data?.hidden
+        ? "Retiró el apartado"
+        : {
+            created: "Apartó el load",
+            edited: "Editó los datos",
+            state_changed: "Cambió el estado",
+            reviewed: "Revisó",
+            removed: "Retiró el apartado",
+          }[item.event] || item.event) + (item.note ? ": " + item.note : ""),
   })),
 });
 export const communicationModel = (row, name) => ({

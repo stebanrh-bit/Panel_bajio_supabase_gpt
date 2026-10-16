@@ -1,0 +1,13 @@
+{
+  "environment": "Chromium + SDK Supabase + PostgreSQL local; peticiones remotas interceptadas",
+  "checks": [
+    "Contacto externo guardado sin crear cuenta",
+    "Checklist creado y asociado a tarea real",
+    "Pasos completados y persistidos",
+    "Tarea recurrente creada con horario de México",
+    "Escalamiento configurable; envío externo permanece desactivado",
+    "Mis clientes filtra y limpiar recupera toda la operación",
+    "Carga, cliente, estatus, trailer y color adversos permanecen como texto"
+  ],
+  "errors": []
+}

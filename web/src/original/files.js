@@ -1,55 +1,76 @@
-import { readSheet } from "read-excel-file/browser";
-import { parseCsv, rowsToLoads } from "../features/imports/parser.js";
-
-/** Convertir el desfase TMS firmado, por ejemplo -01:30, a minutos. */
-function deltaMinutes(value) {
-  const text = String(value ?? "").trim();
-  if (!text) return "";
-  if (/^-?\d+(?:\.\d+)?$/.test(text)) return text;
-  const match = text.match(/^(-?)(\d+):([0-5]\d)$/);
-  if (!match)
-    throw Error("El desfase debe indicar minutos o una duración como -01:30.");
-  return String(
-    (Number(match[2]) * 60 + Number(match[3])) * (match[1] ? -1 : 1),
-  );
+/** El lector se descarga al seleccionar un archivo, sin incluirlo en el arranque. */
+let sourcePromise;
+let sequence = 0;
+async function workerSource() {
+  if (!sourcePromise)
+    sourcePromise = (async () => {
+      const native = globalThis.google?.script?.run;
+      if (native)
+        return new Promise((resolve, reject) =>
+          native
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .panelFileReader(),
+        );
+      const response = await fetch(new URL("./lector.html", location.href));
+      if (!response.ok) throw Error("No se pudo cargar el lector de archivos.");
+      return response.text();
+    })().catch((error) => {
+      sourcePromise = null;
+      throw error;
+    });
+  return sourcePromise;
 }
-
-/** XLSX/CSV se leen con las bibliotecas incluidas; .xls conserva el lector heredado. */
-export async function parseLoadFile(file, readLegacy) {
+export async function parseLoadFile(file, readLegacy, options = {}) {
+  if (typeof Worker === "undefined")
+    throw Error(
+      "Este navegador necesita soporte de Web Workers para leer archivos.",
+    );
   if (!file || file.size > 10 * 1024 * 1024)
     throw Error("Selecciona un archivo de hasta 10 MB.");
-  let rows;
-  if (/\.csv$/i.test(file.name)) rows = parseCsv(await file.text());
-  else if (/\.xlsx$/i.test(file.name)) rows = await readSheet(file);
-  else if (/\.xls$/i.test(file.name) && readLegacy) {
-    rows = await readLegacy(file);
-    // SheetJS devuelve fechas locales; el lector XLSX incluido devuelve componentes UTC.
-    // Igualar ambos formatos antes de la conversión de hora local a ISO.
-    rows = rows.map((row) =>
-      row.map((value) => {
-        if (!(value instanceof Date)) return value;
-        return new Date(
-          Date.UTC(
-            value.getFullYear(),
-            value.getMonth(),
-            value.getDate(),
-            value.getHours(),
-            value.getMinutes(),
-            value.getSeconds(),
-          ),
-        );
-      }),
+  const source = await workerSource(),
+    url = URL.createObjectURL(
+      new Blob([source], { type: "application/javascript" }),
+    ),
+    worker = new Worker(url),
+    id = ++sequence;
+  return new Promise((resolve, reject) => {
+    let ended = false;
+    const finish = (error, result) => {
+      if (ended) return;
+      ended = true;
+      clearTimeout(timer);
+      options.signal?.removeEventListener("abort", abort);
+      worker.terminate();
+      URL.revokeObjectURL(url);
+      error ? reject(error) : resolve(result);
+    };
+    const abort = () => finish(new Error("Lectura cancelada."));
+    const timer = setTimeout(
+      () => finish(new Error("El archivo tardó demasiado. Revisa su tamaño.")),
+      90000,
     );
-  } else throw Error("Selecciona un archivo .xlsx, .xls o .csv.");
-  // El original descarta filas sin load y conserva la última fila de los loads repetidos.
-  // El adaptador genera la advertencia de duplicados antes de guardar.
-  const records = rowsToLoads(rows, {
-    allowDuplicates: true,
-    skipMissingLoads: true,
+    worker.onmessage = ({ data }) => {
+      if (data.id !== id) return;
+      if (data.progress) {
+        options.onProgress?.(data.progress);
+        return;
+      }
+      if (data.error) {
+        finish(Error(data.error));
+        return;
+      }
+      finish(null, data.records);
+    };
+    worker.onerror = () =>
+      finish(
+        Error("No se pudo iniciar el lector. Actualiza lector.html en Google."),
+      );
+    options.signal?.addEventListener("abort", abort, { once: true });
+    if (options.signal?.aborted) {
+      abort();
+      return;
+    }
+    worker.postMessage({ id, file, raw: Boolean(options.raw) });
   });
-  for (const record of records) {
-    for (const field of ["pickup_delta_min", "delivery_delta_min"])
-      if (field in record) record[field] = deltaMinutes(record[field]);
-  }
-  return records;
 }

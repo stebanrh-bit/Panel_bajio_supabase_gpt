@@ -30,6 +30,7 @@ function worker({
   const properties = new Map([["PANEL_MAPS_WORKER_TOKEN", token]]),
     logs = [],
     calls = [],
+    taskCalls = [],
     triggers = [];
   let mapsCalls = 0,
     released = 0,
@@ -92,7 +93,10 @@ function worker({
           input = JSON.parse(options.payload);
         assert.equal(input.p_token, properties.get("PANEL_MAPS_WORKER_TOKEN"));
         assert.ok(!options.headers.Authorization);
-        calls.push({ name, input });
+        (name === "ops_worker_task_tick" ? taskCalls : calls).push({
+          name,
+          input,
+        });
         const result =
           name === "ops_google_worker_claim"
             ? jobs
@@ -151,6 +155,7 @@ function worker({
     properties,
     logs,
     calls,
+    taskCalls,
     triggers,
     stats: () => ({ mapsCalls, released }),
   };
@@ -160,6 +165,7 @@ test("proceso Google: guarda todos los tramos y solo cuenta escrituras confirmad
   const w = worker();
   const result = w.context.procesarMillasGoogle_();
   assert.equal(result.completed, 1);
+  assert.equal(w.taskCalls.length, 1);
   assert.equal(result.status, "ok");
   assert.equal(w.calls[1].input.p_miles, 3);
   assert.equal(w.calls[1].input.p_hours, 0.05);

@@ -66,17 +66,13 @@ async function profiles() {
   }
 }
 async function findAccount(identifier: string, clientMode = false) {
-  const normalized = identifier.trim().toLowerCase();
-  const matches = (await profiles()).filter(
-    (row) =>
-      (clientMode ? row.role === "client" : row.role !== "client") &&
-      [row.login_name, row.display_name].some(
-        (value) =>
-          String(value || "")
-            .trim()
-            .toLowerCase() === normalized,
-      ),
-  );
+  const matches =
+    check(
+      await service.rpc("ops_find_account", {
+        p_identifier: identifier.trim(),
+        p_client: clientMode,
+      }),
+    ) || [];
   if (matches.length !== 1) throw Error("Usuario o contraseña incorrectos.");
   return matches[0];
 }

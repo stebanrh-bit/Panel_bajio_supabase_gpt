@@ -1,0 +1,11 @@
+[
+  "panel/01_shell_and_cards.js",
+  "panel/02_daily_plan.js",
+  "panel/03_shift_tasks.js",
+  "panel/04_table_and_team.js",
+  "panel/05_workspace.js",
+  "panel/06_events_and_sync.js",
+  "panel/07_reservations.js",
+  "panel/08_radar.js",
+  "panel/09_reports_and_alerts.js"
+]

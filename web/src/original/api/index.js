@@ -1,7 +1,9 @@
+import { coordinatePoll } from "../coordination.js";
 import { createContext } from "./context.js";
 import { operationMethods } from "./operations.js";
 import { teamMethods } from "./team.js";
 import { radarMethods } from "./radar.js";
+import { organizationMethods } from "./organization.js";
 import { importMethods } from "./imports.js";
 
 /** Cadena compatible con la UI original, sin reemplazar el servicio real de Google Maps. */
@@ -83,12 +85,13 @@ export function createOriginalApi(client) {
   const operations = operationMethods(ctx);
   const team = teamMethods(ctx, operations);
   const methods = {
+    ...organizationMethods(ctx),
     ...operations,
     ...team,
     ...radarMethods(ctx),
     ...importMethods(ctx),
   };
-  methods.getPanelCambios = async (known = {}, since = 0) => {
+  const getChanges = async (known = {}, since = 0) => {
     ctx.staff();
     const marks = await ctx.rpc("ops_original_marks");
     if (!marks.ok) return marks;
@@ -101,12 +104,13 @@ export function createOriginalApi(client) {
       data.seguimientos = await team.getLoadSeguimientos();
     }
     const calls = {
-      loads: () => methods.getLoadsDelta(),
+      loads: () => methods.getLoadsDelta(since),
       comentarios: operations.getUltimosComentarios,
       pendientes: operations.getPendientes,
       bitacora: operations.getBitacoraTurno,
       apartados: operations.getApartados,
       cierres: operations.getCierresTurnoRecibidos,
+      avisos: methods.getAvisosOperacion,
     };
     const areas = {
       comentarios: "comentarios",
@@ -114,6 +118,7 @@ export function createOriginalApi(client) {
       bitacora: "bitacora",
       apartados: "apartados",
       cierres: "cierres",
+      avisos: "avisos",
       loads: "loads",
     };
     const entries = await Promise.all(
@@ -127,6 +132,12 @@ export function createOriginalApi(client) {
       datos: { ...data, ...Object.fromEntries(entries) },
     };
   };
+  methods.getPanelCambios = (known = {}, since = 0) =>
+    coordinatePoll(
+      (client.supabaseUrl || "panel") + ":" + (ctx.profile?.id || "anonymous"),
+      known,
+      () => getChanges(known, since),
+    );
   return {
     run: createRunner(methods, () => ctx.epoch, announce),
     methods,

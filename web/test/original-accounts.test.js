@@ -83,6 +83,25 @@ async function fixture() {
       return response({ id, email: id + "@example.test" });
     }
     const table = path.split("/").at(-1);
+    if (table === "ops_find_account") {
+      assert.equal(method, "POST");
+      assert.ok(headers.get("apikey"));
+      const key = body.p_identifier.trim().toLowerCase();
+      return response(
+        profiles
+          .filter(
+            (row) =>
+              (body.p_client ? row.role === "client" : row.role !== "client") &&
+              [row.login_name, row.display_name].some(
+                (v) =>
+                  String(v || "")
+                    .trim()
+                    .toLowerCase() === key,
+              ),
+          )
+          .slice(0, 2),
+      );
+    }
     if (table === "ops_record_login_failure") {
       let row = attempts.find((item) => item.account_key === body.p_key);
       if (!row) {

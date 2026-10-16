@@ -130,7 +130,7 @@
 <section class="home-command" id="home-command">
   <div class="home-command-head">
     <div class="home-command-title"><h1>Mi operación</h1><p>Lo que requiere tu atención ahora.</p></div>
-    <div class="home-global-search"><input id="home-search" type="text" placeholder="Buscar carga, cliente, remolque, WO, comentario…" autocomplete="off" aria-label="Buscar en todas tus cargas"><div class="search-resultados" id="home-search-resultados" role="listbox" hidden></div></div>
+    <div class="home-global-search"><input id="home-search" type="text" placeholder="Buscar carga, cliente, trailer, WO, comentario…" autocomplete="off" aria-label="Buscar en todas tus cargas"><div class="search-resultados" id="home-search-resultados" role="listbox" hidden></div></div>
   </div>
   <div class="home-tabs">
     <button type="button" class="home-tab-btn active" data-home-tab="ahora">Por atender</button>
@@ -154,13 +154,14 @@
 <section class="action-center" id="action-center">
     <div class="action-center-head">
       <div>
-        <h2 class="action-center-title">Qué debes atender</h2>
-        <p class="action-center-sub">Primero lo urgente. Cada carga indica el motivo y la acción que necesita.</p>
+        <h2 class="action-center-title">Plan del día</h2>
+        <p class="action-center-sub">Atiende lo vencido, prepara lo de hoy y consulta lo programado. Etapa = avance del viaje; prioridad = orden de trabajo; atención = motivo para revisarlo.</p>
       </div>
       <div class="action-center-count" id="action-center-count">0</div>
     </div>
     <div class="attention-filters" aria-label="Filtrar acciones de Inicio">
       <button type="button" class="ws-btn" data-attention-filter="all" aria-pressed="true">Todas</button>
+      <button type="button" class="ws-btn" data-attention-filter="now" aria-pressed="false">Urgente / vencido</button><button type="button" class="ws-btn" data-attention-filter="today" aria-pressed="false">Hoy / después</button><button type="button" class="ws-btn" data-attention-filter="future" aria-pressed="false">Futuro</button>
       <button type="button" class="ws-btn" data-attention-filter="review" aria-pressed="false">Revisiones y seguimientos</button>
       <button type="button" class="ws-btn" data-attention-filter="notify" aria-pressed="false">Avisar al cliente</button>
       <span id="attention-reminder-count" class="home-section-help"></span>
@@ -207,7 +208,7 @@
       <div class="brief-actions"><button class="ws-btn" type="button" id="brief-copy">Copiar resumen</button><button class="ws-btn primary" type="button" id="handoff-toggle">Preparar cierre de turno</button></div></div>
     <div class="brief-summary" id="brief-summary">Cargando resumen…</div>
     <div class="brief-kpis"><div class="brief-kpi"><b id="brief-active">0</b><span>Activas</span></div><div class="brief-kpi"><b id="brief-now">0</b><span>Atender ahora</span></div><div class="brief-kpi"><b id="brief-client">0</b><span>Cliente pendiente</span></div><div class="brief-kpi"><b id="brief-today">0</b><span>Entregas hoy</span></div><div class="brief-kpi"><b id="brief-overdue">0</b><span>Revisiones vencidas</span></div></div>
-    <div class="handoff-box" id="handoff-box" hidden><h3 class="ws-section-title">Cierre de turno</h3><textarea class="handoff-text" id="handoff-text" aria-label="Texto del cierre de turno"></textarea><div class="brief-actions" style="margin-top:.55rem"><button class="ws-btn" id="handoff-regenerate" type="button">Regenerar</button><button class="ws-btn" id="handoff-copy" type="button">Copiar handoff</button><button class="ws-btn primary" id="handoff-send" type="button">Enviar</button></div><div class="handoff-list" id="handoff-list"></div></div>
+    <div class="handoff-box" id="handoff-box" hidden><h3 class="ws-section-title">Cierre de turno</h3><textarea class="handoff-text" id="handoff-text" aria-label="Texto del cierre de turno"></textarea><div class="brief-actions" style="margin-top:.55rem"><button class="ws-btn" id="handoff-regenerate" type="button">Regenerar</button><button class="ws-btn" id="handoff-copy" type="button">Copiar cierre</button><button class="ws-btn primary" id="handoff-send" type="button">Enviar</button></div><div class="handoff-list" id="handoff-list"></div></div>
   </section>
 <div class="home-secondary-grid"><section class="group" id="group-pendientes">
     <h2>
@@ -267,14 +268,15 @@
     <select class="cliente-filter" id="cliente-filter" aria-label="Filtrar por cliente">
       <option value="">Todos los clientes</option>
     </select>
-    <input class="search" id="search" type="text" placeholder="Buscar carga, cliente, remolque…" title="Busca por carga, cliente, ciudad, unidad o remolque">
+    <button type="button" class="chip" id="own-clients-toggle" aria-pressed="false">Mis clientes</button>
+    <input class="search" id="search" type="text" placeholder="Buscar carga, cliente, trailer…" title="Busca por carga, cliente, ciudad, unidad o trailer">
     <button class="file-btn" type="button" id="view-toggle-btn">Vista tabla</button>
     <button class="file-btn" type="button" data-abrir-multi-msg title="Un solo mensaje para varias cargas de un cliente">Mensaje a cliente</button>
     <button class="file-btn file-btn-sec" type="button" id="masivo-btn" title="Elegir varias cargas para cambiarles el estatus o marcar POD de una vez">Seleccionar varias</button>
     <button class="file-btn file-btn-sec" type="button" id="densidad-btn" title="Cambiar entre tabla compacta y cómoda">Tabla compacta</button>
   </div>
   <!-- Mis vistas: combinaciones de filtro + cliente + búsqueda guardadas con nombre (en este navegador). -->
-  <div class="vistas-bar" id="vistas-bar"></div>
+  <div class="vistas-bar" id="vistas-bar"></div><div id="active-filter-pills" class="organize-toolbar" aria-live="polite"></div>
 
   <div id="cards-view">
     <section class="group" id="group-active">
@@ -309,23 +311,8 @@
       </div>
       <div class="table-wrap">
         <table class="loads-table">
-          <colgroup>
-            <col class="c-load"><col class="c-trailer"><col class="c-customer"><col class="c-status">
-            <col class="c-city"><col class="c-city"><col class="c-date"><col class="c-date"><col class="c-comment">
-          </colgroup>
-          <thead>
-            <tr>
-              <th data-sort="load">Load</th>
-              <th data-sort="trailer">Trailer</th>
-              <th data-sort="customer">Cliente</th>
-              <th data-sort="status">Status</th>
-              <th data-sort="origin_city">Origin</th>
-              <th data-sort="dest_city">Destination</th>
-              <th data-sort="pickup_appt">Pickup cita</th>
-              <th data-sort="delivery_appt">Entrega cita</th>
-              <th title="Último comentario">Comentario</th>
-            </tr>
-          </thead>
+          <colgroup><col class="c-load"><col class="c-customer"><col class="c-status"><col class="c-date"><col class="c-trailer"><col class="c-city"><col class="c-city"><col class="c-date"><col class="c-comment"></colgroup>
+          <thead><tr><th data-sort="load">Carga</th><th data-sort="customer">Cliente</th><th data-sort="status">Etapa / estatus</th><th data-sort="delivery_appt">Entrega · cita</th><th data-sort="trailer">Trailer</th><th data-sort="dest_city">Destino</th><th data-sort="origin_city">Origen</th><th data-sort="pickup_appt">Recolección · cita</th><th>Último comentario</th></tr></thead>
           <tbody id="table-body"></tbody>
         </table>
         <div class="table-empty" id="table-empty" style="display:none;">Sin resultados con los filtros actuales.</div>
@@ -462,7 +449,7 @@
     <select class="cliente-filter" id="historico-estado" title="Filtrar por estado">
       <option value="">Todos los estados</option>
       <option value="abiertos">Solo pendientes</option>
-      <option value="resueltos">Solo atendidos</option>
+      <option value="resueltos">Solo atendidos</option><option value="cancelados">Solo cancelados</option>
     </select>
     <input class="cliente-filter" id="historico-desde" type="date" title="Desde (fecha en que se dejó)">
     <input class="cliente-filter" id="historico-hasta" type="date" title="Hasta (fecha en que se dejó)">

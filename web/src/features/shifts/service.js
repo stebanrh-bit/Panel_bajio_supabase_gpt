@@ -4,16 +4,23 @@ import { fetchAll, unwrap } from "../../data/supabase.js";
 export function createShiftsService(client) {
   const rpc = (name, values) => unwrap(client.rpc(name, values), "SQL 005");
   return {
-    list: () =>
-      fetchAll(
-        () =>
-          client
-            .from("shift_tasks")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .order("id"),
-        "SQL 005",
-      ),
+    list: ({
+      states = null,
+      since = null,
+      until = null,
+      limit = null,
+    } = {}) => {
+      const query = () => {
+        let q = client.from("shift_tasks").select("*");
+        if (states) q = q.in("state", states);
+        if (since) q = q.gte("created_at", since);
+        if (until) q = q.lte("created_at", until);
+        return q.order("created_at", { ascending: false }).order("id");
+      };
+      return limit
+        ? unwrap(query().limit(Math.min(limit, 500)), "SQL 011")
+        : fetchAll(query, "SQL 011");
+    },
     get: (id) =>
       unwrap(
         client.from("shift_tasks").select("*").eq("id", id).single(),
@@ -31,14 +38,14 @@ export function createShiftsService(client) {
         "SQL 005",
       ),
     closures: () =>
-      fetchAll(
-        () =>
-          client
-            .from("shift_closures")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .order("id"),
-        "SQL 005",
+      unwrap(
+        client
+          .from("shift_closures")
+          .select("id,body,shift,created_by,created_at")
+          .order("created_at", { ascending: false })
+          .order("id")
+          .limit(30),
+        "SQL 011",
       ),
     save: (values, previous = null) =>
       rpc("ops_save_tasks", {
@@ -46,12 +53,19 @@ export function createShiftsService(client) {
         p_id: previous?.id || null,
         p_version: previous?.updated_at || null,
       }),
-    setState: (record, state) =>
-      rpc("ops_set_task_state", {
+    setState: (record, state, reason = "") =>
+      rpc("ops_change_task_state", {
+        p_reason: reason,
         p_id: record.id,
         p_version: record.updated_at,
         p_state: state,
       }),
-    saveClosure: (body) => rpc("ops_save_closure", { p_body: body }),
+    saveClosure: (body, critical, responsible, nextAction) =>
+      rpc("ops_save_structured_closure", {
+        p_body: body,
+        p_critical: critical,
+        p_responsible: responsible,
+        p_next_action: nextAction,
+      }),
   };
 }

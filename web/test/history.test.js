@@ -88,7 +88,9 @@ test("adaptador de historial: conserva autor y consulta de la carga, traduce per
       authorized = true;
     },
     personName: (id) => (id === "csr" ? "Ana" : id),
-    rows: async (table, filter) => {
+    page: async (table, { filter, offset, order }) => {
+      assert.equal(order, "changed_at");
+      assert.equal(offset, 0);
       assert.equal(table, "load_history");
       filter({
         eq(field, value) {
@@ -97,15 +99,18 @@ test("adaptador de historial: conserva autor y consulta de la carga, traduce per
           return this;
         },
       });
-      return [
-        {
-          id: "1",
-          actor: uuid,
-          before_data: { next_review_by: "csr" },
-          after_data: { next_review_by: uuid },
-          changed_at: "2026-10-15T12:00:00Z",
-        },
-      ];
+      return {
+        next: null,
+        records: [
+          {
+            id: "1",
+            actor: uuid,
+            before_data: { next_review_by: "csr" },
+            after_data: { next_review_by: uuid },
+            changed_at: "2026-10-15T12:00:00Z",
+          },
+        ],
+      };
     },
   });
   const result = await methods.getHistorialLoad("A");

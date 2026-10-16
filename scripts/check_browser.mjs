@@ -1,3 +1,5 @@
+import { formatMoment } from "../web/src/original/usability.js";
+import { readPanelSource } from "./panel_source.mjs";
 /**
  * Comprobación de la presentación prevista y el HTML entregable con datos independientes.
  * Inicio fue simplificado a petición del usuario; el patrón interno usa esa presentación nueva.
@@ -247,6 +249,7 @@ const fixtures = {
   getAsignaciones: JSON.stringify([{ cliente: "ACME", csr: "Ana" }]),
   getLoadSeguimientos: "[]",
   getUltimosComentarios: "{}",
+  getDetalleCarga: { ok: true, record: legacyLoads[0] },
   getLoadsDelta: {
     ok: true,
     full: true,
@@ -316,8 +319,10 @@ const original = originalPage({
     "\n" +
     (await read("web/src/original/guidance.css")) +
     "\n" +
-    (await read("web/src/original/usability.css")),
-  script: await read("web/src/original/panel-script.js"),
+    (await read("web/src/original/usability.css")) +
+    "\n" +
+    (await read("web/src/original/organization.css")),
+  script: await readPanelSource(),
   config,
 });
 const helperSource = (
@@ -331,6 +336,36 @@ const helperSource = (
   "\n" +
   (await read("web/src/original/calendar.js"))
 ).replace(/^export /gm, "");
+const newHelpers = (
+  await Promise.all(
+    [
+      ["content", "escapeHtml,csvCell,safeLink", "panelContent"],
+      ["rendering", "renderKeyed,reset", "panelRendering"],
+      ["network", "fetchExternal,cancel", "panelNetwork"],
+    ].map(
+      async ([file, exports, key]) =>
+        "<script>(function(){" +
+        (await read("web/src/original/" + file + ".js")).replace(
+          /^export /gm,
+          "",
+        ) +
+        ";window." +
+        key +
+        "={" +
+        exports +
+        "};})()</script>",
+    ),
+  )
+).join("");
+const organizationHelpers =
+  "<script>(function(){const esc=window.panelContent.escapeHtml;" +
+  (await read("web/src/original/dialogs.js"))
+    .replace(/^import .*;\n/gm, "")
+    .replace(/^export /gm, "") +
+  (await read("web/src/original/organization.js"))
+    .replace(/^import .*;\n/gm, "")
+    .replace(/^export /gm, "") +
+  ";mountOrganization(window.panelApi,document);})()</script>";
 const goldenHtml =
   "<!doctype html><html><head>" +
   original.head +
@@ -339,8 +374,10 @@ const goldenHtml =
   "<script>(function(){" +
   helperSource +
   ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelCalendar={calendarClientKey,reservationCalendarClient,filterCalendarEvents};window.panelUsability.mountUsability(document);})()</script>" +
+  newHelpers +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
   "<script>window.panelGuidance.mountGuidance(document);</script>" +
+  organizationHelpers +
   "</body></html>";
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
@@ -389,14 +426,16 @@ async function newPage(
   );
   await page.route("https://fonts.gstatic.com/**", (route) => route.abort());
   if (legacyXls)
-    await page.route(
-      "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
-      (route) =>
-        route.fulfill({
-          contentType: "application/javascript",
-          body: legacyLibrary,
-        }),
-    );
+    await page
+      .context()
+      .route(
+        "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+        (route) =>
+          route.fulfill({
+            contentType: "application/javascript",
+            body: legacyLibrary,
+          }),
+      );
   // Los servicios externos se prueban por separado; no dependen de una ubicación real aquí.
   await page.route("https://nominatim.openstreetmap.org/**", (route) =>
     route.fulfill({ contentType: "application/json", body: "[]" }),
@@ -433,7 +472,12 @@ async function newPage(
           result = [row];
         } else
           result = load ? rawLoads.find((row) => row.load === load) : rawLoads;
-      } else if (table === "load_history") result = rawHistory;
+      } else if (table === "load_history")
+        result = [...rawHistory].sort(
+          (a, b) =>
+            Date.parse(b.changed_at) - Date.parse(a.changed_at) ||
+            String(b.id).localeCompare(String(a.id)),
+        );
       else if (table === "customer_assignments") result = customerAssignments;
       else if (table === "ops_assign_customer") {
         const input = request.postDataJSON();
@@ -503,6 +547,29 @@ async function newPage(
             ].map((key) => [key, "fixture-" + incidents.length]),
           ),
         };
+      else if (table === "ops_loads_delta") {
+        const input = request.postDataJSON();
+        result = {
+          ok: true,
+          full: !input.p_after,
+          revision: 100 + incidents.length,
+          items: rawLoads.map((row) => ({
+            ...row,
+            incidenciasCount: incidents.filter((i) => i.load === row.load)
+              .length,
+          })),
+          removed: [],
+          next: null,
+        };
+      } else if (
+        [
+          "ops_latest_comments",
+          "ops_places_by_keys",
+          "ops_visible_alerts",
+        ].includes(table)
+      )
+        result = [];
+      else if (table === "ops_customer_communications") result = [];
       else if (table === "ops_original_import_info")
         result = fixtures.getImportInfo;
       else if (table === "panel-accounts") {
@@ -577,8 +644,17 @@ async function newPage(
                   return (fn) => runner(fn, failure);
                 if (name === "withFailureHandler")
                   return (fn) => runner(success, fn);
-                return () =>
+                return (...args) =>
                   setTimeout(() => {
+                    if (name === "getDetalleCarga") {
+                      success?.({
+                        ok: true,
+                        record: fixtures.getLoadsDelta.loads.find(
+                          (r) => String(r.load) === String(args[0]),
+                        ),
+                      });
+                      return;
+                    }
                     if (name in fixtures) success?.(fixtures[name]);
                     else if (failure) failure(Error(`Sin fixture: ${name}`));
                     else console.error(`No se completó ${name}`);
@@ -610,6 +686,9 @@ async function newPage(
       pageData.head +
       "</head><body>" +
       pageData.body +
+      "<script>window.panelFormatting={formatMoment:" +
+      formatMoment.toString() +
+      "};</script>" +
       pageData.scripts
         .map((script) => "<script>" + script + "</script>")
         .join("") +
@@ -622,13 +701,26 @@ async function newPage(
     );
   const target = new URL(base);
   if (view !== "internal")
-    target.searchParams.set(
-      "portal",
-      view === "client" ? "cliente" : "gerencia",
+    target.pathname = target.pathname.replace(
+      "index-sitio.html",
+      view === "client" ? "index-cliente.html" : "index-gerencia.html",
     );
   await page.goto(golden ? new URL(filename, base).href : target.href);
   if (view === "internal") {
-    await page.locator("#identity-backdrop.show").waitFor({ state: "hidden" });
+    await page
+      .locator("#identity-backdrop.show")
+      .waitFor({ state: "hidden" })
+      .catch(async (error) => {
+        console.error(
+          JSON.stringify({
+            golden,
+            errors,
+            identity: await page.locator("#identity-backdrop").innerText(),
+            lastRequests: requests.slice(-10),
+          }),
+        );
+        throw error;
+      });
     await page
       .locator("#home-cierres")
       .filter({ hasText: "Sin cierres" })
@@ -1178,7 +1270,7 @@ try {
       }),
     );
     await reservedPage.route(
-      "**/rest/v1/rpc/save_reserved_load",
+      "**/rest/v1/rpc/ops_save_reserved_details",
       async (route) => {
         const input = route.request().postDataJSON();
         reservedSaves.push(input);

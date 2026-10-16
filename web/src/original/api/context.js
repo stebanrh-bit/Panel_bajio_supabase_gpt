@@ -1,3 +1,4 @@
+import { tableColumns } from "../../data/columns.js";
 import { fetchAll, unwrap } from "../../data/supabase.js";
 
 /** Contexto por sesión. Nunca usa el nombre enviado por el formulario como autorización. */
@@ -17,8 +18,12 @@ export function createContext(client) {
   const rows = (table, filter = (query) => query, order = "id") =>
     safe(
       fetchAll(() => {
-        let query = filter(client.from(table).select("*")).order(order);
+        let query = filter(
+          client.from(table).select(tableColumns[table] || "*"),
+        ).order(order);
         const keys = {
+          panel_settings: ["singleton"],
+          customer_aliases: ["alias_key"],
           loads: ["load"],
           load_followers: ["load", "user_id"],
           user_following: ["user_id", "followed_user"],
@@ -33,6 +38,47 @@ export function createContext(client) {
         return query;
       }, "SQL 009"),
     );
+  /** Una sola página con un registro extra para saber si hay más; no recorre el historial entero. */
+  async function page(
+    table,
+    {
+      filter = (query) => query,
+      order = "created_at",
+      offset = 0,
+      limit = 50,
+      columns = tableColumns[table] || "*",
+    } = {},
+  ) {
+    if (
+      !Number.isInteger(offset) ||
+      offset < 0 ||
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > 500
+    )
+      throw Error("Página no válida.");
+    const key = table === "original_routes" ? "route_key" : "id";
+    const records = await safe(
+      unwrap(
+        filter(client.from(table).select(columns))
+          .order(order, { ascending: false })
+          .order(key, { ascending: false })
+          .range(offset, offset + limit),
+      ),
+    );
+    return {
+      records: records.slice(0, limit),
+      next: records.length > limit ? offset + limit : null,
+    };
+  }
+  function records(table) {
+    return [...(caches.get(table)?.values() || [])].map((row) =>
+      structuredClone(row),
+    );
+  }
+  function forget(table, ids) {
+    for (const id of ids) caches.get(table)?.delete(String(id));
+  }
   function remember(table, records, key = "id") {
     const map = new Map(
       records.map((row) => [String(row[key]), structuredClone(row)]),
@@ -75,7 +121,7 @@ export function createContext(client) {
     profile = await unwrap(
       client
         .from("profiles")
-        .select("*")
+        .select(tableColumns.profiles)
         .eq("id", data.session.user.id)
         .single(),
     );
@@ -157,6 +203,9 @@ export function createContext(client) {
     client,
     rpc,
     rows,
+    page,
+    records,
+    forget,
     safe,
     remember,
     previous,

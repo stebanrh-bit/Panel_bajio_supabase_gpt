@@ -1,12 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import template from "./index.template.html?raw";
-import clientTemplate from "./client.template.html?raw";
-import managerTemplate from "./manager.template.html?raw";
 import styles from "./panel-styles.css?raw";
-import script from "./panel-script.js?raw";
+import script from "./panel-source.js";
 import config from "./config.js";
 import { originalPage } from "./page.js";
 import { createOriginalApi } from "./api/index.js";
+import * as content from "./content.js";
 import * as people from "./people.js";
 import * as files from "./files.js";
 import * as guidance from "./guidance.js";
@@ -14,6 +13,12 @@ import guidanceStyles from "./guidance.css?raw";
 import * as usability from "./usability.js";
 import usabilityStyles from "./usability.css?raw";
 import * as history from "./history.js";
+import { mountValidation } from "./validation.js";
+import * as dialogs from "./dialogs.js";
+import { mountOrganization } from "./organization.js";
+import organizationStyles from "./organization.css?raw";
+import * as rendering from "./rendering.js";
+import * as network from "./network.js";
 import * as calendar from "./calendar.js";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
@@ -24,24 +29,27 @@ async function start() {
   );
   const api = createOriginalApi(client);
   window.panelApi = api;
+  window.panelDialogs = dialogs;
+  window.panelRendering = rendering;
+  window.panelNetwork = network;
   window.panelPeople = people;
+  window.panelContent = content;
   window.panelFiles = files;
   window.panelGuidance = guidance;
   window.panelUsability = usability;
   window.panelHistory = history;
   window.panelCalendar = calendar;
-  const portal =
-    window.PANEL_VIEW ||
-    new URLSearchParams(location.search).get("portal") ||
-    "";
-  const view = { cliente: "client", gerencia: "manager" }[portal] || "internal";
+  const view = "internal";
   const page = originalPage({
-    template: {
-      internal: template,
-      client: clientTemplate,
-      manager: managerTemplate,
-    }[view],
-    styles: styles + "\n" + guidanceStyles + "\n" + usabilityStyles,
+    template,
+    styles:
+      styles +
+      "\n" +
+      guidanceStyles +
+      "\n" +
+      usabilityStyles +
+      "\n" +
+      organizationStyles,
     script,
     config,
     view,
@@ -92,12 +100,16 @@ async function start() {
   }
   document.body.innerHTML = page.body;
   if (view === "internal") usability.mountUsability(document);
+  mountValidation(document);
   for (const source of page.scripts) {
     const tag = document.createElement("script");
     tag.textContent = source;
     document.body.append(tag);
   }
-  if (view === "internal") guidance.mountGuidance(document);
+  if (view === "internal") {
+    guidance.mountGuidance(document);
+    mountOrganization(api, document);
+  }
 }
 start().catch((error) => {
   // textContent evita interpretar mensajes del servidor como HTML.

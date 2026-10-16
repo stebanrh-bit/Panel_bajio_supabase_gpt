@@ -56,7 +56,7 @@ def main():
                 raise ValueError('El ZIP no pasó la verificación de integridad.')
             result = package_html(lambda path: archive.read(path).decode('utf-8'))
     else:
-        result = package_html(lambda path: (ROOT/'web'/'dist'/path).read_text())
+        result = package_html(lambda path: (ROOT/'web'/'dist'/'internal'/path).read_text())
     if args.check:
         if not args.output.exists() or args.output.read_text() != result:
             raise SystemExit('El HTML no coincide con el paquete seleccionado.')

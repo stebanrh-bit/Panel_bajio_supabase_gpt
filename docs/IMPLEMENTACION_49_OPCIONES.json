@@ -1,0 +1,1006 @@
+{
+  "base_commit": "f77366f",
+  "status": "implementado y validado localmente; pendiente instalar y aceptar en Google/Supabase reales",
+  "selected": [
+    {
+      "id": "M01",
+      "proposal": "Escapar todo dato dinámico antes de insertarlo en HTML",
+      "benefit": "Que una carga con símbolos se vea como texto y no cree elementos HTML.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H01",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/content.js",
+        "web/src/original/panel/01_shell_and_cards.js",
+        "web/src/original/panel/04_table_and_team.js",
+        "web/src/original/rendering.js"
+      ],
+      "validation": [
+        "web/test/optimization.test.js: HTML, atributos y vínculos; claves DOM adversas",
+        "docs/evidencia-organizacion-49.json: datos adversos en carga/cliente/estatus/trailer/color"
+      ],
+      "result": "Texto y atributos escapados, enlaces HTTP(S), selectores escapados y listas por claves seguras."
+    },
+    {
+      "id": "M02",
+      "proposal": "Proteger los CSV contra fórmulas inesperadas",
+      "benefit": "Exportar texto seguro para Excel sin convertir importes negativos válidos en texto.",
+      "priority": "P1",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H02",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/content.js",
+        "web/src/original/panel/09_reports_and_alerts.js"
+      ],
+      "validation": [
+        "web/test/optimization.test.js: fórmulas, negativos válidos, cero y saltos"
+      ],
+      "result": "Los CSV neutralizan texto que Excel interpretaría como fórmula; conservan números negativos válidos."
+    },
+    {
+      "id": "M04",
+      "proposal": "Completar el respaldo de datos y comprobar una restauración",
+      "benefit": "Incluir las tablas actuales del radar y preferencias; verificar recuperación en una base de prueba.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "H04",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/011_queries_and_revisions.sql",
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "scripts/rehearse_backup.mjs",
+        "web/src/original/api/imports.js"
+      ],
+      "validation": [
+        "web/test/backup-rehearsal.test.js: exportación v2 y restauración en otra base con relaciones",
+        "web/test/organization-database.test.js: manifiesto y tablas nuevas"
+      ],
+      "result": "Respaldo v2 incluye radar, rutas, preferencias y nuevas tablas; ensayo de restauración local con relaciones."
+    },
+    {
+      "id": "M05",
+      "proposal": "Consultar en Supabase solo las rutas y ubicaciones necesarias",
+      "benefit": "Evitar descargar el catálogo entero para calcular o abrir un trayecto.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H05",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/api/radar.js",
+        "supabase/migrations/011_queries_and_revisions.sql"
+      ],
+      "validation": [
+        "web/test/original-adapter.test.js: radar y ubicaciones",
+        "docs/evidencia-consultas-49.json: rutas filtradas"
+      ],
+      "result": "Coordenadas por llaves y rutas por origen; no se descarga el catálogo completo al consultar un trayecto."
+    },
+    {
+      "id": "M06",
+      "proposal": "Guardar las distancias por sentido del recorrido",
+      "benefit": "Distinguir origen→destino de destino→origen; no presentar la ruta inversa como medición exacta.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "H06",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/api/radar.js",
+        "supabase/migrations/011_queries_and_revisions.sql"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: rutas con millas independientes por sentido"
+      ],
+      "result": "A→B y B→A guardan mediciones independientes."
+    },
+    {
+      "id": "M07",
+      "proposal": "Implementar actualizaciones incrementales reales de cargas",
+      "benefit": "Traer altas, cambios y salidas del listado sin descargar todas las cargas activas.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H07",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/011_queries_and_revisions.sql",
+        "web/src/original/api/operations.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: CSR general, revisiones, archivo y tombstones"
+      ],
+      "result": "Cargas nuevas, modificadas, archivadas o eliminadas se sincronizan por revisión y páginas."
+    },
+    {
+      "id": "M08",
+      "proposal": "Traer únicamente el último comentario de cada carga",
+      "benefit": "Una consulta de resumen en vez de descargar todo el historial de comentarios.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H08",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/011_queries_and_revisions.sql",
+        "web/src/original/api/operations.js"
+      ],
+      "validation": [
+        "web/test/original-adapter.test.js: resumen de comentarios",
+        "web/test/organization-database.test.js: marcas por área"
+      ],
+      "result": "El resumen consulta solo el último comentario por carga/solicitud."
+    },
+    {
+      "id": "M09",
+      "proposal": "Contar incidencias en la base de datos",
+      "benefit": "Enviar cantidades por carga sin descargar sus descripciones completas para los contadores.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H07",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/011_queries_and_revisions.sql",
+        "web/src/original/api/models.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: conteo incremental de incidencias",
+        "scripts/check_browser.mjs: alta de incidencia y refresco"
+      ],
+      "result": "Supabase calcula el contador de incidencias activas sin descargar todas las incidencias."
+    },
+    {
+      "id": "M10",
+      "proposal": "Filtrar las comunicaciones por cliente desde Supabase",
+      "benefit": "Consultar solo comunicaciones de las cargas del cliente solicitado.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H09",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/011_queries_and_revisions.sql",
+        "web/src/original/api/team.js"
+      ],
+      "validation": [
+        "web/test/original-adapter.test.js: comunicaciones por cliente",
+        "supabase/migrations/011_queries_and_revisions.sql: filtro, permiso y límites"
+      ],
+      "result": "Las comunicaciones por cliente se filtran en el servidor."
+    },
+    {
+      "id": "M11",
+      "proposal": "Paginar los historiales y cargarlos al abrirlos",
+      "benefit": "Evitar descargar historiales completos de cargas y apartados en cada refresco.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H10",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/history.js",
+        "web/src/original/api/operations.js",
+        "web/src/original/api/radar.js"
+      ],
+      "validation": [
+        "web/test/history.test.js: páginas, fechas y cambios legibles",
+        "scripts/check_browser.mjs: ventanas de historial"
+      ],
+      "result": "Historial de carga y apartado por páginas al abrir; tareas muestran los últimos cambios bajo demanda."
+    },
+    {
+      "id": "M12",
+      "proposal": "Filtrar tareas por estado y periodo en el servidor",
+      "benefit": "Cargar primero tareas abiertas y consultar las antiguas bajo demanda.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H11",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/api/operations.js",
+        "web/src/original/panel/03_shift_tasks.js"
+      ],
+      "validation": [
+        "web/test/original-adapter.test.js: tareas abiertas e histórico",
+        "scripts/check_browser.mjs: navegación de tareas"
+      ],
+      "result": "Las tareas abiertas y el histórico por periodo se filtran en Supabase; el histórico tiene páginas."
+    },
+    {
+      "id": "M13",
+      "proposal": "Aplicar límites de bitácoras y cierres en la consulta",
+      "benefit": "Solicitar los últimos registros directamente en lugar de descargar todo y recortar.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H11",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/features/team/service.js",
+        "web/src/features/shifts/service.js"
+      ],
+      "validation": [
+        "web/test/original-adapter.test.js: contratos de servicios",
+        "web/src/features/team/service.js y shifts/service.js: límites aplicados a consulta"
+      ],
+      "result": "Eventos administrativos: máximo 100 por consulta; cierres: últimos 30 desde el servidor."
+    },
+    {
+      "id": "M14",
+      "proposal": "Procesar Excel pesado fuera del hilo de la pantalla",
+      "benefit": "Mantener el panel utilizable mientras se lee y convierte un archivo permitido.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H12",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/files.js",
+        "web/src/original/reader-worker.js",
+        "google-apps-script/Code-sitio.gs"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs --legacy-xls: CSV/XLSX/XLS en Worker, vista previa e importación"
+      ],
+      "result": "CSV/XLSX/XLS se procesan en Worker con progreso, cancelación y límite de tiempo."
+    },
+    {
+      "id": "M15",
+      "proposal": "Buscar la cuenta de acceso mediante una consulta específica",
+      "benefit": "Dejar de leer todos los perfiles para resolver un solo usuario.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H13",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/functions/panel-accounts/index.ts",
+        "supabase/migrations/011_queries_and_revisions.sql"
+      ],
+      "validation": [
+        "web/test/original-accounts.test.js: acceso, ambigüedad, cuentas desactivadas y permisos",
+        "Deno check: panel-accounts/index.ts"
+      ],
+      "result": "El acceso por nombre consulta hasta dos coincidencias mediante RPC privada del servidor."
+    },
+    {
+      "id": "M17",
+      "proposal": "Usar revisiones de datos en vez de recuentos completos para detectar cambios",
+      "benefit": "Reducir el trabajo de cada refresco de las marcas de actualización.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H14",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/011_queries_and_revisions.sql",
+        "web/src/original/api/index.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: revisiones y migraciones repetibles"
+      ],
+      "result": "Contadores de revisión sustituyen agregados globales durante el sondeo."
+    },
+    {
+      "id": "M18",
+      "proposal": "Coordinar el refresco entre pestañas y adaptarlo a la actividad",
+      "benefit": "Evitar varias pestañas de una cuenta preguntando lo mismo cada minuto.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H14",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/coordination.js",
+        "web/src/original/api/index.js"
+      ],
+      "validation": [
+        "web/test/optimization.test.js: coordinación en segundo plano y actualización con foco"
+      ],
+      "result": "Pestañas de fondo coordinan sondeos por sesión; foco y actualización explícita recuperan datos."
+    },
+    {
+      "id": "M19",
+      "proposal": "Seleccionar solo las columnas requeridas por cada pantalla",
+      "benefit": "Separar resúmenes ligeros y datos completos del expediente.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H05,H07,H11",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/data/columns.js",
+        "web/src/original/api/context.js",
+        "web/src/original/api/operations.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: columnas reales del esquema",
+        "web/test/original-adapter.test.js: resumen y detalle con versiones"
+      ],
+      "result": "Lecturas con columnas definidas; procedencias del expediente se consultan al abrir."
+    },
+    {
+      "id": "M20",
+      "proposal": "Reducir el tamaño del código publicado conservando fuentes legibles",
+      "benefit": "Optimizar la entrega de producción sin perder archivos fuente comentados para mantenimiento.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H15; decidir si se compacta el artefacto generado",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/vite.config.js",
+        "scripts/package_site.py",
+        "web/src/original/page.js"
+      ],
+      "validation": [
+        "npm run build: cuatro objetivos",
+        "python scripts/package_site.py --check: entrega reproducible",
+        "web/test/optimization.test.js: signos dólar en script comprimido"
+      ],
+      "result": "Paquetes de entrega comprimidos; fuentes mantenidas legibles y comentadas."
+    },
+    {
+      "id": "M21",
+      "proposal": "Generar o cargar solo la vista y los lectores que se están usando",
+      "benefit": "Evitar cargar desde el inicio el código de los tres portales y del lector de archivos.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H15; conservar alojamiento Google y enlace actual",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/vite.config.js",
+        "web/src/original/main-portal.js",
+        "google-apps-script/Code-sitio.gs"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: vistas interna/cliente/gerencia",
+        "web/test/google-worker.test.js: lector fijo y alojamiento"
+      ],
+      "result": "Panel, cliente y gerencia se entregan por separado; lector de Excel bajo demanda."
+    },
+    {
+      "id": "M22",
+      "proposal": "Actualizar únicamente los componentes visuales afectados",
+      "benefit": "Reducir reconstrucciones de tablas y recorridos generales del observador del DOM.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H15",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/rendering.js",
+        "web/src/original/panel/06_events_and_sync.js"
+      ],
+      "validation": [
+        "web/test/optimization.test.js: identidad DOM al insertar/eliminar/reordenar y campo en edición"
+      ],
+      "result": "Listas conservan nodos al insertar/reordenar; el detalle sin cambios conserva sus controles."
+    },
+    {
+      "id": "M23",
+      "proposal": "Añadir índices después de medir las consultas más usadas",
+      "benefit": "Probar índices de historial y rutas con EXPLAIN y datos representativos.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓/↑",
+      "evidence_or_dependency": "H16; índices ahorran lectura pero ocupan espacio",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/011_queries_and_revisions.sql",
+        "scripts/measure_queries.mjs",
+        "docs/evidencia-consultas-49.json"
+      ],
+      "validation": [
+        "docs/evidencia-consultas-49.json: EXPLAIN antes/después con datos sintéticos"
+      ],
+      "result": "Índices para historial, comentarios, rutas, tareas y acceso; planes EXPLAIN locales guardados."
+    },
+    {
+      "id": "M24",
+      "proposal": "Definir retención y archivo de historiales e importaciones",
+      "benefit": "Controlar crecimiento sin borrar auditoría ni evidencias necesarias por defecto.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H17; requiere acordar periodos y recuperación",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: política nula por defecto, vista obsoleta rechazada, archivo conserva expediente y depuración de instantáneas"
+      ],
+      "result": "Política configurable y vista previa manual para archivar cargas y retirar instantáneas antiguas. Sin ejecución automática."
+    },
+    {
+      "id": "M25",
+      "proposal": "Poner tiempo máximo y cancelación a consultas externas",
+      "benefit": "Una búsqueda nueva o un servicio caído no debe dejar búsquedas antiguas ocupadas indefinidamente.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↓",
+      "evidence_or_dependency": "H18",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/network.js",
+        "web/src/original/panel/08_radar.js"
+      ],
+      "validation": [
+        "web/test/optimization.test.js: cancelación y vencimiento del plazo de petición"
+      ],
+      "result": "Consultas externas con plazo y cancelación; no se presentan resultados de direcciones que ya cambiaron."
+    },
+    {
+      "id": "M28",
+      "proposal": "Automatizar pruebas, compilación y verificación del paquete en cada cambio",
+      "benefit": "Impedir publicar un HTML, SQL o ZIP desactualizado.",
+      "priority": "P1",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H19",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        ".github/workflows/check-panel.yml",
+        "scripts/package_site.py"
+      ],
+      "validation": [
+        "npm test y npm run build ejecutados localmente",
+        "python scripts/package_site.py --check ejecutado localmente; GitHub Actions se ejecutará al subir"
+      ],
+      "result": "GitHub Actions instala con lockfile, prueba, compila y verifica SQL/HTML/ZIP."
+    },
+    {
+      "id": "M30",
+      "proposal": "Dividir el script principal y documentar qué código está activo",
+      "benefit": "Facilitar cambios pequeños y conservar los originales como referencia claramente identificada.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H15,H19",
+      "category": "mejora",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/panel.parts.json",
+        "web/src/original/panel-source.js",
+        "docs/CODIGO_ACTIVO.md"
+      ],
+      "validation": [
+        "web/test/original-adapter.test.js: compatibilidad de fuente ensamblada y API",
+        "docs/CODIGO_ACTIVO.md: revisión de entradas activas"
+      ],
+      "result": "Interfaz distribuida por áreas, con módulos separados de datos, formularios, seguridad, red, fechas y lector."
+    },
+    {
+      "id": "C01",
+      "proposal": "Unificar palabras: carga, unidad, trailer y cita",
+      "benefit": "Evitar términos mezclados en inglés y español en la misma operación.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Interfaz interna y portales",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/index.template.html",
+        "web/src/original/panel/01_shell_and_cards.js",
+        "web/src/original/panel/05_workspace.js"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: vistas, tarjetas y expediente"
+      ],
+      "result": "Etiquetas principales uniformes: carga, unidad, trailer y cita."
+    },
+    {
+      "id": "C02",
+      "proposal": "Ordenar Inicio como un plan de trabajo del día",
+      "benefit": "Destacar lo urgente, lo que toca después y el trabajo futuro.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Ajustar la presentación actual, que ya agrupa por carga",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/panel/02_daily_plan.js",
+        "web/src/original/panel-styles.css"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: Inicio en escritorio y móvil"
+      ],
+      "result": "Inicio presenta un plan del día con urgente, hoy y futuro."
+    },
+    {
+      "id": "C03",
+      "proposal": "Acordar estatus y transiciones por etapa",
+      "benefit": "Reducir cambios ambiguos y definir cuándo se puede avanzar, regresar o cancelar.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Decisión operativa; conservar compatibilidad con los estatus importados",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: regla configurable, validación servidor y alias"
+      ],
+      "result": "Transiciones configurables; no se endurecen las reglas actuales por defecto."
+    },
+    {
+      "id": "C04",
+      "proposal": "Distinguir etapa, prioridad y condición de atención",
+      "benefit": "Evitar que el color de la tarjeta se confunda con el estatus del viaje.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Actualmente conviven estatus, colores y alertas",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/panel/05_workspace.js",
+        "web/src/original/guidance.js"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: detalle operativo",
+        "docs/MANUAL_POR_ROL.md: significado de etapa/prioridad/atención"
+      ],
+      "result": "Expediente distingue etapa, prioridad y motivos de atención."
+    },
+    {
+      "id": "C05",
+      "proposal": "Usar una distribución uniforme en todas las ventanas",
+      "benefit": "Homogeneizar etiquetas, espacio, cierre, desplazamiento y posición de Guardar.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Extender los ajustes ya aplicados a solicitudes y tareas",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/dialogs.js",
+        "web/src/original/organization.css",
+        "web/src/original/usability.css"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: ventanas y móvil",
+        "docs/evidencia-organizacion-49.json: formularios nuevos"
+      ],
+      "result": "Diálogos con espacio, contraste, foco y acciones consistentes."
+    },
+    {
+      "id": "C06",
+      "proposal": "Mantener avisos no urgentes dentro de la campana al capturar",
+      "benefit": "Evitar que notificaciones de fondo cubran campos; conservar errores visibles.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Extender el criterio ya aplicado a algunos formularios",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/usability.js",
+        "web/src/original/panel/09_reports_and_alerts.js"
+      ],
+      "validation": [
+        "web/test/usability.test.js: errores y confirmaciones",
+        "scripts/check_browser.mjs: captura y ventanas"
+      ],
+      "result": "Avisos no urgentes permanecen en la campana mientras escribes; los errores siguen visibles."
+    },
+    {
+      "id": "C07",
+      "proposal": "Nombrar de forma uniforme revisión operativa y seguimiento personal",
+      "benefit": "Reconocer sus dos plazos independientes en todas las ventanas.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "No fusionar los dos recordatorios existentes",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/panel/02_daily_plan.js",
+        "docs/MANUAL_POR_ROL.md"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: recordatorios independientes y completar seguimiento"
+      ],
+      "result": "Revisión operativa y seguimiento personal se explican y completan por separado."
+    },
+    {
+      "id": "C11",
+      "proposal": "Definir si el CSR puede consultar todo o solo sus clientes",
+      "benefit": "Alinear visibilidad y permisos reales con la política que elijas.",
+      "priority": "P1",
+      "effort": "Alto",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "H20; el filtro de persona actual no equivale a aislamiento por RLS",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/panel/04_table_and_team.js",
+        "supabase/migrations/011_queries_and_revisions.sql"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: CSR consulta todas las cargas",
+        "docs/evidencia-organizacion-49.json: Mis clientes y limpiar filtros"
+      ],
+      "result": "Toda la operación disponible para CSR, con filtro «Mis clientes»."
+    },
+    {
+      "id": "C12",
+      "proposal": "Estandarizar qué debe contener cada cierre de turno",
+      "benefit": "Exigir pendientes críticos, responsable y siguiente acción, conservando el resumen automático.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Cambio de procedimiento del cierre existente",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/panel/03_shift_tasks.js",
+        "web/src/features/shifts/service.js",
+        "supabase/migrations/012_turn_rules_and_tasks.sql"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: cierre de turno",
+        "web/test/organization-database.test.js: campos y respaldo del cierre"
+      ],
+      "result": "Cierre con pendientes críticos, persona a cargo y próxima acción."
+    },
+    {
+      "id": "C13",
+      "proposal": "Definir cuándo vence, se renueva y se completa cada tipo de aviso",
+      "benefit": "Documentar reglas únicas para evitar renovaciones accidentales o expectativas distintas.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Revisión del significado de acciones existentes, no eliminación de pendientes",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "docs/MANUAL_POR_ROL.md"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: avisos renovados/resueltos y POD pendiente",
+        "scripts/check_browser.mjs: seguimiento independiente"
+      ],
+      "result": "Un plazo vencido permanece hasta atenderlo; renovar o completar retira el aviso anterior."
+    },
+    {
+      "id": "C14",
+      "proposal": "Mostrar validación de campos junto al dato que falta",
+      "benefit": "Aplicar el mismo lenguaje y ubicación del error en todos los formularios.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Conservar siempre la validación de Supabase",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/validation.js",
+        "web/src/original/dialogs.js",
+        "supabase/migrations/012_turn_rules_and_tasks.sql"
+      ],
+      "validation": [
+        "web/test/incidents.test.js: categoría obligatoria y doble envío",
+        "docs/evidencia-organizacion-49.json: formularios con guardado real"
+      ],
+      "result": "Formularios con validación junto al campo; SQL vuelve a validar antes de guardar."
+    },
+    {
+      "id": "C17",
+      "proposal": "Mostrar fuente y fecha del cálculo junto a las millas",
+      "benefit": "Identificar Google, OSM y estimación y la vigencia del dato utilizado.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "La fuente ya se muestra; uniformar fecha y explicación",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/panel/08_radar.js"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: radar, fuentes y trayectos",
+        "web/test/google-worker.test.js: procesamiento Google"
+      ],
+      "result": "Fuente y fecha de cálculo de millas; se distingue estimado, mapas abiertos y Google."
+    },
+    {
+      "id": "C18",
+      "proposal": "Separar carga relacionada y referencia libre del apartado",
+      "benefit": "Relacionar un número real cuando exista y conservar notas libres aparte.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "El CSR externo de VG permanece como captura manual",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js",
+        "web/src/original/api/radar.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: vínculo y contacto opcionales",
+        "scripts/check_browser.mjs: CSR de VG manual"
+      ],
+      "result": "Apartado distingue carga relacionada, referencia libre y contacto externo."
+    },
+    {
+      "id": "C19",
+      "proposal": "Estandarizar nombres y alias de clientes",
+      "benefit": "Evitar que diferencias de escritura fragmenten filtros, asignaciones y reportes.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Revisar nombres existentes antes de fusionar clientes",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: alias, asignación heredada, conflicto y preservación histórica"
+      ],
+      "result": "Equivalencias de clientes para nuevas capturas; los datos históricos no se reescriben. Un nombre principal nuevo hereda el mismo CSR del alias."
+    },
+    {
+      "id": "C21",
+      "proposal": "Hacer visibles los filtros activos y un patrón común para limpiarlos",
+      "benefit": "Evitar interpretar una lista filtrada como registros perdidos.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Conservar filtros existentes de cada sección",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/index.template.html",
+        "web/src/original/panel/04_table_and_team.js"
+      ],
+      "validation": [
+        "docs/evidencia-organizacion-49.json: etiquetas activas y limpiar"
+      ],
+      "result": "Filtros activos visibles y acción para limpiarlos."
+    },
+    {
+      "id": "C22",
+      "proposal": "Uniformar fechas, horas y valores sin información",
+      "benefit": "Usar el mismo formato legible y distinguir sin fecha, cero y pendiente.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Extender reglas existentes sin alterar instantes guardados",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/usability.js",
+        "web/src/original/main-portal.js"
+      ],
+      "validation": [
+        "web/test/usability.test.js: formato de fecha y ausentes",
+        "scripts/check_browser.mjs: tres vistas en hora de México"
+      ],
+      "result": "Fechas legibles en hora del centro de México, sin cambiar los instantes guardados; cero se distingue de ausencia."
+    },
+    {
+      "id": "C23",
+      "proposal": "Ordenar las columnas por decisión operativa",
+      "benefit": "Priorizar carga, cliente, etapa y próximo compromiso; relegar detalles secundarios.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Cambio de orden y jerarquía de la tabla actual",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/index.template.html",
+        "web/src/original/panel/04_table_and_team.js",
+        "web/src/original/panel-styles.css"
+      ],
+      "validation": [
+        "scripts/check_browser.mjs: tabla, detalle abierto, trailer T0132 y móvil"
+      ],
+      "result": "Tabla ordenada por decisiones: carga, cliente, estatus, entrega, trailer y destino."
+    },
+    {
+      "id": "C24",
+      "proposal": "Pedir motivo y explicar el efecto de cancelar, liberar o retirar",
+      "benefit": "Unificar las acciones sensibles con confirmaciones concretas y auditoría.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "No sustituye la validación de autor y versión existente",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "web/src/original/dialogs.js",
+        "web/src/original/api/models.js",
+        "supabase/migrations/012_turn_rules_and_tasks.sql"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: motivo obligatorio y retirada de apartado cerrado con historial"
+      ],
+      "result": "Cancelar, liberar o retirar exige motivo y conserva el expediente/historial."
+    },
+    {
+      "id": "C30",
+      "proposal": "Crear instrucciones cortas por rol con ejemplos reales",
+      "benefit": "Ayudar a Admin, Supervisor, CSR y Cliente a completar sus tareas habituales.",
+      "priority": "P2",
+      "effort": "Bajo",
+      "resource_effect": "≈",
+      "evidence_or_dependency": "Complementar las guías de instalación y la ayuda actual",
+      "category": "cambio",
+      "status": "implementado; validación local",
+      "implementation": [
+        "docs/MANUAL_POR_ROL.md",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "docs/MANUAL_POR_ROL.md: revisión por Admin/Supervisor/CSR/Cliente",
+        "docs/evidencia-organizacion-49.json: acceso a Organizar turno"
+      ],
+      "result": "Guía dentro del panel y manual por función del equipo."
+    },
+    {
+      "id": "F04",
+      "proposal": "Escalar pendientes sin atender al responsable de supervisión",
+      "benefit": "Derivar tareas críticas según plazo y responsable.",
+      "priority": "P2",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Depende de C10, C11 y reglas operativas explícitas",
+      "category": "funcion",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: reasignación real del destinatario y aviso vigente",
+        "docs/evidencia-organizacion-49.json: configuración de escalamiento"
+      ],
+      "result": "Escalamiento interno configurable a una cuenta de supervisión; comienza desactivado."
+    },
+    {
+      "id": "F05",
+      "proposal": "Crear tareas recurrentes",
+      "benefit": "Programar revisiones diarias o semanales sin volver a capturarlas.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Nueva programación, distinta de los recordatorios de una carga",
+      "category": "funcion",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js",
+        "google-apps-script/Code-sitio.gs"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: recurrencia idempotente y recuperación de una ocurrencia",
+        "docs/evidencia-organizacion-49.json: programación guardada",
+        "web/test/google-worker.test.js: tick independiente de millas"
+      ],
+      "result": "Tareas diarias/semanales con persona, horario, carga opcional y pausa."
+    },
+    {
+      "id": "F06",
+      "proposal": "Agregar plantillas de checklist y dependencias de tareas",
+      "benefit": "No olvidar pasos y ordenar el trabajo que depende de otro.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Nueva estructura para tareas, además de su nota",
+      "category": "funcion",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: pasos obligatorios, antecedentes, ciclos y permisos",
+        "docs/evidencia-organizacion-49.json: checklist guardado y completado"
+      ],
+      "result": "Checklist obligatorio/opcional y dependencias; el servidor bloquea ciclos y cierres incompletos."
+    },
+    {
+      "id": "F08",
+      "proposal": "Enviar alertas programadas con el panel cerrado",
+      "benefit": "Recibir avisos por un canal externo autorizado aunque no esté abierta la página.",
+      "priority": "P3",
+      "effort": "Alto",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Diferente de las notificaciones actuales del navegador; requiere elegir proveedor/canal",
+      "category": "funcion",
+      "status": "preparado; envío externo desactivado por decisión del usuario",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "google-apps-script/Code-sitio.gs",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "web/test/organization-database.test.js: cola sin envío cuando está desactivada",
+        "docs/evidencia-organizacion-49.json: configuración mantiene envío apagado"
+      ],
+      "result": "Cola y avisos preparados; envío externo desactivado hasta elegir canal."
+    },
+    {
+      "id": "F18",
+      "proposal": "Guardar una agenda opcional de contactos externos de VG",
+      "benefit": "Consultar datos de contacto sin convertirlos en usuarios ni forzar la selección del CSR.",
+      "priority": "P2",
+      "effort": "Medio",
+      "resource_effect": "↑",
+      "evidence_or_dependency": "Conservar siempre la captura manual del CSR externo solicitada por el usuario",
+      "category": "funcion",
+      "status": "implementado; validación local",
+      "implementation": [
+        "supabase/migrations/012_turn_rules_and_tasks.sql",
+        "web/src/original/organization.js"
+      ],
+      "validation": [
+        "docs/evidencia-organizacion-49.json: contacto guardado sin cuenta",
+        "scripts/check_browser.mjs: captura libre CSR VG"
+      ],
+      "result": "Agenda VG opcional, con edición y baja sin convertir contactos en usuarios."
+    }
+  ],
+  "decisions": {
+    "csr_scope": "Confirmado: toda la operación, con filtro Mis clientes; Admin y Supervisor consulta general",
+    "external_alerts": "Confirmado: envío externo desactivado hasta elegir canal; preparar mecanismo sin enviar mensajes",
+    "rules": "Sin nueva política confirmada: conservar reglas actuales; escalamiento apagado y retención sin ejecución automática."
+  },
+  "recorded_date": "2026-10-16",
+  "production_changed": false,
+  "validation_summary": {
+    "unit_integration_passed": 142,
+    "failed": 0,
+    "skipped": 0,
+    "organization_browser_flows": 7,
+    "visual_comparisons": 38,
+    "visual_comparison_scope": "Presentación prevista frente al HTML generado, con datos de prueba; no comparación autenticada contra el portal original en producción.",
+    "artifacts": "docs/VALIDACION_49_OPCIONES.md",
+    "production_acceptance": "docs/PRUEBAS_FINALES.md: pendiente, una prueba por vez"
+  }
+}

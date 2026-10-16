@@ -49,7 +49,7 @@ export function createReservedLoadsService(supabase) {
   }
   function save(values, previous = null) {
     return unwrap(
-      supabase.rpc("save_reserved_load", {
+      supabase.rpc("ops_save_reserved_details", {
         p_values: values,
         p_id: previous?.id || null,
         p_version: previous?.updated_at || null,

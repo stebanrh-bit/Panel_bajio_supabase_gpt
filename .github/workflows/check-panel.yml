@@ -1,0 +1,31 @@
+name: Verificar Panel Bajío
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npm test
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+        env:
+          VITE_SUPABASE_URL: https://pwqibuunekrzfcztcfju.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_slNN4K-4Ak-1RqD9z0GvnA_2hgsAL9J
+      - run: python scripts/package_site.py --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: panel-bajio-google
+          path: entregables/panel-bajio-sitio.zip

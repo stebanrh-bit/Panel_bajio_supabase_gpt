@@ -1,27 +1,33 @@
 import { googleMapsCall } from "../../features/radar/service.js";
 
-/** Conserva las llaves y la caché compartida de ciudades, direcciones y trayectos del original. */
+/** Consultas por origen/llave. Una ruta inversa nunca reemplaza una medición de este sentido. */
 export function radarMethods(ctx) {
-  const places = () =>
-    ctx.rows("original_places", (query) => query, "place_key");
-  const routes = () =>
-    ctx.rows("original_routes", (query) => query, "route_key");
+  const places = (keys) =>
+    keys.length
+      ? ctx.rpc("ops_places_by_keys", { p_keys: [...new Set(keys)] })
+      : Promise.resolve([]);
   const data = (row) => ({
     key: row.route_key,
     millas: Number(row.google_miles ?? row.miles),
     horas: Number(row.google_hours ?? row.hours),
     fuente: row.google_miles == null ? "osm" : "google",
+    calculadaEn: row.google_at || row.created_at,
     googleEstado:
       row.google_state || (row.google_miles == null ? "pending" : "ok"),
     osm: row.google_miles == null ? undefined : Number(row.miles),
   });
   return {
-    getCoordenadas: async () => {
+    getCoordenadas: async (keys = []) => {
       ctx.staff();
+      if (!Array.isArray(keys))
+        throw Error("Indica las ciudades de esta búsqueda.");
+      const records = [];
+      for (let i = 0; i < keys.length; i += 200)
+        records.push(...(await places(keys.slice(i, i + 200))));
       return {
         ok: true,
         items: Object.fromEntries(
-          (await places())
+          records
             .filter((row) => row.kind === "city")
             .map((row) => [row.place_key, [row.latitude, row.longitude]]),
         ),
@@ -29,33 +35,33 @@ export function radarMethods(ctx) {
     },
     guardarCoordenadas: async (list) => {
       ctx.staff(true);
-      const result = await ctx.rpc("ops_original_places", {
-        p_places: list.slice(0, 200).map((row) => ({
-          key: row.key,
-          kind: "city",
-          text: [row.ciudad, row.estado].filter(Boolean).join(", "),
-          lat: row.lat,
-          lon: row.lon,
-        })),
-      });
-      return { ok: true, guardadas: result };
+      return {
+        ok: true,
+        guardadas: await ctx.rpc("ops_original_places", {
+          p_places: list.slice(0, 200).map((row) => ({
+            key: row.key,
+            kind: "city",
+            text: [row.ciudad, row.estado].filter(Boolean).join(", "),
+            lat: row.lat,
+            lon: row.lon,
+          })),
+        }),
+      };
     },
     getDirecciones: async (keys) => {
       ctx.staff();
       return {
         ok: true,
         items: Object.fromEntries(
-          (await places())
-            .filter((row) => keys.includes(row.place_key))
-            .map((row) => [
-              row.place_key,
-              {
-                texto: row.searched_text,
-                direccion: row.formatted_address,
-                lat: row.latitude,
-                lon: row.longitude,
-              },
-            ]),
+          (await places(keys)).map((row) => [
+            row.place_key,
+            {
+              texto: row.searched_text,
+              direccion: row.formatted_address,
+              lat: row.latitude,
+              lon: row.longitude,
+            },
+          ]),
         ),
       };
     },
@@ -77,13 +83,17 @@ export function radarMethods(ctx) {
     },
     getDistancias: async (origin) => {
       ctx.staff();
-      const result = {};
-      for (const row of await routes()) {
-        if (row.origin_key === origin) result[row.destination_key] = data(row);
-        else if (row.destination_key === origin && !result[row.origin_key])
-          result[row.origin_key] = data(row);
-      }
-      return { ok: true, items: result };
+      const records = await ctx.rows(
+        "original_routes",
+        (query) => query.eq("origin_key", origin),
+        "route_key",
+      );
+      return {
+        ok: true,
+        items: Object.fromEntries(
+          records.map((row) => [row.destination_key, data(row)]),
+        ),
+      };
     },
     guardarDistancias: async (list) => {
       ctx.staff(true);
@@ -96,7 +106,18 @@ export function radarMethods(ctx) {
     },
     getBusquedasDirecciones: async () => {
       ctx.staff();
-      const [points, distances] = await Promise.all([places(), routes()]);
+      const page = await ctx.page("original_routes", {
+        filter: (query) =>
+          query.or("origin_key.like.dir:*,destination_key.like.dir:*"),
+        order: "created_at",
+        limit: 50,
+      });
+      const records = page.records;
+      const points = await places([
+        ...new Set(
+          records.flatMap((row) => [row.origin_key, row.destination_key]),
+        ),
+      ]);
       const labels = new Map(
         points.map((row) => [
           row.place_key,
@@ -105,35 +126,33 @@ export function radarMethods(ctx) {
       );
       return {
         ok: true,
-        items: distances
-          .filter(
-            (row) =>
-              row.origin_key.startsWith("dir:") ||
-              row.destination_key.startsWith("dir:"),
-          )
-          .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
-          .slice(0, 50)
-          .map((row) => ({
-            ...data(row),
-            origen: row.origin_key,
-            destino: row.destination_key,
-            origenTxt: labels.get(row.origin_key) || row.origin_key,
-            destinoTxt: labels.get(row.destination_key) || row.destination_key,
-            recta: row.straight_miles,
-            por: ctx.personName(row.created_by),
-            en: row.created_at,
-          })),
+        items: records.map((row) => ({
+          ...data(row),
+          origen: row.origin_key,
+          destino: row.destination_key,
+          origenTxt: labels.get(row.origin_key) || row.origin_key,
+          destinoTxt: labels.get(row.destination_key) || row.destination_key,
+          recta: row.straight_miles,
+          por: ctx.personName(row.created_by),
+          en: row.created_at,
+        })),
       };
     },
     recalcularMillasGoogle: async (key) => {
       ctx.staff(true);
       if (ctx.profile.role !== "admin")
         throw Error("Recalcular millas requiere permisos de administración.");
-      const [points, distances] = await Promise.all([places(), routes()]);
-      const route = distances.find((row) => row.route_key === key);
+      const route = (
+        await ctx.rows(
+          "original_routes",
+          (query) => query.eq("route_key", key),
+          "route_key",
+        )
+      )[0];
       if (!route) throw Error("Ese trayecto no está guardado.");
-      const point = (placeKey) => {
-        const row = points.find((item) => item.place_key === placeKey);
+      const points = await places([route.origin_key, route.destination_key]);
+      const point = (key) => {
+        const row = points.find((item) => item.place_key === key);
         if (!row)
           throw Error("No están guardadas las coordenadas del trayecto.");
         return { latitude: row.latitude, longitude: row.longitude };
@@ -153,17 +172,19 @@ export function radarMethods(ctx) {
           millas: result.miles,
           horas: result.minutes / 60,
           fuente: "google",
+          calculadaEn: new Date().toISOString(),
         },
       };
     },
     getRadarExcel: async () => {
       ctx.staff();
-      const records = await ctx.rows(
-        "original_radar",
-        (query) => query.eq("singleton", true),
-        "singleton",
-      );
-      const row = records[0];
+      const row = (
+        await ctx.rows(
+          "original_radar",
+          (query) => query.eq("singleton", true),
+          "singleton",
+        )
+      )[0];
       return {
         ok: true,
         excel: row?.visible

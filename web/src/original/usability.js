@@ -45,13 +45,17 @@ export function formatMoment(value, dateOnly = false) {
       ? value
       : plainDate
         ? new Date(
-            Number(plainDate[1]),
-            Number(plainDate[2]) - 1,
-            Number(plainDate[3]),
+            Date.UTC(
+              Number(plainDate[1]),
+              Number(plainDate[2]) - 1,
+              Number(plainDate[3]),
+              12,
+            ),
           )
         : new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("es-MX", {
+    timeZone: "America/Mexico_City",
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -128,8 +132,8 @@ export function mountUsability(doc) {
       ),
     ].filter(visible);
 
-  function labelFields() {
-    doc
+  function labelFields(root = doc) {
+    root
       .querySelectorAll(
         "input:not([type=hidden]):not([type=file]):not([type=checkbox]):not([type=radio]),select,textarea",
       )
@@ -424,13 +428,14 @@ export function mountUsability(doc) {
       .formatToParts(new Date())
       .find((part) => part.type === "timeZoneName")?.value;
     timezone.textContent =
-      "Fechas y horas de tu dispositivo: " + zoneName + ".";
+      "Fechas y horas del centro de México. Los plazos vencidos permanecen hasta atenderlos.";
   }
 
-  function refresh() {
+  function refresh(roots) {
     if (refreshing) return;
     refreshing = true;
-    labelFields();
+    if (!roots) labelFields();
+    else for (const root of roots) labelFields(root);
     administration();
     accountMenu();
     secondaryControls();
@@ -460,7 +465,22 @@ export function mountUsability(doc) {
     }
     refreshing = false;
   }
-  const observer = new win.MutationObserver(refresh);
+  let scheduled = false;
+  const roots = new Set();
+  const observer = new win.MutationObserver((records) => {
+    for (const record of records)
+      if (record.type === "childList")
+        for (const node of record.addedNodes)
+          if (node.nodeType === 1) roots.add(node.parentElement || node);
+    if (scheduled) return;
+    scheduled = true;
+    win.queueMicrotask(() => {
+      scheduled = false;
+      const added = [...roots];
+      roots.clear();
+      refresh(added);
+    });
+  });
   observer.observe(doc.body, {
     childList: true,
     subtree: true,

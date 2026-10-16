@@ -41,22 +41,61 @@ export function operationMethods(ctx) {
       ]),
     );
   }
-  async function listLoads() {
+  /** Páginas fijadas a una revisión: un cambio de una sola carga no vuelve a descargar todo. */
+  async function syncLoads(after = 0) {
     ctx.staff();
-    const [loads, incidents] = await Promise.all([
-      rows("loads", (query) => query.eq("archived", false), "load"),
-      rows("incidents", (query) => query.is("deleted_at", null)),
-    ]);
-    remember("loads", loads, "load");
-    const counts = new Map();
-    incidents.forEach((row) =>
-      counts.set(row.load, (counts.get(row.load) || 0) + 1),
-    );
-    return loads.map((row) =>
-      loadModel({ ...row, incidenciasCount: counts.get(row.load) || 0 }, name),
-    );
+    const known = ctx.records("loads").map((row) => row.load);
+    const updated = [];
+    let cursor = "",
+      watermark = null,
+      result;
+    do {
+      result = await rpc("ops_loads_delta", {
+        p_after: Number(after) || 0,
+        p_known: known,
+        p_cursor: cursor,
+        p_until: watermark,
+        p_limit: 500,
+      });
+      watermark = result.revision;
+      updated.push(...result.items);
+      cursor = result.next;
+    } while (cursor);
+    if (!after) remember("loads", updated, "load");
+    else {
+      updated.forEach((row) => saved("loads", row, "load"));
+      ctx.forget("loads", result.removed || []);
+    }
+    const models = updated.map((row) => loadModel(row, name));
+    return {
+      ok: true,
+      full: !after,
+      ts: Number(watermark),
+      loads: !after ? models : undefined,
+      updated: models,
+      currentLoads: ctx.records("loads").map((row) => row.load),
+      removed: result.removed || [],
+    };
+  }
+  async function listLoads() {
+    await syncLoads();
+    return ctx.records("loads").map((row) => loadModel(row, name));
+  }
+  async function reasonFor(effect, supplied) {
+    const reason =
+      supplied || (await globalThis.window?.panelDialogs?.reason(effect));
+    if (!reason || reason.trim().length < 3)
+      throw Error(
+        "Acción cancelada. El motivo debe tener al menos 3 caracteres.",
+      );
+    return reason.trim();
   }
   async function updateLoad(load, values) {
+    if (/^cancelado\.?$/i.test(values.status || ""))
+      values.cancel_reason = await reasonFor(
+        "Cancelar esta carga conserva su expediente y la quita de los viajes activos.",
+        values.cancel_reason,
+      );
     ctx.staff(true);
     return ctx.serial(`load:${load}`, async () => {
       const old = previous("loads", load);
@@ -96,9 +135,28 @@ export function operationMethods(ctx) {
     });
   }
   const methods = {
-    getLoadsDelta: async () =>
+    getDetalleCarga: async (load) => {
+      ctx.staff();
+      const old = previous("loads", load);
+      const record = await safe(
+        unwrap(
+          client
+            .from("loads")
+            .select("*")
+            .eq("load", load)
+            .eq("archived", false)
+            .single(),
+        ),
+      );
+      if (Date.parse(record.updated_at) !== Date.parse(old.updated_at))
+        throw Error(
+          "La carga cambió. Actualiza antes de abrir su detalle completo.",
+        );
+      return { ok: true, record: loadModel({ ...old, ...record }, name) };
+    },
+    getLoadsDelta: async (after = 0) =>
       ctx.profile
-        ? { ok: true, full: true, ts: Date.now(), loads: await listLoads() }
+        ? syncLoads(after)
         : { ok: false, full: true, ts: 0, loads: [] },
     getComments: async (load) => {
       if (!ctx.profile) return json([]);
@@ -136,7 +194,7 @@ export function operationMethods(ctx) {
     getUltimosComentarios: async () => {
       if (!ctx.profile) return json({});
       ctx.staff();
-      const records = await rows("comments", (query) => query, "created_at");
+      const records = await rpc("ops_latest_comments");
       return json(
         Object.fromEntries(
           records.map((row) => [row.load, commentModel(row, name)]),
@@ -179,17 +237,31 @@ export function operationMethods(ctx) {
       await rpc("ops_remove_incident", { p_id: id });
       return { ok: true };
     },
-    getHistorialLoad: async (load) => {
+    getHistorialLoad: async (load, _name, _password, offset = 0) => {
       ctx.staff();
-      const records = (
-        await rows(
-          "load_history",
-          (query) => query.eq("load", load),
-          "changed_at",
-        )
-      ).reverse();
-      const items = loadHistoryItems(records, load, name);
-      return { ok: true, items };
+      const page = await ctx.page("load_history", {
+        filter: (query) => query.eq("load", load),
+        order: "changed_at",
+        offset,
+      });
+      return {
+        ok: true,
+        items: loadHistoryItems(page.records, load, name),
+        nextOffset: page.next,
+      };
+    },
+    getHistorialApartado: async (id, offset = 0) => {
+      ctx.staff();
+      const page = await ctx.page("reserved_load_history", {
+        filter: (query) => query.eq("reserved_id", id),
+        order: "changed_at",
+        offset,
+      });
+      return {
+        ok: true,
+        items: reservedModel({}, name, page.records).historial,
+        nextOffset: page.next,
+      };
     },
     getComunicaciones: async (load) => {
       ctx.staff();
@@ -208,19 +280,16 @@ export function operationMethods(ctx) {
     },
     getComunicacionesPorCliente: async (customer) => {
       ctx.staff();
-      const loads = await rows(
-        "loads",
-        (query) => query.eq("customer", customer),
-        "load",
-      );
-      const ids = new Set(loads.map((row) => row.load));
-      return {
-        ok: true,
-        items: (await rows("communications", (query) => query, "created_at"))
-          .filter((row) => ids.has(row.load))
-          .reverse()
-          .map((row) => communicationModel(row, name)),
-      };
+      const items = [];
+      for (let offset = 0; ; offset += 500) {
+        const page = await rpc("ops_customer_communications", {
+          p_customer: customer,
+          p_offset: offset,
+          p_limit: 500,
+        });
+        items.push(...page.map((row) => communicationModel(row, name)));
+        if (page.length < 500) return { ok: true, items };
+      }
     },
     getSlaComunicacion: async () => {
       if (!ctx.profile) return { ok: true, pairs: [] };
@@ -299,12 +368,19 @@ export function operationMethods(ctx) {
       };
       const field = fields[action];
       if (!field) throw Error("Acción masiva no válida.");
+      const reason =
+        field === "status" && /^cancelado\.?$/i.test(value)
+          ? await reasonFor(
+              "Cancelar las cargas seleccionadas conserva sus expedientes y las retira de los viajes activos.",
+            )
+          : null;
       await rpc("ops_bulk_loads", {
         p_items: loads.map((load) => ({
           load,
           updated_at: previous("loads", load).updated_at,
         })),
         p_values: {
+          ...(reason ? { cancel_reason: reason } : {}),
           [field]: typeof value === "boolean" ? String(value) : value,
         },
       });
@@ -331,9 +407,16 @@ export function operationMethods(ctx) {
       );
       return { ok: true, id: record.id, creado_en: record.created_at };
     },
-    removePendiente: async (id) => {
+    removePendiente: async (id, _name, _password, reason) => {
       ctx.staff(true);
-      await pending.cancel(previous("pending_loads", id));
+      await rpc("ops_cancel_pending_reason", {
+        p_id: id,
+        p_version: previous("pending_loads", id).updated_at,
+        p_reason: await reasonFor(
+          "Cancelar esta solicitud la retira de Pendientes y conserva su historial.",
+          reason,
+        ),
+      });
       return { ok: true };
     },
     vincularPendiente: async (id, load) => {
@@ -351,32 +434,25 @@ export function operationMethods(ctx) {
       if (!ctx.profile) return { ok: true, items: [] };
       ctx.staff();
       const records = remember("reserved_loads", await reserved.list());
-      const history = await rows(
-        "reserved_load_history",
-        (query) => query,
-        "changed_at",
-      );
       return {
         ok: true,
         items: records
           .filter((row) => !row.hidden)
-          .map((row) =>
-            reservedModel(
-              row,
-              name,
-              history.filter((item) => item.reserved_id === row.id),
-            ),
-          ),
+          .map((row) => reservedModel(row, name, [])),
       };
     },
     guardarApartado: async (input) => {
       ctx.staff(true);
+      const oldDetails = input.id ? previous("reserved_loads", input.id) : {};
       const values = {
         load: input.load,
         csr_owner: input.csr_dueno || "",
         origin: input.origen || "",
         destination: input.destino || "",
         own_load: input.mi_carga || "",
+        related_load: input.related_load ?? oldDetails.related_load ?? null,
+        free_reference: input.free_reference ?? oldDetails.free_reference ?? "",
+        vg_contact_id: input.vg_contact_id ?? oldDetails.vg_contact_id ?? null,
         note: input.nota || "",
         review_hours: Number(input.frecuencia_horas) || 3,
         crossing_at: date(input.fecha_cruce),
@@ -392,22 +468,27 @@ export function operationMethods(ctx) {
       );
       return {
         ok: true,
-        apartado: reservedModel(
-          record,
-          name,
-          await reserved.history(record.id),
-        ),
+        apartado: reservedModel(record, name, []),
       };
     },
     cambiarEstadoApartado: async (id, state, note) => {
       ctx.staff(true);
       const record = saved(
         "reserved_loads",
-        await reserved.changeState(previous("reserved_loads", id), state, note),
+        await reserved.changeState(
+          previous("reserved_loads", id),
+          state,
+          state === "liberado"
+            ? await reasonFor(
+                "Liberar el apartado detiene sus revisiones. Podrás reabrirlo desde Cerrados.",
+                note,
+              )
+            : note,
+        ),
       );
       return {
         ok: true,
-        apartado: reservedModel(record, name, await reserved.history(id)),
+        apartado: reservedModel(record, name, []),
       };
     },
     revisarApartado: async (id, note) => {
@@ -418,12 +499,16 @@ export function operationMethods(ctx) {
       );
       return {
         ok: true,
-        apartado: reservedModel(record, name, await reserved.history(id)),
+        apartado: reservedModel(record, name, []),
       };
     },
-    eliminarApartado: async (id) => {
+    eliminarApartado: async (id, _name, _password, reason) => {
       ctx.staff(true);
-      await rpc("ops_hide_reserved", {
+      await rpc("ops_hide_reserved_reason", {
+        p_reason: await reasonFor(
+          "Retirar este apartado lo oculta del panel. Su historial se conserva.",
+          reason,
+        ),
         p_id: id,
         p_version: previous("reserved_loads", id).updated_at,
       });
@@ -433,18 +518,46 @@ export function operationMethods(ctx) {
       if (!ctx.profile) return json([]);
       ctx.staff();
       return json(
-        remember("shift_tasks", await shifts.list())
-          .filter((row) => row.state !== "cancelled")
-          .map((row) => taskModel(row, name)),
+        remember("shift_tasks", await shifts.list({ states: ["open"] })).map(
+          (row) => taskModel(row, name),
+        ),
       );
     },
-    getBitacoraHistorico: async () => {
+    getBitacoraHistorico: async (
+      _name,
+      _password,
+      since = null,
+      until = null,
+      offset = 0,
+      state = null,
+    ) => {
       ctx.staff();
+      const page = await ctx.page("shift_tasks", {
+        filter: (query) => {
+          let q = query.in(
+            "state",
+            state
+              ? {
+                  abiertos: ["open"],
+                  resueltos: ["resolved"],
+                  cancelados: ["cancelled"],
+                }[state] || ["open", "resolved", "cancelled"]
+              : ["open", "resolved", "cancelled"],
+          );
+          if (since) q = q.gte("created_at", date(since));
+          if (until) q = q.lte("created_at", date(until));
+          return q;
+        },
+        order: "created_at",
+        offset,
+        limit: 100,
+      });
       return {
         ok: true,
-        items: remember("shift_tasks", await shifts.list())
-          .filter((row) => row.state !== "cancelled")
-          .map((row) => taskModel(row, name)),
+        items: page.records.map((row) =>
+          taskModel(saved("shift_tasks", row), name),
+        ),
+        nextOffset: page.next,
       };
     },
     addBitacoraTurno: async (
@@ -496,11 +609,18 @@ export function operationMethods(ctx) {
       );
       return { ok: true };
     },
-    removeBitacoraTurno: async (id) => {
+    removeBitacoraTurno: async (id, _name, _password, reason) => {
       ctx.staff(true);
       saved(
         "shift_tasks",
-        await shifts.setState(previous("shift_tasks", id), "cancelled"),
+        await shifts.setState(
+          previous("shift_tasks", id),
+          "cancelled",
+          await reasonFor(
+            "Cancelar esta tarea la retira del turno y conserva su historial.",
+            reason,
+          ),
+        ),
       );
       return { ok: true };
     },
@@ -509,7 +629,7 @@ export function operationMethods(ctx) {
       ctx.staff();
       return {
         ok: true,
-        items: (await shifts.closures()).slice(0, 30).map((row) => ({
+        items: (await shifts.closures()).map((row) => ({
           id: row.id,
           csr: name(row.created_by),
           creado_en: row.created_at,
@@ -517,9 +637,19 @@ export function operationMethods(ctx) {
         })),
       };
     },
-    enviarCierreTurno: async (body) => {
+    enviarCierreTurno: async (body, _name, _password, details) => {
       ctx.staff(true);
-      const record = await shifts.saveClosure(body);
+      if (!details)
+        details = await globalThis.window?.panelDialogs?.closure(
+          ctx.records("profiles"),
+        );
+      if (!details) throw Error("Cierre cancelado.");
+      const record = await shifts.saveClosure(
+        body,
+        details.critical,
+        details.responsible,
+        details.nextAction,
+      );
       return { ok: true, id: record.id, creado_en: record.created_at };
     },
   };

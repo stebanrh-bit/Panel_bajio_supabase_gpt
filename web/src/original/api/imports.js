@@ -104,7 +104,7 @@ export function importMethods(ctx) {
     },
     deshacerUltimaImportacion: async () => {
       ctx.staff(true);
-      const batch = (await service.list()).find((row) => !row.undone_at);
+      const batch = await service.latest();
       if (!batch)
         throw Error("No hay una importación disponible para deshacer.");
       await service.undo(batch);

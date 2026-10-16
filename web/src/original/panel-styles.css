@@ -1004,14 +1004,14 @@ body .home-priority-kpi small{font-size:.58rem;margin-top:.1rem}
   #table-view:has(#table-detail-panel:not([hidden])) .table-section{margin-bottom:0}
   #table-view:has(#table-detail-panel:not([hidden])) .table-detail-section{position:sticky;top:.75rem;border-top:0;padding-top:0;margin-top:0;max-height:calc(100vh - 1.5rem);overflow:auto}
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table{min-width:0}
-  #table-view:has(#table-detail-panel:not([hidden])) .loads-table col:nth-child(5),
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table col:nth-child(7),
+  #table-view:has(#table-detail-panel:not([hidden])) .loads-table col:nth-child(8),
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table col:nth-child(9),
-  #table-view:has(#table-detail-panel:not([hidden])) .loads-table th:nth-child(5),
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table th:nth-child(7),
+  #table-view:has(#table-detail-panel:not([hidden])) .loads-table th:nth-child(8),
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table th:nth-child(9),
-  #table-view:has(#table-detail-panel:not([hidden])) .loads-table tr.t-row > td:nth-child(5),
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table tr.t-row > td:nth-child(7),
+  #table-view:has(#table-detail-panel:not([hidden])) .loads-table tr.t-row > td:nth-child(8),
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table tr.t-row > td:nth-child(9){display:none}
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table td{padding:.6rem .7rem}
   #table-view:has(#table-detail-panel:not([hidden])) .loads-table th{padding:.7rem .7rem}

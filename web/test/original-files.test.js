@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { parseLoadFile } from "../src/original/files.js";
+import { parseLoadFileFallback as parseLoadFile } from "../src/original/files-fallback.js";
 
 test("importación original: CSV con encabezado inicial, ceros y booleanos literales", async () => {
   const file = new File(

@@ -60,4 +60,27 @@ Pospuesta por el usuario hasta disponer de otras cuentas. No hace falta otro cor
 | Dos ediciones simultáneas sobre una carga | Versión vieja rechazada; no pierde el cambio más reciente | Pendiente |
 | Sin sesión | Login público; datos y acciones privadas denegados | Pendiente |
 
-Las pruebas locales están documentadas en VALIDACION_SITIO.md. Las funciones anteriores de archivo y respaldo permanecen en el backend; no se agregan botones que no pertenecen a la interfaz original.
+Las comprobaciones históricas están documentadas en VALIDACION_SITIO.md. La entrega de las 49 opciones agrega Organizar turno y Guía de uso; sus pruebas locales se registran por separado.
+
+
+## Entrega de las 49 opciones: aceptación después de instalar
+
+Estas pruebas están **pendientes en tu Google y Supabase**. Se hacen una por una después de seguir INSTALAR_SITIO.md; las pruebas automatizadas locales no sustituyen esta aceptación. No hay que borrar tus cargas.
+
+| Paso | Acción | Resultado esperado | Estado |
+| --- | --- | --- | --- |
+| 1 | Entrar como Esteban y abrir Cargas; alternar Mis clientes y Limpiar filtros | Toda la operación disponible; filtro y etiquetas claros; perfil Admin | Pendiente |
+| 2 | Abrir Inicio y una carga con revisión y seguimiento personal | Urgente/hoy/futuro; completar un seguimiento no borra la revisión independiente; entregada sin POD conserva lo pendiente | Pendiente |
+| 3 | Tabla con detalle abierto y trailer T0132; filtros y calendario por cliente/tipo | Trailer completo; filtros visibles; columnas alineadas; solo movimientos seleccionados | Pendiente |
+| 4 | Organizar turno: crear contacto VG y referencia de regreso | No crea usuario; CSR externo sigue manual; carga relacionada solo activa; texto libre separado | Pendiente |
+| 5 | Crear checklist y dependencia; intentar terminar sin completarlos | Indica qué falta; rechaza ciclos; guarda los pasos al completarlos | Pendiente |
+| 6 | Programar tarea diaria/semanal y comprobar programaciones ahora | Una ocurrencia por horario de México; persona asignada correcta; pausa disponible | Pendiente |
+| 7 | Admin: configurar escalamiento, revisar avisos y devolverlo al estado deseado | Destinatario correcto; avisos renovados desaparecen; envío externo siempre desactivado | Pendiente |
+| 8 | Crear cierre con críticos, persona y siguiente acción; probar cancelar con y sin motivo | Campos obligatorios junto al dato; guarda autor y motivo legible en historial | Pendiente |
+| 9 | Admin: equivalencia de cliente de prueba y nueva captura | Usa nombre principal sin reescribir cargas anteriores ni cambiar otra asignación | Pendiente |
+| 10 | Importar CSV y Excel de prueba; ver historial anterior; revisar trayecto en ambos sentidos | Lector responde; historial por páginas; millas con fuente/fecha; sentidos independientes | Pendiente |
+| 11 | Descargar respaldo y abrir vista previa de archivo sin aplicar | Respaldo v2; vista previa explica IDs/efecto; ninguna eliminación automática | Pendiente |
+| 12 | Actualizar en dos pestañas, cerrar sesión con ventana abierta y volver a entrar | Datos al día; ventanas privadas se cierran; no quedan datos de otra sesión | Pendiente |
+| 13 | Portal Cliente y Vista Gerencia desde sus enlaces, también en móvil | Cada vista carga su archivo; permisos y lectura correspondientes | Pendiente |
+
+La restauración se ensayó en bases efímeras separadas, con identidades simuladas. No ejecutar una restauración ni una limpieza en producción como parte de estas pruebas. Las pruebas con otras cuentas permanecen para el final, como acordamos.

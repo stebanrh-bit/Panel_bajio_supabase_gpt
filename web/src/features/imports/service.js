@@ -13,6 +13,18 @@ export function createImportsService(client) {
             .order("id"),
         "SQL 006",
       ),
+    latest: async () => {
+      const records = await unwrap(
+        client
+          .from("import_batches")
+          .select("id,created_at,undone_at")
+          .is("undone_at", null)
+          .order("created_at", { ascending: false })
+          .order("id")
+          .limit(1),
+      );
+      return records[0] || null;
+    },
     preview: (records) => rpc("ops_preview_import", { p_records: records }),
     apply: (records, preview, name) =>
       rpc("ops_apply_import", {
@@ -23,34 +35,11 @@ export function createImportsService(client) {
     undo: (batch) => rpc("ops_undo_import", { p_batch: batch.id }),
     /** Copia de datos de la aplicación; no incluye contraseñas, JWT ni claves. */
     async backup() {
-      const tables = [
-        "profiles",
-        "loads",
-        "comments",
-        "incidents",
-        "load_history",
-        "communications",
-        "pending_loads",
-        "pending_load_comments",
-        "pending_load_history",
-        "reserved_loads",
-        "reserved_load_history",
-        "customer_assignments",
-        "load_followers",
-        "user_following",
-        "shift_tasks",
-        "shift_task_history",
-        "shift_closures",
-        "message_templates",
-        "portal_access",
-        "admin_events",
-        "import_batches",
-        "import_rows",
-        "radar_sources",
-        "geo_places",
-      ];
+      const manifest = await rpc("ops_backup_manifest", {});
+      const tables = manifest.tables;
       const data = {
-        format: "panel-bajio-backup-v1",
+        format: "panel-bajio-backup-v2",
+        revisions: manifest.revisions,
         exported_at: new Date().toISOString(),
         tables: {},
       };
@@ -67,6 +56,16 @@ export function createImportsService(client) {
           if (page.length < 500) break;
         }
       }
+      const final = await rpc("ops_backup_manifest", {});
+      if (
+        JSON.stringify(final.revisions) !== JSON.stringify(manifest.revisions)
+      )
+        throw Error(
+          "Los datos cambiaron durante el respaldo. Genera uno nuevo para conservar una copia consistente.",
+        );
+      data.counts = Object.fromEntries(
+        tables.map((table) => [table, data.tables[table].length]),
+      );
       return data;
     },
   };

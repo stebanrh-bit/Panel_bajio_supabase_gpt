@@ -12,7 +12,13 @@ function doGet(e) {
   const view = ["cliente", "gerencia"].indexOf(portal) >= 0 ? portal : "";
   const bootstrap =
     "<script>window.PANEL_VIEW=" + JSON.stringify(view) + ";<\/script>";
-  const html = HtmlService.createHtmlOutputFromFile("index")
+  const html = HtmlService.createHtmlOutputFromFile(
+    view === "cliente"
+      ? "index-cliente"
+      : view === "gerencia"
+        ? "index-gerencia"
+        : "index",
+  )
     .getContent()
     .replace("<!--PANEL_VIEW-->", bootstrap);
   return HtmlService.createHtmlOutput(html)
@@ -24,6 +30,11 @@ function doGet(e) {
           : "Panel Bajío",
     )
     .addMetaTag("viewport", "width=device-width, initial-scale=1");
+}
+
+/** Recurso público fijo. No acepta rutas ni devuelve datos o credenciales. */
+function panelFileReader() {
+  return HtmlService.createHtmlOutputFromFile("lector").getContent();
 }
 
 /** Ejecutar desde el editor si Google necesita autorizar UrlFetch para los mapas. */
@@ -240,6 +251,7 @@ function googleMilesRpc_(name, values) {
       "ops_google_worker_claim",
       "ops_google_worker_complete",
       "ops_google_worker_status",
+      "ops_worker_task_tick",
     ].indexOf(name) < 0
   )
     throw new Error("Operación de millas no permitida.");
@@ -333,6 +345,13 @@ function procesarMillasGoogle_() {
     deferred: 0,
   };
   try {
+    // La actualización SQL 012 puede instalarse después del código: un fallo del turno no
+    // interrumpe las millas ni registra datos personales o el secreto del worker.
+    try {
+      procesarTareasTurno_();
+    } catch (error) {
+      Logger.log("Organización del turno pendiente de vincular con SQL 012.");
+    }
     const jobs = googleMilesRpc_("ops_google_worker_claim", {
       p_limit: GOOGLE_MILES_BATCH_,
     });
@@ -449,4 +468,37 @@ function procesarMillasGoogle() {
 function desactivarMillasGoogle() {
   requireGoogleMilesEditor_();
   return desactivarMillasGoogle_();
+}
+
+/** Organización del turno: el mismo secreto limitado autentica este lote en Supabase.
+ * Crea tareas y avisos internos. El envío externo permanece desactivado hasta elegir canal.
+ * La retención nunca se ejecuta en este proceso.
+ */
+function procesarTareasTurno_() {
+  return googleMilesRpc_("ops_worker_task_tick", {});
+}
+function procesarTareasTurno() {
+  requireGoogleMilesEditor_();
+  const result = procesarTareasTurno_();
+  Logger.log(JSON.stringify(result));
+  return result;
+}
+
+/** Opcional: un activador propio para tareas si decides detener el de millas.
+ * No activa canales externos ni borra datos. Requiere la misma vinculación SQL del worker.
+ */
+function activarTareasTurno() {
+  requireGoogleMilesEditor_();
+  googleMilesRpc_("ops_google_worker_status", {});
+  ScriptApp.getProjectTriggers().forEach(function (trigger) {
+    if (trigger.getHandlerFunction() === "procesarTareasTurno_")
+      ScriptApp.deleteTrigger(trigger);
+  });
+  ScriptApp.newTrigger("procesarTareasTurno_")
+    .timeBased()
+    .everyHours(1)
+    .create();
+  Logger.log(
+    "Organización del turno programada cada hora. No se activó envío externo.",
+  );
 }

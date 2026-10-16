@@ -1,0 +1,121 @@
+{
+  "screenshots": [
+    "inicio",
+    "mi-turno",
+    "turno-secciones-cerradas",
+    "nueva-solicitud",
+    "nueva-tarea",
+    "operacion",
+    "workspace-operacion",
+    "workspace-tracking",
+    "workspace-comunicacion",
+    "workspace-documentos",
+    "workspace-incidencias",
+    "workspace-historial",
+    "comentarios",
+    "incidencias",
+    "tabla",
+    "calendario",
+    "indicadores",
+    "apartados",
+    "radar",
+    "historico",
+    "selector-usuario",
+    "cambiar-contrasena",
+    "clave-administracion",
+    "ventana-kpi-detail",
+    "ventana-pendiente",
+    "ventana-bitacora",
+    "ventana-vincular",
+    "ventana-recordatorio",
+    "ventana-apartado",
+    "ventana-multimsg",
+    "ventana-confirmar",
+    "movil-inicio",
+    "client-dashboard",
+    "client-detalle",
+    "client-movil",
+    "manager-dashboard",
+    "manager-detalle",
+    "manager-movil"
+  ],
+  "incidentSaves": 1,
+  "importPreviews": 6,
+  "importSaves": 1,
+  "requests": 438,
+  "errors": [],
+  "usabilityLayouts": [
+    {
+      "trailerEditor": {
+        "viewport": 1533,
+        "available": 114,
+        "required": 28.3544921875,
+        "insideCell": true,
+        "documentFits": true
+      }
+    },
+    {
+      "trailerEditor": {
+        "viewport": 1440,
+        "available": 114,
+        "required": 28.3544921875,
+        "insideCell": true,
+        "documentFits": true
+      }
+    },
+    {
+      "trailerEditor": {
+        "viewport": 1180,
+        "available": 114,
+        "required": 28.3544921875,
+        "insideCell": true,
+        "documentFits": true
+      }
+    },
+    {
+      "trailerEditor": {
+        "viewport": 1024,
+        "available": 170,
+        "required": 28.3544921875,
+        "insideCell": true,
+        "documentFits": true
+      }
+    },
+    {
+      "trailerEditor": {
+        "viewport": 390,
+        "available": 170,
+        "required": 28.3544921875,
+        "insideCell": true,
+        "documentFits": true
+      }
+    },
+    {
+      "trailerEditor": {
+        "viewport": 360,
+        "available": 170,
+        "required": 28.3544921875,
+        "insideCell": true,
+        "documentFits": true
+      }
+    },
+    {
+      "viewport": 390,
+      "documentWidth": 390
+    },
+    {
+      "viewport": 360,
+      "documentWidth": 360
+    },
+    {
+      "administration": {
+        "bottom": 801.796875,
+        "overflow": "auto",
+        "width": 360,
+        "viewport": 360
+      }
+    }
+  ],
+  "scope": "Comparación de la presentación prevista con los archivos generados; datos sintéticos y peticiones interceptadas. No es una revisión autenticada del sitio original en producción.",
+  "recorded_date": "2026-10-16"
+}

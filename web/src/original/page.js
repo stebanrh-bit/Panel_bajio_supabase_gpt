@@ -12,15 +12,14 @@ export function originalPage({
     html = html
       .replace(
         /<\?!=\s*include\('PanelEstilos'\);\s*\?>/,
-        `<style>${styles}</style>`,
+        () => `<style>${styles}</style>`,
       )
-      .replace(
-        /<\?!=\s*jsonPagina_\(configPanel_\(\)\)\s*\?>/,
+      .replace(/<\?!=\s*jsonPagina_\(configPanel_\(\)\)\s*\?>/, () =>
         JSON.stringify(config).replace(/</g, "\\u003c"),
       )
       .replace(
         /<\?!=\s*include\('PanelScript'\);\s*\?>/,
-        `<script>${script}</script>`,
+        () => `<script>${script}</script>`,
       );
   }
   html = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, (_tag, body) => {

@@ -170,14 +170,12 @@ export function teamMethods(ctx, operations) {
         throw Error("Solo administración puede consultar esta bitácora.");
       return {
         ok: true,
-        items: (await service.events())
-          .slice(0, 100)
-          .map((row) => ({
-            fecha: row.created_at,
-            quien: name(row.actor),
-            accion: row.action,
-            detalle: JSON.stringify(row.details),
-          })),
+        items: (await service.events()).map((row) => ({
+          fecha: row.created_at,
+          quien: name(row.actor),
+          accion: row.action,
+          detalle: JSON.stringify(row.details),
+        })),
       };
     },
     getLoadsForCliente: async () =>

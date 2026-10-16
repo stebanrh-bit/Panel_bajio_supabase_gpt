@@ -1,3 +1,4 @@
+import { tableColumns } from "../../data/columns.js";
 import { fetchAll, unwrap } from "../../data/supabase.js";
 
 /** Equipo y preferencias: la autorización real se aplica en los RPC de SQL 005. */
@@ -10,7 +11,7 @@ export function createTeamService(client) {
   };
   const table = (name) =>
     fetchAll(() => {
-      let query = client.from(name).select("*");
+      let query = client.from(name).select(tableColumns[name] || "*");
       for (const key of sortKeys[name] || ["id"]) query = query.order(key);
       return query;
     }, "SQL 005");
@@ -21,14 +22,14 @@ export function createTeamService(client) {
     following: () => table("user_following"),
     templates: () => table("message_templates"),
     events: () =>
-      fetchAll(
-        () =>
-          client
-            .from("admin_events")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .order("id"),
-        "SQL 005",
+      unwrap(
+        client
+          .from("admin_events")
+          .select("id,action,details,actor,created_at")
+          .order("created_at", { ascending: false })
+          .order("id")
+          .limit(100),
+        "SQL 011",
       ),
     saveProfile: (previous, values) =>
       rpc("ops_save_profile", {

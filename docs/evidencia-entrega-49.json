@@ -1,0 +1,30 @@
+{
+  "recorded_date": "2026-10-16",
+  "baseline_commit": "f77366f",
+  "baseline_html_bytes": 1920975,
+  "baseline_gzip_bytes_estimated": 437809,
+  "current_artifacts": [
+    {
+      "file": "google-apps-script/index-sitio.html",
+      "bytes": 830390,
+      "gzip_bytes_estimated": 233310
+    },
+    {
+      "file": "google-apps-script/index-cliente.html",
+      "bytes": 292957,
+      "gzip_bytes_estimated": 78173
+    },
+    {
+      "file": "google-apps-script/index-gerencia.html",
+      "bytes": 291381,
+      "gzip_bytes_estimated": 77809
+    },
+    {
+      "file": "google-apps-script/lector.html",
+      "bytes": 71056,
+      "gzip_bytes_estimated": 20590
+    }
+  ],
+  "internal_html_reduction_percent": 56.8,
+  "note": "Tamaños locales de entrega; gzip es una estimación, no una medición de tráfico o cuota de Supabase/Google."
+}

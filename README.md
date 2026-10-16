@@ -3,6 +3,8 @@
 La entrega conjunta para Supabase y Google Apps Script está preparada en la rama `supabase-inicial`. Sigue [la instalación paso a paso](docs/INSTALAR_SITIO.md) y después [las pruebas finales, una por una](docs/PRUEBAS_FINALES.md). Los módulos nuevos deben instalarse y validarse en la página real; los archivos originales se conservan como referencia.
 
 
+La entrega de [las 49 opciones seleccionadas](docs/ENTREGA_49_OPCIONES.md) agrega organización del turno y optimiza las consultas. Consulta el [manual por rol](docs/MANUAL_POR_ROL.md) y la [guía de código activo](docs/CODIGO_ACTIVO.md).
+
 La base de datos y autenticación permanecen en Supabase. La página se aloja en Google Apps Script: sigue [la guía de google-apps-script](google-apps-script/README.md). No se requiere Google Sheets. El usuario confirmó en Google el acceso, la consulta de cargas y los comentarios persistentes; también confirmó la revisión de tránsito y el registro persistente de un aviso que resuelve el pendiente de comunicación. La tercera entrega, `google-apps-script/index-pendientes.html`, agrega solicitudes sin número de carga y requiere SQL 003. El usuario la activó y confirmó la vinculación: la nota y el comentario aparecen en la carga después de actualizar y la solicitud queda en Vinculados. El usuario confirmó también que la solicitud PRUEBA-002 aparece en Pendientes y que, tras cancelarla, permanece en Cancelados con su nota y comentario al actualizar. Las pruebas con otros roles siguen pendientes en el proyecto real.
 
 La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raíz se conservan como referencia y no se ejecutan en la nueva aplicación.
@@ -23,7 +25,7 @@ La aplicación nueva está en `web/`. Los archivos Google Apps Script de la raí
 
 La entrada de `web/` reutiliza las tres interfaces originales en `web/src/original/`. Sus 97 acciones se conectan a Supabase mediante adaptadores comentados. Incluye administración de cuentas Auth a través de `panel-accounts`, cargas, comentarios/incidencias, pendientes, bitácora/cierres, apartados, seguimiento, plantillas, calendario, indicadores, importación/deshacer, radar compartido y ambos portales. Consulta [la comparación y sus límites](docs/COMPARACION_ORIGINAL.md).
 
-El proyecto existente requiere la actualización conjunta SQL 004–010, desplegar `panel-accounts` y activar la nueva versión del mismo proyecto Google. Sigue **docs/INSTALAR_SITIO.md**; no repitas SQL 001. Los módulos anteriores de `web/src/features/` permanecen como servicios reutilizables y referencia de la migración. No se ejecuta el backend Sheets de la raíz.
+El proyecto existente requiere la actualización conjunta SQL 004–012, desplegar `panel-accounts` y activar la nueva versión del mismo proyecto Google. Sigue **docs/INSTALAR_SITIO.md**; no repitas SQL 001. Los módulos anteriores de `web/src/features/` permanecen como servicios reutilizables y referencia de la migración. No se ejecuta el backend Sheets de la raíz.
 
 Auth/RLS/RPC verifican permisos y autores. Admin y CSR escriben; manager consulta; clientes reciben únicamente los campos de sus cargas autorizadas. La sesión no almacena contraseñas. Los estados y versiones conservan los expedientes y evitan sobrescrituras. Las pruebas reales entre cuentas y en Google quedan para el final, por petición del usuario.
 
@@ -31,7 +33,7 @@ Esteban también puede trabajar como CSR manteniendo administración y comprobar
 
 ## Referencia: crear un proyecto nuevo
 
-El proyecto del usuario ya existe. Para actualizarlo, usar la guía de instalación enlazada arriba. Estos pasos iniciales se conservan para una instalación desde cero; después se aplica la actualización 004–010 y se instala `panel-accounts`.
+El proyecto del usuario ya existe. Para actualizarlo, usar la guía de instalación enlazada arriba. Estos pasos iniciales se conservan para una instalación desde cero; después se aplica la actualización 004–012 y se instala `panel-accounts`.
 
 1. Abre https://supabase.com y entra en Dashboard.
 2. Crea una organización si no tienes una y pulsa **New project**.
@@ -111,7 +113,7 @@ Las pruebas de interfaz con DOM simulado detectaron una lista vacía al crear so
 
 El usuario pidió dejar las pruebas manuales con otras cuentas para el final porque solo dispone de su cuenta y no tiene otro correo. Esta decisión permite continuar el desarrollo; el acceso real entre cuentas sigue pendiente de verificar. Las pruebas locales de permisos ya pasaron. Creación, vinculación y cancelación con persistencia fueron confirmadas por el usuario.
 
-1. Instalar SQL 004–010 y `panel-accounts` en Supabase.
+1. Instalar SQL 004–012 y `panel-accounts` en Supabase.
 2. Actualizar Code.gs e index.html y activar una nueva versión del mismo enlace Google.
 3. Recorrer las pruebas finales de la interfaz original, una por una.
 4. Comprobar al final el acceso entre cuentas y los portales cliente/gerencia.

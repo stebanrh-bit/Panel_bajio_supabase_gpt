@@ -16,6 +16,7 @@ export const historyFieldLabels = {
   truck: "Unidad",
   trailer: "Trailer",
   status: "Estatus",
+  cancel_reason: "Motivo de cancelación",
   work_order: "Orden de trabajo",
   bol: "Documento BOL",
   doc_status: "Estado de documentación",

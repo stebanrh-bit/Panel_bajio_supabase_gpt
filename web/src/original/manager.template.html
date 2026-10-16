@@ -366,14 +366,7 @@
       return (v === null || v === undefined) ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function fmtDateTime(d) {
-      if (!d) return '';
-      var dt = (d instanceof Date) ? d : new Date(d);
-      if (isNaN(dt.getTime())) return String(d);
-      var months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-      var pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
-      return dt.getDate() + ' ' + months[dt.getMonth()] + ', ' + pad2(dt.getHours()) + ':' + pad2(dt.getMinutes());
-    }
+    function fmtDateTime(d) { return window.panelFormatting.formatMoment(d); }
 
     function showScreen(id) {
       ['login-screen', 'dashboard-screen', 'detail-screen'].forEach(function (s) {
