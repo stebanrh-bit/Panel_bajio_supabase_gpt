@@ -393,6 +393,7 @@ let importPreviews = 0,
   importSaves = 0,
   previewedRecords = [];
 const usabilityLayouts = [];
+const planningChecks = [];
 const incidents = [];
 const customerAssignments = [
   {
@@ -1103,6 +1104,7 @@ try {
   }
   // Calendario real con dos clientes: los filtros ocultan los demás eventos y no alteran datos.
   const previousCalendarData = {
+    length: rawLoads.length,
     crossing: rawLoads[0].cruce_usa_fecha,
     delivery: rawLoads[1].delivery_appt,
     customer: rawLoads[1].customer,
@@ -1116,7 +1118,9 @@ try {
   const calendarPage = await newPage(false);
   try {
     await calendarPage.locator('[data-page="calendario"]').click();
-    await calendarPage.locator("[data-cal-apartado]").waitFor();
+    await calendarPage
+      .locator("[data-cal-apartado]")
+      .waitFor({ state: "attached" });
     assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 5);
     for (const [type, count] of [
       ["pickup", 1],
@@ -1206,7 +1210,9 @@ try {
     reservedRow.own_load = "Sin referencia";
     await calendarPage.reload();
     await calendarPage.locator('[data-page="calendario"]').click();
-    await calendarPage.locator("[data-cal-apartado]").waitFor();
+    await calendarPage
+      .locator("[data-cal-apartado]")
+      .waitFor({ state: "attached" });
     await calendarPage
       .locator("#cal-cliente")
       .selectOption({ label: "Sin cliente identificado" });
@@ -1251,7 +1257,174 @@ try {
         fullPage: true,
       });
     }
+    // Agenda con volumen: ningún registro desaparece al compactar los días.
+    for (let i = 0; i < 12; i++)
+      rawLoads.push({
+        load: `PLAN-${String(i + 1).padStart(3, "0")}`,
+        customer: i % 2 ? "ACME" : "OTRO CLIENTE",
+        status: "Pte. Arribo",
+        truck: `TRUCK-${i + 1}`,
+        trailer: `TRAILER-${i + 1}`,
+        origin_city: "San Luis Potosí",
+        origin_state: "SLP",
+        dest_city: "Coldwater",
+        dest_state: "MI",
+        pickup_appt: i < 6 ? "2026-10-08T20:00:00Z" : future,
+        delivery_appt: future,
+        updated_at: stamp,
+        archived: false,
+      });
+    await calendarPage.setViewportSize({ width: 1533, height: 1100 });
+    await calendarPage.reload();
+    await calendarPage.locator('[data-page="calendario"]').click();
+    await calendarPage
+      .locator('#cal-grid [data-cal-load="PLAN-012"]')
+      .first()
+      .waitFor({ state: "attached" });
+    assert.equal(await calendarPage.locator("#cal-grid .cal-chip").count(), 29);
+    for (const day of await calendarPage.locator(".cal-dia").all()) {
+      assert.ok(
+        (await day.locator(".cal-chip:visible").count()) <= 3,
+        "Un día muestra como máximo tres movimientos al inicio",
+      );
+    }
+    const busyDay = calendarPage
+      .locator(".cal-dia")
+      .filter({ has: calendarPage.locator('[data-cal-load="PLAN-012"]') });
+    const totalBusy = await busyDay.locator(".cal-chip").count();
+    for (const day of await calendarPage.locator(".cal-dia-empty").all()) {
+      assert.ok(
+        (await day.boundingBox()).height <= 60,
+        "Un día vacío debe ocupar una sola fila compacta",
+      );
+    }
+    await busyDay.locator("summary").focus();
+    await calendarPage.keyboard.press("Enter");
+    assert.equal(await busyDay.locator(".cal-chip:visible").count(), totalBusy);
+    const dayBody = await busyDay
+      .locator(".cal-dia-body")
+      .evaluate((node) => ({
+        visible: node.clientHeight,
+        content: node.scrollHeight,
+      }));
+    assert.ok(
+      dayBody.content <= dayBody.visible + 1,
+      "Los movimientos desplegados no deben tener otro scroll interno",
+    );
+    await calendarPage.locator("#cal-reset").click();
+    assert.equal(
+      await busyDay.locator("details").getAttribute("open"),
+      "",
+      "Actualizar los filtros conserva el día desplegado",
+    );
+    await busyDay.locator('[data-cal-load="PLAN-012"]').last().click();
+    await calendarPage.locator("#workspace-backdrop.show").waitFor();
+    await calendarPage.locator("#workspace-close").click();
+    await busyDay.locator("summary").click();
+    assert.equal(await busyDay.locator(".cal-chip:visible").count(), 3);
+    await calendarPage
+      .locator("#cal-grid")
+      .screenshot({
+        path: "/tmp/panel-original-comparison/agenda-semanal-nueva.png",
+      });
+    planningChecks.push({
+      agendaEvents: 29,
+      perDayInitiallyVisible: 3,
+      expansionAndOpening: true,
+    });
+    await calendarPage.locator('[data-page="home"]').click();
+    await calendarPage.locator('[data-home-tab="ahora"]').click();
+    assert.equal(await calendarPage.locator(".attention-lane").count(), 3);
+    for (const key of ["now", "today", "future"])
+      assert.ok(
+        Number(
+          await calendarPage
+            .locator(`.attention-lane-${key} .attention-lane-count`)
+            .innerText(),
+        ) > 0,
+      );
+    const cards = calendarPage.locator("[data-attention-load]");
+    const loads = await cards.evaluateAll((nodes) =>
+      nodes.map((node) => node.dataset.attentionLoad),
+    );
+    assert.equal(
+      loads.length,
+      new Set(loads).size,
+      "Cada carga aparece una sola vez en el plan",
+    );
+    const plannedCard = calendarPage.locator(
+      '[data-attention-load="PLAN-001"]',
+    );
+    assert.match(
+      await plannedCard.locator(".attention-equipment").innerText(),
+      /TRAILER-1/,
+    );
+    assert.match(
+      await plannedCard.locator(".attention-equipment").innerText(),
+      /TRUCK-1/,
+    );
+    assert.match(
+      await plannedCard.locator(".attention-route").innerText(),
+      /San Luis Potosí.*Coldwater/,
+    );
+    const futureLane = calendarPage.locator(".attention-lane-future");
+    const futureCards = await futureLane
+      .locator("[data-attention-load]")
+      .count();
+    assert.equal(
+      await futureLane.locator("[data-attention-load]:visible").count(),
+      3,
+    );
+    await futureLane.locator("[data-lista-mas]").click();
+    assert.equal(
+      await futureLane.locator("[data-attention-load]:visible").count(),
+      futureCards,
+    );
+    await futureLane.locator("[data-lista-mas]").click();
+    await calendarPage
+      .locator("#action-center")
+      .screenshot({
+        path: "/tmp/panel-original-comparison/plan-del-dia-nuevo.png",
+      });
+    await plannedCard.locator("[data-home-open]").click();
+    await calendarPage.locator("#workspace-backdrop.show").waitFor();
+    await calendarPage.locator("#workspace-close").click();
+    for (const width of [1280, 1024, 768, 390, 320]) {
+      await calendarPage.setViewportSize({ width, height: 900 });
+      for (const view of ["home", "calendario"]) {
+        await calendarPage
+          .locator(`[data-page="${view}"]`)
+          .first()
+          .evaluate((node) => node.click());
+        if (view === "home")
+          await calendarPage
+            .locator('[data-home-tab="ahora"]')
+            .evaluate((node) => node.click());
+        const dimensions = await calendarPage.evaluate(() => ({
+          width: innerWidth,
+          content: document.documentElement.scrollWidth,
+        }));
+        assert.ok(
+          dimensions.content <= width,
+          `${view} no debe desbordarse a ${width}px`,
+        );
+        planningChecks.push({ view, ...dimensions });
+        if (width === 390)
+          await calendarPage
+            .locator(view === "home" ? "#action-center" : "#cal-grid")
+            .screenshot({
+              path: `/tmp/panel-original-comparison/${view}-nuevo-movil.png`,
+            });
+      }
+    }
+    planningChecks.push({
+      dailyGroups: 3,
+      trailerAndTruck: true,
+      uniqueLoads: loads.length,
+      showMoreAndOpening: true,
+    });
   } finally {
+    rawLoads.splice(previousCalendarData.length);
     if (previousCalendarData.crossing === undefined)
       delete rawLoads[0].cruce_usa_fecha;
     else rawLoads[0].cruce_usa_fecha = previousCalendarData.crossing;
@@ -2244,6 +2417,7 @@ try {
         requests: requests.length,
         errors,
         usabilityLayouts,
+        planningChecks,
       },
       null,
       2,

@@ -6,7 +6,8 @@
 - `index.template.html`, `client.template.html`, `manager.template.html`: presentación de cada vista.
 - `panel-source.js` y `panel.parts.json`: ensamblan los nueve archivos de `panel/` en orden. Mantienen un único cierre para preservar los eventos heredados; no se ejecutan por separado.
 - `api/`: adaptadores de operaciones, equipo, importación, radar y organización. `context.js` guarda sesiones, versiones y cachés por cuenta.
-- `organization.js`, `dialogs.js`, `validation.js`: pantallas nuevas y formularios compartidos.
+- `organization.js` y `organization.css`: centro de turno con navegación por secciones; `dialogs.js` y `validation.js`: formularios y validación compartidos.
+- `panel/02_daily_plan.js`: tarjetas del plan en tres grupos; `panel/06_events_and_sync.js`: agenda semanal con días desplegables. Su presentación está en `usability.css`. Los contadores incluyen registros aún no desplegados.
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.

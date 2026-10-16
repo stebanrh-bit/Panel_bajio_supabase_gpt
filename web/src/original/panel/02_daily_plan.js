@@ -1310,7 +1310,7 @@
     );
   }
   var homeAttentionFilter = "all";
-  /** Una fila por carga: prioridad, comunicación y revisiones conservan sus acciones propias. */
+  /** Plan en tres grupos: cada tarjeta reúne equipo, ruta y acciones de una sola carga. */
   function renderActionCenter(data, journey) {
     var list = document.getElementById("action-center-list");
     if (!list) return;
@@ -1415,92 +1415,156 @@
         return !!entry.row.client_notify_pending;
       return true;
     });
-    list.innerHTML = filtered.length
-      ? htmlListaConMas_(
-          "attention-" + homeAttentionFilter,
-          filtered,
-          8,
-          function (entry) {
-            var r = entry.row;
-            var due = entry.reminders.filter(function (item) {
-              return item.needsAction;
-            });
-            var upcoming = entry.reminders.filter(function (item) {
-              return !item.needsAction;
-            });
-            var labels = {
-              now: "Urgente",
-              review: "Revisar en el turno",
-              monitor: "En seguimiento",
-              scheduled: "Programada",
-            };
-            return (
-              '<article class="attention-load" data-attention-load="' +
-              esc(r.load) +
-              '"><div class="attention-load-header"><h3>Carga ' +
-              esc(r.load) +
-              "</h3><span>" +
-              esc(r.customer || "Sin cliente") +
-              '</span><span class="ux-state">' +
-              esc(labels[entry.bucket]) +
-              '</span><button type="button" class="ws-btn" data-home-open="' +
-              esc(r.load) +
-              '">Abrir expediente</button></div>' +
-              (entry.reasons.some(function (reason) {
+    // Una carga aparece una sola vez. Cada columna conserva sus acciones y su propio «Ver más».
+    function loadCard(entry) {
+      var r = entry.row;
+      var due = entry.reminders.filter(function (item) {
+        return item.needsAction;
+      });
+      var upcoming = entry.reminders.filter(function (item) {
+        return !item.needsAction;
+      });
+      var labels = {
+        now: "Urgente",
+        review: "Revisar en el turno",
+        monitor: "En seguimiento",
+        scheduled: "Programada",
+      };
+      return (
+        '<article class="attention-load" data-attention-load="' +
+        esc(r.load) +
+        '"><div class="attention-load-header"><h3>Carga ' +
+        esc(r.load) +
+        '</h3><span class="attention-customer">' +
+        esc(r.customer || "Sin cliente") +
+        '</span><span class="ux-state">' +
+        esc(labels[entry.bucket]) +
+        "</span></div>" +
+        '<p class="attention-route">' +
+        esc(
+          [r.origin_city, r.origin_state].filter(Boolean).join(", ") ||
+            "Origen sin capturar",
+        ) +
+        '<span aria-hidden="true"> → </span>' +
+        esc(
+          [r.dest_city, r.dest_state].filter(Boolean).join(", ") ||
+            "Destino sin capturar",
+        ) +
+        '</p><dl class="attention-equipment"><div><dt>Trailer</dt><dd>' +
+        esc(r.trailer || "Sin asignar") +
+        "</dd></div><div><dt>Truck</dt><dd>" +
+        esc(r.truck || "Sin asignar") +
+        '</dd></div></dl><div class="attention-card-content">' +
+        (entry.reasons.some(function (reason) {
+          return (
+            reason.kind !== "notify" && !reason.text.startsWith("Seguimiento ")
+          );
+        })
+          ? '<div class="action-reasons">' +
+            entry.reasons
+              .filter(function (reason) {
                 return (
                   reason.kind !== "notify" &&
                   !reason.text.startsWith("Seguimiento ")
                 );
               })
-                ? '<div class="action-reasons">' +
-                  entry.reasons
-                    .filter(function (reason) {
-                      return (
-                        reason.kind !== "notify" &&
-                        !reason.text.startsWith("Seguimiento ")
-                      );
-                    })
-                    .map(function (reason) {
-                      return (
-                        '<span class="action-reason-chip">' +
-                        esc(reason.text) +
-                        "</span>"
-                      );
-                    })
-                    .join("") +
-                  "</div>"
-                : "") +
-              (r.client_notify_pending
-                ? '<div class="attention-notify"><span>Avisar al cliente: ' +
-                  esc(r.client_notify_reason || "Actualización operativa") +
-                  '</span><button type="button" class="ws-btn" data-home-comm="' +
-                  esc(r.load) +
-                  '">Preparar aviso</button></div>'
-                : "") +
-              (!entry.reminders.length
-                ? "<p>Próximo compromiso · Recolección: " +
-                  esc(fmtDate(r.pickup_appt)) +
-                  " · Entrega: " +
-                  esc(fmtDate(r.delivery_appt)) +
-                  "</p>"
-                : "") +
-              due.map(homeReminderHtml).join("") +
-              (upcoming.length
-                ? '<details class="home-reminders-upcoming"><summary>Próximas revisiones (' +
-                  esc(upcoming.length) +
-                  ")</summary>" +
-                  upcoming.map(homeReminderHtml).join("") +
-                  "</details>"
-                : "") +
-              "</article>"
-            );
-          },
-        )
-      : '<div class="action-empty">' +
-        (groups.length
-          ? "Sin cargas para este filtro."
-          : "Sin acciones pendientes. La operación activa está al día.") +
-        "</div>";
+              .map(function (reason) {
+                return (
+                  '<span class="action-reason-chip">' +
+                  esc(reason.text) +
+                  "</span>"
+                );
+              })
+              .join("") +
+            "</div>"
+          : "") +
+        (r.client_notify_pending
+          ? '<div class="attention-notify"><span>Avisar al cliente: ' +
+            esc(r.client_notify_reason || "Actualización operativa") +
+            '</span><button type="button" class="ws-btn" data-home-comm="' +
+            esc(r.load) +
+            '">Preparar aviso</button></div>'
+          : "") +
+        (!entry.reminders.length
+          ? "<p>Próximo compromiso · Recolección: " +
+            esc(fmtDate(r.pickup_appt)) +
+            " · Entrega: " +
+            esc(fmtDate(r.delivery_appt)) +
+            "</p>"
+          : "") +
+        due.map(homeReminderHtml).join("") +
+        (upcoming.length
+          ? '<details class="home-reminders-upcoming"><summary>Próximas revisiones (' +
+            esc(upcoming.length) +
+            ")</summary>" +
+            upcoming.map(homeReminderHtml).join("") +
+            "</details>"
+          : "") +
+        '</div><button type="button" class="ws-btn attention-open" data-home-open="' +
+        esc(r.load) +
+        '">Abrir expediente <span aria-hidden="true">›</span></button></article>'
+      );
+    }
+    var lanes = [
+      {
+        key: "now",
+        title: "Atender primero",
+        note: "Vencido o requiere atención",
+      },
+      {
+        key: "today",
+        title: "Durante el día",
+        note: "Revisiones y avisos de hoy",
+      },
+      {
+        key: "future",
+        title: "Próximos días",
+        note: "Lo que ya está programado",
+      },
+    ].filter(function (lane) {
+      return (
+        ["now", "today", "future"].indexOf(homeAttentionFilter) === -1 ||
+        lane.key === homeAttentionFilter
+      );
+    });
+    list.classList.toggle("attention-single-lane", lanes.length === 1);
+    list.innerHTML = lanes
+      .map(function (lane) {
+        var items = filtered.filter(function (entry) {
+          return dayBucket(entry) === lane.key;
+        });
+        return (
+          '<section class="attention-lane attention-lane-' +
+          lane.key +
+          '" aria-labelledby="attention-lane-' +
+          lane.key +
+          '">' +
+          '<header class="attention-lane-head"><div><h3 id="attention-lane-' +
+          lane.key +
+          '">' +
+          lane.title +
+          "</h3><p>" +
+          lane.note +
+          '</p></div><span class="attention-lane-count">' +
+          items.length +
+          "</span></header>" +
+          '<div class="attention-lane-items">' +
+          (items.length
+            ? htmlListaConMas_(
+                "attention-" + homeAttentionFilter + "-" + lane.key,
+                items,
+                3,
+                loadCard,
+              )
+            : '<p class="attention-lane-empty">' +
+              (filtered.length || groups.length
+                ? "Sin cargas para este grupo."
+                : "Sin pendientes en este grupo.") +
+              "</p>") +
+          "</div></section>"
+        );
+      })
+      .join("");
     renderHomeReminders(scoped);
   }
   document.addEventListener("click", function (event) {

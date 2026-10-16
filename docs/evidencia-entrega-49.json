@@ -6,8 +6,8 @@
   "current_artifacts": [
     {
       "file": "google-apps-script/index-sitio.html",
-      "bytes": 835027,
-      "gzip_bytes_estimated": 234267
+      "bytes": 854540,
+      "gzip_bytes_estimated": 238718
     },
     {
       "file": "google-apps-script/index-cliente.html",
@@ -25,6 +25,6 @@
       "gzip_bytes_estimated": 21152
     }
   ],
-  "internal_html_reduction_percent": 56.5,
+  "internal_html_reduction_percent": 55.5,
   "note": "Tamaños locales de entrega; gzip es una estimación, no una medición de tráfico o cuota de Supabase/Google."
 }

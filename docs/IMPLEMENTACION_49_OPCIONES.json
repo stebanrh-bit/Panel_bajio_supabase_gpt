@@ -1001,11 +1001,11 @@
     "unit_integration_passed": 145,
     "failed": 0,
     "skipped": 0,
-    "organization_browser_flows": 8,
+    "organization_browser_flows": 9,
     "visual_comparisons": 38,
     "visual_comparison_scope": "Presentación prevista frente al HTML generado, con datos de prueba; no comparación autenticada contra el portal original en producción.",
     "artifacts": "docs/VALIDACION_49_OPCIONES.md",
-    "production_acceptance": "docs/PRUEBAS_FINALES.md: pendiente, una prueba por vez"
+    "production_acceptance": "Las pruebas manuales siguen canceladas por el usuario hasta nuevo aviso."
   },
   "followup": {
     "date": "2026-10-16",
@@ -1041,5 +1041,21 @@
     "recurrence": "El usuario confirma persona/frecuencia/hora guardadas y luego pausa persistente de PRUEBA DIARIA.",
     "alerts": "La prueba del aviso no fue confirmada antes de cancelar la ronda.",
     "accounts": "Sin confirmación de pruebas con otras cuentas."
+  },
+  "planning_design": {
+    "date": "2026-10-16",
+    "request": "Separar cargas del plan con trailer y truck, simplificar calendario semanal y mejorar Organizar turno.",
+    "implementation": [
+      "web/src/original/panel/02_daily_plan.js",
+      "web/src/original/panel/06_events_and_sync.js",
+      "web/src/original/organization.js",
+      "web/src/original/organization.css",
+      "web/src/original/usability.css",
+      "web/src/original/index.template.html"
+    ],
+    "delivery": "Actualizar solo index.html en la implementación Google existente; no requiere SQL.",
+    "evidence": "docs/evidencia-diseno-plan-turno-2026-10-16.json",
+    "production": "Pendiente de instalación por el usuario.",
+    "manual_testing": "No se reinician las pruebas manuales canceladas."
   }
 }

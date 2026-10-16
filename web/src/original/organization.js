@@ -27,6 +27,57 @@ const templateOptions = (data) => [
   ...data.task_checklist_templates.map((t) => [t.id, t.name]),
 ];
 
+/** Iconos locales: acompañan al texto sin descargar imágenes ni añadir dependencias. */
+const organizationSections = [
+  {
+    id: "tasks",
+    label: "Tareas y checklist",
+    detail: "Asigna acciones y revisa sus pasos",
+    icon: "M9 5h10v15H5V5h2m2-2h6v4H9zM8 12l2 2 4-4m-6 7h8",
+  },
+  {
+    id: "schedules",
+    label: "Tareas recurrentes",
+    detail: "Programa lo que se repite",
+    icon: "M20 7v5h-5M4 17v-5h5M5 8a8 8 0 0 1 13-3l2 3M4 16l2 3a8 8 0 0 0 13-3",
+  },
+  {
+    id: "reserved",
+    label: "Referencias de regreso",
+    detail: "Relaciona tus cargas apartadas",
+    icon: "M3 6h11v11H3zM14 10h4l3 4v3h-7M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4m11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4",
+  },
+  {
+    id: "alerts",
+    label: "Avisos",
+    detail: "Consulta lo que sigue pendiente",
+    icon: "M5 17h14l-2-3V9a5 5 0 0 0-10 0v5zM10 20h4",
+  },
+  {
+    id: "rules",
+    label: "Reglas",
+    detail: "Ajusta el funcionamiento del panel",
+    admin: true,
+    icon: "M4 7h16M4 17h16M8 4v6m8 4v6",
+  },
+  {
+    id: "clients",
+    label: "Nombres de clientes",
+    detail: "Unifica nombres y equivalencias",
+    admin: true,
+    icon: "M3 21V5h11v16M14 10h7v11M1 21h22M6 9h5m-5 4h5m-5 4h5m6-3h2m-2 4h2",
+  },
+  {
+    id: "retention",
+    label: "Respaldo y archivo",
+    detail: "Conserva y organiza tu información",
+    admin: true,
+    icon: "M4 8h16v13H4zM2 3h20v5H2zM9 12h6",
+  },
+];
+const organizationNavButton = ({ id, label, detail, icon }) =>
+  `<button type="button" data-org-action="tab" data-id="${id}" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icon}"/></svg><span><strong>${label}</strong><small>${detail}</small></span><span class="organize-nav-arrow" aria-hidden="true">›</span></button>`;
+
 /** Controles nuevos en una sola ventana; se consultan al abrirla, no en cada refresco del panel. */
 export function mountOrganization(api, doc = document) {
   const toolbar = doc.createElement("div");
@@ -75,21 +126,27 @@ export function mountOrganization(api, doc = document) {
     const dialog = doc.createElement("dialog");
     active = dialog;
     dialog.dataset.organizationId = crypto.randomUUID();
-    dialog.className = "organize-dialog";
-    const tabs = [
-      ["tasks", "Tareas y checklist"],
-      ["schedules", "Tareas recurrentes"],
-      ["reserved", "Referencias de regreso"],
-      ["alerts", "Avisos"],
-      ...(data.admin
-        ? [
-            ["rules", "Reglas"],
-            ["clients", "Nombres de clientes"],
-            ["retention", "Respaldo y archivo"],
-          ]
-        : []),
-    ];
-    dialog.innerHTML = `<form method="dialog"><header><h2>Organizar turno</h2><button value="close" aria-label="Cerrar">×</button></header><nav class="organize-tabs">${tabs.map(([id, label]) => button("tab", label, id)).join("")}</nav><p class="organize-status" role="status"></p><section></section></form>`;
+    dialog.className = "organize-dialog organize-hub";
+    dialog.setAttribute("aria-labelledby", "organize-hub-title");
+    const tabs = organizationSections.filter(
+      (item) => !item.admin || data.admin,
+    );
+    dialog.innerHTML = `<form method="dialog">
+      <header class="organize-hub-head"><div><span class="organize-eyebrow">TU ESPACIO DE TRABAJO</span><h2 id="organize-hub-title">Organizar turno</h2><p>Prepara el trabajo, da seguimiento y deja todo en orden.</p></div><button class="organize-close" value="close" aria-label="Cerrar">×</button></header>
+      <div class="organize-layout"><nav class="organize-tabs" aria-label="Secciones de Organizar turno"><p class="organize-nav-label">Trabajo diario</p>${tabs
+        .filter((t) => !t.admin)
+        .map(organizationNavButton)
+        .join("")}${
+        data.admin
+          ? '<p class="organize-nav-label">Administración</p>' +
+            tabs
+              .filter((t) => t.admin)
+              .map(organizationNavButton)
+              .join("")
+          : ""
+      }</nav>
+      <div class="organize-content"><div class="organize-content-head"><span class="organize-eyebrow">TRABAJO DIARIO</span><h3 id="organize-section-title"></h3></div><p class="organize-status" role="status"></p><section aria-labelledby="organize-section-title"></section></div></div>
+    </form>`;
     doc.body.append(dialog);
     dialog.addEventListener("close", () => {
       dialog.remove();
@@ -100,6 +157,12 @@ export function mountOrganization(api, doc = document) {
       status = dialog.querySelector("[role=status]");
     function show(key) {
       tab = key;
+      const current = tabs.find((item) => item.id === key);
+      dialog.querySelector("#organize-section-title").textContent =
+        current.label;
+      dialog.querySelector(
+        ".organize-content-head .organize-eyebrow",
+      ).textContent = current.admin ? "ADMINISTRACIÓN" : "TRABAJO DIARIO";
       status.textContent = "";
       dialog
         .querySelectorAll("[data-org-action=tab]")
@@ -108,7 +171,7 @@ export function mountOrganization(api, doc = document) {
         );
       if (key === "tasks") {
         // La pestaña inicial debe explicar qué muestra y permitir crear una tarea aquí mismo.
-        section.innerHTML = `<h3>Tareas y checklist</h3><p>Estas son tus tareas abiertas. Pulsa «Abrir» para agregar o completar sus pasos obligatorios.</p>${button("new-task", "Nueva tarea de turno")}${data.tasks.length ? data.tasks.map((t) => row(t.note, `${t.load || "Sin carga"} · ${date(t.follow_up_at)}`, button("task", "Abrir", t.id))).join("") : "<p>No hay tareas abiertas. Crea una con «Nueva tarea de turno».</p>"}`;
+        section.innerHTML = `<p>Estas son tus tareas abiertas. Pulsa «Abrir» para agregar o completar sus pasos obligatorios.</p>${button("new-task", "Nueva tarea de turno")}${data.tasks.length ? data.tasks.map((t) => row(t.note, `${t.load || "Sin carga"} · ${date(t.follow_up_at)}`, button("task", "Abrir", t.id))).join("") : "<p>No hay tareas abiertas. Crea una con «Nueva tarea de turno».</p>"}`;
       }
       if (key === "schedules")
         section.innerHTML = `<p>Horario del centro de México. Se crea una tarea por ocurrencia; si el proceso estuvo detenido, recupera una sola y continúa en el próximo horario.</p>${button("schedule", "Nueva programación")}${data.admin ? button("tick", "Comprobar programaciones ahora") : ""}${data.task_schedules.map((t) => row(t.note, `${t.cadence === "daily" ? "Diaria" : "Semanal"} · ${date(t.next_run_at)} · ${t.active ? "Activa" : "Pausada"}`, button("schedule", "Editar", t.id))).join("") || empty}`;

@@ -1374,6 +1374,7 @@ function clicWorkspaceYAvisos_(e) {
   // ===== Calendario de la semana =====
   var calTipo_ = "all",
     calCliente_ = ""; // Filtros locales, independientes del listado de Cargas.
+  var calDiasAbiertos_ = new Set(); // Conserva el despliegue durante la actualización automática.
   var calSemana_ = 0; // 0 = esta semana, -1 la anterior, +1 la siguiente
   function lunesDe_(d) {
     var x = new Date(d);
@@ -1517,70 +1518,106 @@ function clicWorkspaceYAvisos_(e) {
         ? " · " + clients.get(calCliente_)
         : " · Todos los clientes");
     document.getElementById("cal-no-results").hidden = visible > 0;
-    var nombres = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+    var nombres = [
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo",
+      ],
       hoy = new Date().toDateString();
+    function calendarCard(x) {
+      var record = x.ap || x.r;
+      var hh =
+        ("0" + x.fecha.getHours()).slice(-2) +
+        ":" +
+        ("0" + x.fecha.getMinutes()).slice(-2);
+      var target = x.ap
+        ? 'data-cal-apartado="' + esc(x.ap.id)
+        : 'data-cal-load="' + esc(x.r.load);
+      return (
+        '<button type="button" class="cal-chip t-' +
+        esc(x.tipo) +
+        '" ' +
+        target +
+        '">' +
+        '<span class="cal-event-top"><span class="cal-event-type">' +
+        esc(x.etiqueta) +
+        '</span><time datetime="' +
+        esc(x.fecha.toISOString()) +
+        '">' +
+        hh +
+        "</time></span>" +
+        "<strong>Carga " +
+        esc(record.load) +
+        '</strong><small class="cal-event-client">' +
+        esc(x.customer || "Sin cliente identificado") +
+        "</small>" +
+        '<span class="cal-event-equipment">Trailer: ' +
+        esc(record.trailer || "Sin asignar") +
+        (x.ap ? "" : " · Truck: " + esc(record.truck || "Sin asignar")) +
+        "</span>" +
+        '<span class="cal-event-status">' +
+        esc(
+          x.ap
+            ? APARTADO_ESTADOS_[x.ap.estado] || "Apartado"
+            : x.r.status || "Sin estatus",
+        ) +
+        '<span aria-hidden="true"> ›</span></span></button>'
+      );
+    }
+    // La semana se lee por filas; los días con mayor actividad se despliegan a petición.
     grid.innerHTML = dias
       .map(function (d, i) {
         var items = porDia[d.toDateString()].sort(function (a, b) {
           return a.fecha - b.fecha;
         });
+        var extra = items.length - 3;
         return (
-          '<div class="cal-dia' +
+          '<section class="cal-dia' +
           (d.toDateString() === hoy ? " hoy" : "") +
-          '"><div class="cal-dia-head">' +
+          (!items.length ? " cal-dia-empty" : "") +
+          '" aria-labelledby="cal-day-' +
+          i +
+          '">' +
+          '<header class="cal-dia-head"><div><span class="cal-day-name">' +
           esc(nombres[i]) +
-          " " +
+          "</span>" +
+          '<h3 id="cal-day-' +
+          i +
+          '">' +
           d.getDate() +
-          "<span>" +
-          esc(items.length) +
-          '</span></div><div class="cal-dia-body">' +
+          "<small>" +
+          esc(d.toLocaleDateString("es-MX", { month: "short" })) +
+          "</small></h3>" +
+          (d.toDateString() === hoy
+            ? '<span class="cal-today-label">Hoy</span>'
+            : "") +
+          '</div><span class="cal-day-count">' +
+          items.length +
+          (items.length === 1 ? " movimiento" : " movimientos") +
+          "</span></header>" +
+          '<div class="cal-dia-body">' +
           (items.length
-            ? items
-                .map(function (x) {
-                  var hh =
-                    ("0" + x.fecha.getHours()).slice(-2) +
-                    ":" +
-                    ("0" + x.fecha.getMinutes()).slice(-2);
-                  if (x.ap)
-                    return (
-                      '<button type="button" class="cal-chip t-apartado" data-cal-apartado="' +
-                      esc(x.ap.id) +
-                      '">' +
-                      hh +
-                      " · " +
-                      esc(x.etiqueta) +
-                      " · Carga " +
-                      esc(x.ap.load) +
-                      "<small>" +
-                      esc(
-                        x.customer
-                          ? x.customer + " · "
-                          : "Sin cliente identificado · ",
-                      ) +
-                      esc(APARTADO_ESTADOS_[x.ap.estado] || "") +
-                      (x.ap.mi_carga ? " · " + esc(x.ap.mi_carga) : "") +
-                      "</small></button>"
-                    );
-                  return (
-                    '<button type="button" class="cal-chip t-' +
-                    esc(x.tipo) +
-                    '" data-cal-load="' +
-                    esc(x.r.load) +
-                    '">' +
-                    hh +
-                    " · " +
-                    esc(x.etiqueta) +
-                    " · Carga " +
-                    esc(x.r.load) +
-                    "<small>" +
-                    esc(x.r.customer || "") +
-                    (x.r.status ? " · " + esc(x.r.status) : "") +
-                    "</small></button>"
-                  );
-                })
-                .join("")
-            : '<div class="cal-vacio">Sin movimientos</div>') +
-          "</div></div>"
+            ? '<div class="cal-day-events">' +
+              items.slice(0, 3).map(calendarCard).join("") +
+              "</div>" +
+              (extra > 0
+                ? '<details class="cal-day-more" data-cal-day="' +
+                  i +
+                  '"' +
+                  (calDiasAbiertos_.has(i) ? " open" : "") +
+                  "><summary><span>Ver " +
+                  extra +
+                  " movimientos más</span><span>Mostrar menos</span></summary>" +
+                  '<div class="cal-day-events">' +
+                  items.slice(3).map(calendarCard).join("") +
+                  "</div></details>"
+                : "")
+            : '<p class="cal-vacio">Sin movimientos programados</p>') +
+          "</div></section>"
         );
       })
       .join("");
@@ -1603,17 +1640,32 @@ function clicWorkspaceYAvisos_(e) {
     renderCalendario_();
   });
   document.getElementById("cal-prev").addEventListener("click", function () {
+    calDiasAbiertos_.clear();
     calSemana_--;
     renderCalendario_();
   });
   document.getElementById("cal-next").addEventListener("click", function () {
+    calDiasAbiertos_.clear();
     calSemana_++;
     renderCalendario_();
   });
   document.getElementById("cal-hoy").addEventListener("click", function () {
+    calDiasAbiertos_.clear();
     calSemana_ = 0;
     renderCalendario_();
   });
+  document.getElementById("cal-grid").addEventListener(
+    "toggle",
+    function (event) {
+      if (!event.target.matches("details[data-cal-day]")) return;
+      var day = Number(event.target.dataset.calDay);
+      // Ignorar eventos pendientes de nodos reemplazados al volver a dibujar la semana.
+      if (!event.target.isConnected) return;
+      if (event.target.open) calDiasAbiertos_.add(day);
+      else calDiasAbiertos_.delete(day);
+    },
+    true,
+  );
   document.getElementById("cal-grid").addEventListener("click", function (e) {
     var b = e.target.closest("[data-cal-load]");
     if (b) {

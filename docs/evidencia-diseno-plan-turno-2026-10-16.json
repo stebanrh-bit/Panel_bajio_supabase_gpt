@@ -1,0 +1,345 @@
+{
+  "date": "2026-10-16",
+  "environment": "Chromium local, datos ficticios y peticiones Supabase interceptadas; PostgreSQL efímero para tareas y programación. Sin escrituras en producción.",
+  "artifact": {
+    "file": "google-apps-script/index-sitio.html",
+    "sha256": "b87eb7b9c70744a66d57f4cba6cd34609caa62de8f186643facc27b4f7b92ebf"
+  },
+  "unit_integration_tests": {
+    "passed": 145,
+    "failed": 0,
+    "skipped": 0
+  },
+  "build": "Panel interno, cliente, gerencia y lector compilados.",
+  "planning_checks": [
+    {
+      "agendaEvents": 29,
+      "perDayInitiallyVisible": 3,
+      "expansionAndOpening": true
+    },
+    {
+      "view": "home",
+      "width": 1280,
+      "content": 1280
+    },
+    {
+      "view": "calendario",
+      "width": 1280,
+      "content": 1280
+    },
+    {
+      "view": "home",
+      "width": 1024,
+      "content": 1024
+    },
+    {
+      "view": "calendario",
+      "width": 1024,
+      "content": 1024
+    },
+    {
+      "view": "home",
+      "width": 768,
+      "content": 768
+    },
+    {
+      "view": "calendario",
+      "width": 768,
+      "content": 768
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "content": 390
+    },
+    {
+      "view": "calendario",
+      "width": 390,
+      "content": 390
+    },
+    {
+      "view": "home",
+      "width": 320,
+      "content": 320
+    },
+    {
+      "view": "calendario",
+      "width": 320,
+      "content": 320
+    },
+    {
+      "dailyGroups": 3,
+      "trailerAndTruck": true,
+      "uniqueLoads": 14,
+      "showMoreAndOpening": true
+    }
+  ],
+  "calendar_checks": {
+    "empty_day_max_height_px": 60,
+    "expanded_day_no_internal_scroll": true,
+    "expansion_survives_filter_refresh": true,
+    "filters_and_week_navigation": true,
+    "apartado_opening": true,
+    "keyboard_expansion": true
+  },
+  "organization": {
+    "environment": "Chromium + SDK Supabase + PostgreSQL local; peticiones remotas interceptadas",
+    "checks": [
+      "Pestaña sin tareas muestra explicación y botón; Contactos VG retirado",
+      "Nueva tarea abre el formulario y aparece guardada al regresar",
+      "Organizar turno: navegación y contenido activos, sin desbordamiento en cinco anchos de 320 a 1533 px",
+      "Checklist creado y asociado a tarea real",
+      "Pasos completados y persistidos",
+      "Tarea recurrente creada con horario de México",
+      "Escalamiento configurable; envío externo permanece desactivado",
+      "Mis clientes filtra y limpiar recupera toda la operación",
+      "Carga, cliente, estatus, trailer y color adversos permanecen como texto"
+    ],
+    "errors": []
+  },
+  "loads_list_regression": [
+    {
+      "viewport": 1920,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": false,
+      "available": 1058,
+      "content": 1058,
+      "tableWidth": 1058,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": false,
+      "available": 958,
+      "content": 958,
+      "tableWidth": 958,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": false,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": false,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": false,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": false,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": false,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": false,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": false,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": false,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1920,
+      "detail": true,
+      "available": 956,
+      "content": 956,
+      "tableWidth": 956.40625,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": true,
+      "available": 770,
+      "content": 770,
+      "tableWidth": 769.8125,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": true,
+      "available": 714,
+      "content": 714,
+      "tableWidth": 714,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": true,
+      "available": 618,
+      "content": 618,
+      "tableWidth": 618,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": true,
+      "available": 542,
+      "content": 542,
+      "tableWidth": 542,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": true,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": true,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": true,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": true,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": true,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": true,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": true,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": true,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    }
+  ],
+  "browser_regressions": {
+    "errors": [],
+    "imports": "CSV/XLSX/XLS; validación y guardado",
+    "reminders": "Revisión operativa y seguimiento personal independientes; completar y cambiar fecha conservan el otro plazo."
+  },
+  "visual_review": "Capturas del plan, agenda y menú de turno revisadas localmente. La batería de 38 comparaciones exactas no se repitió en esta revisión.",
+  "installation": "Reemplazar solo index.html y actualizar la misma implementación Google; sin SQL.",
+  "manual_tests": "Canceladas por el usuario hasta nuevo aviso.",
+  "production": "Pendiente de instalación por el usuario."
+}

@@ -3,6 +3,7 @@
   "checks": [
     "Pestaña sin tareas muestra explicación y botón; Contactos VG retirado",
     "Nueva tarea abre el formulario y aparece guardada al regresar",
+    "Organizar turno: navegación y contenido activos, sin desbordamiento en cinco anchos de 320 a 1533 px",
     "Checklist creado y asociado a tarea real",
     "Pasos completados y persistidos",
     "Tarea recurrente creada con horario de México",

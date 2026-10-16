@@ -282,6 +282,45 @@ try {
     .filter({ hasText: "Tarea creada desde Organizar turno" })
     .waitFor();
   checks.push("Nueva tarea abre el formulario y aparece guardada al regresar");
+  // Navegación del nuevo centro de turno, con datos persistidos y distintos anchos.
+  for (const width of [1533, 1024, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const id of ["schedules", "tasks"]) {
+      await org.locator(`[data-org-action=tab][data-id=${id}]`).click();
+      assert.equal(
+        await org
+          .locator(`[data-org-action=tab][data-id=${id}]`)
+          .getAttribute("aria-pressed"),
+        "true",
+      );
+      assert.equal(
+        await org.locator("[data-org-action=tab][aria-pressed=true]").count(),
+        1,
+      );
+      assert.match(
+        await org.locator("#organize-section-title").innerText(),
+        id === "tasks" ? /Tareas y checklist/ : /Tareas recurrentes/,
+      );
+    }
+    const geometry = await org.evaluate((node) => ({
+      width: node.clientWidth,
+      content: node.scrollWidth,
+      screen: innerWidth,
+      page: document.documentElement.scrollWidth,
+    }));
+    assert.ok(
+      geometry.content <= geometry.width && geometry.page <= geometry.screen,
+      `Organizar turno no debe desbordarse a ${width}px`,
+    );
+    if ([1533, 390].includes(width))
+      await org.screenshot({
+        path: `/tmp/panel-original-comparison/organizar-turno-nuevo-${width}.png`,
+      });
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  checks.push(
+    "Organizar turno: navegación y contenido activos, sin desbordamiento en cinco anchos de 320 a 1533 px",
+  );
   let current = page.locator("dialog").last();
   await current
     .locator(".organize-row")
