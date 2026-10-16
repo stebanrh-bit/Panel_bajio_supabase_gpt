@@ -1,5 +1,7 @@
 # Qué código se mantiene
 
+La actualización de calendario, tareas y listado está documentada en [CALENDARIO_TAREAS_Y_LISTADO_2026-10-16.md](CALENDARIO_TAREAS_Y_LISTADO_2026-10-16.md). La presentación activa se modifica en las fuentes siguientes; los archivos históricos de la raíz conservan su contenido.
+
 ## Sitio actual
 
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.

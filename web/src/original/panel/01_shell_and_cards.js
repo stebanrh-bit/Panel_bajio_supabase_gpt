@@ -1161,12 +1161,9 @@
       incidenciasBtnLabel(rec) +
       "</button>" +
       '<details class="card-secondary-actions"><summary>Más acciones</summary><div class="ux-advanced-content">' +
-      '<button type="button" class="incidencias-btn" data-pendiente-turno-load="' +
+      '<button type="button" class="incidencias-btn" data-create-task-load="' +
       esc(rec.load) +
-      '">Marcar pendiente</button>' +
-      '<button type="button" class="incidencias-btn" data-pendiente-turno-asignar-load="' +
-      esc(rec.load) +
-      '">Asignar a alguien en especial</button>' +
+      '">Crear tarea</button>' +
       colorSwatchesHtml(rec) +
       "</div></details>" +
       "</div>" +

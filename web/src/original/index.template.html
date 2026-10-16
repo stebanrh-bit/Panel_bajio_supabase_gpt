@@ -300,7 +300,7 @@
   </div>
 
   <div id="table-view" style="display:none;">
-    <section class="table-section">
+    <section class="table-section loads-list-section">
       <h2 class="table-section-h2">Listado de cargas</h2>
       <!-- Acciones masivas: aparece con "Seleccionar varias"; clic en los renglones para elegirlos. -->
       <div class="masivo-bar" id="masivo-bar" hidden>
@@ -316,8 +316,8 @@
       <div class="table-wrap">
         <table class="loads-table" role="table">
           <caption class="loads-table-caption">Ordenar listado por</caption>
-          <colgroup><col class="c-load"><col class="c-customer"><col class="c-status"><col class="c-date"><col class="c-trailer"><col class="c-city"><col class="c-city"><col class="c-date"><col class="c-comment"></colgroup>
-          <thead><tr><th data-sort="load">Carga</th><th data-sort="customer">Cliente</th><th data-sort="status">Etapa / estatus</th><th data-sort="delivery_appt">Entrega · cita</th><th data-sort="trailer">Trailer</th><th data-sort="dest_city">Destino</th><th data-sort="origin_city">Origen</th><th data-sort="pickup_appt">Recolección · cita</th><th>Último comentario</th></tr></thead>
+          <colgroup><col class="c-load"><col class="c-customer"><col class="c-status"><col class="c-date"><col class="c-trailer"><col class="c-city"><col class="c-city"><col class="c-comment"></colgroup>
+          <thead><tr><th data-sort="load">Carga</th><th data-sort="customer">Cliente</th><th data-sort="status">Etapa / estatus</th><th data-sort="delivery_appt">Entrega · cita</th><th data-sort="trailer">Trailer</th><th data-sort="origin_city">Origen</th><th data-sort="dest_city">Destino</th><th>Último comentario</th></tr></thead>
           <tbody role="rowgroup" id="table-body"></tbody>
         </table>
         <div class="table-empty" id="table-empty" style="display:none;">Sin resultados con los filtros actuales.</div>
@@ -358,10 +358,18 @@
     </div>
     <button type="button" class="ws-btn" id="cal-reset">Limpiar filtros</button>
   </div>
-  <p class="cal-filter-help">La semana se organiza por día y hora. En los días con más actividad, despliega los movimientos restantes. Usa los filtros para enfocarte en un cliente o tipo de movimiento.</p>
+  <div class="cal-view-bar">
+    <div class="cal-view-switch" role="group" aria-label="Vista del calendario">
+      <span>Vista</span>
+      <button type="button" class="ws-btn" data-cal-view="agenda" aria-pressed="true" aria-controls="cal-grid">Agenda</button>
+      <button type="button" class="ws-btn" data-cal-view="week" aria-pressed="false" aria-controls="cal-grid">Semana</button>
+      <button type="button" class="ws-btn" data-cal-view="list" aria-pressed="false" aria-controls="cal-grid">Lista compacta</button>
+    </div>
+    <p class="cal-filter-help" id="cal-view-help">Agenda por día: muestra tres movimientos y permite desplegar los demás.</p>
+  </div>
   <div class="cal-summary"><h2 id="cal-week-title"></h2><span id="cal-result" role="status" aria-live="polite"></span></div>
   <p class="cal-no-results" id="cal-no-results" hidden>No hay movimientos esta semana para los filtros seleccionados.</p>
-  <div class="cal-grid" id="cal-grid"></div>
+  <div class="cal-grid" id="cal-grid" data-view="agenda"></div>
 </div>
 
 <!-- Indicadores: resumen (sirve en celular), por CSR, puntualidad, frontera y reporte semanal. -->
@@ -447,7 +455,7 @@
     <select class="cliente-filter" id="historico-persona" title="Filtrar por persona (quien lo dejó o a quien se le asignó)">
       <option value="">Todas las personas</option>
     </select>
-    <select class="cliente-filter" id="historico-csr" title="Filtrar por CSR (pendientes ruteados por &quot;Marcar pendiente&quot;)">
+    <select class="cliente-filter" id="historico-csr" title="Filtrar por CSR (tareas asignadas a quien cubra al CSR)">
       <option value="">Todos los CSR</option>
     </select>
     <select class="cliente-filter" id="historico-estado" title="Filtrar por estado">
@@ -624,6 +632,10 @@
           <div class="bitacora-load-list" id="bitacora-load-select"></div>
         </fieldset>
         <label class="turno-field">Fecha de seguimiento (opcional)<input type="date" id="bitacora-fecha-seguimiento"></label>
+        <label class="turno-field" id="bitacora-assignment-mode-wrap" hidden>Tipo de asignación<select id="bitacora-assignment-mode">
+          <option value="person">Persona específica</option>
+          <option value="coverage">Quien cubra al CSR del cliente</option>
+        </select></label>
         <div id="bitacora-asignado-wrap">
           <label class="turno-field">Asignar a:<select id="bitacora-asignado"></select></label>
         </div>

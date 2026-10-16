@@ -5,13 +5,25 @@
 1. Entra con tu cuenta. Abre Inicio y elige **Urgente**, **Hoy** o **Próximos días**. Cada fila muestra carga, cliente, trailer y truck; **Ver acciones** despliega sus recordatorios y botones.
 2. Abre Cargas. Puedes consultar toda la operación; **Mis clientes** muestra tus clientes y cargas seguidas. Los filtros solo cambian la vista. **Limpiar filtros** recupera la lista general.
 3. En el expediente, **Etapa** indica el avance, **Prioridad** el orden de trabajo y **Atención** el motivo para revisarlo. Unidad es el tractocamión; trailer es la caja; cita es la hora acordada.
-4. **Revisión operativa** depende del estatus, por ejemplo revisar tránsito cada tres horas. **Seguimiento personal** guarda una próxima acción propia. Atender una no completa la otra. Vencer significa «ya toca», no elimina nada.
+4. **Revisión operativa** depende del estatus, por ejemplo revisar tránsito cada tres horas. **Seguimiento personal** guarda una próxima acción propia. Atender una no completa la otra. Vencer significa «ya toca», no elimina nada. El expediente indica **Programado para**, **Pendiente de atender** o **Sin seguimiento programado**. Pulsa **Completar seguimiento** cuando hayas terminado o **Reprogramar** si aún falta trabajo.
 5. Prepara el mensaje al cliente y envíalo por tu canal habitual. Después registra que ya avisaste. Preparar o copiar el texto no equivale a enviarlo.
-6. Solicitudes son viajes sin número confirmado. Vincúlalas cuando exista una carga activa. Tareas son acciones asignadas a personas del panel.
+6. Solicitudes son viajes sin número confirmado. Vincúlalas cuando exista una carga activa. Tareas son acciones asignadas a personas del panel. En el detalle de una carga, usa **Crear tarea** y elige **Persona específica** o **Quien cubra al CSR del cliente**. La cobertura se ofrece cuando todas las cargas seleccionadas tienen el mismo CSR asignado.
 7. En **Organizar turno → Tareas y checklist**, abre tus tareas y completa los pasos obligatorios. Si la lista está vacía, usa **Nueva tarea de turno** en esa misma ventana. Si depende de otra tarea, termina primero el antecedente. Puedes agregar una plantilla con un paso por línea o seleccionar una existente.
 8. En **Tareas recurrentes**, elige persona, frecuencia, hora y carga opcional. Los días usan 0 domingo a 6 sábado; por ejemplo `1,2,3,4,5` para lunes a viernes. Puedes pausar una programación.
 9. Para un regreso, el CSR de VG se escribe manualmente. Una carga relacionada debe estar activa al crear el vínculo; una referencia libre admite datos externos.
 10. Antes de salir, prepara el cierre. Indica pendientes críticos (o «Sin pendientes críticos»), quién continúa y la próxima acción con plazo.
+
+## Calendario y listado
+
+En **Calendario**, elige la vista que prefieras:
+
+- **Agenda:** días en filas, con tres movimientos y un desplegable para los demás.
+- **Semana:** días en columnas; se adapta a menos columnas en pantallas pequeñas.
+- **Lista compacta:** todos los movimientos ordenados por día y hora, sin desplegables.
+
+Cambiar de vista conserva la semana y los filtros. El navegador recuerda la vista por cuenta. **Limpiar filtros** recupera todos los clientes y movimientos, conservando esa vista. Pulsa una carga o apartado para abrir su detalle.
+
+El listado de **Cargas** muestra origen antes de destino y da más espacio al último comentario. Al abrir un detalle o reducir el ancho, los campos se agrupan con etiquetas y los comentarios ocupan la fila completa. La cita de recolección se consulta y edita dentro del detalle.
 
 ## Campana personal
 

@@ -352,7 +352,7 @@
 
   function historicoRowHtml(b) {
     // Mismo criterio que bitacoraCardHtml: si no tiene asignado_a fijo pero sí asignado_csr, es un
-    // pendiente "Marcar pendiente" (ruteo automático a quien siga a ese CSR ahorita).
+    // tarea por cobertura (ruteo automático a quien siga a ese CSR ahorita).
     var paraTexto = b.asignado_a
       ? esc(b.asignado_a)
       : b.asignado_csr
@@ -540,6 +540,7 @@
   }
 
   function renderBitacoraLoadSelected() {
+    actualizarAsignacionBitacora_();
     var wrap = document.getElementById("bitacora-load-selected");
     if (!bitacoraLoadsSeleccionados.length) {
       wrap.innerHTML =
@@ -633,16 +634,49 @@
   var bitacoraEditingId = null;
 
   var bitacoraAutoAssignCsr = "";
+  var bitacoraRoutingCsr = "";
 
-  function openBitacoraModal(existing, preselectLoad, autoAssignCsr) {
+  /** Una sola tarea, con dos destinos distintos: persona fija o cobertura del CSR. */
+  function actualizarAsignacionBitacora_() {
+    // La cobertura solo es válida si todas las cargas seleccionadas tienen el mismo CSR.
+    var owners = bitacoraLoadsSeleccionados.map(function (load) {
+      return csrDeLoad(recPorLoad_(load));
+    });
+    bitacoraRoutingCsr =
+      !bitacoraEditingId &&
+      owners.length &&
+      owners[0] &&
+      owners.every(function (owner) {
+        return owner === owners[0];
+      })
+        ? owners[0]
+        : "";
+    document.getElementById("bitacora-assignment-mode-wrap").hidden =
+      !bitacoraRoutingCsr;
+    if (!bitacoraRoutingCsr)
+      document.getElementById("bitacora-assignment-mode").value = "person";
+    var automatico =
+      !bitacoraEditingId &&
+      bitacoraRoutingCsr &&
+      document.getElementById("bitacora-assignment-mode").value === "coverage";
+    bitacoraAutoAssignCsr = automatico ? bitacoraRoutingCsr : "";
+    document.getElementById("bitacora-asignado-wrap").style.display =
+      bitacoraEditingId || automatico ? "none" : "";
+    document.getElementById("bitacora-asignado-auto-label").style.display =
+      automatico ? "" : "none";
+    document.getElementById("bitacora-asignado-auto-csr").textContent =
+      bitacoraRoutingCsr;
+  }
+  document
+    .getElementById("bitacora-assignment-mode")
+    .addEventListener("change", actualizarAsignacionBitacora_);
+
+  function openBitacoraModal(existing, preselectLoad) {
     bitacoraEditingId = existing ? String(existing.id) : null;
-    bitacoraAutoAssignCsr =
-      !existing && autoAssignCsr ? String(autoAssignCsr) : "";
+    document.getElementById("bitacora-assignment-mode").value = "person";
     document.getElementById("bitacora-modal-title").textContent = existing
       ? "Editar tarea de turno"
-      : bitacoraAutoAssignCsr
-        ? "Asignar tarea de turno"
-        : "Nueva tarea de turno";
+      : "Nueva tarea de turno";
     document.getElementById("bitacora-nota").value = existing
       ? existing.nota
       : "";
@@ -680,10 +714,10 @@
       bitacoraAutoAssignCsr ? "" : "none";
     if (existing) {
       document.getElementById("bitacora-asignado-fixed").textContent =
-        existing.asignado_a || "—";
-    } else if (bitacoraAutoAssignCsr) {
-      document.getElementById("bitacora-asignado-auto-csr").textContent =
-        bitacoraAutoAssignCsr;
+        existing.asignado_a ||
+        (existing.asignado_csr
+          ? "Quien cubra a " + existing.asignado_csr
+          : "—");
     } else {
       var sel = document.getElementById("bitacora-asignado");
       sel.innerHTML = personas
@@ -702,9 +736,7 @@
     }
     document.getElementById("bitacora-turno-note").textContent = existing
       ? "Actualiza la descripción, la carga, la fecha o el color. El turno y la persona asignada se conservan."
-      : bitacoraAutoAssignCsr
-        ? "El turno se registra automáticamente al guardar."
-        : "Describe el trabajo pendiente y elige quién lo atenderá. El turno se registra automáticamente al guardar.";
+      : "Describe el trabajo pendiente y elige quién lo atenderá. La tarea queda abierta hasta que se marque como completada. El turno se registra automáticamente al guardar.";
     document.getElementById("bitacora-error").style.display = "none";
     document.getElementById("bitacora-backdrop").classList.add("show");
     document.getElementById("bitacora-nota").focus();
@@ -716,6 +748,7 @@
     bitacoraEditingId = null;
     bitacoraLoadsSeleccionados = [];
     bitacoraAutoAssignCsr = "";
+    bitacoraRoutingCsr = "";
   }
 
   // ---- Aviso de cambios sin guardar (modales de bitácora y de load apartado) ----

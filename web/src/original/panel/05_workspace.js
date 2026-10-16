@@ -162,12 +162,22 @@ var commentsCurrentLoad = null;
       p(d.getMinutes())
     );
   }
+  /** La fecha es de atención: vencer nunca completa ni borra un seguimiento pendiente. */
   function workspaceReviewHtml(r) {
     var scheduled = !!r.next_review_at;
+    var due = scheduled && Date.parse(r.next_review_at) <= Date.now();
     return (
-      '<div class="review-card"><h3 class="ws-section-title">Seguimiento programado por ti</h3><div class="section-help">Elige cuándo volver a revisar esta carga. Al vencer queda por atender hasta que completes el seguimiento o cambies su fecha. Es independiente de la revisión automática de tránsito.</div><div class="review-row"><div class="review-field"><label>Fecha y hora</label><input id="next-review-at" class="review-input" type="datetime-local" value="' +
+      '<div class="review-card"><h3 class="ws-section-title">Seguimiento programado por ti</h3>' +
+      '<div class="review-state' +
+      (due ? " due" : "") +
+      '" role="status">' +
+      (scheduled
+        ? (due ? "Pendiente de atender · " : "Programado para · ") +
+          esc(wsDate(r.next_review_at))
+        : "Sin seguimiento programado") +
+      '</div><div class="section-help">La fecha indica cuándo atenderlo; no lo completa automáticamente. Cuando termines, pulsa «Completar seguimiento»: dejará de aparecer como pendiente. Si falta trabajo, usa «Reprogramar». Es independiente de la revisión automática de tránsito.</div><div class="review-row"><div class="review-field"><label for="next-review-at">Fecha y hora para atender</label><input id="next-review-at" class="review-input" type="datetime-local" value="' +
       reviewLocalValue(r.next_review_at) +
-      '"></div><div class="review-field"><label>Qué revisar</label><input id="next-review-note" class="review-input" type="text" maxlength="250" placeholder="Ej. validar cruce / confirmar ETA" value="' +
+      '"></div><div class="review-field"><label for="next-review-note">Qué revisar</label><input id="next-review-note" class="review-input" type="text" maxlength="250" placeholder="Ej. validar cruce / confirmar ETA" value="' +
       esc(r.next_review_note || "") +
       '"></div><button class="ws-btn primary" data-review-save>' +
       (scheduled ? "Reprogramar" : "Programar") +
@@ -175,9 +185,9 @@ var commentsCurrentLoad = null;
       (scheduled
         ? '<button class="ws-btn" data-review-clear>Completar seguimiento</button>'
         : "") +
-      '</div><div id="review-action-feedback" class="tracking-note">' +
+      '</div><div id="review-action-feedback" class="tracking-note" role="status">' +
       (scheduled
-        ? "✓ Programada " +
+        ? (due ? "Por atender desde " : "Programado ") +
           esc(relativeTimeLabel(r.next_review_at)) +
           (r.next_review_by ? " por " + esc(r.next_review_by) : "") +
           "."
@@ -1922,7 +1932,7 @@ var commentsCurrentLoad = null;
               "good",
             );
             setTimeout(function () {
-              renderWorkspace();
+              if (workspaceCurrentLoad === String(r.load)) renderWorkspace();
             }, 700);
           })
           .withFailureHandler(function (err) {
@@ -1946,23 +1956,45 @@ var commentsCurrentLoad = null;
           );
         return;
       }
-      if (e.target.closest("[data-review-clear]")) {
+      if ((b = e.target.closest("[data-review-clear]"))) {
         if (!r) return;
+        if (!myRealIdentity || !myPassword) {
+          ensureLoggedIn(function () {
+            if (workspaceCurrentLoad === String(r.load)) renderWorkspace();
+          });
+          return;
+        }
+        var completeButton = b;
+        var saveButton = document.querySelector(
+          "#workspace-body [data-review-save]",
+        );
+        completeButton.disabled = true;
+        completeButton.textContent = "Completando…";
+        if (saveButton) saveButton.disabled = true;
+        function reviewCompleteFailed(message) {
+          completeButton.disabled = false;
+          completeButton.textContent = "Completar seguimiento";
+          if (saveButton) saveButton.disabled = false;
+          showToast(message, "error");
+        }
         google.script.run
           .withSuccessHandler(function (res) {
             if (!res || res.ok === false) {
-              showToast((res && res.error) || "No se pudo quitar", "error");
+              reviewCompleteFailed(
+                (res && res.error) || "No se pudo completar el seguimiento",
+              );
               return;
             }
             r.next_review_at = "";
             r.next_review_note = "";
             r.next_review_by = "";
+            refreshOperationalAttention();
             render(currentData);
-            renderWorkspace();
+            if (workspaceCurrentLoad === String(r.load)) renderWorkspace();
             showToast("Seguimiento completado", "good");
           })
           .withFailureHandler(function (err) {
-            showToast("Error: " + err.message, "error");
+            reviewCompleteFailed("No se pudo completar: " + err.message);
           })
           .clearNextReview(r.load, myRealIdentity, myPassword);
         return;

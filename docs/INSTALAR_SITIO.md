@@ -4,6 +4,10 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Vistas del calendario, tareas y listado de cargas
+
+Esta actualización agrega **Agenda, Semana y Lista compacta**, unifica las tareas del detalle y aclara el estado del seguimiento. El listado muestra origen antes de destino, conserva los comentarios y deja la cita de recolección en el detalle. Requiere actualizar únicamente **index.html** si ya instalaste la revisión general. [Cambios y pasos](CALENDARIO_TAREAS_Y_LISTADO_2026-10-16.md).
+
 ## Revisión general del panel y Portal Cliente
 
 La revisión más reciente corrige búsqueda, formularios, Histórico, avisos, apertura de turno y respuestas tardías del Portal Cliente. Requiere actualizar **index.html e index-cliente.html**. [Cambios, resultados y pasos](REVISION_GENERAL_2026-10-16.md).

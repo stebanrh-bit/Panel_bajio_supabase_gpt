@@ -1,4 +1,5 @@
 import { runPanelReview } from "./panel_review_checks.mjs";
+import { runCalendarTasksReview } from "./calendar_tasks_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
 import { readPanelSource } from "./panel_source.mjs";
 /**
@@ -754,8 +755,20 @@ async function newPage(
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
 }
-let panelReview;
+let panelReview, calendarTasksReview;
 try {
+  calendarTasksReview = await runCalendarTasksReview({
+    newPage,
+    rawLoads,
+    taskRow,
+    profiles,
+  });
+  if (process.argv.includes("--calendar-tasks-only")) {
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log("Calendario, tareas, seguimiento y listado verificados.");
+    process.exit(0);
+  }
   panelReview = await runPanelReview({
     newPage,
     rawLoads,
@@ -2672,6 +2685,7 @@ try {
         planningChecks,
         personalBellChecks,
         panelReview,
+        calendarTasksReview,
       },
       null,
       2,

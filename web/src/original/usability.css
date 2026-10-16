@@ -260,13 +260,32 @@
   width: 100%;
   min-width: 0;
   table-layout: fixed;
-  --column-load: 8%;
-  --column-customer: 16%;
-  --column-status: 15%;
+  --column-load: 7%;
+  --column-customer: 14%;
+  --column-status: 14%;
   --column-date: 10%;
-  --column-trailer: 11%;
+  --column-trailer: 10%;
   --column-city: 9%;
-  --column-comment: 12%;
+  --column-comment: 27%;
+}
+/* Recuperar las columnas que la vista dividida antigua ocultaba por posición.
+   Dentro de una fila grid/flex, el navegador convierte estas celdas en bloques. */
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col:nth-child(n + 7) {
+  display: table-column;
+}
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  th:nth-child(n + 7),
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  tr.t-row
+  > td:nth-child(n + 7) {
+  display: table-cell;
 }
 /* La regla con :has también reemplaza los anchos fijos de la vista dividida heredada. */
 .panel-internal #table-view .loads-table col.c-load,
@@ -377,22 +396,12 @@
   font-size: 14px;
   min-height: 40px;
 }
-/* En escritorio, las seis columnas de resumen comparten el ancho de la lista izquierda. */
-@media (min-width: 1180px) {
-  .panel-internal
-    #table-view:has(#table-detail-panel:not([hidden]))
-    .loads-table {
-    --column-load: 10%;
-    --column-customer: 24%;
-    --column-status: 20%;
-    --column-date: 16%;
-    --column-trailer: 17%;
-    --column-city: 13%;
-  }
+/* El ancho de la lista, incluso al abrir el detalle, decide cuándo agrupar los campos.
+   Así se conservan las ocho columnas y se da una fila completa al comentario. */
+.panel-internal #table-view .loads-list-section {
+  container: loads-list / inline-size;
 }
-/* En móvil y tablet, cada carga agrupa sus campos en dos columnas con etiquetas.
-   Los encabezados siguen disponibles como botones para ordenar, en varias líneas. */
-@media (max-width: 1050px) {
+@container loads-list (max-width: 850px) {
   .panel-internal #table-view .loads-table,
   .panel-internal #table-view .loads-table thead,
   .panel-internal #table-view .loads-table tbody {
@@ -421,12 +430,22 @@
     border-radius: 7px;
     padding: 0.45rem 0.55rem;
   }
-  .panel-internal #table-view .loads-table th:not([data-sort]) {
+  .panel-internal #table-view .loads-table th:not([data-sort]),
+  .panel-internal
+    #table-view:has(#table-detail-panel:not([hidden]))
+    .loads-table
+    th:not([data-sort]) {
     display: none;
   }
   .panel-internal #table-view .loads-table tr.t-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "load status"
+      "customer customer"
+      "trailer delivery"
+      "origin destination"
+      "comment comment";
     padding: 0.5rem;
     border-top: 1px solid var(--line);
   }
@@ -444,12 +463,42 @@
     font-weight: 600;
     color: var(--ink-faint);
   }
-  .panel-internal #table-view .loads-table .t-customer,
+  .panel-internal #table-view .loads-table .t-load {
+    grid-area: load;
+  }
+  .panel-internal #table-view .loads-table .t-status {
+    grid-area: status;
+  }
+  .panel-internal #table-view .loads-table .t-customer {
+    grid-area: customer;
+  }
+  .panel-internal #table-view .loads-table .t-trailer {
+    grid-area: trailer;
+  }
+  .panel-internal #table-view .loads-table .t-date-delivery {
+    grid-area: delivery;
+  }
+  .panel-internal #table-view .loads-table .t-origin {
+    grid-area: origin;
+  }
+  .panel-internal #table-view .loads-table .t-destination {
+    grid-area: destination;
+  }
   .panel-internal #table-view .loads-table .t-comment {
-    grid-column: 1 / -1;
+    grid-area: comment;
   }
   .panel-internal #table-view .loads-table .t-status-select {
     font-size: 14px;
+  }
+}
+@container loads-list (min-width: 600px) and (max-width: 850px) {
+  .panel-internal #table-view .loads-table tr.t-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      "load status trailer"
+      "customer customer customer"
+      "origin destination delivery"
+      "comment comment comment";
   }
 }
 .panel-internal .action-trailer {
@@ -1683,4 +1732,130 @@
 }
 .attention-extra-filters.has-active-filter > summary {
   color: var(--accent);
+}
+
+/* El usuario elige la densidad del calendario sin cambiar la semana ni sus filtros. */
+.cal-view-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 16px 0;
+}
+.cal-view-switch {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.cal-view-switch > span {
+  color: var(--ink-soft);
+  font-size: 12px;
+  margin-right: 3px;
+}
+.cal-view-switch [aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.cal-view-bar .cal-filter-help {
+  flex: 1 1 320px;
+  margin: 0;
+}
+.panel-internal #cal-grid[data-view="week"] {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: start;
+  gap: 9px;
+}
+.panel-internal #cal-grid[data-view="week"] .cal-dia {
+  grid-template-columns: minmax(0, 1fr);
+}
+.panel-internal #cal-grid[data-view="week"] .cal-dia-head {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+}
+.panel-internal #cal-grid[data-view="week"] .cal-day-events {
+  grid-template-columns: minmax(0, 1fr);
+}
+.panel-internal #cal-grid[data-view="week"] .cal-dia-body {
+  padding: 8px;
+}
+.panel-internal #cal-grid[data-view="week"] .cal-chip {
+  padding: 9px;
+}
+.panel-internal #cal-grid[data-view="week"] .cal-dia-empty .cal-dia-head > div {
+  display: block;
+}
+.panel-internal #cal-grid[data-view="list"] .cal-day-events {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+.panel-internal #cal-grid[data-view="list"] .cal-chip {
+  display: grid;
+  grid-template-columns: 100px 110px minmax(0, 1.3fr) minmax(0, 1fr) minmax(
+      0,
+      0.8fr
+    );
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top-width: 1px;
+  border-left: 3px solid var(--event-color);
+}
+.panel-internal #cal-grid[data-view="list"] .cal-event-top {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+}
+.panel-internal #cal-grid[data-view="list"] .cal-event-client,
+.panel-internal #cal-grid[data-view="list"] .cal-event-equipment,
+.panel-internal #cal-grid[data-view="list"] .cal-event-status {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.review-state {
+  display: inline-block;
+  color: var(--good);
+  background: var(--good-soft);
+  padding: 8px 10px;
+  border-radius: 7px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.review-state.due {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+@media (max-width: 1350px) {
+  .panel-internal #cal-grid[data-view="week"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .panel-internal #cal-grid[data-view="list"] .cal-chip {
+    grid-template-columns: 100px 110px minmax(0, 1fr);
+  }
+}
+@media (max-width: 950px) {
+  .panel-internal #cal-grid[data-view="week"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 550px) {
+  .panel-internal #cal-grid[data-view="week"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel-internal #cal-grid[data-view="list"] .cal-chip {
+    grid-template-columns: 80px minmax(0, 1fr);
+  }
+  .panel-internal #cal-grid[data-view="list"] .cal-event-client,
+  .panel-internal #cal-grid[data-view="list"] .cal-event-equipment,
+  .panel-internal #cal-grid[data-view="list"] .cal-event-status {
+    grid-column: 1 / -1;
+  }
 }

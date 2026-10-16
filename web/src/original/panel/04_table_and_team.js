@@ -68,7 +68,7 @@ function tableRowHtml(rec) {
       '">' +
       esc(rec.customer || "—") +
       "</td>" +
-      '<td role="cell" data-label="Etapa / estatus"><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
+      '<td role="cell" data-label="Etapa / estatus" class="t-status"><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
       esc(rec.load) +
       '" data-status-load="' +
       esc(rec.load) +
@@ -89,22 +89,19 @@ function tableRowHtml(rec) {
       '" aria-label="Editar trailer" title="' +
       esc(rec.trailer || "Trailer") +
       '"></details></td>' +
-      '<td role="cell" data-label="Destino" class="t-city" title="' +
-      esc(rec.dest_city) +
-      (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
-      '">' +
-      esc(rec.dest_city) +
-      (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
-      "</td>" +
-      '<td role="cell" data-label="Origen" class="t-city" title="' +
+      '<td role="cell" data-label="Origen" class="t-city t-origin" title="' +
       esc(rec.origin_city) +
       (rec.origin_state ? ", " + esc(rec.origin_state) : "") +
       '">' +
       esc(rec.origin_city) +
       (rec.origin_state ? ", " + esc(rec.origin_state) : "") +
       "</td>" +
-      '<td role="cell" data-label="Recolección · cita" class="t-date t-date-pickup">' +
-      fmtDate(rec.pickup_appt) +
+      '<td role="cell" data-label="Destino" class="t-city t-destination" title="' +
+      esc(rec.dest_city) +
+      (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
+      '">' +
+      esc(rec.dest_city) +
+      (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
       "</td>" +
       '<td role="cell" data-label="Último comentario" class="t-comment" title="Clic para ver todos los comentarios">' +
       commentCell +
@@ -198,12 +195,9 @@ function tableRowHtml(rec) {
       '">' +
       incidenciasBtnLabel(rec) +
       "</button>" +
-      '<button type="button" class="incidencias-btn" data-pendiente-turno-load="' +
+      '<button type="button" class="incidencias-btn" data-create-task-load="' +
       esc(rec.load) +
-      '">Marcar pendiente</button>' +
-      '<button type="button" class="incidencias-btn" data-pendiente-turno-asignar-load="' +
-      esc(rec.load) +
-      '">Asignar a alguien en especial</button>' +
+      '">Crear tarea</button>' +
       colorSwatchesHtml(rec) +
       "</div>"
     );

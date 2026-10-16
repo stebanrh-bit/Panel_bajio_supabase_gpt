@@ -54,37 +54,11 @@ function clicWorkspaceYAvisos_(e) {
       return;
     }
 
-    var pendienteTurnoBtn;
-    if ((pendienteTurnoBtn = e.target.closest("[data-pendiente-turno-load]"))) {
-      var pendienteTurnoLoad = pendienteTurnoBtn.getAttribute(
-        "data-pendiente-turno-load",
-      );
+    var taskButton = e.target.closest("[data-create-task-load]");
+    if (taskButton) {
+      var taskLoad = taskButton.getAttribute("data-create-task-load");
       ensureLoggedIn(function () {
-        var recPendiente = recPorLoad_(pendienteTurnoLoad);
-        var csrPendiente = csrDeLoad(recPendiente);
-        if (!csrPendiente) {
-          showToast(
-            'Este load no tiene un CSR asignado (revisa "Gestionar CSR") — usa "Asignar a alguien en especial".',
-            "error",
-          );
-          return;
-        }
-        openBitacoraModal(null, pendienteTurnoLoad, csrPendiente);
-      });
-      return;
-    }
-
-    var pendienteTurnoAsignarBtn;
-    if (
-      (pendienteTurnoAsignarBtn = e.target.closest(
-        "[data-pendiente-turno-asignar-load]",
-      ))
-    ) {
-      var pendienteTurnoAsignarLoad = pendienteTurnoAsignarBtn.getAttribute(
-        "data-pendiente-turno-asignar-load",
-      );
-      ensureLoggedIn(function () {
-        openBitacoraModal(null, pendienteTurnoAsignarLoad);
+        openBitacoraModal(null, taskLoad);
       });
       return;
     }
@@ -1396,6 +1370,37 @@ function clicWorkspaceYAvisos_(e) {
     calCliente_ = ""; // Filtros locales, independientes del listado de Cargas.
   var calDiasAbiertos_ = new Set(); // Conserva el despliegue durante la actualización automática.
   var calSemana_ = 0; // 0 = esta semana, -1 la anterior, +1 la siguiente
+  var calVista_ = "agenda",
+    calVistaCuenta_ = null;
+
+  /** Preferencia por cuenta y navegador; no modifica registros ni filtros. */
+  function calVistaKey_() {
+    return "bajio_cal_view_" + (myRealIdentity || "sin-sesion");
+  }
+  function actualizarVistaCalendario_() {
+    var key = calVistaKey_();
+    if (calVistaCuenta_ !== key) {
+      calVistaCuenta_ = key;
+      calVista_ = "agenda";
+      try {
+        var saved = localStorage.getItem(key);
+        if (["agenda", "week", "list"].indexOf(saved) !== -1) calVista_ = saved;
+      } catch (e) {}
+    }
+    document.getElementById("cal-grid").dataset.view = calVista_;
+    document.querySelectorAll("[data-cal-view]").forEach(function (button) {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.calView === calVista_),
+      );
+    });
+    document.getElementById("cal-view-help").textContent = {
+      agenda:
+        "Agenda por día: muestra tres movimientos y permite desplegar los demás.",
+      week: "Semana en columnas: compara los días y despliega los movimientos restantes. En pantallas pequeñas, los días se acomodan en menos columnas.",
+      list: "Lista compacta: muestra todos los movimientos por día y hora, sin desplegables. Pulsa un registro para abrirlo.",
+    }[calVista_];
+  }
   function lunesDe_(d) {
     var x = new Date(d);
     x.setHours(0, 0, 0, 0);
@@ -1405,6 +1410,7 @@ function clicWorkspaceYAvisos_(e) {
   function renderCalendario_() {
     var grid = document.getElementById("cal-grid");
     if (!grid) return;
+    actualizarVistaCalendario_();
     var inicio = lunesDe_(new Date());
     inicio.setDate(inicio.getDate() + calSemana_ * 7);
     var dias = [],
@@ -1594,7 +1600,8 @@ function clicWorkspaceYAvisos_(e) {
         var items = porDia[d.toDateString()].sort(function (a, b) {
           return a.fecha - b.fecha;
         });
-        var extra = items.length - 3;
+        var limit = calVista_ === "list" ? items.length : 3;
+        var extra = items.length - limit;
         return (
           '<section class="cal-dia' +
           (d.toDateString() === hoy ? " hoy" : "") +
@@ -1622,7 +1629,7 @@ function clicWorkspaceYAvisos_(e) {
           '<div class="cal-dia-body">' +
           (items.length
             ? '<div class="cal-day-events">' +
-              items.slice(0, 3).map(calendarCard).join("") +
+              items.slice(0, limit).map(calendarCard).join("") +
               "</div>" +
               (extra > 0
                 ? '<details class="cal-day-more" data-cal-day="' +
@@ -1633,7 +1640,7 @@ function clicWorkspaceYAvisos_(e) {
                   extra +
                   " movimientos más</span><span>Mostrar menos</span></summary>" +
                   '<div class="cal-day-events">' +
-                  items.slice(3).map(calendarCard).join("") +
+                  items.slice(limit).map(calendarCard).join("") +
                   "</div></details>"
                 : "")
             : '<p class="cal-vacio">Sin movimientos programados</p>') +
@@ -1642,6 +1649,16 @@ function clicWorkspaceYAvisos_(e) {
       })
       .join("");
   }
+  document.querySelectorAll("[data-cal-view]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      calVista_ = button.dataset.calView;
+      calVistaCuenta_ = calVistaKey_();
+      try {
+        localStorage.setItem(calVistaCuenta_, calVista_);
+      } catch (e) {}
+      renderCalendario_();
+    });
+  });
   document
     .getElementById("cal-cliente")
     .addEventListener("change", function (event) {
