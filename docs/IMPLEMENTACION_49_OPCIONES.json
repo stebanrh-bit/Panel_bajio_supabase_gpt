@@ -1014,12 +1014,32 @@
     "scope_change": "Retirar Contactos VG de la interfaz y su selector; conservar CSR manual y datos existentes.",
     "production_acceptance": "Primera a sexta pruebas confirmadas; séptima pendiente de nueva actualización."
   },
-  "manual_testing": "Suspendidas hasta nuevo aviso por petición del usuario; no dar por aprobados pasos no confirmados.",
+  "manual_testing": "Canceladas de nuevo por el usuario; no continuar sin nueva indicación.",
   "radar_reader_fix": {
     "date": "2026-10-16",
     "report": "Exception: Contenido HTML incorrecto seguido del código del lector",
     "fix": "Entregar lector como JSON dentro de HTML válido y extraer el programa antes de iniciar Worker.",
     "validation": "web/test/reader-source.test.js y scripts/check_organization_browser.mjs --reader-files; XLSX/XLS reales guardados y recuperados de PostgreSQL efímero sin copia local.",
     "installation": "Actualizar index.html y lector.html juntos en Google; pendiente en producción."
+  },
+  "loads_list_layout": {
+    "date": "2026-10-16",
+    "request": "Quitar scroll lateral del listado de Cargas.",
+    "implementation": [
+      "web/src/original/usability.css",
+      "web/src/original/panel/04_table_and_team.js",
+      "web/src/original/index.template.html"
+    ],
+    "validation": "26 casos de ancho/detalle y 13 verificaciones de T0132 en Chromium; 145 pruebas del proyecto.",
+    "evidence": "docs/evidencia-listado-sin-scroll-2026-10-16.json",
+    "production": "Pendiente reemplazar index.html en Google.",
+    "manual_testing": "Canceladas por el usuario; no se reinician con esta corrección."
+  },
+  "manual_confirmations_before_cancellation": {
+    "radar": "El usuario confirma nombre y cantidad de cargas; no confirma manualmente la recuperación desde otra cuenta.",
+    "checklist": "El usuario confirma guardado de pasos, bloqueo si faltan y resolución después de completarlos.",
+    "recurrence": "El usuario confirma persona/frecuencia/hora guardadas y luego pausa persistente de PRUEBA DIARIA.",
+    "alerts": "La prueba del aviso no fue confirmada antes de cancelar la ronda.",
+    "accounts": "Sin confirmación de pruebas con otras cuentas."
   }
 }

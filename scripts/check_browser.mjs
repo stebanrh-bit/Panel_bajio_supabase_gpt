@@ -1895,6 +1895,37 @@ try {
         .evaluate((el) => el.scrollWidth <= el.clientWidth),
       true,
     );
+    // Caso reportado: la tabla completa debe caber, sin esconder desbordamientos.
+    async function measureLoadsLayout() {
+      return ux.locator("#table-view .table-wrap").evaluate((wrapper) => {
+        const table = wrapper.querySelector("table");
+        return {
+          available: wrapper.clientWidth,
+          content: wrapper.scrollWidth,
+          tableWidth: table.getBoundingClientRect().width,
+          overflow: getComputedStyle(wrapper).overflowX,
+          documentFits: document.documentElement.scrollWidth <= innerWidth,
+        };
+      });
+    }
+    for (const width of [
+      1920, 1533, 1440, 1280, 1180, 1100, 1050, 1024, 820, 768, 390, 360, 320,
+    ]) {
+      await ux.setViewportSize({ width, height: 900 });
+      const layout = await measureLoadsLayout();
+      assert.ok(
+        layout.content <= layout.available + 1,
+        `Scroll lateral sin detalle a ${width}px: ${JSON.stringify(layout)}`,
+      );
+      assert.ok(
+        layout.documentFits && layout.tableWidth <= layout.available + 1,
+      );
+      assert.equal(layout.overflow, "visible");
+      usabilityLayouts.push({
+        loadsList: { viewport: width, detail: false, ...layout },
+      });
+    }
+    await ux.setViewportSize({ width: 1533, height: 900 });
     await ux.screenshot({
       path: "/tmp/panel-original-comparison/trailer-completo.png",
     });
@@ -1919,7 +1950,9 @@ try {
       await ux.locator("#table-detail-load-label").innerText(),
       /TRAILER-BAJIO/,
     );
-    for (const width of [1533, 1440, 1180, 1024, 390, 360]) {
+    for (const width of [
+      1920, 1533, 1440, 1280, 1180, 1100, 1050, 1024, 820, 768, 390, 360, 320,
+    ]) {
       await ux.setViewportSize({ width, height: 900 });
       const editor = await trailerCell.locator("input").evaluate((input) => {
         const style = getComputedStyle(input);
@@ -1945,6 +1978,17 @@ try {
         editor.insideCell && editor.documentFits,
         `Editor fuera de su espacio a ${width}px`,
       );
+      const layout = await measureLoadsLayout();
+      assert.ok(
+        layout.content <= layout.available + 1,
+        `Scroll lateral con detalle a ${width}px: ${JSON.stringify(layout)}`,
+      );
+      assert.ok(
+        layout.documentFits && layout.tableWidth <= layout.available + 1,
+      );
+      usabilityLayouts.push({
+        loadsList: { viewport: width, detail: true, ...layout },
+      });
       usabilityLayouts.push({ trailerEditor: { viewport: width, ...editor } });
     }
     await ux.setViewportSize({ width: 1533, height: 900 });

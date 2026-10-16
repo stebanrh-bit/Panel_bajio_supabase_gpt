@@ -4,6 +4,10 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Actualización del listado sin scroll lateral
+
+Si ya instalaste la corrección del lector de Radar, este ajuste requiere reemplazar únicamente **index.html** y publicar una nueva versión de la implementación existente. [Pasos](LISTADO_SIN_SCROLL_2026-10-16.md).
+
 ## Si Radar muestra «Contenido HTML incorrecto»
 
 Actualiza **index.html y lector.html juntos** siguiendo [la corrección del lector](CORRECCION_RADAR_LECTOR_2026-10-16.md). Esta corrección se aplica después de la entrega de las 49 opciones y conserva tu enlace.

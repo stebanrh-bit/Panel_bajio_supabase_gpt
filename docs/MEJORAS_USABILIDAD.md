@@ -88,7 +88,7 @@ Dentro de las ventanas, Tab y Shift+Tab recorren sus controles; el fondo queda f
 
 ## Trailer, navegación y asignación
 
-Al abrir el detalle de una carga, el editor del trailer conserva espacio suficiente para T0132. Si lista y detalle no caben juntos, el desplazamiento horizontal queda dentro de la tabla. Abrir «Editar trailer» ya no abre o cierra el detalle por accidente; el encabezado también refleja el trailer editado. Los identificadores largos se leen completos encima del editor.
+Al abrir el detalle de una carga, el editor del trailer conserva espacio suficiente para T0132. La actualización posterior ajusta las columnas al espacio disponible sin desplazamiento horizontal; en pantallas pequeñas los campos se agrupan con etiquetas. Abrir «Editar trailer» ya no abre o cierra el detalle por accidente; el encabezado también refleja el trailer editado. Los identificadores largos se leen completos encima del editor.
 
 En el menú lateral, **Solicitudes** muestra solo las solicitudes sin carga confirmada. **Tareas de turno** muestra tareas asignadas a ti y tareas que registraste. El botón elegido queda marcado y las secciones se abren aunque estuvieran plegadas. La pestaña **Solicitudes y tareas** vuelve a mostrar el conjunto y el resumen del turno.
 
@@ -137,3 +137,10 @@ Capturas: [Trailer con detalle abierto](imagenes/trailer-detalle-T0132.png), [In
 - `web/src/original/api/index.js`: informa inicio, confirmación o rechazo de una escritura, sin publicar argumentos ni contraseñas.
 
 Los archivos originales de la raíz permanecen como referencia. Las nuevas funciones tienen responsabilidades y comentarios en español; el HTML generado se reconstruye desde estos archivos fuente.
+
+
+## Listado sin desplazamiento lateral
+
+El usuario pidió quitar el scroll lateral de Cargas. El listado ahora usa columnas proporcionales en lugar de los mínimos fijos de 1320/820 px. Con el detalle abierto se conserva el resumen a la izquierda en escritorio. Hasta 1050 px, cada carga agrupa los campos en dos columnas con sus etiquetas y los encabezados para ordenar se distribuyen en varias líneas. La información permite salto de línea y el editor de trailer sigue disponible.
+
+Se verificaron 26 combinaciones de ancho y detalle, entre 320 y 1920 px, sin desbordamiento del listado ni de la página. T0132 cabe en el editor en los 13 tamaños. [Entrega y actualización](LISTADO_SIN_SCROLL_2026-10-16.md).

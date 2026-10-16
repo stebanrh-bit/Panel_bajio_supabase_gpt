@@ -14,7 +14,7 @@ Esta entrega conserva Supabase como base y Google Apps Script como alojamiento. 
 
 Abre **Organizar turno** en el encabezado. Incluye tareas y checklist, programaciones, referencias de regreso y avisos. Admin también tiene reglas, equivalencias de clientes y respaldo/archivo. «Guía de uso» explica los conceptos sin salir del panel.
 
-En Inicio, el plan separa urgente/vencido, hoy/después y futuro. Las revisiones operativas, seguimientos personales y avisos al cliente conservan acciones independientes. En Cargas puedes combinar filtros, verlos como etiquetas y limpiarlos; la tabla prioriza carga, cliente, estatus y entrega. El trailer conserva su ancho y el desplazamiento horizontal dentro del listado.
+En Inicio, el plan separa urgente/vencido, hoy/después y futuro. Las revisiones operativas, seguimientos personales y avisos al cliente conservan acciones independientes. En Cargas puedes combinar filtros, verlos como etiquetas y limpiarlos; la tabla prioriza carga, cliente, estatus y entrega. El listado se ajusta al ancho disponible sin desplazamiento horizontal. El trailer permite varias líneas y conserva su editor; en móvil/tablet los campos se agrupan con sus etiquetas.
 
 Las tareas recurrentes usan hora del centro de México. El proceso horario de millas también comprueba programaciones cuando se actualiza `Code.gs` y SQL 012. Si ya estaba activado, conserva su activador. Si estuvo detenido, genera una sola ocurrencia atrasada y continúa con el próximo horario. Una carga entregada/cancelada detiene las siguientes ocurrencias asociadas. «Comprobar programaciones ahora» permite una ejecución manual de Admin.
 

@@ -1,0 +1,350 @@
+{
+  "date": "2026-10-16",
+  "environment": "Chromium local; datos sintéticos y peticiones Supabase interceptadas. No modifica la base del usuario.",
+  "unit_integration_tests": {
+    "passed": 145,
+    "failed": 0,
+    "skipped": 0
+  },
+  "layout_checks": [
+    {
+      "viewport": 1920,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": false,
+      "available": 1058,
+      "content": 1058,
+      "tableWidth": 1058,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": false,
+      "available": 958,
+      "content": 958,
+      "tableWidth": 958,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": false,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": false,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": false,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": false,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": false,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": false,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": false,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": false,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1920,
+      "detail": true,
+      "available": 956,
+      "content": 956,
+      "tableWidth": 956.40625,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": true,
+      "available": 770,
+      "content": 770,
+      "tableWidth": 769.8125,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": true,
+      "available": 714,
+      "content": 714,
+      "tableWidth": 714,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": true,
+      "available": 618,
+      "content": 618,
+      "tableWidth": 618,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": true,
+      "available": 542,
+      "content": 542,
+      "tableWidth": 542,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": true,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": true,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": true,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": true,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": true,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": true,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": true,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": true,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    }
+  ],
+  "trailer_checks": [
+    {
+      "viewport": 1920,
+      "available": 132,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "available": 100,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "available": 91,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "available": 74,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "available": 61,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "available": 66,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "available": 375,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "available": 362,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "available": 260,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "available": 234,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "available": 141,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "available": 126,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "available": 106,
+      "required": 28.3544921875,
+      "insideCell": true,
+      "documentFits": true
+    }
+  ],
+  "errors": [],
+  "visual_comparison_note": {
+    "scenario": "Nueva solicitud",
+    "pixels": 253,
+    "bounds": {
+      "minx": 136,
+      "miny": 276,
+      "maxx": 154,
+      "maxy": 299
+    },
+    "note": "Diferencia localizada en insignia del menú lateral, fuera del listado de cargas. La comparación exacta no se da por aprobada en esta revisión."
+  }
+}

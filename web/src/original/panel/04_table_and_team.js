@@ -11,7 +11,7 @@ function tableRowHtml(rec) {
         "</div>"
       : '<span class="t-comment-empty">Sin comentarios</span>';
     return (
-      '<tr class="t-row' +
+      '<tr role="row" class="t-row' +
       (rec.color ? " t-color-" + esc(rec.color) : "") +
       (String(rec.load) === String(selectedTableLoad) ? " selected" : "") +
       '" data-load="' +
@@ -41,7 +41,7 @@ function tableRowHtml(rec) {
       '" data-extra="' +
       esc(textoBusqueda_(rec).toLowerCase()) +
       '">' +
-      '<td class="t-load">' +
+      '<td role="cell" data-label="Carga" class="t-load">' +
       (needsAttention(rec)
         ? '<span class="t-warn" title="' +
           esc(needsAttentionReasons(rec).join(" · ")) +
@@ -63,12 +63,12 @@ function tableRowHtml(rec) {
       esc(rec.load) +
       "</span>" +
       "</td>" +
-      '<td class="t-customer" title="' +
+      '<td role="cell" data-label="Cliente" class="t-customer" title="' +
       esc(rec.customer) +
       '">' +
       esc(rec.customer || "—") +
       "</td>" +
-      '<td><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
+      '<td role="cell" data-label="Etapa / estatus"><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
       esc(rec.load) +
       '" data-status-load="' +
       esc(rec.load) +
@@ -77,10 +77,10 @@ function tableRowHtml(rec) {
       '">' +
       statusOptionsHtml(rec.status) +
       "</select></td>" +
-      '<td class="t-date t-date-delivery">' +
+      '<td role="cell" data-label="Entrega · cita" class="t-date t-date-delivery">' +
       fmtDate(rec.delivery_appt) +
       "</td>" +
-      '<td class="t-truck t-trailer"><span class="trailer-full-value" data-trailer-value>' +
+      '<td role="cell" data-label="Trailer" class="t-truck t-trailer"><span class="trailer-full-value" data-trailer-value>' +
       esc(rec.trailer || "Sin asignar") +
       '</span><details class="table-trailer-edit"><summary>Editar trailer</summary><input class="field-input t-trailer-input" type="text" placeholder="—" value="' +
       esc(rec.trailer) +
@@ -89,24 +89,24 @@ function tableRowHtml(rec) {
       '" aria-label="Editar trailer" title="' +
       esc(rec.trailer || "Trailer") +
       '"></details></td>' +
-      '<td class="t-city" title="' +
+      '<td role="cell" data-label="Destino" class="t-city" title="' +
       esc(rec.dest_city) +
       (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
       '">' +
       esc(rec.dest_city) +
       (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
       "</td>" +
-      '<td class="t-city" title="' +
+      '<td role="cell" data-label="Origen" class="t-city" title="' +
       esc(rec.origin_city) +
       (rec.origin_state ? ", " + esc(rec.origin_state) : "") +
       '">' +
       esc(rec.origin_city) +
       (rec.origin_state ? ", " + esc(rec.origin_state) : "") +
       "</td>" +
-      '<td class="t-date t-date-pickup">' +
+      '<td role="cell" data-label="Recolección · cita" class="t-date t-date-pickup">' +
       fmtDate(rec.pickup_appt) +
       "</td>" +
-      '<td class="t-comment" title="Clic para ver todos los comentarios">' +
+      '<td role="cell" data-label="Último comentario" class="t-comment" title="Clic para ver todos los comentarios">' +
       commentCell +
       "</td>" +
       "</tr>"

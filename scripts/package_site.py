@@ -67,6 +67,8 @@ def main():
         'VALIDACION_49_OPCIONES.md':ROOT/'docs/VALIDACION_49_OPCIONES.md',
         'CORRECCION_TAREAS_2026-10-16.md':ROOT/'docs/CORRECCION_TAREAS_2026-10-16.md',
         'CORRECCION_RADAR_LECTOR_2026-10-16.md':ROOT/'docs/CORRECCION_RADAR_LECTOR_2026-10-16.md',
+        'LISTADO_SIN_SCROLL_2026-10-16.md':ROOT/'docs/LISTADO_SIN_SCROLL_2026-10-16.md',
+        'evidencia-listado-sin-scroll-2026-10-16.json':ROOT/'docs/evidencia-listado-sin-scroll-2026-10-16.json',
         'evidencia-radar-lector-2026-10-16.json':ROOT/'docs/evidencia-radar-lector-2026-10-16.json',
         'imagenes/organizar-turno.png':ROOT/'docs/imagenes/organizar-turno.png',
         'INSTALAR_SITIO.md':ROOT/'docs/INSTALAR_SITIO.md',

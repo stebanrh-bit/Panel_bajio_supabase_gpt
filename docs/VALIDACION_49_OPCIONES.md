@@ -52,3 +52,10 @@ Después seguir [PRUEBAS_FINALES.md](PRUEBAS_FINALES.md), una prueba por vez. Ah
 ## Corrección del lector del Radar
 
 Se corrigió el transporte de lector.html por HtmlService: HTML válido con JSON, extracción del programa antes de iniciar el Worker y errores legibles. La prueba `check_organization_browser.mjs --reader-files` comprueba adicionalmente XLSX y XLS con el puente Google simulado, archivos reales y PostgreSQL efímero. Se elimina la copia local antes de recargar, para verificar la recuperación desde la base. La cuenta Google real y la instalación de la corrección no se validan desde este entorno. [Evidencia](evidencia-radar-lector-2026-10-16.json) · [Instalación de dos archivos](CORRECCION_RADAR_LECTOR_2026-10-16.md).
+
+
+## Listado de Cargas sin desplazamiento lateral
+
+Las 145 pruebas del proyecto aprobaron con el nuevo diseño. El flujo funcional de navegador aprobó 26 medidas del listado (13 anchos, con y sin detalle), T0132 legible, edición persistente, navegación e importación CSV/XLSX/XLS. El contenedor utiliza overflow visible: se comprueba que el contenido cabe, sin esconder un desbordamiento con CSS.
+
+La ejecución de comparación exacta se detuvo en Nueva solicitud por una diferencia de 253 píxeles localizada en una insignia lateral, fuera del listado modificado. No se presenta esa ejecución como 38 comparaciones aprobadas de esta revisión; el registro anterior es histórico. Las medidas y la nota visual están en [la evidencia del listado](evidencia-listado-sin-scroll-2026-10-16.json). [Actualización de un solo HTML](LISTADO_SIN_SCROLL_2026-10-16.md).

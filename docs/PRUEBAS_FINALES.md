@@ -41,7 +41,7 @@ Para la entrega del 15 de octubre, seguir [MEJORAS_USABILIDAD.md](MEJORAS_USABIL
 | 33 | Repetir activación, detener y reactivar; recálculo manual | No duplica activadores de la cuenta; detener conserva datos; corrección manual persiste y tiene prioridad | Pendiente |
 | 34 | Apartar un load con CSR de VG que no sea usuario del panel; repetir desde Radar | Captura manual sin directorio ni asignación automática; nombre persiste al recargar y editar; autor del apartado sigue siendo la cuenta autenticada | Pendiente |
 
-| 35 | En Cargas, abrir el detalle de una fila y después Editar trailer; escribir T0132 | El detalle sigue abierto, T0132 cabe en el campo; abrir el editor no cambia la selección; tabla con desplazamiento interno en pantallas estrechas | Pendiente en Google; comprobación local documentada en VALIDACION_SITIO.md |
+| 35 | En Cargas, abrir el detalle de una fila y después Editar trailer; escribir T0132 | El detalle sigue abierto, T0132 cabe en el campo; abrir el editor no cambia la selección; listado adaptable sin desplazamiento lateral en pantallas estrechas | Pendiente en Google; comprobación local documentada en VALIDACION_SITIO.md |
 | 36 | Plegar las tres secciones del turno, ir a Cargas y entrar por Solicitudes y por Tareas de turno | Solicitudes muestra sus registros; Tareas muestra las asignadas a ti y las registradas; botón lateral marcado y secciones abiertas; la pestaña conjunta recupera el resumen | Pendiente en Google |
 | 37 | Abrir Vincular a una carga, buscar una activa, una entregada sin POD y una cancelada | Solo se ofrecen cargas activas; entregadas/completadas y canceladas no aparecen; sin coincidencias no permite vincular | Pendiente en Google |
 
@@ -98,3 +98,13 @@ El contacto de prueba se guardó, pero el usuario pidió retirar Contactos VG. E
 El usuario pidió suspender la ronda de pruebas manuales hasta nuevo aviso. Confirmó que funciona la corrección de Tareas y checklist, pero no se da por confirmado el guardado de pasos obligatorios.
 
 Después reportó el error «Contenido HTML incorrecto» al cargar el documento de Radar. Se preparó la corrección del lector y se comprobó automáticamente la importación de XLSX/XLS con persistencia en PostgreSQL efímero. **Pendiente de copiar index.html y lector.html a Google y publicar la nueva versión.** Esto no reanuda la ronda de aceptación manual.
+
+
+## Ajuste visual solicitado después de cancelar las pruebas
+
+El usuario pidió nuevamente cancelar la ronda de pruebas manuales y solicitó quitar el scroll lateral de Cargas. Se preparó el listado adaptable y se verificó automáticamente con el detalle abierto/cerrado a 13 anchos (26 casos). Las comprobaciones manuales permanecen canceladas; la instalación del HTML corregido queda pendiente.
+
+
+### Confirmaciones recibidas antes de la última cancelación
+
+El usuario confirmó que Radar muestra el archivo y la cantidad de cargas después de instalar el lector corregido. También confirmó que el checklist muestra los pasos obligatorios, rechaza completar la tarea si faltan y permite completarla después de marcarlos y guardarlos. La programación PRUEBA DIARIA conserva persona, frecuencia y hora; luego se dejó pausada y el usuario confirmó ese estado tras actualizar. La comprobación de PRUEBA AVISO no llegó a confirmarse antes de cancelar de nuevo. Las pruebas con otras cuentas siguen sin confirmación.

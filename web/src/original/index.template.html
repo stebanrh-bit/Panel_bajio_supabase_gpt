@@ -310,10 +310,11 @@
         <button type="button" class="ws-btn" id="masivo-salir">Terminar</button>
       </div>
       <div class="table-wrap">
-        <table class="loads-table">
+        <table class="loads-table" role="table">
+          <caption class="loads-table-caption">Ordenar listado por</caption>
           <colgroup><col class="c-load"><col class="c-customer"><col class="c-status"><col class="c-date"><col class="c-trailer"><col class="c-city"><col class="c-city"><col class="c-date"><col class="c-comment"></colgroup>
           <thead><tr><th data-sort="load">Carga</th><th data-sort="customer">Cliente</th><th data-sort="status">Etapa / estatus</th><th data-sort="delivery_appt">Entrega · cita</th><th data-sort="trailer">Trailer</th><th data-sort="dest_city">Destino</th><th data-sort="origin_city">Origen</th><th data-sort="pickup_appt">Recolección · cita</th><th>Último comentario</th></tr></thead>
-          <tbody id="table-body"></tbody>
+          <tbody role="rowgroup" id="table-body"></tbody>
         </table>
         <div class="table-empty" id="table-empty" style="display:none;">Sin resultados con los filtros actuales.</div>
         <button type="button" class="ws-btn tabla-mas" id="tabla-mas" hidden></button>

@@ -244,20 +244,116 @@
   max-width: 100%;
   overflow-wrap: anywhere;
 }
-/* La celda muestra el identificador completo; el editor se despliega por separado. */
-.panel-internal .loads-table {
-  min-width: 1320px;
+/* Listado de cargas: ajustar las columnas al espacio real, también con el detalle abierto.
+   No ocultar un desbordamiento: texto y controles deben caber dentro de cada celda. */
+.panel-internal #table-view .table-section {
+  min-width: 0;
 }
-.panel-internal .loads-table colgroup .c-trailer {
-  width: 220px;
-}
-.panel-internal .loads-table th[data-sort="trailer"] {
+.panel-internal #table-view .table-wrap {
   overflow: visible;
-  white-space: normal;
+  min-width: 0;
 }
-.panel-internal .loads-table td.t-trailer {
+.panel-internal #table-view .loads-table,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  --column-load: 8%;
+  --column-customer: 16%;
+  --column-status: 15%;
+  --column-date: 10%;
+  --column-trailer: 11%;
+  --column-city: 9%;
+  --column-comment: 12%;
+}
+/* La regla con :has también reemplaza los anchos fijos de la vista dividida heredada. */
+.panel-internal #table-view .loads-table col.c-load,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col.c-load {
+  width: var(--column-load);
+}
+.panel-internal #table-view .loads-table col.c-customer,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col.c-customer {
+  width: var(--column-customer);
+}
+.panel-internal #table-view .loads-table col.c-status,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col.c-status {
+  width: var(--column-status);
+}
+.panel-internal #table-view .loads-table col.c-date,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col.c-date {
+  width: var(--column-date);
+}
+.panel-internal #table-view .loads-table col.c-trailer,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col.c-trailer {
+  width: var(--column-trailer);
+}
+.panel-internal #table-view .loads-table col.c-city,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col.c-city {
+  width: var(--column-city);
+}
+.panel-internal #table-view .loads-table col.c-comment,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  col.c-comment {
+  width: var(--column-comment);
+}
+.panel-internal #table-view .loads-table th,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  th {
   white-space: normal;
+  overflow-wrap: anywhere;
+  padding: 0.7rem 0.4rem;
+}
+.panel-internal #table-view .loads-table td,
+.panel-internal
+  #table-view:has(#table-detail-panel:not([hidden]))
+  .loads-table
+  td {
+  white-space: normal;
+  overflow-wrap: anywhere;
   overflow: visible;
+  padding: 0.7rem 0.4rem;
+}
+.panel-internal #table-view .t-comment-text {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.panel-internal #table-view .t-status-select {
+  width: 100%;
+  min-width: 0;
+  font-size: 12px;
+  letter-spacing: 0;
+  padding-left: 0.35rem;
+}
+.panel-internal #table-view .table-detail-load {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.loads-table-caption {
+  display: none;
 }
 .trailer-full-value {
   display: block;
@@ -273,6 +369,7 @@
   cursor: pointer;
   font-size: 13px;
   color: var(--accent);
+  overflow-wrap: anywhere;
 }
 .panel-internal .table-trailer-edit .t-trailer-input {
   width: 100%;
@@ -280,25 +377,79 @@
   font-size: 14px;
   min-height: 40px;
 }
-/* Con el detalle abierto, la regla antigua reducía Trailer a 82 px y cortaba incluso T0132.
-   El desplazamiento queda dentro de la tabla cuando no caben ambas columnas de la vista. */
+/* En escritorio, las seis columnas de resumen comparten el ancho de la lista izquierda. */
 @media (min-width: 1180px) {
   .panel-internal
     #table-view:has(#table-detail-panel:not([hidden]))
-    .table-section {
-    min-width: 0;
-  }
-  .panel-internal
-    #table-view:has(#table-detail-panel:not([hidden]))
     .loads-table {
-    min-width: 820px;
+    --column-load: 10%;
+    --column-customer: 24%;
+    --column-status: 20%;
+    --column-date: 16%;
+    --column-trailer: 17%;
+    --column-city: 13%;
   }
-  .panel-internal
-    #table-view:has(#table-detail-panel:not([hidden]))
-    .loads-table
-    colgroup
-    .c-trailer {
-    width: 154px;
+}
+/* En móvil y tablet, cada carga agrupa sus campos en dos columnas con etiquetas.
+   Los encabezados siguen disponibles como botones para ordenar, en varias líneas. */
+@media (max-width: 1050px) {
+  .panel-internal #table-view .loads-table,
+  .panel-internal #table-view .loads-table thead,
+  .panel-internal #table-view .loads-table tbody {
+    display: block;
+    width: 100%;
+  }
+  .panel-internal #table-view .loads-table colgroup {
+    display: none;
+  }
+  .panel-internal #table-view .loads-table-caption {
+    display: block;
+    padding: 0.7rem;
+    text-align: left;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .panel-internal #table-view .loads-table thead tr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 0.7rem 0.7rem;
+  }
+  .panel-internal #table-view .loads-table th[data-sort] {
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.45rem 0.55rem;
+  }
+  .panel-internal #table-view .loads-table th:not([data-sort]) {
+    display: none;
+  }
+  .panel-internal #table-view .loads-table tr.t-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .panel-internal #table-view .loads-table tr.t-row > td {
+    display: block;
+    min-width: 0;
+    border: 0;
+    padding: 0.6rem;
+  }
+  .panel-internal #table-view .loads-table tr.t-row > td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+  }
+  .panel-internal #table-view .loads-table .t-customer,
+  .panel-internal #table-view .loads-table .t-comment {
+    grid-column: 1 / -1;
+  }
+  .panel-internal #table-view .loads-table .t-status-select {
+    font-size: 14px;
   }
 }
 .panel-internal .action-trailer {
