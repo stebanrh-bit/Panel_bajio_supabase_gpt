@@ -1351,7 +1351,18 @@
           reminders: [],
         });
     });
+    // Reutilizar formato y clasificación en filtros, contadores y ordenamiento de este render.
+    var planNow = Date.now();
+    var dayFormat = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Mexico_City",
+    });
+    var todayKey = dayFormat.format(new Date(planNow));
+    var dayCache = new Map();
     function dayBucket(entry) {
+      if (!dayCache.has(entry)) dayCache.set(entry, computeDayBucket(entry));
+      return dayCache.get(entry);
+    }
+    function computeDayBucket(entry) {
       if (
         entry.bucket === "now" ||
         entry.reminders.some(function (r) {
@@ -1373,17 +1384,10 @@
             .map(Date.parse),
         )
         .filter(function (t) {
-          return isFinite(t) && t >= Date.now();
+          return isFinite(t) && t >= planNow;
         });
-      var todayKey = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Mexico_City",
-      }).format(new Date());
       return times.some(function (t) {
-        return (
-          new Intl.DateTimeFormat("en-CA", {
-            timeZone: "America/Mexico_City",
-          }).format(new Date(t)) === todayKey
-        );
+        return dayFormat.format(new Date(t)) === todayKey;
       }) ||
         entry.row.client_notify_pending ||
         entry.bucket === "review"

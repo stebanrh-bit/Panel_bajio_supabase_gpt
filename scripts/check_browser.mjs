@@ -1,3 +1,4 @@
+import { runPanelReview } from "./panel_review_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
 import { readPanelSource } from "./panel_source.mjs";
 /**
@@ -343,6 +344,11 @@ const newHelpers = (
       ["rendering", "renderKeyed,reset", "panelRendering"],
       ["network", "fetchExternal,cancel", "panelNetwork"],
       ["notice-scope", "customerNoticeScope", "panelNotices"],
+      [
+        "validation",
+        "showFieldValidation,validateForm,validateDateRange,mountValidation",
+        "panelValidation",
+      ],
     ].map(
       async ([file, exports, key]) =>
         "<script>(function(){" +
@@ -359,7 +365,7 @@ const newHelpers = (
   )
 ).join("");
 const organizationHelpers =
-  "<script>(function(){const esc=window.panelContent.escapeHtml;" +
+  "<script>(function(){const esc=window.panelContent.escapeHtml;const validateForm=window.panelValidation.validateForm;" +
   (await read("web/src/original/dialogs.js"))
     .replace(/^import .*;\n/gm, "")
     .replace(/^export /gm, "") +
@@ -376,6 +382,7 @@ const goldenHtml =
   helperSource +
   ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelCalendar={calendarClientKey,reservationCalendarClient,filterCalendarEvents};window.panelUsability.mountUsability(document);})()</script>" +
   newHelpers +
+  "<script>window.panelValidation.mountValidation(document);</script>" +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
   "<script>window.panelGuidance.mountGuidance(document);</script>" +
   organizationHelpers +
@@ -746,6 +753,28 @@ async function newPage(
         .waitFor({ state: "attached" });
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
+}
+let panelReview;
+try {
+  panelReview = await runPanelReview({
+    newPage,
+    rawLoads,
+    taskRow,
+    profiles,
+    browser,
+  });
+} catch (error) {
+  await browser.close();
+  throw error;
+}
+if (process.argv.includes("--review-only")) {
+  await browser.close();
+  console.log(
+    "Revisión general completada: " +
+      panelReview.checks.length +
+      " comprobaciones, sin errores JS.",
+  );
+  process.exit(0);
 }
 const importsOnly = process.argv.includes("--imports-only");
 const pages = importsOnly
@@ -2642,6 +2671,7 @@ try {
         usabilityLayouts,
         planningChecks,
         personalBellChecks,
+        panelReview,
       },
       null,
       2,

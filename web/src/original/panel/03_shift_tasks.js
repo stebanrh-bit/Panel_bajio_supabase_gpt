@@ -211,20 +211,43 @@
   }
 
   var historico = [];
+  var historicoRequestSeq = 0;
   function loadHistoricoPendientes(offset) {
-    offset = typeof offset === "number" ? offset : 0;
+    var seq = ++historicoRequestSeq;
     var body = document.getElementById("historico-body");
+    var empty = document.getElementById("historico-empty");
+    if (empty) empty.style.display = "none";
+    document.getElementById("historico-count").textContent = "—";
+    if (
+      !window.panelValidation.validateDateRange(
+        document.getElementById("historico-desde"),
+        document.getElementById("historico-hasta"),
+      )
+    ) {
+      if (body)
+        body.innerHTML =
+          '<tr><td colspan="7">Corrige las fechas para consultar el histórico.</td></tr>';
+      var more = document.getElementById("task-history-more");
+      if (more) more.hidden = true;
+      return;
+    }
+    offset = typeof offset === "number" ? offset : 0;
     if (body)
       body.innerHTML =
         '<tr><td colspan="7" style="color:var(--ink-soft);">Cargando…</td></tr>';
     google.script.run
       .withSuccessHandler(function (res) {
+        if (seq !== historicoRequestSeq) return;
         if (!res || !res.ok) {
           showToast(
             (res && res.error) || "No se pudo cargar el histórico",
             "error",
           );
-          if (body) body.innerHTML = "";
+          if (body)
+            body.innerHTML =
+              '<tr><td colspan="7">No se pudo cargar el histórico. Usa Actualizar para reintentar.</td></tr>';
+          var more = document.getElementById("task-history-more");
+          if (more) more.disabled = false;
           return;
         }
         historico = offset
@@ -249,12 +272,17 @@
         renderHistorico();
       })
       .withFailureHandler(function (err) {
+        if (seq !== historicoRequestSeq) return;
+        var more = document.getElementById("task-history-more");
+        if (more) more.disabled = false;
         showToast(
           "Error al cargar el histórico: " +
             (err && err.message ? err.message : err),
           "error",
         );
-        if (body) body.innerHTML = "";
+        if (body)
+          body.innerHTML =
+            '<tr><td colspan="7">No se pudo cargar el histórico. Usa Actualizar para reintentar.</td></tr>';
       })
       .getBitacoraHistorico(
         myRealIdentity,
@@ -418,6 +446,12 @@
     if (empty) empty.style.display = "none";
     body.innerHTML = filtrados.map(historicoRowHtml).join("");
   }
+
+  document
+    .getElementById("historico-actualizar-btn")
+    .addEventListener("click", function () {
+      loadHistoricoPendientes();
+    });
 
   function resetHistoricoFiltros() {
     [

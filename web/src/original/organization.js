@@ -89,9 +89,23 @@ export function mountOrganization(api, doc = document) {
   toolbar.children[0].onclick = () => open();
   toolbar.children[1].onclick = () => help();
   let active = null;
+  let openRequest = 0;
+  const openButton = toolbar.children[0];
+  const feedback = doc.createElement("span");
+  feedback.className = "organize-load-status";
+  feedback.setAttribute("role", "status");
+  toolbar.append(feedback);
+  const setLoading = (loading) => {
+    openButton.disabled = loading;
+    openButton.textContent = loading ? "Abriendo turno…" : "Organizar turno";
+    openButton.setAttribute("aria-busy", String(loading));
+  };
   // Cerrar vistas de datos al salir, incluso si la sesión termina con un diálogo abierto.
   window.addEventListener("panel:save", (event) => {
     if (event.detail?.phase !== "reset") return;
+    openRequest++; // Invalidar también lecturas pendientes al terminar la sesión.
+    setLoading(false);
+    feedback.textContent = "";
     for (const dialog of doc.querySelectorAll(".organize-dialog")) {
       dialog.dispatchEvent(new Event("cancel", { cancelable: true }));
       if (dialog.isConnected) {
@@ -117,11 +131,23 @@ export function mountOrganization(api, doc = document) {
     );
   }
   async function open(tab = "tasks") {
-    const data = await call("getOrganizacion").catch((error) => {
-      window.alert(error.message);
-      return null;
-    });
-    if (!data) return;
+    const request = ++openRequest;
+    feedback.textContent = "";
+    setLoading(true);
+    let data;
+    try {
+      data = await call("getOrganizacion");
+    } catch (error) {
+      if (request === openRequest)
+        feedback.textContent =
+          "No se pudo abrir el turno: " +
+          error.message +
+          ". Vuelve a intentarlo.";
+      return;
+    } finally {
+      if (request === openRequest) setLoading(false);
+    }
+    if (request !== openRequest) return;
     active?.remove();
     const dialog = doc.createElement("dialog");
     active = dialog;

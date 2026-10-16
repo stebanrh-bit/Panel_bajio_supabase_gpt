@@ -6,7 +6,7 @@ Fecha: 16 de octubre de 2026. Base de trabajo: `f77366f`, rama `supabase-inicial
 
 | Comprobación | Resultado |
 | --- | --- |
-| `npm --prefix web test` | 149 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
+| `npm --prefix web test` | 152 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
 | `npm --prefix web run build` | Compila panel interno, cliente, gerencia y lector. |
 | `python scripts/package_site.py --check` | Verifica correspondencia exacta entre SQL 004–012, los cuatro archivos HTML generados y el contenido del ZIP. |
 | `node scripts/check_browser.mjs --legacy-xls` | 38 comparaciones de pantallas/ventanas; flujo de incidencia, cierre de sesión, Admin como CSR, CSV/XLSX/XLS, recordatorios independientes y móvil. Sin errores JS. |
@@ -23,7 +23,7 @@ El ensayo de respaldo exporta las tablas permitidas y las restaura en otra base 
 
 ## Tamaño y consultas
 
-El HTML interno se redujo aproximadamente un **56 %** frente a los 1 920 975 bytes de la entrega base; los tamaños actuales exactos están en evidencia-entrega-49.json. Cliente y gerencia pesan aproximadamente 293 y 291 kB; el lector de 71 kB se solicita al usarlo. Los tamaños gzip son estimaciones locales. El empaquetado autónomo para Google conserva un paquete interno mayor de 500 kB; Vite lo informa como advertencia, con compilación correcta.
+El HTML interno se redujo aproximadamente un **55 %** frente a los 1 920 975 bytes de la entrega base; los tamaños actuales exactos están en evidencia-entrega-49.json. Cliente y gerencia pesan aproximadamente 293 y 291 kB; el lector de 71 kB se solicita al usarlo. Los tamaños gzip son estimaciones locales. El empaquetado autónomo para Google conserva un paquete interno mayor de 500 kB; Vite lo informa como advertencia, con compilación correcta.
 
 En la muestra EXPLAIN, el costo estimado de consultar una página de historial pasa de 1237,45 a 91,85 y el de rutas por origen de 321,57 a 175,36. Se conservan los planes completos. Es una comparación local de esas consultas; no mide cuotas, latencia ni concurrencia de producción.
 
@@ -75,3 +75,10 @@ La revisión usa `check_browser.mjs --imports-only --legacy-xls` para las accion
 El alcance de los avisos de cargas se calcula por cliente asignado y sesión real, sin usar los filtros de consulta ni excepciones por rol. Incluye candidatos del servidor, revisiones, apartados relacionados y limpieza de avisos guardados de clientes ajenos. Las tareas sin carga requieren asignación personal. El plan empieza con un solo grupo y mantiene trailer/truck en filas compactas, con acciones desplegables.
 
 La batería Node pasa 149 pruebas, incluidas cuatro nuevas comprobaciones de alcance personal, reasignación, tareas y apartados. La prueba funcional de navegador incorpora cuentas separadas de Admin, CSR y Supervisor, un cliente Continental ajeno, seguimiento de una carga ajena, avisos guardados, consulta de otro CSR y reasignación con retirada del contador. Se conservan las comprobaciones del calendario, listado sin scroll, importaciones y recordatorios independientes. La prueba de organización mantiene nueve flujos con persistencia local. [Evidencia](evidencia-campana-plan-2026-10-16.json) · [Actualizar solo index.html](CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md).
+
+
+## Revisión general del panel y Portal Cliente
+
+152 pruebas del proyecto aprobadas. El recorrido general añade once comprobaciones de comportamiento, 28 combinaciones de las siete secciones principales y cuatro tamaños de pantalla, navegación de avisos de tareas/cargas, validación sin mensajes duplicados, reintento y respuestas tardías del Histórico, apertura de turno tras errores y cierre de sesión, y respuestas tardías del Portal Cliente. Gerencia conserva su consulta y búsqueda. El recorrido funcional conserva las tres cuentas de campana, las 26 medidas del listado, calendario, archivos y recordatorios; organización conserva nueve flujos con persistencia local.
+
+[Resultados](evidencia-revision-general-2026-10-16.json) · [Cambios e instalación de dos HTML](REVISION_GENERAL_2026-10-16.md). No se ejecutó la comparación exacta de píxeles en esta revisión. La ronda manual permanece cancelada y la implementación publicada de Google queda pendiente de la actualización del usuario.

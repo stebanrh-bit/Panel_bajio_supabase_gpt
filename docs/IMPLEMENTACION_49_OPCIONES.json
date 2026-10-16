@@ -998,7 +998,7 @@
   "recorded_date": "2026-10-16",
   "production_changed": false,
   "validation_summary": {
-    "unit_integration_passed": 149,
+    "unit_integration_passed": 152,
     "failed": 0,
     "skipped": 0,
     "organization_browser_flows": 9,
@@ -1066,5 +1066,27 @@
     "delivery": "Solo index.html, sin SQL; pendiente de actualización en Google.",
     "evidence": "docs/evidencia-campana-plan-2026-10-16.json",
     "manual_testing": "Permanecen canceladas hasta nuevo aviso."
+  },
+  "general_review": {
+    "date": "2026-10-16",
+    "base_commit": "98bd631",
+    "scope": [
+      "Inicio",
+      "Cargas",
+      "Calendario",
+      "Indicadores",
+      "Apartados",
+      "Radar",
+      "Histórico",
+      "Organizar turno",
+      "Administración",
+      "Portal Cliente",
+      "Gerencia"
+    ],
+    "report": "docs/REVISION_GENERAL_2026-10-16.md",
+    "evidence": "docs/evidencia-revision-general-2026-10-16.json",
+    "delivery": "Actualizar index.html e index-cliente.html en la misma implementación Google; sin SQL.",
+    "manual_testing": "Continúan canceladas por el usuario.",
+    "production": "Pendiente de instalación en Google."
   }
 }

@@ -942,13 +942,20 @@ function clicWorkspaceYAvisos_(e) {
     );
   }
   var busquedaActiva_ = -1;
+  function cerrarBusqueda_() {
+    document.getElementById("home-search-resultados").hidden = true;
+    var input = document.getElementById("home-search");
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+    busquedaActiva_ = -1;
+  }
   function buscarGlobal_() {
     var input = document.getElementById("home-search"),
       box = document.getElementById("home-search-resultados");
     var q = input.value.trim().toLowerCase();
     busquedaActiva_ = -1;
     if (q.length < 2) {
-      box.hidden = true;
+      cerrarBusqueda_();
       box.innerHTML = "";
       return;
     }
@@ -967,7 +974,9 @@ function clicWorkspaceYAvisos_(e) {
         return (
           '<button type="button" class="search-item" role="option" data-search-load="' +
           esc(r.load) +
-          '" data-idx="' +
+          '" id="global-search-result-' +
+          i +
+          '" aria-selected="false" data-idx="' +
           i +
           '">' +
           "<b>Carga " +
@@ -992,6 +1001,8 @@ function clicWorkspaceYAvisos_(e) {
         esc(input.value.trim()) +
         '" en tus cargas.</div>';
     box.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    input.removeAttribute("aria-activedescendant");
   }
   (function () {
     var input = document.getElementById("home-search"),
@@ -1004,18 +1015,27 @@ function clicWorkspaceYAvisos_(e) {
     input.addEventListener("keydown", function (e) {
       var items = box.querySelectorAll(".search-item");
       if (e.key === "Escape") {
-        box.hidden = true;
+        cerrarBusqueda_();
         return;
       }
-      if (!items.length) return;
+      if (box.hidden || !items.length) return;
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault();
         busquedaActiva_ =
-          (busquedaActiva_ + (e.key === "ArrowDown" ? 1 : -1) + items.length) %
-          items.length;
+          busquedaActiva_ < 0
+            ? e.key === "ArrowDown"
+              ? 0
+              : items.length - 1
+            : (busquedaActiva_ +
+                (e.key === "ArrowDown" ? 1 : -1) +
+                items.length) %
+              items.length;
         items.forEach(function (it, i) {
           it.classList.toggle("activo", i === busquedaActiva_);
+          it.setAttribute("aria-selected", String(i === busquedaActiva_));
         });
+        input.setAttribute("aria-activedescendant", items[busquedaActiva_].id);
+        items[busquedaActiva_].scrollIntoView({ block: "nearest" });
       } else if (e.key === "Enter") {
         e.preventDefault();
         items[Math.max(0, busquedaActiva_)].click();
@@ -1024,12 +1044,12 @@ function clicWorkspaceYAvisos_(e) {
     box.addEventListener("click", function (e) {
       var b = e.target.closest("[data-search-load]");
       if (b) {
-        box.hidden = true;
+        cerrarBusqueda_();
         openLoadWorkspace(b.getAttribute("data-search-load"), "operacion");
         return;
       }
       if (e.target.closest("[data-search-todos]")) {
-        box.hidden = true;
+        cerrarBusqueda_();
         var main = document.getElementById("search");
         main.value = input.value.trim();
         marcarFiltroOperacion_("all"); // resultados de búsqueda: en todas las cargas, no solo "En ruta"
@@ -1038,7 +1058,7 @@ function clicWorkspaceYAvisos_(e) {
       }
     });
     document.addEventListener("click", function (e) {
-      if (!e.target.closest(".home-global-search")) box.hidden = true;
+      if (!e.target.closest(".home-global-search")) cerrarBusqueda_();
     });
   })();
 

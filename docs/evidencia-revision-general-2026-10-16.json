@@ -1,0 +1,518 @@
+{
+  "date": "2026-10-16",
+  "timezone": "America/Mexico_City",
+  "base_commit": "98bd631",
+  "environment": "Chromium y SDK Supabase locales; peticiones interceptadas, datos ficticios y PostgreSQL efímero. Sin cambios en producción.",
+  "artifacts": [
+    {
+      "file": "google-apps-script/index-sitio.html",
+      "bytes": 864087,
+      "sha256": "7a883c90fe19aef226e8ae007481159f5e4a77d9f4fe0dcac7c18c0e386caf11"
+    },
+    {
+      "file": "google-apps-script/index-cliente.html",
+      "bytes": 293839,
+      "sha256": "7760248661d9a1b2a8d23732ccdf7d2100e252eb363bf4c90492550aff1db584"
+    }
+  ],
+  "unit_integration_tests": {
+    "passed": 152,
+    "failed": 0,
+    "skipped": 0
+  },
+  "general_review": {
+    "checks": [
+      "Siete secciones principales abren y caben en cuatro anchos de 320 a 1440 px",
+      "Búsqueda: selección accesible, flecha arriba, Escape y Enter sin abrir resultados ocultos",
+      "Histórico: error claro para fechas invertidas y recuperación al corregir",
+      "Histórico: una consulta anterior que tarda más no reemplaza los filtros actuales",
+      "Histórico: un error muestra cómo reintentar y Actualizar recupera la lista sin borrar filtros",
+      "Campana: avisos locales y del servidor abren su tarea; revisión de carga abre el expediente",
+      "Organizar turno: espera, fallo visible y reintento correcto",
+      "Formularios: campos obligatorios con un solo mensaje y limpieza al corregir, sin guardar el borrador",
+      "Cerrar sesión impide que una lectura anterior reabra Organizar turno",
+      "Portal Cliente: una respuesta lenta no reemplaza el embarque abierto después",
+      "Gerencia: búsqueda y recuperación de un filtro sin coincidencias"
+    ],
+    "layouts": [
+      {
+        "section": "home",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "operation",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "calendario",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "indicadores",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "apartados",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "radar",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "historico",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "home",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "operation",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "calendario",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "indicadores",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "apartados",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "radar",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "historico",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "home",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "operation",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "calendario",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "indicadores",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "apartados",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "radar",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "historico",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "home",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "operation",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "calendario",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "indicadores",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "apartados",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "radar",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "historico",
+        "width": 320,
+        "content": 320
+      }
+    ],
+    "errors": []
+  },
+  "organization_flows": {
+    "environment": "Chromium + SDK Supabase + PostgreSQL local; peticiones remotas interceptadas",
+    "checks": [
+      "Pestaña sin tareas muestra explicación y botón; Contactos VG retirado",
+      "Nueva tarea abre el formulario y aparece guardada al regresar",
+      "Organizar turno: navegación y contenido activos, sin desbordamiento en cinco anchos de 320 a 1533 px",
+      "Checklist creado y asociado a tarea real",
+      "Pasos completados y persistidos",
+      "Tarea recurrente creada con horario de México",
+      "Escalamiento configurable; envío externo permanece desactivado",
+      "Mis clientes filtra y limpiar recupera toda la operación",
+      "Carga, cliente, estatus, trailer y color adversos permanecen como texto"
+    ],
+    "errors": []
+  },
+  "personal_bell_regression": [
+    {
+      "user": "Esteban",
+      "role": "admin",
+      "ownCustomersOnly": true
+    },
+    {
+      "user": "Ana",
+      "role": "csr",
+      "ownCustomersOnly": true
+    },
+    {
+      "user": "Abraham",
+      "role": "admin",
+      "ownCustomersOnly": true
+    }
+  ],
+  "loads_list_regression": [
+    {
+      "viewport": 1920,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": false,
+      "available": 1058,
+      "content": 1058,
+      "tableWidth": 1058,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": false,
+      "available": 958,
+      "content": 958,
+      "tableWidth": 958,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": false,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": false,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": false,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": false,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": false,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": false,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": false,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": false,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1920,
+      "detail": true,
+      "available": 956,
+      "content": 956,
+      "tableWidth": 956.40625,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": true,
+      "available": 770,
+      "content": 770,
+      "tableWidth": 769.8125,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": true,
+      "available": 714,
+      "content": 714,
+      "tableWidth": 714,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": true,
+      "available": 618,
+      "content": 618,
+      "tableWidth": 618,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": true,
+      "available": 542,
+      "content": 542,
+      "tableWidth": 542,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": true,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": true,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": true,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": true,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": true,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": true,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": true,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": true,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    }
+  ],
+  "planning_and_calendar_regression": [
+    {
+      "agendaEvents": 29,
+      "perDayInitiallyVisible": 3,
+      "expansionAndOpening": true
+    },
+    {
+      "view": "home",
+      "width": 1280,
+      "content": 1280
+    },
+    {
+      "view": "calendario",
+      "width": 1280,
+      "content": 1280
+    },
+    {
+      "view": "home",
+      "width": 1024,
+      "content": 1024
+    },
+    {
+      "view": "calendario",
+      "width": 1024,
+      "content": 1024
+    },
+    {
+      "view": "home",
+      "width": 768,
+      "content": 768
+    },
+    {
+      "view": "calendario",
+      "width": 768,
+      "content": 768
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "content": 390
+    },
+    {
+      "view": "calendario",
+      "width": 390,
+      "content": 390
+    },
+    {
+      "view": "home",
+      "width": 320,
+      "content": 320
+    },
+    {
+      "view": "calendario",
+      "width": 320,
+      "content": 320
+    },
+    {
+      "dailyGroups": 3,
+      "trailerAndTruck": true,
+      "uniqueLoads": 14,
+      "showMoreAndOpening": true
+    }
+  ],
+  "imports_and_reminders": "CSV/XLSX/XLS, validaciones y guardado; revisión operativa y seguimiento personal independientes.",
+  "build": "Cuatro entradas compiladas; lector y gerencia sin cambios de entrega.",
+  "pixel_comparisons": "No se repitieron comparaciones exactas de píxeles en esta revisión.",
+  "installation": "Actualizar index.html e index-cliente.html, y crear nueva versión de la misma implementación Google. Sin SQL.",
+  "production": "Instalación pendiente del usuario; no se accedió a su sesión privada de Google ni a métricas de producción.",
+  "manual_tests": "Permanecen canceladas hasta nuevo aviso."
+}

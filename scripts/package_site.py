@@ -70,6 +70,8 @@ def main():
         'LISTADO_SIN_SCROLL_2026-10-16.md':ROOT/'docs/LISTADO_SIN_SCROLL_2026-10-16.md',
         'DISENO_PLAN_Y_TURNO_2026-10-16.md':ROOT/'docs/DISENO_PLAN_Y_TURNO_2026-10-16.md',
         'CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md':ROOT/'docs/CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md',
+        'REVISION_GENERAL_2026-10-16.md':ROOT/'docs/REVISION_GENERAL_2026-10-16.md',
+        'evidencia-revision-general-2026-10-16.json':ROOT/'docs/evidencia-revision-general-2026-10-16.json',
         'evidencia-campana-plan-2026-10-16.json':ROOT/'docs/evidencia-campana-plan-2026-10-16.json',
         'imagenes/plan-del-dia-compacto.png':ROOT/'docs/imagenes/plan-del-dia-compacto.png',
         'imagenes/plan-compacto-movil.png':ROOT/'docs/imagenes/plan-compacto-movil.png',

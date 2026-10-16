@@ -417,3 +417,19 @@
     font-size: 19px;
   }
 }
+
+/* La apertura informa espera y fallo junto al botón y permite volver a intentarlo. */
+.organize-load-status {
+  flex: 1 1 100%;
+  max-width: 520px;
+  color: #ffb4a6;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.organize-load-status:empty {
+  display: none;
+}
+.organize-toolbar button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}

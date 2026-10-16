@@ -4,6 +4,10 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Revisión general del panel y Portal Cliente
+
+La revisión más reciente corrige búsqueda, formularios, Histórico, avisos, apertura de turno y respuestas tardías del Portal Cliente. Requiere actualizar **index.html e index-cliente.html**. [Cambios, resultados y pasos](REVISION_GENERAL_2026-10-16.md).
+
 ## Campana por cliente y plan compacto
 
 La campana ahora se limita a los clientes de cada cuenta y el plan muestra un grupo a la vez con acciones desplegables. Se actualiza únicamente **index.html**. [Pasos y capturas](CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md).

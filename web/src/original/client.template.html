@@ -533,7 +533,10 @@
 
 
 
+    var detailRequestId = 0;
     function openDetail(load) {
+      var requestId = ++detailRequestId;
+      $('detail-screen').setAttribute('aria-busy', 'true');
       showScreen('detail-screen');
       $('detail-po').textContent = 'PO ' + load;
       $('detail-origin').textContent = '';
@@ -543,11 +546,15 @@
       $('detail-facts').innerHTML = '';
       $('detail-docs').innerHTML = '<div class="incidencia-empty">Cargando…</div>';
       $('detail-incidencias').innerHTML = '<div class="incidencia-empty">Cargando…</div>';
+      if ($('detail-avisos')) $('detail-avisos').textContent = 'Cargando avisos de este embarque…';
 
       google.script.run
         .withSuccessHandler(function (rec) {
+          if (requestId !== detailRequestId) return;
+          $('detail-screen').setAttribute('aria-busy', 'false');
           if (sesionExpirada(rec)) return;
           if (!rec) {
+            if ($('detail-avisos')) $('detail-avisos').textContent = 'No se pudieron cargar los avisos.';
             $('detail-docs').innerHTML = '<div class="incidencia-empty">No se pudo cargar este embarque.</div>';
             $('detail-incidencias').innerHTML = '';
             return;
@@ -555,6 +562,9 @@
           showDetail(rec);
         })
         .withFailureHandler(function (err) {
+          if (requestId !== detailRequestId) return;
+          $('detail-screen').setAttribute('aria-busy', 'false');
+          if ($('detail-avisos')) $('detail-avisos').textContent = 'No se pudieron cargar los avisos.';
           $('detail-docs').innerHTML = '<div class="incidencia-empty">Error: ' + escHtml(err.message) + '</div>';
           $('detail-incidencias').innerHTML = '';
         })
@@ -636,6 +646,8 @@
     }
 
     $('back-btn').addEventListener('click', function () {
+      detailRequestId++; // Una respuesta anterior no debe pintar otro embarque al volver.
+      $('detail-screen').setAttribute('aria-busy', 'false');
       showScreen('dashboard-screen');
     });
 

@@ -13,7 +13,7 @@ import guidanceStyles from "./guidance.css?raw";
 import * as usability from "./usability.js";
 import usabilityStyles from "./usability.css?raw";
 import * as history from "./history.js";
-import { mountValidation } from "./validation.js";
+import * as validation from "./validation.js";
 import * as dialogs from "./dialogs.js";
 import { mountOrganization } from "./organization.js";
 import organizationStyles from "./organization.css?raw";
@@ -41,6 +41,7 @@ async function start() {
   window.panelHistory = history;
   window.panelCalendar = calendar;
   window.panelNotices = notices;
+  window.panelValidation = validation;
   const view = "internal";
   const page = originalPage({
     template,
@@ -102,7 +103,7 @@ async function start() {
   }
   document.body.innerHTML = page.body;
   if (view === "internal") usability.mountUsability(document);
-  mountValidation(document);
+  validation.mountValidation(document);
   for (const source of page.scripts) {
     const tag = document.createElement("script");
     tag.textContent = source;

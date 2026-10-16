@@ -65,9 +65,13 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
             tipo: "server",
             sev: a.kind === "escalation" ? "critical" : "warn",
             load: a.load || "",
-            destino: "bitacora",
+            taskId: a.task_id || "",
+            destino: a.kind === "load_review" ? "carga" : "bitacora",
             titulo: a.message,
-            detalle: "Pendiente vigente · revisa su tarea antes de completar",
+            detalle:
+              a.kind === "load_review"
+                ? "Revisión pendiente · abre esta carga para atenderla"
+                : "Tarea pendiente · abre su detalle para continuar",
             ts: a.created_at,
           };
         }),
@@ -195,6 +199,7 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
       if (bitacoraCargada_ && b.creado_por && b.creado_por !== yo) {
         out.push({
           id: "bit:" + b.id,
+          taskId: b.id,
           tipo: "bit",
           sev: "info",
           destino: "bitacora",
@@ -206,6 +211,7 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
       if (seg && !isNaN(seg.getTime()) && seg.getTime() <= finDeHoy.getTime()) {
         out.push({
           id: "bitseg:" + b.id + ":" + b.fecha_seguimiento,
+          taskId: b.id,
           tipo: "bitseg",
           sev: "warn",
           destino: "bitacora",
@@ -734,8 +740,13 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
     marcarAvisosVistos_(id);
     abrirAvisos_(false);
     if (!a) return;
-    if (a.load) openLoadWorkspace(a.load, a.tab || "operacion");
-    else if (a.destino === "bitacora") showMainPage("home", "group-bitacora");
+    if (a.destino === "bitacora") {
+      showMainPage("home", "group-bitacora");
+      var task = (bitacora || []).find(function (item) {
+        return String(item.id) === String(a.taskId);
+      });
+      if (task) openBitacoraModal(task);
+    } else if (a.load) openLoadWorkspace(a.load, a.tab || "operacion");
     else if (a.destino === "gestionar") openCsrPasswordGate();
     else if (a.destino === "apartados") verApartado_(a.apartado);
   }

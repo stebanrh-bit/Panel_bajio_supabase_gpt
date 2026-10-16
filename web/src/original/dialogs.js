@@ -1,4 +1,5 @@
 import { escapeHtml as esc } from "./content.js";
+import { validateForm } from "./validation.js";
 
 /** Diálogo único con validación junto al campo. Cancelar nunca ejecuta la operación. */
 export function formDialog(title, content, submitLabel = "Guardar") {
@@ -6,7 +7,12 @@ export function formDialog(title, content, submitLabel = "Guardar") {
     const previous = document.activeElement;
     const dialog = document.createElement("dialog");
     dialog.className = "organize-dialog";
-    dialog.innerHTML = `<form novalidate><header><h2>${esc(title)}</h2><button type="button" data-close aria-label="Cerrar">×</button></header><div class="organize-fields">${content}</div><p role="alert" class="organize-error"></p><footer><button type="button" data-close>Cancelar</button><button type="submit">${esc(submitLabel)}</button></footer></form>`;
+    dialog.setAttribute(
+      "aria-labelledby",
+      "form-dialog-" + crypto.randomUUID(),
+    );
+    dialog.innerHTML = `<form novalidate data-managed-validation><header><h2>${esc(title)}</h2><button type="button" data-close aria-label="Cerrar">×</button></header><div class="organize-fields">${content}</div><p role="alert" class="organize-error"></p><footer><button type="button" data-close>Cancelar</button><button type="submit">${esc(submitLabel)}</button></footer></form>`;
+    dialog.querySelector("h2").id = dialog.getAttribute("aria-labelledby");
     const close = (value) => {
       dialog.close();
       dialog.remove();
@@ -23,24 +29,7 @@ export function formDialog(title, content, submitLabel = "Guardar") {
     const form = dialog.querySelector("form");
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      form.querySelectorAll("[data-field-error]").forEach((n) => n.remove());
-      let invalid = null;
-      for (const input of form.querySelectorAll("input,select,textarea")) {
-        input.removeAttribute("aria-invalid");
-        if (!input.checkValidity()) {
-          invalid ||= input;
-          input.setAttribute("aria-invalid", "true");
-          const hint = document.createElement("small");
-          hint.dataset.fieldError = "";
-          hint.className = "organize-error";
-          hint.textContent = input.validationMessage;
-          input.after(hint);
-        }
-      }
-      if (invalid) {
-        invalid.focus();
-        return;
-      }
+      if (!validateForm(form)) return;
       close(Object.fromEntries(new FormData(form)));
     });
     document.body.append(dialog);

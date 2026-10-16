@@ -110,7 +110,7 @@
         <button type="button" class="link-btn" id="avisos-leer-todo">Marcar avisos como leídos</button>
       </div>
     </div>
-    <p class="home-section-help">Leer o posponer un aviso no completa la tarea. Registra la acción realizada en la carga.</p><div class="avisos-lista" id="avisos-lista"></div>
+    <p class="home-section-help">Avisos de cargas de tus clientes y tareas personales. Leer u ocultar un aviso no completa el trabajo.</p><div class="avisos-lista" id="avisos-lista"></div>
   </div>
 
   <div class="who-drawer-backdrop" id="who-drawer-backdrop">
@@ -130,7 +130,7 @@
 <section class="home-command" id="home-command">
   <div class="home-command-head">
     <div class="home-command-title"><h1>Mi operación</h1><p>Lo que requiere tu atención ahora.</p></div>
-    <div class="home-global-search"><input id="home-search" type="text" placeholder="Buscar carga, cliente, trailer, WO, comentario…" autocomplete="off" aria-label="Buscar en todas tus cargas"><div class="search-resultados" id="home-search-resultados" role="listbox" hidden></div></div>
+    <div class="home-global-search"><input id="home-search" type="text" role="combobox" aria-autocomplete="list" aria-controls="home-search-resultados" aria-expanded="false" placeholder="Buscar carga, cliente, trailer, WO, comentario…" autocomplete="off" aria-label="Buscar en todas tus cargas"><div class="search-resultados" id="home-search-resultados" role="listbox" hidden></div></div>
   </div>
   <div class="home-tabs">
     <button type="button" class="home-tab-btn active" data-home-tab="ahora">Por atender</button>
@@ -366,7 +366,7 @@
 
 <!-- Indicadores: resumen (sirve en celular), por CSR, puntualidad, frontera y reporte semanal. -->
 <div class="page-view" id="page-indicadores" hidden>
-  <div class="operation-page-head"><div><h1>Indicadores</h1><p>Con las cargas que estás viendo ahorita (tu alcance). Los porcentajes usan las cargas que siguen en la hoja Loads (las archivadas ya no cuentan).</p></div></div>
+  <div class="operation-page-head"><div><h1>Indicadores</h1><p>Indicadores de las cargas del alcance seleccionado. Las cargas archivadas no se incluyen.</p></div></div>
   <section class="ind-section"><h2>Resumen</h2><div class="ind-kpis" id="ind-resumen"></div><div id="ind-urgentes"></div></section>
   <section class="ind-section" id="ind-csr-section"><h2>Por CSR</h2><div class="table-wrap"><table class="ind-table" id="ind-csr"></table></div></section>
   <section class="ind-section"><h2>Puntualidad por cliente <small>(últimos 30 días · a tiempo = hasta 20 min tarde)</small></h2><div class="table-wrap"><table class="ind-table" id="ind-puntualidad"></table></div></section>
@@ -379,7 +379,7 @@
 
 <!-- Loads apartados: loads de otros CSR que se apartan para regresar cargado (ver renderApartados_). -->
 <div class="page-view" id="page-apartados" hidden>
-  <div class="operation-page-head"><div><h1>Loads apartados</h1><p>Loads de otros CSR que apartas para regresar cargado. Monitorea que cruce, revisa cuándo entrega y decide si te sirve para tu carga o se va a broker. Te avisa en la campana 🔔.</p></div>
+  <div class="operation-page-head"><div><h1>Loads apartados</h1><p>Loads de otros CSR que apartas para regresar cargado. Monitorea que cruce, revisa cuándo entrega y decide si te sirve para tu carga o se va a broker. La campana avisa cuando está relacionado con uno de tus clientes.</p></div>
     <div class="operation-head-right"><button type="button" class="ws-btn primary" id="apartado-nuevo">+ Apartar load</button></div></div>
   <div class="ap-pasos" aria-hidden="true"><span>1 · Monitorear cruce</span><span>2 · Esperar entrega</span><span>3 · ¿Me sirve?</span><span>4 · Usar o broker</span></div>
   <div class="toolbar">
@@ -396,14 +396,13 @@
 
 <!-- Radar de millas: cargas con "Broker" en Regresos cerca de un origen (ver renderRadar_). -->
 <div class="page-view" id="page-radar" hidden>
-  <div class="operation-page-head"><div><h1>Radar de millas</h1><p>Cargas con <b>Broker</b> en Regresos (del Excel de VanGuard que subas aquí), ordenadas por distancia desde tu origen. Distancia en línea recta (aprox.) — confirma la ruta real antes de programar.</p></div>
+  <div class="operation-page-head"><div><h1>Radar de millas</h1><p>Cargas con <b>Broker</b> en Regresos (del Excel de VanGuard que subas aquí), ordenadas por distancia desde tu origen. Revisa la fuente y fecha de las millas: ruta por carretera cuando está disponible o aproximación en línea recta. Confirma el trayecto antes de programar.</p></div>
     <div class="operation-head-right"><button type="button" class="ws-btn primary" id="radar-subir">Subir Excel VanGuard</button><input type="file" id="radar-file" accept=".xlsx,.xls" hidden><button type="button" class="ws-btn" id="radar-wa">Copiar disponibilidad para WhatsApp</button></div></div>
-  <div class="home-tabs"><button type="button" class="radar-tab-btn active" data-radar-tab="cargas">Cargas cerca</button><button type="button" class="radar-tab-btn" data-radar-tab="exacta">Distancia exacta</button></div>
+  <div class="home-tabs"><button type="button" class="radar-tab-btn active" data-radar-tab="cargas">Cargas cerca</button><button type="button" class="radar-tab-btn" data-radar-tab="exacta">Ruta entre direcciones</button></div>
 
-  <!-- Distancia exacta entre dos direcciones (ver dirCalcular_). Cada búsqueda se guarda en las
-       hojas "Direcciones" y "Distancias"; repetirla ya no consulta nada afuera. -->
+  <!-- Distancia exacta entre dos direcciones (ver dirCalcular_). Cada búsqueda se guarda en la base de datos; repetirla ya no consulta nada afuera. -->
   <section class="ind-section" id="radar-exacta" hidden>
-    <h2>Distancia exacta entre direcciones <small>(millas por carretera · OpenStreetMap)</small></h2>
+    <h2>Ruta entre direcciones <small>(estimación por carretera · fuente y fecha en el resultado)</small></h2>
     <div class="toolbar radar-toolbar">
       <label class="radar-campo radar-campo-dir">Origen<input class="cliente-filter" type="text" id="dir-origen" placeholder="Dirección, Ciudad, Estado — o coordenadas de la unidad (41.9237, -85.0186)" autocomplete="off"></label>
       <label class="radar-campo radar-campo-dir">Destino<input class="cliente-filter" type="text" id="dir-destino" placeholder="Calle y número, ciudad, estado (o solo Ciudad, Estado)" autocomplete="off"></label>
@@ -458,6 +457,7 @@
     </select>
     <input class="cliente-filter" id="historico-desde" type="date" title="Desde (fecha en que se dejó)">
     <input class="cliente-filter" id="historico-hasta" type="date" title="Hasta (fecha en que se dejó)">
+    <button class="file-btn" type="button" id="historico-actualizar-btn">Actualizar</button>
     <button class="file-btn" type="button" id="historico-limpiar-btn">Limpiar filtros</button>
   </div>
   <section class="table-section">
