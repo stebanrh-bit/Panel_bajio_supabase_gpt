@@ -1,16 +1,16 @@
 # Validación de la entrega de 49 opciones
 
-Fecha: 16 de octubre de 2026. Base de trabajo: `f77366f`, rama `supabase-inicial`. Esta validación no instaló cambios en el Supabase ni en la implementación Google del usuario.
+Fecha: 16 de octubre de 2026. Base de trabajo: `f77366f`, rama `supabase-inicial`. Actualizada después de la corrección de la pestaña de tareas vacía y la retirada de Contactos VG. Esta validación no instaló cambios en el Supabase ni en la implementación Google del usuario.
 
 ## Resultados locales
 
 | Comprobación | Resultado |
 | --- | --- |
-| `npm --prefix web test` | 142 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
+| `npm --prefix web test` | 143 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
 | `npm --prefix web run build` | Compila panel interno, cliente, gerencia y lector. |
 | `python scripts/package_site.py --check` | Verifica correspondencia exacta entre SQL 004–012, los cuatro archivos HTML generados y el contenido del ZIP. |
 | `node scripts/check_browser.mjs --legacy-xls` | 38 comparaciones de pantallas/ventanas; flujo de incidencia, cierre de sesión, Admin como CSR, CSV/XLSX/XLS, recordatorios independientes y móvil. Sin errores JS. |
-| `node scripts/check_organization_browser.mjs` | 7 flujos nuevos con SDK real y PostgreSQL efímero: contacto VG, creación y guardado de checklist, pasos completados, recurrencia, configuración sin envío externo, Mis clientes/limpiar y texto adverso sin ejecución HTML. |
+| `node scripts/check_organization_browser.mjs` | 8 flujos con SDK real y PostgreSQL efímero: pestaña vacía con mensaje y sin Contactos VG, creación desde Organizar turno, checklist, pasos completados, recurrencia, configuración sin envío externo, Mis clientes/limpiar y texto adverso sin ejecución HTML. |
 | Deno check de `panel-accounts/index.ts` | Tipos correctos usando caché local y `--no-remote`. |
 | `node scripts/measure_queries.mjs` | EXPLAIN antes/después guardado con 100 cargas, 50 100 cambios y 10 000 rutas sintéticas. |
 | Integridad de fuentes originales | `Code.gs`, `PanelScript.html`, `PanelEstilos.html` e `index.html` de la raíz se conservan. |
@@ -23,7 +23,7 @@ El ensayo de respaldo exporta las tablas permitidas y las restaura en otra base 
 
 ## Tamaño y consultas
 
-El HTML interno pasa de **1 920 975 a 830 390 bytes: 56,8 % menos**. Cliente y gerencia pesan aproximadamente 293 y 291 kB; el lector de 71 kB se solicita al usarlo. Los tamaños gzip son estimaciones locales. El empaquetado autónomo para Google conserva un paquete interno mayor de 500 kB; Vite lo informa como advertencia, con compilación correcta.
+El HTML interno se redujo aproximadamente un **57 %** frente a los 1 920 975 bytes de la entrega base; los tamaños actuales exactos están en evidencia-entrega-49.json. Cliente y gerencia pesan aproximadamente 293 y 291 kB; el lector de 71 kB se solicita al usarlo. Los tamaños gzip son estimaciones locales. El empaquetado autónomo para Google conserva un paquete interno mayor de 500 kB; Vite lo informa como advertencia, con compilación correcta.
 
 En la muestra EXPLAIN, el costo estimado de consultar una página de historial pasa de 1237,45 a 91,85 y el de rutas por origen de 321,57 a 175,36. Se conservan los planes completos. Es una comparación local de esas consultas; no mide cuotas, latencia ni concurrencia de producción.
 

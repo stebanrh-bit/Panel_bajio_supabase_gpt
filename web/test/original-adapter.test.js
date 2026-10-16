@@ -367,3 +367,38 @@ test("SQL 009: persistencia, bajas lógicas, radar, aislamiento y permisos", asy
     await db.close();
   }
 });
+
+test("organización: abrir consulta tareas nuevas aunque el panel aún no las tenga y no carga agenda VG", async () => {
+  const { organizationMethods } = await import(
+    "../src/original/api/organization.js"
+  );
+  const task = {
+    id: "task-new",
+    note: "Creada desde otra pestaña",
+    state: "open",
+  };
+  const reads = [],
+    filters = [];
+  const ctx = {
+    profile: { role: "admin" },
+    staff() {},
+    records: () => [], // Simula el panel todavía vacío antes de su siguiente sondeo.
+    rows: async (table, filter) => {
+      reads.push(table);
+      const query = {
+        eq: (key, value) => {
+          filters.push([key, value]);
+          return query;
+        },
+      };
+      filter(query);
+      return table === "shift_tasks" ? [task] : [];
+    },
+    remember: (_table, rows) => rows,
+  };
+  const result = await organizationMethods(ctx).getOrganizacion();
+  assert.deepEqual(result.tasks, [task]);
+  assert.ok(reads.includes("shift_tasks"));
+  assert.ok(!reads.includes("vg_contacts"));
+  assert.deepEqual(filters, [["state", "open"]]);
+});

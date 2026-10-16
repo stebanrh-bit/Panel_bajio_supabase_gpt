@@ -36,17 +36,6 @@ try {
     "insert into loads(load,customer,status,trailer) values('TEST-A','ACME','Cargando','T0132'),('TEST-B','OTRO','Cargando','S1078')",
   );
   await rpc("ops_assign_customer", ["ACME", people.Esteban, null]);
-  const task = (
-    await rpc("ops_save_tasks", [
-      {
-        note: "Revisar documentos",
-        assigned_to: people.Ana,
-        loads: ["TEST-A"],
-      },
-      null,
-      null,
-    ])
-  ).rows[0];
   const context = await browser.newContext({
     timezoneId: "America/Mexico_City",
     viewport: { width: 1440, height: 1000 },
@@ -224,25 +213,69 @@ try {
     .click();
   const org = page.locator("dialog").filter({ hasText: "Organizar turno" });
   await org.waitFor();
-  await org.locator("[data-org-action=tab][data-id=contacts]").click();
-  await org.locator("[data-org-action=contact]").first().click();
-  let form = page.locator("dialog").last();
-  await form.locator("[name=name]").fill("CSR externo VG");
-  await form.locator("[name=phone]").fill("4771234567");
-  await saveDialog(form);
+  assert.equal(
+    await org.locator("[data-org-action=tab][data-id=contacts]").count(),
+    0,
+  );
+  assert.equal(
+    await org.getByRole("heading", { name: "Tareas y checklist" }).count(),
+    1,
+  );
+  assert.ok(
+    await org
+      .getByText("No hay tareas abiertas.", { exact: false })
+      .isVisible(),
+  );
+  checks.push(
+    "Pestaña sin tareas muestra explicación y botón; Contactos VG retirado",
+  );
+  await org.locator("[data-org-action=new-task]").click();
+  await page.locator("#bitacora-backdrop.show").waitFor();
+  await page
+    .locator("#bitacora-nota")
+    .fill("Tarea creada desde Organizar turno");
+  await page.locator("#bitacora-asignado").selectOption("Esteban");
+  await page.locator("#bitacora-submit").click();
+  await page.locator("#bitacora-backdrop.show").waitFor({ state: "hidden" });
+  assert.equal(
+    (
+      await db.query(
+        "select count(*)::int as n from shift_tasks where note='Tarea creada desde Organizar turno'",
+      )
+    ).rows[0].n,
+    1,
+  );
+  const task = (
+    await rpc("ops_save_tasks", [
+      {
+        note: "Revisar documentos",
+        assigned_to: people.Ana,
+        loads: ["TEST-A"],
+      },
+      null,
+      null,
+    ])
+  ).rows[0];
+  await page
+    .locator(".organize-toolbar button")
+    .filter({ hasText: "Organizar turno" })
+    .click();
   await page
     .locator("dialog .organize-row")
-    .filter({ hasText: "CSR externo VG" })
+    .filter({ hasText: "Tarea creada desde Organizar turno" })
     .waitFor();
-  checks.push("Contacto externo guardado sin crear cuenta");
+  checks.push("Nueva tarea abre el formulario y aparece guardada al regresar");
   let current = page.locator("dialog").last();
-  await current.locator("[data-org-action=tab][data-id=tasks]").click();
-  await current.locator("[data-org-action=task]").first().click();
-  form = page.locator("dialog").last();
+  await current
+    .locator(".organize-row")
+    .filter({ hasText: "Revisar documentos" })
+    .locator("[data-org-action=task]")
+    .click();
+  let form = page.locator("dialog").last();
   await form.locator("[name=new_template]").fill("Documentación");
   await form.locator("[name=steps]").fill("Validar DODA\nConfirmar entrega");
   await saveDialog(form);
-  await page.locator("dialog [data-org-action=task]").waitFor();
+  await page.locator("dialog [data-org-action=task]").first().waitFor();
   let stored = (
     await db.query("select * from task_checklist_items where task_id=$1", [
       task.id,
@@ -250,13 +283,17 @@ try {
   ).rows;
   assert.equal(stored.length, 2);
   checks.push("Checklist creado y asociado a tarea real");
-  await page.locator("dialog [data-org-action=task]").click();
+  await page
+    .locator("dialog .organize-row")
+    .filter({ hasText: "Revisar documentos" })
+    .locator("[data-org-action=task]")
+    .click();
   form = page.locator("dialog").last();
   await form.locator('input[name^="step:"]').first().waitFor();
   for (const check of await form.locator('input[name^="step:"]').all())
     await check.check();
   await saveDialog(form);
-  await page.locator("dialog [data-org-action=task]").waitFor();
+  await page.locator("dialog [data-org-action=task]").first().waitFor();
   stored = (
     await db.query("select * from task_checklist_items where task_id=$1", [
       task.id,

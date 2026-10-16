@@ -4,6 +4,10 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Si ya instalaste las 49 opciones
+
+Para corregir la pestaña de tareas vacía y quitar Contactos VG, sigue [esta actualización de un solo archivo](CORRECCION_TAREAS_2026-10-16.md). Los pasos completos de abajo corresponden a una instalación de la entrega completa.
+
 ## Archivos completos
 
 Abre cada enlace y usa **Ctrl+A → Ctrl+C** para copiar TODO. No necesitas descargar un ZIP.

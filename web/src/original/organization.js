@@ -61,7 +61,7 @@ export function mountOrganization(api, doc = document) {
   async function help() {
     await formDialog(
       "Guía del panel",
-      `<div class="organize-help"><p><b>Inicio:</b> comienza por lo vencido y lo que requiere atención. «Próxima revisión» es la fecha para volver a revisar; al vencer sigue visible hasta que lo atiendas.</p><p><b>Revisión operativa:</b> depende del estatus de la carga. <b>Seguimiento personal:</b> es el pendiente que tú programas. Completar uno no completa el otro.</p><p><b>Cargas:</b> unidad = tractocamión; trailer = caja; cita = horario acordado. La etapa indica el avance, la prioridad el orden de trabajo y atención lo que necesita revisión.</p><p><b>Solicitudes:</b> viajes sin número de carga confirmado. <b>Tareas:</b> acciones asignadas a personas del panel. <b>Apartados:</b> viajes reservados para regreso; el CSR de VG se escribe manualmente o se elige en la agenda.</p><p><b>CSR:</b> consulta toda la operación y usa «Mis clientes» para enfocarte. <b>Supervisor:</b> revisa pendientes y cierres. <b>Admin:</b> administra cuentas, clientes y reglas. El nombre del perfil conserva Admin/Supervisor según tu cuenta.</p><p><b>Turno:</b> asigna las tareas, completa sus pasos y entrega pendientes críticos con responsable y próxima acción. Una tarea dependiente se completa después de sus antecedentes.</p><p><b>Millas:</b> revisa fuente y fecha. OSRM usa mapas abiertos; Google actualiza cuando el proceso programado tiene cuota.</p><p>Fechas mostradas en hora del centro de México. «Sin fecha» significa que no se capturó; 0 es un valor válido.</p><p>Los avisos externos están desactivados hasta elegir el canal.</p></div>`,
+      `<div class="organize-help"><p><b>Inicio:</b> comienza por lo vencido y lo que requiere atención. «Próxima revisión» es la fecha para volver a revisar; al vencer sigue visible hasta que lo atiendas.</p><p><b>Revisión operativa:</b> depende del estatus de la carga. <b>Seguimiento personal:</b> es el pendiente que tú programas. Completar uno no completa el otro.</p><p><b>Cargas:</b> unidad = tractocamión; trailer = caja; cita = horario acordado. La etapa indica el avance, la prioridad el orden de trabajo y atención lo que necesita revisión.</p><p><b>Solicitudes:</b> viajes sin número de carga confirmado. <b>Tareas:</b> acciones asignadas a personas del panel. <b>Apartados:</b> viajes reservados para regreso; el CSR de VG se escribe manualmente.</p><p><b>CSR:</b> consulta toda la operación y usa «Mis clientes» para enfocarte. <b>Supervisor:</b> revisa pendientes y cierres. <b>Admin:</b> administra cuentas, clientes y reglas. El nombre del perfil conserva Admin/Supervisor según tu cuenta.</p><p><b>Turno:</b> asigna las tareas, completa sus pasos y entrega pendientes críticos con responsable y próxima acción. Una tarea dependiente se completa después de sus antecedentes.</p><p><b>Millas:</b> revisa fuente y fecha. OSRM usa mapas abiertos; Google actualiza cuando el proceso programado tiene cuota.</p><p>Fechas mostradas en hora del centro de México. «Sin fecha» significa que no se capturó; 0 es un valor válido.</p><p>Los avisos externos están desactivados hasta elegir el canal.</p></div>`,
       "Entendido",
     );
   }
@@ -79,7 +79,6 @@ export function mountOrganization(api, doc = document) {
     const tabs = [
       ["tasks", "Tareas y checklist"],
       ["schedules", "Tareas recurrentes"],
-      ["contacts", "Contactos VG"],
       ["reserved", "Referencias de regreso"],
       ["alerts", "Avisos"],
       ...(data.admin
@@ -107,12 +106,12 @@ export function mountOrganization(api, doc = document) {
         .forEach((b) =>
           b.setAttribute("aria-pressed", String(b.dataset.id === key)),
         );
-      if (key === "tasks")
-        section.innerHTML = `<p>Abre una tarea para revisar pasos obligatorios y dependencias. Para crear una, usa «Nueva tarea de turno» en el panel.</p>${data.tasks.map((t) => row(t.note, `${t.load || "Sin carga"} · ${date(t.follow_up_at)}`, button("task", "Abrir", t.id))).join("") || empty}`;
+      if (key === "tasks") {
+        // La pestaña inicial debe explicar qué muestra y permitir crear una tarea aquí mismo.
+        section.innerHTML = `<h3>Tareas y checklist</h3><p>Estas son tus tareas abiertas. Pulsa «Abrir» para agregar o completar sus pasos obligatorios.</p>${button("new-task", "Nueva tarea de turno")}${data.tasks.length ? data.tasks.map((t) => row(t.note, `${t.load || "Sin carga"} · ${date(t.follow_up_at)}`, button("task", "Abrir", t.id))).join("") : "<p>No hay tareas abiertas. Crea una con «Nueva tarea de turno».</p>"}`;
+      }
       if (key === "schedules")
         section.innerHTML = `<p>Horario del centro de México. Se crea una tarea por ocurrencia; si el proceso estuvo detenido, recupera una sola y continúa en el próximo horario.</p>${button("schedule", "Nueva programación")}${data.admin ? button("tick", "Comprobar programaciones ahora") : ""}${data.task_schedules.map((t) => row(t.note, `${t.cadence === "daily" ? "Diaria" : "Semanal"} · ${date(t.next_run_at)} · ${t.active ? "Activa" : "Pausada"}`, button("schedule", "Editar", t.id))).join("") || empty}`;
-      if (key === "contacts")
-        section.innerHTML = `<p>Agenda opcional de personas externas. No crea cuentas ni cambia los permisos del panel.</p>${button("contact", "Nuevo contacto VG")}${data.vg_contacts.map((c) => row(c.name, `${c.company} · ${c.phone || c.email || "Sin contacto"} · ${c.active ? "Activo" : "Inactivo"}`, button("contact", "Editar", c.id))).join("")}`;
       if (key === "reserved") {
         section.innerHTML =
           "<p>«Carga relacionada» valida una carga activa. «Referencia libre» admite cualquier dato externo y no crea un vínculo.</p><p>Cargando…</p>";
@@ -167,41 +166,14 @@ export function mountOrganization(api, doc = document) {
       status.textContent = "";
       try {
         let result;
-        if (action === "contact") {
-          const c = data.vg_contacts.find((c) => c.id === id) || {};
-          result = await formDialog(
-            "Contacto externo VG",
-            field(
-              "name",
-              "Nombre",
-              "text",
-              c.name,
-              'required maxlength="200"',
-            ) +
-              field(
-                "company",
-                "Empresa",
-                "text",
-                c.company || "VG",
-                'maxlength="200"',
-              ) +
-              field("phone", "Teléfono", "tel", c.phone, 'maxlength="100"') +
-              field("email", "Correo", "email", c.email, 'maxlength="320"') +
-              area("note", "Notas", c.note, 'maxlength="1000"') +
-              select(
-                "active",
-                "Estado",
-                [
-                  ["true", "Activo"],
-                  ["false", "Inactivo"],
-                ],
-                String(c.active !== false),
-              ),
-          );
-          if (result) {
-            result.active = result.active === "true";
-            await call("guardarContactoVG", id, result);
-          }
+        if (action === "new-task") {
+          // Reutilizar el formulario existente conserva asignación, permisos e historial.
+          dialog.close();
+          doc
+            .querySelector('[data-page-scroll="home:group-bitacora"]')
+            ?.click();
+          doc.getElementById("bitacora-add-btn")?.click();
+          return;
         }
         if (action === "schedule") {
           const t = data.task_schedules.find((t) => t.id === id) || {};
@@ -269,6 +241,7 @@ export function mountOrganization(api, doc = document) {
           }
         }
         if (action === "task") {
+          status.textContent = "Abriendo tarea…";
           await taskDetails(id, data, call);
           await open(tab);
           dialog.close();
@@ -296,17 +269,6 @@ export function mountOrganization(api, doc = document) {
                 "text",
                 a.free_reference,
                 'maxlength="500"',
-              ) +
-              select(
-                "vg_contact_id",
-                "Contacto VG (opcional)",
-                [
-                  ["", "Captura manual de CSR"],
-                  ...data.vg_contacts
-                    .filter((c) => c.active || c.id === a.vg_contact_id)
-                    .map((c) => [c.id, c.name]),
-                ],
-                a.vg_contact_id,
               ),
           );
           if (result) await call("guardarApartado", { ...a, ...result });
@@ -481,7 +443,12 @@ export function mountOrganization(api, doc = document) {
           dialog.close();
         }
       } catch (error) {
-        notice(status, error);
+        notice(
+          status,
+          action === "task"
+            ? new Error("No se pudo abrir la tarea: " + error.message)
+            : error,
+        );
       } finally {
         b.disabled = false;
       }

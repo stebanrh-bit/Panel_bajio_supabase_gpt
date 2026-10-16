@@ -6,18 +6,18 @@
   "current_artifacts": [
     {
       "file": "google-apps-script/index-sitio.html",
-      "bytes": 830390,
-      "gzip_bytes_estimated": 233310
+      "bytes": 830028,
+      "gzip_bytes_estimated": 233251
     },
     {
       "file": "google-apps-script/index-cliente.html",
-      "bytes": 292957,
-      "gzip_bytes_estimated": 78173
+      "bytes": 293009,
+      "gzip_bytes_estimated": 78186
     },
     {
       "file": "google-apps-script/index-gerencia.html",
-      "bytes": 291381,
-      "gzip_bytes_estimated": 77809
+      "bytes": 291433,
+      "gzip_bytes_estimated": 77822
     },
     {
       "file": "google-apps-script/lector.html",

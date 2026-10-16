@@ -8,11 +8,11 @@ Esta entrega conserva Supabase como base y Google Apps Script como alojamiento. 
 - Los envíos externos quedan **desactivados** hasta elegir canal. Hay tareas y avisos internos programables; no se agregó envío automático de correos. Las funciones SQL de reserva de avisos quedan preparadas para una integración posterior.
 - Los estatus y la revisión de tránsito de tres horas conservan sus reglas actuales. Admin puede configurar transiciones y escalamiento. El escalamiento comienza apagado y no hay borrado automático.
 - Se conservan Admin para Esteban y Supervisor para Abraham. Esas etiquetas no alteran los permisos almacenados.
-- El CSR externo de VG sigue siendo texto manual. La agenda es opcional y no crea cuentas.
+- El CSR externo de VG sigue siendo texto manual. La sección Contactos VG y su selector se retiraron de la interfaz el 16 de octubre por indicación del usuario.
 
 ## Dónde están las funciones
 
-Abre **Organizar turno** en el encabezado. Incluye tareas y checklist, programaciones, contactos VG, referencias de regreso y avisos. Admin también tiene reglas, equivalencias de clientes y respaldo/archivo. «Guía de uso» explica los conceptos sin salir del panel.
+Abre **Organizar turno** en el encabezado. Incluye tareas y checklist, programaciones, referencias de regreso y avisos. Admin también tiene reglas, equivalencias de clientes y respaldo/archivo. «Guía de uso» explica los conceptos sin salir del panel.
 
 En Inicio, el plan separa urgente/vencido, hoy/después y futuro. Las revisiones operativas, seguimientos personales y avisos al cliente conservan acciones independientes. En Cargas puedes combinar filtros, verlos como etiquetas y limpiarlos; la tabla prioriza carga, cliente, estatus y entrega. El trailer conserva su ancho y el desplazamiento horizontal dentro del listado.
 
@@ -59,7 +59,7 @@ Las tareas recurrentes usan hora del centro de México. El proceso horario de mi
 | C13 | Un plazo vencido permanece hasta atenderlo; renovar o completar retira el aviso anterior. |
 | C14 | Formularios con validación junto al campo; SQL vuelve a validar antes de guardar. |
 | C17 | Fuente y fecha de cálculo de millas; se distingue estimado, mapas abiertos y Google. |
-| C18 | Apartado distingue carga relacionada, referencia libre y contacto externo. |
+| C18 | Apartado distingue carga relacionada y referencia libre; CSR de VG manual. |
 | C19 | Equivalencias de clientes para nuevas capturas; los datos históricos no se reescriben. Un nombre principal nuevo hereda el mismo CSR del alias. |
 | C21 | Filtros activos visibles y acción para limpiarlos. |
 | C22 | Fechas legibles en hora del centro de México, sin cambiar los instantes guardados; cero se distingue de ausencia. |
@@ -70,7 +70,7 @@ Las tareas recurrentes usan hora del centro de México. El proceso horario de mi
 | F05 | Tareas diarias/semanales con persona, horario, carga opcional y pausa. |
 | F06 | Checklist obligatorio/opcional y dependencias; el servidor bloquea ciclos y cierres incompletos. |
 | F08 | Cola y avisos preparados; envío externo desactivado hasta elegir canal. |
-| F18 | Agenda VG opcional, con edición y baja sin convertir contactos en usuarios. |
+| F18 | Retirada de la interfaz por petición del usuario el 16 de octubre; datos existentes conservados. |
 
 ## Verificación y límites
 
@@ -83,3 +83,10 @@ El respaldo contiene información operativa y datos de contacto: guárdalo en un
 La retención no borra cargas: archiva las terminadas con POD o recargos confirmados. Retirar instantáneas antiguas sí elimina la posibilidad de deshacer esas importaciones, por lo que muestra los IDs, exige verificar un respaldo y comprueba que la vista previa siga vigente.
 
 La instalación y las pruebas finales con tus cuentas reales se hacen después de actualizar Google y Supabase. La conectividad, cuotas y autorizaciones de tu cuenta Google solo se validan allí.
+
+
+## Corrección posterior: tareas vacías
+
+La apertura consulta las tareas abiertas en Supabase, sin depender del siguiente sondeo del panel. La pestaña tiene título, selección visible y botón **Nueva tarea de turno**; cuando no hay tareas explica cómo crear una. **Abrir** muestra progreso y cualquier error de lectura. Se comprobó crear una tarea desde la lista vacía, regresar y guardar su checklist.
+
+Si ya instalaste las 49 opciones, esta corrección solo requiere reemplazar **index.html** y publicar una nueva versión de la implementación Google existente. [Pasos concretos](CORRECCION_TAREAS_2026-10-16.md).

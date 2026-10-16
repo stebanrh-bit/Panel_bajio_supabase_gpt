@@ -65,6 +65,7 @@ def main():
         'evidencia-visual-49.json':ROOT/'docs/evidencia-visual-49.json',
         'evidencia-entrega-49.json':ROOT/'docs/evidencia-entrega-49.json',
         'VALIDACION_49_OPCIONES.md':ROOT/'docs/VALIDACION_49_OPCIONES.md',
+        'CORRECCION_TAREAS_2026-10-16.md':ROOT/'docs/CORRECCION_TAREAS_2026-10-16.md',
         'imagenes/organizar-turno.png':ROOT/'docs/imagenes/organizar-turno.png',
         'INSTALAR_SITIO.md':ROOT/'docs/INSTALAR_SITIO.md',
         'PRUEBAS_FINALES.md':ROOT/'docs/PRUEBAS_FINALES.md',

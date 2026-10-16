@@ -72,7 +72,7 @@ Estas pruebas están **pendientes en tu Google y Supabase**. Se hacen una por un
 | 1 | Entrar como Esteban y abrir Cargas; alternar Mis clientes y Limpiar filtros | Toda la operación disponible; filtro y etiquetas claros; perfil Admin | Pendiente |
 | 2 | Abrir Inicio y una carga con revisión y seguimiento personal | Urgente/hoy/futuro; completar un seguimiento no borra la revisión independiente; entregada sin POD conserva lo pendiente | Pendiente |
 | 3 | Tabla con detalle abierto y trailer T0132; filtros y calendario por cliente/tipo | Trailer completo; filtros visibles; columnas alineadas; solo movimientos seleccionados | Pendiente |
-| 4 | Organizar turno: crear contacto VG y referencia de regreso | No crea usuario; CSR externo sigue manual; carga relacionada solo activa; texto libre separado | Pendiente |
+| 4 | Crear apartado de prueba y referencia de regreso | CSR externo manual; carga relacionada solo activa; texto libre separado; sin agenda VG | CSR manual y referencia persistente confirmados por el usuario; selección de carga activa pendiente |
 | 5 | Crear checklist y dependencia; intentar terminar sin completarlos | Indica qué falta; rechaza ciclos; guarda los pasos al completarlos | Pendiente |
 | 6 | Programar tarea diaria/semanal y comprobar programaciones ahora | Una ocurrencia por horario de México; persona asignada correcta; pausa disponible | Pendiente |
 | 7 | Admin: configurar escalamiento, revisar avisos y devolverlo al estado deseado | Destinatario correcto; avisos renovados desaparecen; envío externo siempre desactivado | Pendiente |
@@ -84,3 +84,10 @@ Estas pruebas están **pendientes en tu Google y Supabase**. Se hacen una por un
 | 13 | Portal Cliente y Vista Gerencia desde sus enlaces, también en móvil | Cada vista carga su archivo; permisos y lectura correspondientes | Pendiente |
 
 La restauración se ensayó en bases efímeras separadas, con identidades simuladas. No ejecutar una restauración ni una limpieza en producción como parte de estas pruebas. Las pruebas con otras cuentas permanecen para el final, como acordamos.
+
+
+## Confirmaciones del usuario y corrección del 16 de octubre
+
+Confirmado por el usuario en su sitio publicado: aparecen Organizar turno y Guía de uso; su perfil dice Admin; Mis clientes filtra y Limpiar filtros recupera la operación; el plan de Inicio permite abrir la carga correcta; el trailer se ve completo en listado/editor con el detalle abierto; el CSR manual y la referencia libre del apartado persisten.
+
+El contacto de prueba se guardó, pero el usuario pidió retirar Contactos VG. Esa sección y el selector se eliminaron de la entrega, conservando los registros existentes. Después reportó vacía la pestaña Tareas y checklist. Se corrigieron la consulta y la presentación de lista vacía; se agregó Nueva tarea de turno dentro de la ventana. **Pendiente de instalar esta corrección y repetir la séptima prueba**. No se da el checklist por aprobado en producción.

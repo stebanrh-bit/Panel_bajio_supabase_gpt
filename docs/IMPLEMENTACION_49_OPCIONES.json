@@ -762,7 +762,7 @@
         "web/test/organization-database.test.js: vínculo y contacto opcionales",
         "scripts/check_browser.mjs: CSR de VG manual"
       ],
-      "result": "Apartado distingue carga relacionada, referencia libre y contacto externo."
+      "result": "Apartado distingue carga relacionada y referencia libre; CSR externo manual, sin selector de contactos."
     },
     {
       "id": "C19",
@@ -940,7 +940,8 @@
       ],
       "validation": [
         "web/test/organization-database.test.js: pasos obligatorios, antecedentes, ciclos y permisos",
-        "docs/evidencia-organizacion-49.json: checklist guardado y completado"
+        "docs/evidencia-organizacion-49.json: checklist guardado y completado",
+        "scripts/check_organization_browser.mjs: abrir desde lista vacía, crear tarea y guardar checklist"
       ],
       "result": "Checklist obligatorio/opcional y dependencias; el servidor bloquea ciclos y cierres incompletos."
     },
@@ -974,16 +975,16 @@
       "resource_effect": "↑",
       "evidence_or_dependency": "Conservar siempre la captura manual del CSR externo solicitada por el usuario",
       "category": "funcion",
-      "status": "implementado; validación local",
+      "status": "retirado de la interfaz por petición del usuario el 2026-10-16",
       "implementation": [
         "supabase/migrations/012_turn_rules_and_tasks.sql",
         "web/src/original/organization.js"
       ],
       "validation": [
-        "docs/evidencia-organizacion-49.json: contacto guardado sin cuenta",
-        "scripts/check_browser.mjs: captura libre CSR VG"
+        "scripts/check_organization_browser.mjs: pestaña de contactos ausente; tarea creada desde lista vacía",
+        "web/test/original-adapter.test.js: organización no consulta vg_contacts"
       ],
-      "result": "Agenda VG opcional, con edición y baja sin convertir contactos en usuarios."
+      "result": "Sin pestaña Contactos VG ni selector de contactos; se conservan los datos existentes y el CSR de VG manual."
     }
   ],
   "decisions": {
@@ -994,13 +995,20 @@
   "recorded_date": "2026-10-16",
   "production_changed": false,
   "validation_summary": {
-    "unit_integration_passed": 142,
+    "unit_integration_passed": 143,
     "failed": 0,
     "skipped": 0,
-    "organization_browser_flows": 7,
+    "organization_browser_flows": 8,
     "visual_comparisons": 38,
     "visual_comparison_scope": "Presentación prevista frente al HTML generado, con datos de prueba; no comparación autenticada contra el portal original en producción.",
     "artifacts": "docs/VALIDACION_49_OPCIONES.md",
     "production_acceptance": "docs/PRUEBAS_FINALES.md: pendiente, una prueba por vez"
+  },
+  "followup": {
+    "date": "2026-10-16",
+    "report": "Pestaña Tareas y checklist vacía",
+    "fix": "Consulta de tareas abiertas al abrir; mensaje sin registros, Nueva tarea de turno y errores visibles.",
+    "scope_change": "Retirar Contactos VG de la interfaz y su selector; conservar CSR manual y datos existentes.",
+    "production_acceptance": "Primera a sexta pruebas confirmadas; séptima pendiente de nueva actualización."
   }
 }

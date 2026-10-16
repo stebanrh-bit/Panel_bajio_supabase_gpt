@@ -8,9 +8,9 @@
 4. **Revisión operativa** depende del estatus, por ejemplo revisar tránsito cada tres horas. **Seguimiento personal** guarda una próxima acción propia. Atender una no completa la otra. Vencer significa «ya toca», no elimina nada.
 5. Prepara el mensaje al cliente y envíalo por tu canal habitual. Después registra que ya avisaste. Preparar o copiar el texto no equivale a enviarlo.
 6. Solicitudes son viajes sin número confirmado. Vincúlalas cuando exista una carga activa. Tareas son acciones asignadas a personas del panel.
-7. En **Organizar turno → Tareas y checklist**, completa pasos obligatorios. Si depende de otra tarea, termina primero el antecedente. Puedes agregar una plantilla con un paso por línea o seleccionar una existente.
+7. En **Organizar turno → Tareas y checklist**, abre tus tareas y completa los pasos obligatorios. Si la lista está vacía, usa **Nueva tarea de turno** en esa misma ventana. Si depende de otra tarea, termina primero el antecedente. Puedes agregar una plantilla con un paso por línea o seleccionar una existente.
 8. En **Tareas recurrentes**, elige persona, frecuencia, hora y carga opcional. Los días usan 0 domingo a 6 sábado; por ejemplo `1,2,3,4,5` para lunes a viernes. Puedes pausar una programación.
-9. Para un regreso, el CSR de VG se escribe manualmente. La agenda de contactos externos es opcional. Una carga relacionada debe estar activa al crear el vínculo; una referencia libre admite datos externos.
+9. Para un regreso, el CSR de VG se escribe manualmente. Una carga relacionada debe estar activa al crear el vínculo; una referencia libre admite datos externos.
 10. Antes de salir, prepara el cierre. Indica pendientes críticos (o «Sin pendientes críticos»), quién continúa y la próxima acción con plazo.
 
 ## Supervisor: revisar la operación

@@ -4,7 +4,6 @@ export function organizationMethods(ctx) {
   const tables = [
     "panel_settings",
     "customer_aliases",
-    "vg_contacts",
     "task_checklist_templates",
     "task_schedules",
   ];
@@ -62,7 +61,16 @@ export function organizationMethods(ctx) {
             ),
         )
         .map(({ load, customer }) => ({ load, customer }));
-      result.tasks = ctx.records("shift_tasks");
+      // Consultar al abrir: una tarea recién creada puede no haber llegado al sondeo del panel.
+      // La base conserva la autorización por persona; solo se solicitan tareas abiertas.
+      result.tasks = ctx.remember(
+        "shift_tasks",
+        await ctx.rows(
+          "shift_tasks",
+          (query) => query.eq("state", "open"),
+          "created_at",
+        ),
+      );
       return { ok: true, ...result, admin: ctx.profile.role === "admin" };
     },
     guardarReglas: async (values) => {

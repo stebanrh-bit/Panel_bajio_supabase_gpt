@@ -1,7 +1,8 @@
 {
   "environment": "Chromium + SDK Supabase + PostgreSQL local; peticiones remotas interceptadas",
   "checks": [
-    "Contacto externo guardado sin crear cuenta",
+    "Pestaña sin tareas muestra explicación y botón; Contactos VG retirado",
+    "Nueva tarea abre el formulario y aparece guardada al regresar",
     "Checklist creado y asociado a tarea real",
     "Pasos completados y persistidos",
     "Tarea recurrente creada con horario de México",
