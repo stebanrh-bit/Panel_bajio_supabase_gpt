@@ -42,38 +42,66 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
   /** Todo lo que hoy amerita un aviso, con un id estable (mismo motivo = mismo id). */
   var serverAlerts_ = [];
   function candidatosAvisos_() {
-    var out = serverAlerts_.map(function (a) {
-        return {
-          id: "server:" + a.id,
-          tipo: "server",
-          sev: a.kind === "escalation" ? "critical" : "warn",
-          load: a.load || "",
-          destino: "bitacora",
-          titulo: a.message,
-          detalle: "Pendiente vigente · revisa su tarea antes de completar",
-          ts: a.created_at,
-        };
+    // La campana pertenece a la sesión real, incluso al consultar otro CSR o toda la operación.
+    var scope = window.panelNotices.customerNoticeScope(
+      myRealIdentity,
+      asignaciones,
+      currentData,
+    );
+    var tasks = new Map(
+      (bitacora || []).map(function (item) {
+        return [String(item.id), item];
       }),
+    );
+    var out = serverAlerts_
+        .filter(function (a) {
+          if (a.load) return scope.hasLoad(a.load);
+          var task = tasks.get(String(a.task_id));
+          return !!task && scope.hasTask(task);
+        })
+        .map(function (a) {
+          return {
+            id: "server:" + a.id,
+            tipo: "server",
+            sev: a.kind === "escalation" ? "critical" : "warn",
+            load: a.load || "",
+            destino: "bitacora",
+            titulo: a.message,
+            detalle: "Pendiente vigente · revisa su tarea antes de completar",
+            ts: a.created_at,
+          };
+        }),
       ahora = Date.now(),
       yo = myRealIdentity;
-    var activas = computeActiveJourney(currentData).active;
-    homeBuckets_(currentData).now.forEach(function (rec) {
-      if (rec.updated_by === yo) return;
-      var rs = journeyReasons(rec);
-      // Si lo que la manda a "Atender ahora" es el cliente pendiente de avisar, ya lo cubre el
-      // aviso de comunicación de abajo — no se duplica.
-      if (rs.length && rs[0].kind === "notify" && rec.client_notify_pending)
-        return;
-      out.push({
-        id: "now:" + rec.load,
-        tipo: "now",
-        sev: "critical",
-        load: rec.load,
-        tab: "operacion",
-        titulo: "Atender ahora · " + avisoLoad_(rec),
-        detalle: rs.length ? rs[0].text : "Requiere acción inmediata",
-      });
+    var activas = (currentData || []).filter(function (rec) {
+      return (
+        scope.hasLoad(rec.load) &&
+        !isArchived(rec) &&
+        !isCanceladaFinalizada(rec) &&
+        !isCancelledStatus(rec.status)
+      );
     });
+    activas
+      .filter(function (rec) {
+        return journeyBucket(journeyReasons(rec)) === "now";
+      })
+      .forEach(function (rec) {
+        if (rec.updated_by === yo) return;
+        var rs = journeyReasons(rec);
+        // Si lo que la manda a "Atender ahora" es el cliente pendiente de avisar, ya lo cubre el
+        // aviso de comunicación de abajo — no se duplica.
+        if (rs.length && rs[0].kind === "notify" && rec.client_notify_pending)
+          return;
+        out.push({
+          id: "now:" + rec.load,
+          tipo: "now",
+          sev: "critical",
+          load: rec.load,
+          tab: "operacion",
+          titulo: "Atender ahora · " + avisoLoad_(rec),
+          detalle: rs.length ? rs[0].text : "Requiere acción inmediata",
+        });
+      });
     activas.forEach(function (rec) {
       var motivo = String(
         rec.client_notify_reason || "Actualización operativa",
@@ -162,7 +190,7 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
     var finDeHoy = new Date();
     finDeHoy.setHours(23, 59, 59, 999);
     (bitacora || []).forEach(function (b) {
-      if (b.resuelto) return;
+      if (b.resuelto || b.cancelado || !scope.hasTask(b)) return;
       var nota = String(b.nota || "").slice(0, 120);
       if (bitacoraCargada_ && b.creado_por && b.creado_por !== yo) {
         out.push({
@@ -187,7 +215,7 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
       }
     });
     apartados.forEach(function (ap) {
-      if (apartadoCerrado_(ap)) return;
+      if (apartadoCerrado_(ap) || !scope.hasReservation(ap)) return;
       var base = {
         destino: "apartados",
         apartado: ap.id,
@@ -241,22 +269,7 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
         );
       }
     });
-    if (puedeVerTodo_()) {
-      clientesSinCsr_().forEach(function (x) {
-        out.push({
-          id: "sincsr:" + x.cliente.toLowerCase(),
-          tipo: "sincsr",
-          sev: "warn",
-          destino: "gestionar",
-          titulo: "Cliente sin CSR asignado · " + x.cliente,
-          detalle:
-            x.cargas +
-            (x.cargas === 1
-              ? " carga activa que nadie ve en su panel"
-              : " cargas activas que nadie ve en su panel"),
-        });
-      });
-    }
+    // Los clientes sin asignación se consultan en Administración; no son avisos personales.
     return out;
   }
 
@@ -613,9 +626,21 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
       lista = document.getElementById("avisos-lista");
     if (!btn) return;
     btn.hidden = !myRealIdentity;
+    // También filtrar al pintar: un aviso guardado antes de una reasignación no debe reaparecer.
+    var allowed = new Set(
+      myRealIdentity
+        ? candidatosAvisos_().map(function (a) {
+            return a.id;
+          })
+        : [],
+    );
     var items =
       avisosEstado_ && myRealIdentity
-        ? avisosEstado_.lista.slice().concat(noticesWhileEditing_)
+        ? avisosEstado_.lista
+            .filter(function (a) {
+              return allowed.has(a.id);
+            })
+            .concat(noticesWhileEditing_)
         : [];
     var sinVer = items.filter(function (a) {
       return a.nuevo;

@@ -1487,3 +1487,200 @@
     padding: 12px;
   }
 }
+
+/* Plan compacto: un grupo por defecto y solo lo esencial en cada fila.
+   Las acciones conservan sus controles dentro de un desplegable accesible con teclado. */
+#action-center .action-list,
+#action-center .action-list.attention-single-lane {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.attention-lane-items,
+.attention-single-lane .attention-lane-items {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.attention-lane-head {
+  padding: 11px 0;
+  border-top-width: 2px;
+}
+.attention-lane-head p {
+  display: none;
+}
+.attention-lane-count {
+  min-width: 26px;
+  height: 26px;
+  font-size: 12px;
+}
+#action-center .attention-load {
+  padding: 12px 14px;
+  box-shadow: none;
+  border-radius: 9px;
+}
+.attention-row-main {
+  display: grid;
+  grid-template-columns:
+    minmax(140px, 1.2fr) minmax(170px, 1fr) minmax(150px, 1.2fr)
+    auto;
+  align-items: center;
+  gap: 18px;
+}
+.attention-load-header {
+  display: block;
+}
+.attention-load-header h3 {
+  font-size: 14px;
+}
+.attention-load-header .attention-customer {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+}
+.attention-equipment {
+  margin: 0;
+  padding: 0;
+  gap: 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.attention-equipment dt {
+  font-size: 10px;
+}
+.attention-equipment dd {
+  font-size: 13px;
+  margin-top: 3px;
+}
+.attention-focus {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.attention-focus strong {
+  display: block;
+  color: var(--lane-color);
+  font-weight: 500;
+}
+.attention-focus > span {
+  display: block;
+  color: var(--ink-soft);
+  margin-top: 4px;
+  font-size: 11px;
+}
+.attention-load .attention-open {
+  margin: 0;
+  width: auto;
+  gap: 14px;
+  white-space: normal;
+  padding: 8px 10px;
+}
+.attention-actions {
+  margin-top: 8px;
+}
+.attention-actions > summary {
+  cursor: pointer;
+  width: fit-content;
+  margin-left: auto;
+  padding: 3px 0;
+  color: #9dafc8;
+  font-size: 11px;
+}
+.attention-actions[open] > summary {
+  color: #ffb067;
+}
+.attention-actions > .attention-card-content {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.attention-actions .attention-route {
+  margin-top: 0;
+}
+.attention-actions .attention-notify {
+  padding: 10px 12px;
+}
+.attention-filters {
+  align-items: center;
+  gap: 8px;
+}
+.attention-filters [data-attention-count] {
+  display: inline-block;
+  min-width: 20px;
+  margin-left: 6px;
+  padding: 2px 5px;
+  background: #ffffff0a;
+  border-radius: 5px;
+  font-size: 11px;
+}
+.attention-extra-filters > summary {
+  padding: 9px 6px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+.attention-extra-filters > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.attention-extra-filters[open] {
+  flex-basis: 100%;
+  order: 1;
+}
+.attention-actions > summary:focus-visible,
+.attention-extra-filters > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (max-width: 1050px) {
+  .attention-row-main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .attention-focus {
+    grid-column: 1 / 3;
+    grid-row: 2;
+  }
+  .attention-load .attention-open {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+}
+@media (max-width: 600px) {
+  .attention-row-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .attention-equipment {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .attention-focus {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+  .attention-load .attention-open {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .attention-actions > summary {
+    margin-left: 0;
+    padding: 6px 0;
+  }
+  .attention-filters > [data-attention-filter] {
+    flex: 1 1 85px;
+    font-size: 11px;
+    padding: 9px 6px;
+  }
+}
+
+#action-center .action-center-count {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.attention-extra-filters.has-active-filter > summary {
+  color: var(--accent);
+}

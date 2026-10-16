@@ -998,7 +998,7 @@
   "recorded_date": "2026-10-16",
   "production_changed": false,
   "validation_summary": {
-    "unit_integration_passed": 145,
+    "unit_integration_passed": 149,
     "failed": 0,
     "skipped": 0,
     "organization_browser_flows": 9,
@@ -1057,5 +1057,14 @@
     "evidence": "docs/evidencia-diseno-plan-turno-2026-10-16.json",
     "production": "Pendiente de instalación por el usuario.",
     "manual_testing": "No se reinician las pruebas manuales canceladas."
+  },
+  "personal_bell_and_compact_plan": {
+    "date": "2026-10-16",
+    "request": "Solo clientes propios en la campana de cada usuario y reducir la saturación del plan.",
+    "bell_rule": "Cuenta autenticada y cliente asignado; sin excepción por rol, filtro o seguimiento de una carga ajena. Las tareas personales sin carga conservan avisos solo para la persona asignada.",
+    "plan": "Un grupo inicial con filas compactas; trailer y truck visibles, acciones desplegables y filtros secundarios cerrados.",
+    "delivery": "Solo index.html, sin SQL; pendiente de actualización en Google.",
+    "evidence": "docs/evidencia-campana-plan-2026-10-16.json",
+    "manual_testing": "Permanecen canceladas hasta nuevo aviso."
   }
 }

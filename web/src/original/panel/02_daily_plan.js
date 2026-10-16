@@ -1309,7 +1309,8 @@
       "</div></div>"
     );
   }
-  var homeAttentionFilter = "all";
+  var homeAttentionFilter = null;
+  var homeDetailsOpen_ = new Set(); // Mantener solo los detalles que el usuario decidió abrir.
   /** Plan en tres grupos: cada tarjeta reúne equipo, ruta y acciones de una sola carga. */
   function renderActionCenter(data, journey) {
     var list = document.getElementById("action-center-list");
@@ -1407,12 +1408,51 @@
     ).length;
     document.getElementById("action-center-count").textContent =
       groups.length + (groups.length === 1 ? " carga" : " cargas");
+    var counts = {
+      all: groups.length,
+      now: 0,
+      today: 0,
+      future: 0,
+      review: 0,
+      notify: 0,
+    };
+    groups.forEach(function (entry) {
+      counts[dayBucket(entry)]++;
+      if (entry.reminders.length) counts.review++;
+      if (entry.row.client_notify_pending) counts.notify++;
+    });
+    if (homeAttentionFilter === null && groups.length) {
+      homeAttentionFilter = counts.now
+        ? "now"
+        : counts.today
+          ? "today"
+          : "future";
+    }
+    var activeFilter = homeAttentionFilter || "now";
+    document
+      .querySelectorAll("[data-attention-filter]")
+      .forEach(function (button) {
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.attentionFilter === activeFilter),
+        );
+        button.querySelector("[data-attention-count]").textContent =
+          counts[button.dataset.attentionFilter];
+      });
+    var extraFilters = document.querySelector(".attention-extra-filters");
+    var extraLabel = {
+      all: "Todas",
+      review: "Revisiones y seguimientos",
+      notify: "Avisar al cliente",
+    }[activeFilter];
+    extraFilters.querySelector("summary").textContent =
+      extraLabel || "Más filtros";
+    extraFilters.classList.toggle("has-active-filter", !!extraLabel);
     var filtered = groups.filter(function (entry) {
-      if (["now", "today", "future"].indexOf(homeAttentionFilter) !== -1)
-        return dayBucket(entry) === homeAttentionFilter;
-      if (homeAttentionFilter === "review") return entry.reminders.length > 0;
-      if (homeAttentionFilter === "notify")
-        return !!entry.row.client_notify_pending;
+      if (["now", "today", "future"].indexOf(activeFilter) !== -1)
+        return dayBucket(entry) === activeFilter;
+      if (activeFilter === "review") return entry.reminders.length > 0;
+      if (activeFilter === "notify") return !!entry.row.client_notify_pending;
       return true;
     });
     // Una carga aparece una sola vez. Cada columna conserva sus acciones y su propio «Ver más».
@@ -1424,42 +1464,64 @@
       var upcoming = entry.reminders.filter(function (item) {
         return !item.needsAction;
       });
-      var labels = {
-        now: "Urgente",
-        review: "Revisar en el turno",
-        monitor: "En seguimiento",
-        scheduled: "Programada",
-      };
+      var reason = due.length
+        ? due.length +
+          (due.length === 1 ? " revisión pendiente" : " revisiones pendientes")
+        : r.client_notify_pending
+          ? "Avisar al cliente"
+          : entry.reasons.length
+            ? entry.reasons[0].text
+            : "Carga programada";
+      var nextDate = due.length
+        ? due[0].time
+        : upcoming.length
+          ? upcoming[0].time
+          : r.delivery_appt || r.pickup_appt;
+      var actions = entry.reminders.length + (r.client_notify_pending ? 1 : 0);
       return (
         '<article class="attention-load" data-attention-load="' +
         esc(r.load) +
-        '"><div class="attention-load-header"><h3>Carga ' +
+        '">' +
+        '<div class="attention-row-main"><div class="attention-load-header"><h3>Carga ' +
         esc(r.load) +
         '</h3><span class="attention-customer">' +
         esc(r.customer || "Sin cliente") +
-        '</span><span class="ux-state">' +
-        esc(labels[entry.bucket]) +
         "</span></div>" +
+        '<dl class="attention-equipment"><div><dt>Trailer</dt><dd>' +
+        esc(r.trailer || "Sin asignar") +
+        "</dd></div><div><dt>Truck</dt><dd>" +
+        esc(r.truck || "Sin asignar") +
+        "</dd></div></dl>" +
+        '<div class="attention-focus"><strong>' +
+        esc(reason) +
+        "</strong><span>" +
+        esc(nextDate ? fmtDate(new Date(nextDate)) : r.status || "Sin fecha") +
+        "</span></div>" +
+        '<button type="button" class="ws-btn attention-open" data-home-open="' +
+        esc(r.load) +
+        '">Abrir carga <span aria-hidden="true">›</span></button></div>' +
+        '<details class="attention-actions" data-attention-details="' +
+        esc(r.load) +
+        '"' +
+        (homeDetailsOpen_.has(String(r.load)) ? " open" : "") +
+        ">" +
+        "<summary>" +
+        (actions ? "Ver acciones (" + actions + ")" : "Ver detalles") +
+        '</summary><div class="attention-card-content">' +
         '<p class="attention-route">' +
         esc(
           [r.origin_city, r.origin_state].filter(Boolean).join(", ") ||
             "Origen sin capturar",
         ) +
-        '<span aria-hidden="true"> → </span>' +
+        " → " +
         esc(
           [r.dest_city, r.dest_state].filter(Boolean).join(", ") ||
             "Destino sin capturar",
         ) +
-        '</p><dl class="attention-equipment"><div><dt>Trailer</dt><dd>' +
-        esc(r.trailer || "Sin asignar") +
-        "</dd></div><div><dt>Truck</dt><dd>" +
-        esc(r.truck || "Sin asignar") +
-        '</dd></div></dl><div class="attention-card-content">' +
-        (entry.reasons.some(function (reason) {
-          return (
-            reason.kind !== "notify" && !reason.text.startsWith("Seguimiento ")
-          );
-        })
+        " · " +
+        esc(r.status || "Sin estatus") +
+        "</p>" +
+        (entry.reasons.length
           ? '<div class="action-reasons">' +
             entry.reasons
               .filter(function (reason) {
@@ -1486,7 +1548,7 @@
             '">Preparar aviso</button></div>'
           : "") +
         (!entry.reminders.length
-          ? "<p>Próximo compromiso · Recolección: " +
+          ? "<p>Recolección: " +
             esc(fmtDate(r.pickup_appt)) +
             " · Entrega: " +
             esc(fmtDate(r.delivery_appt)) +
@@ -1495,14 +1557,12 @@
         due.map(homeReminderHtml).join("") +
         (upcoming.length
           ? '<details class="home-reminders-upcoming"><summary>Próximas revisiones (' +
-            esc(upcoming.length) +
+            upcoming.length +
             ")</summary>" +
             upcoming.map(homeReminderHtml).join("") +
             "</details>"
           : "") +
-        '</div><button type="button" class="ws-btn attention-open" data-home-open="' +
-        esc(r.load) +
-        '">Abrir expediente <span aria-hidden="true">›</span></button></article>'
+        "</div></details></article>"
       );
     }
     var lanes = [
@@ -1523,8 +1583,8 @@
       },
     ].filter(function (lane) {
       return (
-        ["now", "today", "future"].indexOf(homeAttentionFilter) === -1 ||
-        lane.key === homeAttentionFilter
+        ["now", "today", "future"].indexOf(activeFilter) === -1 ||
+        lane.key === activeFilter
       );
     });
     list.classList.toggle("attention-single-lane", lanes.length === 1);
@@ -1551,7 +1611,7 @@
           '<div class="attention-lane-items">' +
           (items.length
             ? htmlListaConMas_(
-                "attention-" + homeAttentionFilter + "-" + lane.key,
+                "attention-" + activeFilter + "-" + lane.key,
                 items,
                 3,
                 loadCard,
@@ -1571,6 +1631,7 @@
     var button = event.target.closest("[data-attention-filter]");
     if (!button) return;
     homeAttentionFilter = button.getAttribute("data-attention-filter");
+    document.querySelector(".attention-extra-filters").open = false;
     document
       .querySelectorAll("[data-attention-filter]")
       .forEach(function (item) {
@@ -1578,6 +1639,21 @@
       });
     renderActionCenter(currentData);
   });
+
+  document.getElementById("action-center-list").addEventListener(
+    "toggle",
+    function (event) {
+      if (
+        !event.target.matches("details[data-attention-details]") ||
+        !event.target.isConnected
+      )
+        return;
+      var load = event.target.dataset.attentionDetails;
+      if (event.target.open) homeDetailsOpen_.add(load);
+      else homeDetailsOpen_.delete(load);
+    },
+    true,
+  );
 
   function kpiSimpleRowHtml(r, note) {
     return (

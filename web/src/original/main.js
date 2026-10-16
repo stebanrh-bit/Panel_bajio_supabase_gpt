@@ -20,6 +20,7 @@ import organizationStyles from "./organization.css?raw";
 import * as rendering from "./rendering.js";
 import * as network from "./network.js";
 import * as calendar from "./calendar.js";
+import * as notices from "./notice-scope.js";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -39,6 +40,7 @@ async function start() {
   window.panelUsability = usability;
   window.panelHistory = history;
   window.panelCalendar = calendar;
+  window.panelNotices = notices;
   const view = "internal";
   const page = originalPage({
     template,

@@ -155,15 +155,19 @@
     <div class="action-center-head">
       <div>
         <h2 class="action-center-title">Plan del día</h2>
-        <p class="action-center-sub">Cada carga en su lugar: atiende primero lo urgente, continúa con lo de hoy y prepara los próximos días.</p>
+        <p class="action-center-sub">Elige un grupo y despliega solo lo que necesitas.</p>
       </div>
       <div class="action-center-count" id="action-center-count">0</div>
     </div>
     <div class="attention-filters" aria-label="Filtrar acciones de Inicio">
-      <button type="button" class="ws-btn" data-attention-filter="all" aria-pressed="true">Todas</button>
-      <button type="button" class="ws-btn" data-attention-filter="now" aria-pressed="false">Urgente / vencido</button><button type="button" class="ws-btn" data-attention-filter="today" aria-pressed="false">Hoy</button><button type="button" class="ws-btn" data-attention-filter="future" aria-pressed="false">Próximos días</button>
-      <button type="button" class="ws-btn" data-attention-filter="review" aria-pressed="false">Revisiones y seguimientos</button>
-      <button type="button" class="ws-btn" data-attention-filter="notify" aria-pressed="false">Avisar al cliente</button>
+      <button type="button" class="ws-btn" data-attention-filter="now" aria-pressed="true">Urgente <span data-attention-count>0</span></button>
+      <button type="button" class="ws-btn" data-attention-filter="today" aria-pressed="false">Hoy <span data-attention-count>0</span></button>
+      <button type="button" class="ws-btn" data-attention-filter="future" aria-pressed="false">Próximos días <span data-attention-count>0</span></button>
+      <details class="attention-extra-filters"><summary>Más filtros</summary><div>
+        <button type="button" class="ws-btn" data-attention-filter="all" aria-pressed="false">Todas <span data-attention-count>0</span></button>
+        <button type="button" class="ws-btn" data-attention-filter="review" aria-pressed="false">Revisiones y seguimientos <span data-attention-count>0</span></button>
+        <button type="button" class="ws-btn" data-attention-filter="notify" aria-pressed="false">Avisar al cliente <span data-attention-count>0</span></button>
+      </div></details>
       <span id="attention-reminder-count" class="home-section-help"></span>
     </div>
     <p class="home-section-help" id="home-timezone"></p>

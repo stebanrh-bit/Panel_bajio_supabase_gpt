@@ -6,6 +6,7 @@
 - `index.template.html`, `client.template.html`, `manager.template.html`: presentación de cada vista.
 - `panel-source.js` y `panel.parts.json`: ensamblan los nueve archivos de `panel/` en orden. Mantienen un único cierre para preservar los eventos heredados; no se ejecutan por separado.
 - `api/`: adaptadores de operaciones, equipo, importación, radar y organización. `context.js` guarda sesiones, versiones y cachés por cuenta.
+- `notice-scope.js`: alcance de la campana por clientes asignados a la sesión real; independiente del rol y de los filtros de consulta. `panel/09_reports_and_alerts.js` lo aplica a los candidatos y a los avisos guardados antes de mostrarlos.
 - `organization.js` y `organization.css`: centro de turno con navegación por secciones; `dialogs.js` y `validation.js`: formularios y validación compartidos.
 - `panel/02_daily_plan.js`: tarjetas del plan en tres grupos; `panel/06_events_and_sync.js`: agenda semanal con días desplegables. Su presentación está en `usability.css`. Los contadores incluyen registros aún no desplegados.
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.

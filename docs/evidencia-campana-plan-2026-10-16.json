@@ -1,0 +1,361 @@
+{
+  "date": "2026-10-16",
+  "environment": "Chromium local; cuentas y datos sintéticos, peticiones Supabase interceptadas y PostgreSQL efímero. No cambia producción.",
+  "artifact": {
+    "file": "google-apps-script/index-sitio.html",
+    "sha256": "fc95f6988f04db320dec59d00291d9e7883506554c2905f8a8c159155e0d83cd"
+  },
+  "tests": {
+    "passed": 149,
+    "failed": 0,
+    "skipped": 0
+  },
+  "personal_bell_accounts": [
+    {
+      "user": "Esteban",
+      "role": "admin",
+      "ownCustomersOnly": true
+    },
+    {
+      "user": "Ana",
+      "role": "csr",
+      "ownCustomersOnly": true
+    },
+    {
+      "user": "Abraham",
+      "role": "admin",
+      "ownCustomersOnly": true
+    }
+  ],
+  "personal_bell_behaviors": {
+    "cached_foreign_notices_removed": true,
+    "server_and_local_alerts_filtered": true,
+    "foreign_load_follower_does_not_grant_notifications": true,
+    "browsing_other_csr_keeps_real_identity": true,
+    "reassignment_clears_list_and_badge": true,
+    "no_assignments_no_customer_notices": true
+  },
+  "compact_plan": {
+    "default_groups_visible": 1,
+    "actions_initially_closed": true,
+    "desktop_closed_row_height_less_than_px": 155,
+    "trailer_truck_visible": true,
+    "all_groups_available_in_more_filters": true,
+    "actions_and_independent_reminders_work": true
+  },
+  "planning_checks": [
+    {
+      "agendaEvents": 29,
+      "perDayInitiallyVisible": 3,
+      "expansionAndOpening": true
+    },
+    {
+      "view": "home",
+      "width": 1280,
+      "content": 1280
+    },
+    {
+      "view": "calendario",
+      "width": 1280,
+      "content": 1280
+    },
+    {
+      "view": "home",
+      "width": 1024,
+      "content": 1024
+    },
+    {
+      "view": "calendario",
+      "width": 1024,
+      "content": 1024
+    },
+    {
+      "view": "home",
+      "width": 768,
+      "content": 768
+    },
+    {
+      "view": "calendario",
+      "width": 768,
+      "content": 768
+    },
+    {
+      "view": "home",
+      "width": 390,
+      "content": 390
+    },
+    {
+      "view": "calendario",
+      "width": 390,
+      "content": 390
+    },
+    {
+      "view": "home",
+      "width": 320,
+      "content": 320
+    },
+    {
+      "view": "calendario",
+      "width": 320,
+      "content": 320
+    },
+    {
+      "dailyGroups": 3,
+      "trailerAndTruck": true,
+      "uniqueLoads": 14,
+      "showMoreAndOpening": true
+    }
+  ],
+  "loads_list_regression": [
+    {
+      "viewport": 1920,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": false,
+      "available": 1182,
+      "content": 1182,
+      "tableWidth": 1182,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": false,
+      "available": 1058,
+      "content": 1058,
+      "tableWidth": 1058,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": false,
+      "available": 958,
+      "content": 958,
+      "tableWidth": 958,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": false,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": false,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": false,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": false,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": false,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": false,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": false,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": false,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1920,
+      "detail": true,
+      "available": 956,
+      "content": 956,
+      "tableWidth": 956.40625,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": true,
+      "available": 770,
+      "content": 770,
+      "tableWidth": 769.8125,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": true,
+      "available": 714,
+      "content": 714,
+      "tableWidth": 714,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": true,
+      "available": 618,
+      "content": 618,
+      "tableWidth": 618,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": true,
+      "available": 542,
+      "content": 542,
+      "tableWidth": 542,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": true,
+      "available": 878,
+      "content": 878,
+      "tableWidth": 878,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": true,
+      "available": 828,
+      "content": 828,
+      "tableWidth": 828,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": true,
+      "available": 802,
+      "content": 802,
+      "tableWidth": 802,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": true,
+      "available": 598,
+      "content": 598,
+      "tableWidth": 598,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": true,
+      "available": 546,
+      "content": 546,
+      "tableWidth": 546,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": true,
+      "available": 360,
+      "content": 360,
+      "tableWidth": 360,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": true,
+      "available": 330,
+      "content": 330,
+      "tableWidth": 330,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": true,
+      "available": 290,
+      "content": 290,
+      "tableWidth": 290,
+      "overflow": "visible",
+      "documentFits": true
+    }
+  ],
+  "organization_checks": [
+    "Pestaña sin tareas muestra explicación y botón; Contactos VG retirado",
+    "Nueva tarea abre el formulario y aparece guardada al regresar",
+    "Organizar turno: navegación y contenido activos, sin desbordamiento en cinco anchos de 320 a 1533 px",
+    "Checklist creado y asociado a tarea real",
+    "Pasos completados y persistidos",
+    "Tarea recurrente creada con horario de México",
+    "Escalamiento configurable; envío externo permanece desactivado",
+    "Mis clientes filtra y limpiar recupera toda la operación",
+    "Carga, cliente, estatus, trailer y color adversos permanecen como texto"
+  ],
+  "javascript_errors": [],
+  "browser_regressions": "CSV/XLSX/XLS, filtros y agenda de 29 movimientos, expedientes y seguimientos independientes completados.",
+  "visual_review": "Capturas de escritorio y móvil revisadas; no se repitió la batería de comparaciones exactas.",
+  "production": "Pendiente de actualizar solo index.html en Google; no requiere SQL.",
+  "manual_tests": "Canceladas por el usuario hasta nuevo aviso."
+}

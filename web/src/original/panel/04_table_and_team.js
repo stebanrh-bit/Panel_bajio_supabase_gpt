@@ -1952,6 +1952,8 @@ function tableRowHtml(rec) {
   }
   function aplicarAsignaciones_(json) {
     asignaciones = JSON.parse(json);
+    renderAvisos_(); // Retirar inmediatamente los avisos de un cliente que cambió de dueño.
+    programarAvisos_();
     renderAsignacionesList();
     renderTable(currentData);
     wireCardEvents();

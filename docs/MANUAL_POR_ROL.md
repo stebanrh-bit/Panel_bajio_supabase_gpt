@@ -2,7 +2,7 @@
 
 ## CSR: atender el turno
 
-1. Entra con tu cuenta. Abre Inicio y comienza por **Urgente / vencido**. Cada carga indica qué atender y ofrece la acción correspondiente.
+1. Entra con tu cuenta. Abre Inicio y elige **Urgente**, **Hoy** o **Próximos días**. Cada fila muestra carga, cliente, trailer y truck; **Ver acciones** despliega sus recordatorios y botones.
 2. Abre Cargas. Puedes consultar toda la operación; **Mis clientes** muestra tus clientes y cargas seguidas. Los filtros solo cambian la vista. **Limpiar filtros** recupera la lista general.
 3. En el expediente, **Etapa** indica el avance, **Prioridad** el orden de trabajo y **Atención** el motivo para revisarlo. Unidad es el tractocamión; trailer es la caja; cita es la hora acordada.
 4. **Revisión operativa** depende del estatus, por ejemplo revisar tránsito cada tres horas. **Seguimiento personal** guarda una próxima acción propia. Atender una no completa la otra. Vencer significa «ya toca», no elimina nada.
@@ -12,6 +12,10 @@
 8. En **Tareas recurrentes**, elige persona, frecuencia, hora y carga opcional. Los días usan 0 domingo a 6 sábado; por ejemplo `1,2,3,4,5` para lunes a viernes. Puedes pausar una programación.
 9. Para un regreso, el CSR de VG se escribe manualmente. Una carga relacionada debe estar activa al crear el vínculo; una referencia libre admite datos externos.
 10. Antes de salir, prepara el cierre. Indica pendientes críticos (o «Sin pendientes críticos»), quién continúa y la próxima acción con plazo.
+
+## Campana personal
+
+Los avisos de cargas se limitan a tus clientes asignados, también para Admin y Supervisor. Consultar otro CSR o seguir una carga de otro cliente no cambia esta regla. Los avisos guardados de clientes ajenos se retiran al actualizar. Las tareas sin carga pueden avisarte si se asignaron directamente a tu cuenta.
 
 ## Supervisor: revisar la operación
 

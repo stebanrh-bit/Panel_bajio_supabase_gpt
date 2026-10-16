@@ -342,6 +342,7 @@ const newHelpers = (
       ["content", "escapeHtml,csvCell,safeLink", "panelContent"],
       ["rendering", "renderKeyed,reset", "panelRendering"],
       ["network", "fetchExternal,cancel", "panelNetwork"],
+      ["notice-scope", "customerNoticeScope", "panelNotices"],
     ].map(
       async ([file, exports, key]) =>
         "<script>(function(){" +
@@ -394,6 +395,7 @@ let importPreviews = 0,
   previewedRecords = [];
 const usabilityLayouts = [];
 const planningChecks = [];
+const personalBellChecks = [];
 const incidents = [];
 const customerAssignments = [
   {
@@ -403,6 +405,17 @@ const customerAssignments = [
     updated_at: stamp,
   },
 ];
+async function selectHomeAttention(page, filter) {
+  const button = page.locator(`[data-attention-filter="${filter}"]`);
+  if (!(await button.isVisible()))
+    await page.locator(".attention-extra-filters > summary").click();
+  await button.click();
+}
+async function openPlanActions(page, load) {
+  const details = page.locator(`[data-attention-details="${load}"]`);
+  if ((await details.getAttribute("open")) === null)
+    await details.locator(":scope > summary").click();
+}
 async function newPage(
   golden = false,
   viewport = { width: 1440, height: 1024 },
@@ -460,7 +473,7 @@ async function newPage(
                   ? "client"
                   : view === "manager"
                     ? "manager"
-                    : "admin",
+                    : identity.role,
             }
           : profiles;
       else if (table === "loads") {
@@ -722,10 +735,15 @@ async function newPage(
         );
         throw error;
       });
-    await page
-      .locator("#home-cierres")
-      .filter({ hasText: "Sin cierres" })
-      .waitFor({ state: "attached" });
+    if (identity.role === "admin")
+      await page
+        .locator("#home-cierres")
+        .filter({ hasText: "Sin cierres" })
+        .waitFor({ state: "attached" });
+    else
+      await page
+        .locator('[data-attention-load="VISUAL-001"]')
+        .waitFor({ state: "attached" });
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
 }
@@ -1102,6 +1120,189 @@ try {
   } finally {
     await supervisorPage.close();
   }
+  // La campana usa la cuenta autenticada, no el rol ni el CSR que se está consultando.
+  const bellSnapshot = {
+    length: rawLoads.length,
+    assignments: structuredClone(customerAssignments),
+  };
+  rawLoads.push({
+    ...rawLoads[0],
+    load: "BELL-CONT",
+    customer: "Continental",
+    next_review_at: past,
+    client_notify_pending: "true",
+  });
+  customerAssignments.splice(
+    0,
+    customerAssignments.length,
+    {
+      customer: "ACME",
+      customer_key: "acme",
+      owner_id: adminId,
+      updated_at: stamp,
+    },
+    {
+      customer: "Continental",
+      customer_key: "continental",
+      owner_id: csrId,
+      updated_at: stamp,
+    },
+  );
+  try {
+    for (const identity of profiles) {
+      const bell = await newPage(
+        false,
+        { width: 1440, height: 1024 },
+        "internal",
+        identity,
+      );
+      try {
+        await bell.route("**/rest/v1/rpc/ops_visible_alerts", (route) =>
+          route.fulfill({
+            contentType: "application/json",
+            body: JSON.stringify([
+              {
+                id: "test-acme",
+                kind: "load_review",
+                load: "VISUAL-001",
+                message: "Revisión ACME",
+                created_at: past,
+              },
+              {
+                id: "test-cont",
+                kind: "load_review",
+                load: "BELL-CONT",
+                message: "Revisión Continental",
+                created_at: past,
+              },
+            ]),
+          }),
+        );
+        await bell.route("**/rest/v1/load_followers**", (route) =>
+          route.fulfill({
+            contentType: "application/json",
+            body: JSON.stringify([
+              { load: "BELL-CONT", user_id: adminId, created_at: stamp },
+            ]),
+          }),
+        );
+        await bell.evaluate(
+          ({ displayName, past }) =>
+            localStorage.setItem(
+              "bajio_avisos_" + displayName,
+              JSON.stringify({
+                lista: [
+                  {
+                    id: "server:test-cont",
+                    tipo: "server",
+                    nuevo: true,
+                    titulo: "Revisión Continental",
+                    ts: past,
+                  },
+                ],
+                activos: {},
+                base: { now: true, com: true },
+                pospuestos: {},
+              }),
+            ),
+          { displayName: identity.display_name, past },
+        );
+        await bell.reload();
+        await bell
+          .locator("#identity-backdrop.show")
+          .waitFor({ state: "hidden" });
+        await bell.waitForFunction((name) => {
+          const stored = JSON.parse(
+            localStorage.getItem("bajio_avisos_" + name) || "null",
+          );
+          return (
+            stored &&
+            (name === "Abraham"
+              ? stored.lista.length === 0
+              : stored.lista.some((item) =>
+                  item.id.startsWith(
+                    name === "Esteban" ? "rev:VISUAL-001:" : "rev:BELL-CONT:",
+                  ),
+                ) &&
+                stored.lista.some(
+                  (item) =>
+                    item.id ===
+                    (name === "Esteban"
+                      ? "server:test-acme"
+                      : "server:test-cont"),
+                ))
+          );
+        }, identity.display_name);
+        await bell.locator("#avisos-btn").click();
+        const text = await bell.locator("#avisos-lista").innerText();
+        if (identity.display_name === "Esteban") {
+          assert.match(text, /ACME/);
+          assert.doesNotMatch(text, /Continental/);
+          assert.equal(
+            await bell
+              .locator('#avisos-lista [data-aviso-id="server:test-cont"]')
+              .count(),
+            0,
+          );
+          await bell.locator("#who-toggle-btn").click();
+          await bell.locator('[data-who-csr="Ana"]').click();
+          await bell.locator("#avisos-btn").click();
+          assert.match(await bell.locator("#avisos-lista").innerText(), /ACME/);
+          assert.doesNotMatch(
+            await bell.locator("#avisos-lista").innerText(),
+            /Continental/,
+          );
+          await bell.screenshot({
+            path: "/tmp/panel-original-comparison/campana-clientes-propios.png",
+          });
+          // Reasignar ACME: la actualización retira tanto el aviso como el conteo guardado.
+          customerAssignments[0].owner_id = csrId;
+          await bell.locator("#header-refresh-btn").click();
+          await bell.waitForFunction(() => {
+            const state = JSON.parse(
+              localStorage.getItem("bajio_avisos_Esteban") || "null",
+            );
+            return state && state.lista.every((item) => !item.load);
+          });
+          assert.equal(
+            await bell
+              .locator('#avisos-lista [data-aviso-id^="server:"]')
+              .count(),
+            0,
+          );
+          assert.equal(await bell.locator("#avisos-badge").isVisible(), false);
+          customerAssignments[0].owner_id = adminId;
+        } else if (identity.display_name === "Ana") {
+          assert.match(text, /Continental/);
+          assert.doesNotMatch(text, /ACME/);
+          assert.equal(
+            await bell.evaluate(() => window.panelApi.profile.role),
+            "csr",
+          );
+        } else {
+          assert.doesNotMatch(text, /Continental|ACME/);
+          assert.equal(
+            await bell.locator("#avisos-lista [data-aviso-id]").count(),
+            0,
+          );
+        }
+        personalBellChecks.push({
+          user: identity.display_name,
+          role: identity.role,
+          ownCustomersOnly: true,
+        });
+      } finally {
+        await bell.close();
+      }
+    }
+  } finally {
+    rawLoads.splice(bellSnapshot.length);
+    customerAssignments.splice(
+      0,
+      customerAssignments.length,
+      ...bellSnapshot.assignments,
+    );
+  }
   // Calendario real con dos clientes: los filtros ocultan los demás eventos y no alteran datos.
   const previousCalendarData = {
     length: rawLoads.length,
@@ -1301,12 +1502,10 @@ try {
     await busyDay.locator("summary").focus();
     await calendarPage.keyboard.press("Enter");
     assert.equal(await busyDay.locator(".cal-chip:visible").count(), totalBusy);
-    const dayBody = await busyDay
-      .locator(".cal-dia-body")
-      .evaluate((node) => ({
-        visible: node.clientHeight,
-        content: node.scrollHeight,
-      }));
+    const dayBody = await busyDay.locator(".cal-dia-body").evaluate((node) => ({
+      visible: node.clientHeight,
+      content: node.scrollHeight,
+    }));
     assert.ok(
       dayBody.content <= dayBody.visible + 1,
       "Los movimientos desplegados no deben tener otro scroll interno",
@@ -1322,11 +1521,9 @@ try {
     await calendarPage.locator("#workspace-close").click();
     await busyDay.locator("summary").click();
     assert.equal(await busyDay.locator(".cal-chip:visible").count(), 3);
-    await calendarPage
-      .locator("#cal-grid")
-      .screenshot({
-        path: "/tmp/panel-original-comparison/agenda-semanal-nueva.png",
-      });
+    await calendarPage.locator("#cal-grid").screenshot({
+      path: "/tmp/panel-original-comparison/agenda-semanal-nueva.png",
+    });
     planningChecks.push({
       agendaEvents: 29,
       perDayInitiallyVisible: 3,
@@ -1334,6 +1531,28 @@ try {
     });
     await calendarPage.locator('[data-page="home"]').click();
     await calendarPage.locator('[data-home-tab="ahora"]').click();
+    assert.equal(
+      await calendarPage.locator(".attention-lane").count(),
+      1,
+      "El inicio presenta un solo grupo",
+    );
+    assert.equal(
+      await calendarPage.locator(".attention-actions[open]").count(),
+      0,
+      "Las acciones empiezan cerradas",
+    );
+    await calendarPage.locator("#action-center").screenshot({
+      path: "/tmp/panel-original-comparison/plan-del-dia-compacto.png",
+    });
+    const compactCard = await calendarPage
+      .locator("[data-attention-load]")
+      .first()
+      .boundingBox();
+    assert.ok(
+      compactCard.height < 155,
+      "Una carga cerrada debe ocupar una fila compacta en escritorio",
+    );
+    await selectHomeAttention(calendarPage, "all");
     assert.equal(await calendarPage.locator(".attention-lane").count(), 3);
     for (const key of ["now", "today", "future"])
       assert.ok(
@@ -1363,6 +1582,7 @@ try {
       await plannedCard.locator(".attention-equipment").innerText(),
       /TRUCK-1/,
     );
+    await openPlanActions(calendarPage, "PLAN-001");
     assert.match(
       await plannedCard.locator(".attention-route").innerText(),
       /San Luis Potosí.*Coldwater/,
@@ -1381,14 +1601,14 @@ try {
       futureCards,
     );
     await futureLane.locator("[data-lista-mas]").click();
-    await calendarPage
-      .locator("#action-center")
-      .screenshot({
-        path: "/tmp/panel-original-comparison/plan-del-dia-nuevo.png",
-      });
+    await plannedCard.locator(".attention-actions > summary").click();
+    await calendarPage.locator("#action-center").screenshot({
+      path: "/tmp/panel-original-comparison/plan-del-dia-nuevo.png",
+    });
     await plannedCard.locator("[data-home-open]").click();
     await calendarPage.locator("#workspace-backdrop.show").waitFor();
     await calendarPage.locator("#workspace-close").click();
+    await selectHomeAttention(calendarPage, "today");
     for (const width of [1280, 1024, 768, 390, 320]) {
       await calendarPage.setViewportSize({ width, height: 900 });
       for (const view of ["home", "calendario"]) {
@@ -1854,12 +2074,12 @@ try {
       await ux.locator('[data-attention-load="VISUAL-001"]').count(),
       1,
     );
-    await ux.locator('[data-attention-filter="notify"]').click();
+    await selectHomeAttention(ux, "notify");
     assert.equal(
       await ux.locator('[data-attention-load="VISUAL-001"]').count(),
       1,
     );
-    await ux.locator('[data-attention-filter="all"]').click();
+    await selectHomeAttention(ux, "all");
     await ux.locator('[data-page="operation"]').click();
     const openComments = ux
       .locator('#page-operation [data-comments-load="VISUAL-001"]')
@@ -2366,6 +2586,7 @@ try {
   await importPage
     .getByText("Vencer no borra el recordatorio.", { exact: false })
     .waitFor();
+  await openPlanActions(importPage, "VISUAL-001");
   const beforeRead = rawLoads[0].next_review_at;
   await importPage.evaluate(() =>
     document.getElementById("avisos-leer-todo").click(),
@@ -2391,6 +2612,8 @@ try {
     .waitFor();
   assert.equal(rawLoads[0].next_review_at, "");
   assert.equal(rawLoads[0].recordatorio_fecha, "2026-10-08T21:00:00.000Z");
+  await selectHomeAttention(importPage, "review");
+  await openPlanActions(importPage, "VISUAL-001");
   await importPage.locator(".home-reminders-upcoming summary").click();
   await importPage.locator('[data-reminder-kind="transit"]').waitFor();
   await importPage.setViewportSize({ width: 390, height: 844 });
@@ -2418,6 +2641,7 @@ try {
         errors,
         usabilityLayouts,
         planningChecks,
+        personalBellChecks,
       },
       null,
       2,

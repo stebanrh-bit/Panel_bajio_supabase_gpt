@@ -6,7 +6,7 @@ Fecha: 16 de octubre de 2026. Base de trabajo: `f77366f`, rama `supabase-inicial
 
 | Comprobación | Resultado |
 | --- | --- |
-| `npm --prefix web test` | 145 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
+| `npm --prefix web test` | 149 pruebas aprobadas; 0 fallidas, omitidas o canceladas. Incluye PostgreSQL efímero, permisos, versiones y restauración. |
 | `npm --prefix web run build` | Compila panel interno, cliente, gerencia y lector. |
 | `python scripts/package_site.py --check` | Verifica correspondencia exacta entre SQL 004–012, los cuatro archivos HTML generados y el contenido del ZIP. |
 | `node scripts/check_browser.mjs --legacy-xls` | 38 comparaciones de pantallas/ventanas; flujo de incidencia, cierre de sesión, Admin como CSR, CSV/XLSX/XLS, recordatorios independientes y móvil. Sin errores JS. |
@@ -68,3 +68,10 @@ El plan separa cada carga en una tarjeta con trailer y truck, dentro de tres gru
 La revisión usa `check_browser.mjs --imports-only --legacy-xls` para las acciones reales del HTML entregado, la agenda con 29 movimientos, filtros, grupos, apertura de expedientes, despliegue y adaptación a celular; incluye las 26 comprobaciones anteriores del listado de Cargas. `check_organization_browser.mjs` comprueba nueve flujos con persistencia real local y el menú en cinco anchos. Las 145 pruebas del proyecto y la compilación completaron correctamente. No se ejecutó de nuevo la batería de 38 comparaciones exactas; el resultado histórico y su limitación anterior permanecen separados de esta validación funcional.
 
 [Resultados y medidas](evidencia-diseno-plan-turno-2026-10-16.json) · [Instalación y capturas](DISENO_PLAN_Y_TURNO_2026-10-16.md). Solo se requiere reemplazar index.html; no hay migraciones SQL en este cambio. La implementación de Google real queda pendiente de esa actualización.
+
+
+## Campana personal y plan compacto
+
+El alcance de los avisos de cargas se calcula por cliente asignado y sesión real, sin usar los filtros de consulta ni excepciones por rol. Incluye candidatos del servidor, revisiones, apartados relacionados y limpieza de avisos guardados de clientes ajenos. Las tareas sin carga requieren asignación personal. El plan empieza con un solo grupo y mantiene trailer/truck en filas compactas, con acciones desplegables.
+
+La batería Node pasa 149 pruebas, incluidas cuatro nuevas comprobaciones de alcance personal, reasignación, tareas y apartados. La prueba funcional de navegador incorpora cuentas separadas de Admin, CSR y Supervisor, un cliente Continental ajeno, seguimiento de una carga ajena, avisos guardados, consulta de otro CSR y reasignación con retirada del contador. Se conservan las comprobaciones del calendario, listado sin scroll, importaciones y recordatorios independientes. La prueba de organización mantiene nueve flujos con persistencia local. [Evidencia](evidencia-campana-plan-2026-10-16.json) · [Actualizar solo index.html](CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md).

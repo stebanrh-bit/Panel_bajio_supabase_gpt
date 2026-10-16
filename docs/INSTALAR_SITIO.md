@@ -4,6 +4,10 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Campana por cliente y plan compacto
+
+La campana ahora se limita a los clientes de cada cuenta y el plan muestra un grupo a la vez con acciones desplegables. Se actualiza únicamente **index.html**. [Pasos y capturas](CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md).
+
 ## Nuevo diseño del plan, calendario y Organizar turno
 
 Esta actualización requiere reemplazar únicamente **index.html** y publicar una nueva versión de la implementación existente. [Pasos y capturas](DISENO_PLAN_Y_TURNO_2026-10-16.md).
