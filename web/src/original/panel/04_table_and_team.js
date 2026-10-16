@@ -2142,7 +2142,7 @@ function tableRowHtml(rec) {
         document.getElementById("csr-backdrop").classList.remove("show");
     });
 
-  /** Marca la píldora de filtro de Operación completa (Todas, En ruta, …) sin volver a dibujar. */
+  /** Marca la píldora de filtro de Operación completa (Todas, Activas, …) sin volver a dibujar. */
   function marcarFiltroOperacion_(filtro) {
     currentFilter = filtro;
     document.querySelectorAll(".chip[data-filter]").forEach(function (c) {
@@ -2370,7 +2370,7 @@ function tableRowHtml(rec) {
   var VISTAS_MAX_ = 12;
   var FILTRO_NOMBRES_ = {
     all: "Todas",
-    active: "En ruta",
+    active: "Activas",
     attention: "Necesitan atención",
     "cruce-hoy": "Cruzan hoy",
     "cruce-semana": "Cruzan esta semana",
@@ -2480,7 +2480,7 @@ function tableRowHtml(rec) {
         '<p class="who-hint" style="margin:0 0 .5rem">' +
           esc(describirVista_(actual)) +
           "</p>" +
-          '<input type="text" id="vista-nombre" class="search" maxlength="30" placeholder="Nombre, por ejemplo: Bosch en ruta" style="width:100%">',
+          '<input type="text" id="vista-nombre" class="search" maxlength="30" placeholder="Nombre, por ejemplo: Bosch activas" style="width:100%">',
         "Guardar",
         function () {
           actual.nombre =

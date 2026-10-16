@@ -1635,7 +1635,7 @@ var commentsCurrentLoad = null;
       }, 30);
     else window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  // Operación completa siempre abre en la píldora "En ruta" al entrar desde la barra lateral.
+  // Operación completa siempre abre en la píldora "Activas" al entrar desde la barra lateral.
   document.querySelectorAll(".sidebar-btn[data-page]").forEach(function (b) {
     b.addEventListener("click", function () {
       var p = b.getAttribute("data-page");

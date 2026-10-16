@@ -1052,7 +1052,7 @@ function clicWorkspaceYAvisos_(e) {
         cerrarBusqueda_();
         var main = document.getElementById("search");
         main.value = input.value.trim();
-        marcarFiltroOperacion_("all"); // resultados de búsqueda: en todas las cargas, no solo "En ruta"
+        marcarFiltroOperacion_("all"); // resultados de búsqueda: en todas las cargas, no solo "Activas"
         showMainPage("operation");
         main.dispatchEvent(new Event("input", { bubbles: true }));
       }
