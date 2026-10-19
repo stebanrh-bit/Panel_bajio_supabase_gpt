@@ -14,6 +14,7 @@ export async function runCalendarTasksReview({
     layouts = [];
   let page;
   try {
+    rawLoads[0].cruce_usa_fecha = "2026-10-08T18:00:00Z";
     // Más de tres movimientos en un día: ninguna vista debe perder los restantes.
     for (let i = 1; i <= 6; i++)
       rawLoads.push({
@@ -27,6 +28,49 @@ export async function runCalendarTasksReview({
     await page.locator('[data-page="calendario"]').click();
     const total = await page.locator("#cal-grid .cal-chip").count();
     assert.ok(total >= 8);
+    const colors = {};
+    for (const type of ["all", "pickup", "cruce", "entrega", "apartado"]) {
+      const filter = page.locator(`[data-cal-type="${type}"]`);
+      const unselected = await filter.evaluate(
+        (node) => getComputedStyle(node).backgroundColor,
+      );
+      await filter.click();
+      assert.equal(await filter.getAttribute("aria-pressed"), "true");
+      assert.equal(
+        await filter.evaluate(
+          (node) => getComputedStyle(node, "::before").content,
+        ),
+        '"✓"',
+      );
+      const selected = await filter.evaluate(
+        (node) => getComputedStyle(node).backgroundColor,
+      );
+      if (type !== "all") assert.notEqual(selected, unselected);
+      assert.equal(
+        await page.locator('[data-cal-type][aria-pressed="true"]').count(),
+        1,
+      );
+      await page.mouse.move(0, 0);
+    }
+    await page.locator('[data-cal-type="all"]').click();
+    for (const type of ["pickup", "cruce", "entrega", "apartado"]) {
+      const card = page.locator(`#cal-grid .cal-chip.t-${type}`).first();
+      await card.waitFor({ state: "attached" });
+      const background = await card.evaluate(
+        (node) => getComputedStyle(node).backgroundColor,
+      );
+      assert.notEqual(background, "rgb(255, 255, 255)");
+      assert.notEqual(background, "rgba(0, 0, 0, 0)");
+      const filterBackground = await page
+        .locator(`[data-cal-type="${type}"]`)
+        .evaluate((node) => getComputedStyle(node).backgroundColor);
+      assert.equal(background, filterBackground);
+      colors[type] = background;
+    }
+    assert.equal(new Set(Object.values(colors)).size, 4);
+    checks.push(
+      "Tarjetas completas y filtros comparten cuatro fondos diferentes; el filtro elegido cambia de color y muestra una marca ✓",
+    );
     for (const width of [1920, 1440, 1024, 768, 390, 320]) {
       await page.setViewportSize({ width, height: 1000 });
       for (const view of ["agenda", "week", "list"]) {
@@ -137,12 +181,19 @@ export async function runCalendarTasksReview({
       .evaluateAll((cells) => cells.map((cell) => cell.dataset.label));
     assert.equal(labels.length, 10);
     assert.ok(labels.indexOf("Origen") < labels.indexOf("Destino"));
-    assert.ok(!labels.includes("Recolección · cita"));
+    assert.ok(labels.indexOf("Pickup") < labels.indexOf("Entrega"));
+    assert.ok(!labels.includes("CSR"));
     await row.locator(".t-trailer .trailer-full-value").click();
     await page.locator("#table-detail-panel:not([hidden])").waitFor();
     for (const width of [1920, 1533, 1280, 1024, 768, 390, 320]) {
       await page.setViewportSize({ width, height: 1000 });
-      for (const field of [".t-origin", ".t-destination", ".t-comment"])
+      for (const field of [
+        ".t-origin",
+        ".t-destination",
+        ".t-date-pickup",
+        ".t-date-delivery",
+        ".t-comment",
+      ])
         assert.equal(await row.locator(field).isVisible(), true);
       assert.equal(await row.locator(".t-comment-text").innerText(), comment);
       assert.equal(
@@ -171,7 +222,7 @@ export async function runCalendarTasksReview({
       path: "/tmp/panel-original-comparison/cargas-origen-comentarios.png",
     });
     checks.push(
-      "Listado conserva origen antes de destino y comentarios con detalle abierto; la recolección queda en el detalle",
+      "Listado muestra Pickup antes de Entrega sin CSR; conserva origen, destino y comentarios sin scroll lateral, incluso con detalle abierto",
     );
 
     const tasks = [];

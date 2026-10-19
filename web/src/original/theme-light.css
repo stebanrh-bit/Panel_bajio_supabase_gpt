@@ -193,26 +193,77 @@ textarea {
   background: var(--surface);
 }
 .panel-internal #cal-grid .cal-chip {
-  background: var(--surface);
+  background: var(--event-background);
   color: var(--ink);
-  border-color: var(--line);
+  border-color: var(--event-border);
   border-top-color: var(--event-color);
 }
 .panel-internal #cal-grid .cal-chip:hover {
-  background: var(--surface-2);
+  background: var(--event-hover);
   border-color: var(--event-color);
 }
-.panel-internal .cal-chip.t-pickup {
+/* Tarjetas y filtros comparten el color del movimiento en todas las vistas. */
+.panel-internal :is(.cal-chip, .cal-type-btn) {
+  --event-color: var(--slate);
+  --event-background: #e8edf5;
+  --event-hover: #dce4ef;
+  --event-border: #b1bfd1;
+}
+.panel-internal :is(.cal-chip, .cal-type-btn).t-pickup {
   --event-color: var(--info);
+  --event-background: #e2edff;
+  --event-hover: #d2e3fa;
+  --event-border: #9cbce1;
 }
-.panel-internal .cal-chip.t-cruce {
+.panel-internal :is(.cal-chip, .cal-type-btn).t-cruce {
   --event-color: var(--warn);
+  --event-background: #ffedcc;
+  --event-hover: #ffe0a6;
+  --event-border: #d4ae61;
 }
-.panel-internal .cal-chip.t-entrega {
+.panel-internal :is(.cal-chip, .cal-type-btn).t-entrega {
   --event-color: var(--good);
+  --event-background: #dff2e5;
+  --event-hover: #cbe8d5;
+  --event-border: #8dbda1;
 }
-.panel-internal .cal-chip.t-apartado {
+.panel-internal :is(.cal-chip, .cal-type-btn).t-apartado {
   --event-color: var(--purple);
+  --event-background: #eee2fb;
+  --event-hover: #e3cff5;
+  --event-border: #b9a0d5;
+}
+.panel-internal .cal-type-btn {
+  background: var(--event-background);
+  border: 2px solid var(--event-border);
+  color: var(--event-color);
+  font-weight: 600;
+  box-shadow: none;
+}
+.panel-internal .cal-type-btn:hover {
+  background: var(--event-hover);
+  border-color: var(--event-color);
+}
+.panel-internal .cal-type-btn::before {
+  content: "";
+  width: 1em;
+  flex: 0 0 1em;
+}
+.panel-internal .cal-type-btn[aria-pressed="true"] {
+  background: var(--event-color);
+  border-color: var(--event-color);
+  color: #fff;
+}
+.panel-internal .cal-type-btn[aria-pressed="true"]::before {
+  content: "✓";
+}
+.panel-internal .cal-type-btn > span {
+  color: inherit;
+  background: #ffffffb3;
+}
+.panel-internal .cal-type-btn[aria-pressed="true"] > span {
+  color: #fff;
+  background: #0000001a;
 }
 .panel-internal
   #cal-grid

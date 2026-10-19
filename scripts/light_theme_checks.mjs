@@ -113,6 +113,24 @@ export async function runLightThemeReview({ newPage }) {
           .first()
           .evaluate((node) => node.click());
         results.push(await inspectContrast(page, `${section}-${width}`));
+        // Cada filtro tiene fondo propio. Revisar también el texto y contador seleccionados.
+        if (section === "calendario") {
+          for (const type of [
+            "pickup",
+            "cruce",
+            "entrega",
+            "apartado",
+            "all",
+          ]) {
+            const filter = page.locator(`[data-cal-type="${type}"]`);
+            await filter.click();
+            await filter.hover();
+            results.push(
+              await inspectContrast(page, `calendario-${type}-${width}`),
+            );
+          }
+          await page.mouse.move(0, 0);
+        }
         const fit = await page.evaluate(() => ({
           width: innerWidth,
           content: document.documentElement.scrollWidth,

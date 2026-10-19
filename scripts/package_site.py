@@ -71,6 +71,8 @@ def main():
         'DISENO_PLAN_Y_TURNO_2026-10-16.md':ROOT/'docs/DISENO_PLAN_Y_TURNO_2026-10-16.md',
         'CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md':ROOT/'docs/CAMPANA_PERSONAL_Y_PLAN_COMPACTO_2026-10-16.md',
         'TEMA_CLARO_2026-10-19.md':ROOT/'docs/TEMA_CLARO_2026-10-19.md',
+        'PICKUP_Y_COLORES_CALENDARIO.md':ROOT/'docs/PICKUP_Y_COLORES_CALENDARIO.md',
+        'evidencia-pickup-calendario.json':ROOT/'docs/evidencia-pickup-calendario.json',
         'evidencia-tema-claro-2026-10-19.json':ROOT/'docs/evidencia-tema-claro-2026-10-19.json',
         'imagenes/tema-claro-panel-completo.png':ROOT/'docs/imagenes/tema-claro-panel-completo.png',
         'imagenes/tema-claro-inicio.png':ROOT/'docs/imagenes/tema-claro-inicio.png',

@@ -1979,17 +1979,16 @@
   --column-load: 6%;
   --column-customer: 11%;
   --column-city: 8%;
-  --column-date: 10%;
+  --column-date: 9%;
   --column-trailer: 7%;
   --column-status: 14%;
-  --column-comment: 22%;
+  --column-comment: 21%;
   border-collapse: collapse;
   background: #fff;
   color: #283548;
   border: 1px solid #dce3ed;
 }
-.panel-internal #page-operation #table-view .loads-table col.c-truck,
-.panel-internal #page-operation #table-view .loads-table col.c-csr {
+.panel-internal #page-operation #table-view .loads-table col.c-truck {
   width: 7%;
 }
 .panel-internal #page-operation #table-view .loads-table th {
@@ -2042,9 +2041,6 @@
 .panel-internal #page-operation #table-view .loads-table .t-customer {
   color: #324d6f;
   font-weight: 500;
-}
-.panel-internal #page-operation #table-view .loads-table .t-csr {
-  font-size: 11px;
 }
 .panel-internal #page-operation #table-view .trailer-full-value {
   font-size: 12px;
@@ -2205,13 +2201,13 @@
 }
 @container loads-list (max-width: 850px) {
   .panel-internal #page-operation #table-view .loads-table tr.t-row {
-    grid-template-areas: "load status" "customer customer" "origin destination" "delivery csr" "truck trailer" "comment comment";
+    grid-template-areas: "load status" "customer customer" "origin destination" "pickup delivery" "truck trailer" "comment comment";
   }
   .panel-internal #page-operation #table-view .loads-table .t-truck-number {
     grid-area: truck;
   }
-  .panel-internal #page-operation #table-view .loads-table .t-csr {
-    grid-area: csr;
+  .panel-internal #page-operation #table-view .loads-table .t-date-pickup {
+    grid-area: pickup;
   }
   .panel-internal #page-operation #table-view .loads-table tr.t-row > td {
     border: 0;
@@ -2232,7 +2228,7 @@
 }
 @container loads-list (min-width: 600px) and (max-width: 850px) {
   .panel-internal #page-operation #table-view .loads-table tr.t-row {
-    grid-template-areas: "load status trailer" "customer customer customer" "origin destination delivery" "truck csr csr" "comment comment comment";
+    grid-template-areas: "load status trailer" "customer customer customer" "origin destination truck" "pickup pickup delivery" "comment comment comment";
   }
 }
 @media (max-width: 600px) {

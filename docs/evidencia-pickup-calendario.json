@@ -1,0 +1,230 @@
+{
+  "fecha": "2026-10-19",
+  "datos": "Ficticios locales; peticiones interceptadas, sin escrituras en producción",
+  "pruebas_automaticas": {
+    "aprobadas": 31,
+    "fallidas": 0
+  },
+  "contraste": {
+    "escenas": 45,
+    "textos_revisados": 3096,
+    "hallazgos": []
+  },
+  "listado": {
+    "checks": [
+      "Primera entrada en tabla sencilla, diez columnas y acciones secundarias cerradas",
+      "Espacio entre filas visible y persistente: 62.78125px normal / 46.78125px reducido; sin perder columnas ni reducir texto; oculto en tarjetas y operativo en móvil",
+      "Selector de estado, cliente y búsqueda conservan sus filtros y resultados",
+      "Tabla, trailer y comentarios legibles sin scroll lateral en once anchos",
+      "Abrir por teclado mantiene el ancho; editar trailer persiste; Escape cierra el diálogo",
+      "Las tareas y los comentarios siguen abriendo al salir del detalle modal",
+      "El cambio de estatus en la fila utiliza el guardado existente"
+    ],
+    "layouts": [
+      {
+        "page": 1920,
+        "screen": 1920,
+        "width": 1504,
+        "content": 1504
+      },
+      {
+        "page": 1533,
+        "screen": 1533,
+        "width": 1273,
+        "content": 1273
+      },
+      {
+        "page": 1440,
+        "screen": 1440,
+        "width": 1180,
+        "content": 1180
+      },
+      {
+        "page": 1280,
+        "screen": 1280,
+        "width": 1020,
+        "content": 1020
+      },
+      {
+        "page": 1180,
+        "screen": 1180,
+        "width": 920,
+        "content": 920
+      },
+      {
+        "page": 1024,
+        "screen": 1024,
+        "width": 764,
+        "content": 764
+      },
+      {
+        "page": 820,
+        "screen": 820,
+        "width": 560,
+        "content": 560
+      },
+      {
+        "page": 768,
+        "screen": 768,
+        "width": 508,
+        "content": 508
+      },
+      {
+        "page": 390,
+        "screen": 390,
+        "width": 334,
+        "content": 334
+      },
+      {
+        "page": 360,
+        "screen": 360,
+        "width": 304,
+        "content": 304
+      },
+      {
+        "page": 320,
+        "screen": 320,
+        "width": 264,
+        "content": 264
+      }
+    ]
+  },
+  "calendario": {
+    "checks": [
+      "Tarjetas completas y filtros comparten cuatro fondos diferentes; el filtro elegido cambia de color y muestra una marca ✓",
+      "Tres vistas conservan los movimientos y caben en seis anchos; Lista muestra todos sin desplegables",
+      "Cambiar vista conserva cliente, tipo y semana; la preferencia permanece al recargar",
+      "Listado muestra Pickup antes de Entrega sin CSR; conserva origen, destino y comentarios sin scroll lateral, incluso con detalle abierto",
+      "Crear tarea guarda persona o cobertura con destinos distintos; quitar la carga retira la cobertura anterior",
+      "Seguimiento distingue vencido y programado, permite reintentar y completar sin alterar tránsito ni avisos al cliente"
+    ],
+    "layouts": [
+      {
+        "view": "agenda",
+        "width": 1920,
+        "page": 1920,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "week",
+        "width": 1920,
+        "page": 1920,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "list",
+        "width": 1920,
+        "page": 1920,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "agenda",
+        "width": 1440,
+        "page": 1440,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "week",
+        "width": 1440,
+        "page": 1440,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "list",
+        "width": 1440,
+        "page": 1440,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "agenda",
+        "width": 1024,
+        "page": 1024,
+        "available": 804,
+        "content": 804
+      },
+      {
+        "view": "week",
+        "width": 1024,
+        "page": 1024,
+        "available": 804,
+        "content": 804
+      },
+      {
+        "view": "list",
+        "width": 1024,
+        "page": 1024,
+        "available": 804,
+        "content": 804
+      },
+      {
+        "view": "agenda",
+        "width": 768,
+        "page": 768,
+        "available": 548,
+        "content": 548
+      },
+      {
+        "view": "week",
+        "width": 768,
+        "page": 768,
+        "available": 548,
+        "content": 548
+      },
+      {
+        "view": "list",
+        "width": 768,
+        "page": 768,
+        "available": 548,
+        "content": 548
+      },
+      {
+        "view": "agenda",
+        "width": 390,
+        "page": 390,
+        "available": 362,
+        "content": 362
+      },
+      {
+        "view": "week",
+        "width": 390,
+        "page": 390,
+        "available": 362,
+        "content": 362
+      },
+      {
+        "view": "list",
+        "width": 390,
+        "page": 390,
+        "available": 362,
+        "content": 362
+      },
+      {
+        "view": "agenda",
+        "width": 320,
+        "page": 320,
+        "available": 292,
+        "content": 292
+      },
+      {
+        "view": "week",
+        "width": 320,
+        "page": 320,
+        "available": 292,
+        "content": 292
+      },
+      {
+        "view": "list",
+        "width": 320,
+        "page": 320,
+        "available": 292,
+        "content": 292
+      }
+    ]
+  }
+}

@@ -82,6 +82,9 @@ function tableRowHtml(rec) {
       '">' +
       esc([rec.dest_city, rec.dest_state].filter(Boolean).join(", ") || "—") +
       "</td>" +
+      '<td role="cell" data-label="Pickup" class="t-date t-date-pickup">' +
+      fmtDate(rec.pickup_appt) +
+      "</td>" +
       '<td role="cell" data-label="Entrega" class="t-date t-date-delivery">' +
       fmtDate(rec.delivery_appt) +
       "</td>" +
@@ -102,11 +105,6 @@ function tableRowHtml(rec) {
       '">' +
       statusOptionsHtml(rec.status) +
       "</select></td>" +
-      '<td role="cell" data-label="CSR" class="t-csr" title="' +
-      esc(csrDeLoad(rec)) +
-      '">' +
-      esc(csrDeLoad(rec) || "Sin asignar") +
-      "</td>" +
       '<td role="cell" data-label="Comentarios" class="t-comment"><button type="button" class="sheet-comment-link" data-comments-load="' +
       esc(rec.load) +
       '" aria-label="Ver comentarios de la carga ' +

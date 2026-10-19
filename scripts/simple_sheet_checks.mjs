@@ -83,15 +83,24 @@ export async function runSimpleSheetReview({ newPage, rawLoads, profiles }) {
         "Cliente",
         "Origen",
         "Destino",
+        "Pickup",
         "Entrega",
         "Truck",
         "Trailer",
         "Estatus",
-        "CSR",
         "Comentarios",
       ],
     );
-    assert.equal(await row.locator(".t-csr").innerText(), "Ana");
+    assert.match(
+      await row.locator(".t-date-pickup").innerText(),
+      /8 oct 2026.*11:00/,
+    );
+    assert.equal(
+      await page
+        .locator('#table-view [data-sort="csr"], #table-body .t-csr')
+        .count(),
+      0,
+    );
     assert.equal(await row.locator("button:visible").count(), 2);
     assert.equal(await row.locator(".t-status-select").count(), 1);
     assert.equal(await row.locator("[data-trailer-load],summary").count(), 0);
@@ -191,7 +200,8 @@ export async function runSimpleSheetReview({ newPage, rawLoads, profiles }) {
         ".t-origin",
         ".t-destination",
         ".t-trailer",
-        ".t-csr",
+        ".t-date-pickup",
+        ".t-date-delivery",
         ".t-comment",
       ])
         assert.equal(await row.locator(cell).isVisible(), true);
