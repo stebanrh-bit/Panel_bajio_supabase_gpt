@@ -1859,3 +1859,380 @@
     grid-column: 1 / -1;
   }
 }
+
+/* Vista de trabajo tipo hoja: una fila por carga, sin acciones repetidas en cada renglón.
+   La campana, los datos y las reglas operativas conservan su implementación. */
+.panel-internal #page-operation.sheet-view {
+  background: #f7f9fc;
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+  padding: 18px;
+  color: #283548;
+}
+.sheet-view .operation-page-head {
+  margin-bottom: 14px;
+}
+.sheet-view .operation-page-head h1 {
+  color: #203047;
+  font-size: 22px;
+}
+.sheet-view .operation-page-head p {
+  color: #68788c;
+  font-size: 12px;
+}
+#operation-visible-count {
+  font-size: 12px;
+  font-weight: 400;
+  color: #68788c;
+  margin-left: 10px;
+}
+.sheet-view .operation-head-right:empty {
+  display: none;
+}
+.panel-internal .sheet-toolbar {
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+.sheet-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  color: #68788c;
+}
+.sheet-toolbar select,
+.sheet-toolbar .search {
+  border: 1px solid #ced7e3;
+  background: #fff;
+  color: #283548;
+  border-radius: 6px;
+  min-height: 36px;
+  font-size: 13px;
+}
+.sheet-toolbar #search {
+  flex: 1 1 230px;
+  min-width: 0;
+  width: auto;
+}
+.sheet-toolbar #cliente-filter {
+  flex: 0 1 210px;
+  min-width: 0;
+}
+.sheet-toolbar #operation-state-filter {
+  width: 175px;
+}
+.sheet-toolbar #ux-advanced-filters {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.sheet-toolbar #ux-advanced-filters > summary {
+  border: 1px solid #ced7e3;
+  border-radius: 6px;
+  background: #fff;
+  color: #42546c;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+.sheet-toolbar #ux-advanced-filters[open] {
+  flex-basis: 100%;
+}
+.sheet-toolbar #ux-advanced-filters .ux-advanced-content {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #dce3ed;
+  border-radius: 8px;
+  background: #edf2f8;
+  color: #40516a;
+}
+.sheet-toolbar
+  #ux-advanced-filters
+  :is(.file-btn, .ws-btn, .chip, .vistas-btn) {
+  background: #fff;
+  border-color: #ced7e3;
+  color: #40516a;
+}
+.sheet-toolbar #ux-advanced-filters :is(.operation-meta, .organize-chip) {
+  color: #52657d;
+}
+.sheet-view .loads-list-section {
+  padding: 0;
+  margin: 0;
+}
+.sheet-view .loads-list-section > .table-section-h2 {
+  display: none;
+}
+.panel-internal
+  #page-operation
+  #table-view:has(#table-detail-panel:not([hidden])) {
+  display: block !important;
+}
+.panel-internal .wrap:has(#page-operation:not([hidden])) {
+  max-width: 1600px;
+}
+.panel-internal #page-operation #table-view .loads-table {
+  --column-load: 6%;
+  --column-customer: 11%;
+  --column-city: 8%;
+  --column-date: 10%;
+  --column-trailer: 7%;
+  --column-status: 14%;
+  --column-comment: 22%;
+  border-collapse: collapse;
+  background: #fff;
+  color: #283548;
+  border: 1px solid #dce3ed;
+}
+.panel-internal #page-operation #table-view .loads-table col.c-truck,
+.panel-internal #page-operation #table-view .loads-table col.c-csr {
+  width: 7%;
+}
+.panel-internal #page-operation #table-view .loads-table th {
+  background: #edf2f8;
+  color: #53657d;
+  padding: 9px 7px;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  border: 1px solid #dce3ed;
+}
+.panel-internal #page-operation #table-view .loads-table tr.t-row {
+  background: #fff;
+}
+.panel-internal
+  #page-operation
+  #table-view
+  .loads-table
+  tr.t-row:nth-child(even) {
+  background: #f9fbfd;
+}
+.panel-internal #page-operation #table-view .loads-table tr.t-row:hover {
+  background: #edf5ff;
+}
+.panel-internal #page-operation #table-view .loads-table tr.t-row.selected {
+  background: #e7f0ff;
+}
+.panel-internal #page-operation #table-view .loads-table td {
+  color: #34465e;
+  border: 1px solid #e4e9f1;
+  padding: 8px 7px;
+  font-size: 12px;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+.panel-internal #page-operation #table-view .loads-table .t-customer {
+  color: #324d6f;
+  font-weight: 500;
+}
+.panel-internal #page-operation #table-view .loads-table .t-csr {
+  font-size: 11px;
+}
+.panel-internal #page-operation #table-view .trailer-full-value {
+  font-size: 12px;
+  line-height: 1.35;
+}
+.sheet-load-link {
+  border: 0;
+  background: none;
+  color: #1b5e9d;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.sheet-load-link:hover {
+  text-decoration: underline;
+}
+.sheet-attention-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #d58b1a;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.sheet-comment-link {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.panel-internal #page-operation #table-view .t-comment-text {
+  color: #34465e;
+  font-size: 12px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.panel-internal #page-operation #table-view .t-comment-ts {
+  display: none;
+}
+.panel-internal #page-operation #table-view .t-comment-empty {
+  color: #8795a8;
+  font-size: 11px;
+  font-style: normal;
+}
+.panel-internal #page-operation #table-view .t-status-select {
+  min-height: 28px;
+  padding: 3px 18px 3px 8px;
+  border: 1px solid #c6d6ea;
+  border-radius: 5px;
+  background: #e9f2fd !important;
+  color: #25629d !important;
+  font-size: 11px;
+  font-weight: 500;
+  text-shadow: none;
+  box-shadow: none;
+}
+.panel-internal
+  #page-operation
+  #table-view
+  tr:is(
+    [data-status="DELIVERED"],
+    [data-status="Entregado"],
+    [data-status="Descargado"]
+  )
+  .t-status-select {
+  background: #e1f3e8 !important;
+  color: #216b45 !important;
+  border-color: #c5e4d1;
+}
+.panel-internal
+  #page-operation
+  #table-view
+  tr:is(
+    [data-status="En yarda MX"],
+    [data-status="En yarda USA"],
+    [data-status="Patio permisionario"],
+    [data-status="Cruzando"]
+  )
+  .t-status-select {
+  background: #fff2cc !important;
+  color: #806313 !important;
+  border-color: #ecddae;
+}
+.panel-internal
+  #page-operation
+  #table-view
+  tr:is(
+    [data-status="Cancelado."],
+    [data-status="Cancelado"],
+    [data-status="Descompuesta"],
+    [data-status="TONU"]
+  )
+  .t-status-select {
+  background: #fbe8e8 !important;
+  color: #963e3e !important;
+  border-color: #edcccc;
+}
+.panel-internal #page-operation #table-view .t-status-select option {
+  background: #fff;
+  color: #283548;
+}
+.panel-internal .sheet-detail-dialog {
+  width: min(720px, calc(100vw - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 36px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 24px 80px #0008;
+  overflow: auto;
+}
+.sheet-detail-dialog::backdrop {
+  background: #0c142366;
+}
+.panel-internal
+  #page-operation
+  #table-view
+  .sheet-detail-dialog
+  .table-detail-section {
+  position: static;
+  width: auto;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+.sheet-detail-dialog .t-detail-content {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.sheet-detail-dialog .table-section-h2 {
+  display: none;
+}
+.sheet-detail-dialog .table-detail-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+.sheet-load-link:focus-visible,
+.sheet-comment-link:focus-visible {
+  outline: 2px solid #3478c5;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+@container loads-list (max-width: 850px) {
+  .panel-internal #page-operation #table-view .loads-table tr.t-row {
+    grid-template-areas: "load status" "customer customer" "origin destination" "delivery csr" "truck trailer" "comment comment";
+  }
+  .panel-internal #page-operation #table-view .loads-table .t-truck-number {
+    grid-area: truck;
+  }
+  .panel-internal #page-operation #table-view .loads-table .t-csr {
+    grid-area: csr;
+  }
+  .panel-internal #page-operation #table-view .loads-table tr.t-row > td {
+    border: 0;
+    padding: 6px;
+  }
+  .panel-internal
+    #page-operation
+    #table-view
+    .loads-table
+    tr.t-row
+    > td::before {
+    color: #72839a;
+    font-size: 10px;
+  }
+  .panel-internal #page-operation #table-view .loads-table-caption {
+    color: #68788c;
+  }
+}
+@container loads-list (min-width: 600px) and (max-width: 850px) {
+  .panel-internal #page-operation #table-view .loads-table tr.t-row {
+    grid-template-areas: "load status trailer" "customer customer customer" "origin destination delivery" "truck csr csr" "comment comment comment";
+  }
+}
+@media (max-width: 600px) {
+  .panel-internal #page-operation.sheet-view {
+    padding: 12px;
+  }
+  .sheet-toolbar #cliente-filter,
+  .sheet-toolbar .sheet-filter {
+    flex: 1 1 120px;
+  }
+  .sheet-toolbar #operation-state-filter {
+    width: 100%;
+  }
+  .sheet-toolbar #search {
+    flex-basis: 100%;
+  }
+  .sheet-detail-dialog .t-detail-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

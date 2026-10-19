@@ -41,34 +41,59 @@ function tableRowHtml(rec) {
       '" data-extra="' +
       esc(textoBusqueda_(rec).toLowerCase()) +
       '">' +
-      '<td role="cell" data-label="Carga" class="t-load">' +
-      (needsAttention(rec)
-        ? '<span class="t-warn" title="' +
-          esc(needsAttentionReasons(rec).join(" · ")) +
-          '">&#9888;</span>'
+      '<td role="cell" data-label="Load" class="t-load">' +
+      (needsAttention(rec) ||
+      podPending(rec) ||
+      recargosPending(rec) ||
+      isRecordatorioVencido(rec)
+        ? '<span class="sheet-attention-dot" role="img" aria-label="Requiere atención" title="' +
+          esc(
+            needsAttentionReasons(rec)
+              .concat(
+                podPending(rec) ? ["Falta enviar POD"] : [],
+                recargosPending(rec) ? ["Faltan recargos VG"] : [],
+                isRecordatorioVencido(rec) ? ["Recordatorio vencido"] : [],
+              )
+              .join(" · "),
+          ) +
+          '"></span>'
         : "") +
-      (podPending(rec)
-        ? '<span class="t-pod-tag" title="Falta enviar POD">POD</span>'
-        : "") +
-      (recargosPending(rec)
-        ? '<span class="t-pod-tag" title="Falta ingresar recargos en VG">VG</span>'
-        : "") +
-      (isRecordatorioVencido(rec)
-        ? '<span class="t-pod-tag tag-critical" title="Recordatorio vencido — revisar">REC</span>'
-        : "") +
-      '<span class="t-expand">&#9656;</span>' +
-      '<span class="t-load-num" data-load-copy="' +
+      '<button type="button" class="sheet-load-link" data-table-select="' +
       esc(rec.load) +
-      '" title="Doble clic para copiar">' +
+      '" aria-label="Abrir carga ' +
       esc(rec.load) +
-      "</span>" +
-      "</td>" +
+      '">' +
+      esc(rec.load) +
+      "</button></td>" +
       '<td role="cell" data-label="Cliente" class="t-customer" title="' +
       esc(rec.customer) +
       '">' +
       esc(rec.customer || "—") +
       "</td>" +
-      '<td role="cell" data-label="Etapa / estatus" class="t-status"><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
+      '<td role="cell" data-label="Origen" class="t-city t-origin" title="' +
+      esc([rec.origin_city, rec.origin_state].filter(Boolean).join(", ")) +
+      '">' +
+      esc(
+        [rec.origin_city, rec.origin_state].filter(Boolean).join(", ") || "—",
+      ) +
+      "</td>" +
+      '<td role="cell" data-label="Destino" class="t-city t-destination" title="' +
+      esc([rec.dest_city, rec.dest_state].filter(Boolean).join(", ")) +
+      '">' +
+      esc([rec.dest_city, rec.dest_state].filter(Boolean).join(", ") || "—") +
+      "</td>" +
+      '<td role="cell" data-label="Entrega" class="t-date t-date-delivery">' +
+      fmtDate(rec.delivery_appt) +
+      "</td>" +
+      '<td role="cell" data-label="Truck" class="t-truck t-truck-number" title="' +
+      esc(rec.truck) +
+      '">' +
+      esc(rec.truck || "—") +
+      "</td>" +
+      '<td role="cell" data-label="Trailer" class="t-truck t-trailer"><span class="trailer-full-value" data-trailer-value>' +
+      esc(rec.trailer || "Sin asignar") +
+      "</span></td>" +
+      '<td role="cell" data-label="Estatus" class="t-status"><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
       esc(rec.load) +
       '" data-status-load="' +
       esc(rec.load) +
@@ -77,44 +102,24 @@ function tableRowHtml(rec) {
       '">' +
       statusOptionsHtml(rec.status) +
       "</select></td>" +
-      '<td role="cell" data-label="Entrega · cita" class="t-date t-date-delivery">' +
-      fmtDate(rec.delivery_appt) +
+      '<td role="cell" data-label="CSR" class="t-csr" title="' +
+      esc(csrDeLoad(rec)) +
+      '">' +
+      esc(csrDeLoad(rec) || "Sin asignar") +
       "</td>" +
-      '<td role="cell" data-label="Trailer" class="t-truck t-trailer"><span class="trailer-full-value" data-trailer-value>' +
-      esc(rec.trailer || "Sin asignar") +
-      '</span><details class="table-trailer-edit"><summary>Editar trailer</summary><input class="field-input t-trailer-input" type="text" placeholder="—" value="' +
-      esc(rec.trailer) +
-      '" data-trailer-load="' +
+      '<td role="cell" data-label="Comentarios" class="t-comment"><button type="button" class="sheet-comment-link" data-comments-load="' +
       esc(rec.load) +
-      '" aria-label="Editar trailer" title="' +
-      esc(rec.trailer || "Trailer") +
-      '"></details></td>' +
-      '<td role="cell" data-label="Origen" class="t-city t-origin" title="' +
-      esc(rec.origin_city) +
-      (rec.origin_state ? ", " + esc(rec.origin_state) : "") +
+      '" aria-label="Ver comentarios de la carga ' +
+      esc(rec.load) +
       '">' +
-      esc(rec.origin_city) +
-      (rec.origin_state ? ", " + esc(rec.origin_state) : "") +
-      "</td>" +
-      '<td role="cell" data-label="Destino" class="t-city t-destination" title="' +
-      esc(rec.dest_city) +
-      (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
-      '">' +
-      esc(rec.dest_city) +
-      (rec.dest_state ? ", " + esc(rec.dest_state) : "") +
-      "</td>" +
-      '<td role="cell" data-label="Último comentario" class="t-comment" title="Clic para ver todos los comentarios">' +
       commentCell +
-      "</td>" +
+      "</button></td>" +
       "</tr>"
     );
   }
 
-  /** Contenido del detalle de un load — usado en el panel inferior de la vista de tabla (ver
-   * renderTableDetailPanel). Antes esto vivía en una fila oculta debajo de cada renglón
-   * (t-detail-row); ahora la tabla arriba solo muestra el resumen, y al hacer clic en una fila
-   * su detalle completo se dibuja aquí, en un panel fijo en la parte de abajo — así se puede ver
-   * la lista y el detalle de un load al mismo tiempo, sin que la tabla se reacomode cada vez. */
+  /** Campos y acciones del detalle rápido. Se muestran en un solo diálogo al abrir una
+   * carga; la hoja conserva su ancho y evita repetir controles dentro de cada fila. */
   function detailPanelHtml(rec) {
     return (
       alertBannerHtml(rec) +
@@ -135,6 +140,11 @@ function tableRowHtml(rec) {
       '" data-truck-load="' +
       esc(rec.load) +
       '"></div>' +
+      '<div class="field"><div class="k">Trailer</div><input class="v field-input t-trailer-input" type="text" placeholder="—" value="' +
+      esc(rec.trailer) +
+      '" data-trailer-load="' +
+      esc(rec.load) +
+      '" aria-label="Editar trailer"></div>' +
       '<div class="field"><div class="k">Cita de recolección</div><input class="v field-input" type="datetime-local" value="' +
       apptDatetimeLocalValue(rec.pickup_appt) +
       '" data-pickup-appt-load="' +
@@ -203,6 +213,25 @@ function tableRowHtml(rec) {
     );
   }
 
+  /** Refleja la edición del detalle en su fila, sin reconstruir el campo que tiene el foco. */
+  function actualizarUnidadEnTabla_(load, field, value) {
+    document.querySelectorAll("#table-body tr.t-row").forEach(function (row) {
+      if (row.getAttribute("data-load") !== String(load)) return;
+      row.setAttribute("data-" + field, String(value || "").toLowerCase());
+      var record = recPorLoad_(load);
+      if (record)
+        row.setAttribute("data-extra", textoBusqueda_(record).toLowerCase());
+      var cell = row.querySelector(
+        field === "trailer" ? "[data-trailer-value]" : ".t-truck-number",
+      );
+      if (cell) {
+        cell.textContent = value || (field === "trailer" ? "Sin asignar" : "—");
+        cell.title = value || "";
+      }
+    });
+    viewDirty.cards = true;
+  }
+
   /** Actualiza solo el encabezado: editar el trailer no debe reconstruir otros campos abiertos. */
   function actualizarTituloDetalleTabla_(rec) {
     if (String(selectedTableLoad) !== String(rec.load)) return;
@@ -214,17 +243,17 @@ function tableRowHtml(rec) {
       rec.customer;
   }
 
-  /** Dibuja (o esconde) el panel de detalle fijo debajo de la tabla, según cuál load esté
-   * seleccionado (selectedTableLoad). Se llama después de cada renderTable() — incluidos los
-   * refrescos de fondo (autoRefresh) — para que el panel siempre muestre datos vigentes del load
-   * que se está viendo, sin que un refresco lo cierre de golpe. */
+  /** Sincroniza el detalle con la carga seleccionada. Una actualización de fondo conserva
+   * el diálogo; si el contenido no cambió, también conserva sus campos y su foco. */
   function renderTableDetailPanel() {
     var panel = document.getElementById("table-detail-panel");
     if (!panel) return;
     var rec = selectedTableLoad ? recPorLoad_(selectedTableLoad) : null;
+    var dialog = document.getElementById("table-detail-dialog");
     if (!rec) {
       selectedTableLoad = null;
       panel.hidden = true;
+      if (dialog.open) dialog.close();
       document
         .querySelectorAll("#table-body tr.t-row.selected")
         .forEach(function (r) {
@@ -240,6 +269,7 @@ function tableRowHtml(rec) {
       body.dataset.rendered = html;
     }
     panel.hidden = false;
+    if (!dialog.open) dialog.showModal();
     document.querySelectorAll("#table-body tr.t-row").forEach(function (r) {
       r.classList.toggle(
         "selected",
@@ -634,11 +664,16 @@ function tableRowHtml(rec) {
     var csrClienteFiltro = currentCsrClienteFiltro();
     var loadsSeguidos = loadsSeguidosScope();
     renderClienteFilterOptions();
+    document.getElementById("operation-state-filter").value = currentFilter;
     var pills = document.getElementById("active-filter-pills");
     if (pills) {
       pills.innerHTML = "";
       [
-        currentFilter !== "all" ? "Estado: " + currentFilter : "",
+        currentFilter !== "all"
+          ? "Estado: " +
+            document.getElementById("operation-state-filter").selectedOptions[0]
+              .textContent
+          : "",
         currentClienteFiltro ? "Cliente: " + currentClienteFiltro : "",
         currentSearch ? "Búsqueda: " + currentSearch : "",
         ownClientsOnly_ ? "Mis clientes" : "",
@@ -664,9 +699,6 @@ function tableRowHtml(rec) {
           document
             .getElementById("own-clients-toggle")
             .setAttribute("aria-pressed", "false");
-          document.querySelectorAll("[data-filter]").forEach(function (b) {
-            b.setAttribute("aria-pressed", String(b.dataset.filter === "all"));
-          });
           applyFilters();
         };
         pills.append(clear);
@@ -801,6 +833,9 @@ function tableRowHtml(rec) {
         ocultas++;
       }
     });
+    var total = document.getElementById("operation-visible-count");
+    if (total)
+      total.textContent = visibles + (visibles === 1 ? " carga" : " cargas");
     var btn = document.getElementById("tabla-mas");
     btn.hidden = !ocultas;
     if (ocultas)
@@ -854,12 +889,6 @@ function tableRowHtml(rec) {
     if (searchInput) searchInput.value = "";
     currentClienteFiltro = "";
     currentFilter = "all";
-    document.querySelectorAll(".chip[data-filter]").forEach(function (c) {
-      c.setAttribute(
-        "aria-pressed",
-        c.getAttribute("data-filter") === "all" ? "true" : "false",
-      );
-    });
     applyFilters();
 
     if (currentView === "table") {
@@ -2136,22 +2165,17 @@ function tableRowHtml(rec) {
         document.getElementById("csr-backdrop").classList.remove("show");
     });
 
-  /** Marca la píldora de filtro de Operación completa (Todas, Activas, …) sin volver a dibujar. */
+  /** Un solo selector conserva el alcance y la lógica de los filtros de la operación. */
   function marcarFiltroOperacion_(filtro) {
     currentFilter = filtro;
-    document.querySelectorAll(".chip[data-filter]").forEach(function (c) {
-      c.setAttribute(
-        "aria-pressed",
-        c.getAttribute("data-filter") === filtro ? "true" : "false",
-      );
-    });
+    document.getElementById("operation-state-filter").value = filtro;
   }
-  document.querySelectorAll(".chip[data-filter]").forEach(function (chip) {
-    chip.addEventListener("click", function () {
-      marcarFiltroOperacion_(chip.getAttribute("data-filter"));
+  document
+    .getElementById("operation-state-filter")
+    .addEventListener("change", function (event) {
+      marcarFiltroOperacion_(event.target.value);
       applyFilters();
     });
-  });
   document.getElementById("search").addEventListener("input", function (e) {
     currentSearch = e.target.value.trim().toLowerCase();
     applyFilters();

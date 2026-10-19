@@ -347,17 +347,33 @@ export function mountUsability(doc) {
       const details = doc.createElement("details");
       details.id = "ux-advanced-filters";
       const summary = doc.createElement("summary");
-      summary.textContent = "Más filtros y opciones";
+      summary.textContent = "Opciones";
       const content = doc.createElement("div");
       content.className = "ux-advanced-content";
       details.append(summary, content);
-      toolbar.after(details);
+      toolbar.append(details);
       for (const node of toolbar.querySelectorAll(
-        '[data-filter="cruce-hoy"],[data-filter="cruce-semana"],[data-filter="cancelada"],#masivo-btn,#densidad-btn',
+        "#own-clients-toggle,#view-toggle-btn,[data-abrir-multi-msg],#masivo-btn,#densidad-btn",
       ))
         content.append(node);
-      const views = doc.getElementById("vistas-bar");
-      if (views) content.append(views);
+      for (const id of [
+        "export-operation-report-btn",
+        "operation-meta",
+        "stats",
+        "vistas-bar",
+        "active-filter-pills",
+      ]) {
+        const element = doc.getElementById(id);
+        if (element) content.append(element);
+      }
+      details.addEventListener("click", (event) => {
+        if (
+          event.target.closest(
+            "#view-toggle-btn,[data-abrir-multi-msg],#masivo-btn,#export-operation-report-btn",
+          )
+        )
+          details.open = false;
+      });
     }
   }
 

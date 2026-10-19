@@ -4,6 +4,10 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Vista sencilla de Cargas
+
+La entrega más reciente convierte Cargas en una hoja clara y compacta, con filtros en una fila y acciones dentro de **Opciones** o del detalle. Conserva notificaciones, datos y permisos. Requiere actualizar únicamente **index.html**. [Capturas y pasos](VISTA_SENCILLA_2026-10-19.md).
+
 ## Vistas del calendario, tareas y listado de cargas
 
 Esta actualización agrega **Agenda, Semana y Lista compacta**, unifica las tareas del detalle y aclara el estado del seguimiento. El listado muestra origen antes de destino, conserva los comentarios y deja la cita de recolección en el detalle. Requiere actualizar únicamente **index.html** si ya instalaste la revisión general. [Cambios y pasos](CALENDARIO_TAREAS_Y_LISTADO_2026-10-16.md).

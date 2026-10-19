@@ -3,7 +3,7 @@
 ## CSR: atender el turno
 
 1. Entra con tu cuenta. Abre Inicio y elige **Urgente**, **Hoy** o **Próximos días**. Cada fila muestra carga, cliente, trailer y truck; **Ver acciones** despliega sus recordatorios y botones.
-2. Abre Cargas. Puedes consultar toda la operación; **Mis clientes** muestra tus clientes y cargas seguidas. Los filtros solo cambian la vista. **Limpiar filtros** recupera la lista general.
+2. Abre Cargas: la tabla sencilla muestra una carga por fila. **Mostrar**, cliente y búsqueda filtran la lista. **Opciones** reúne los controles secundarios; el número de carga abre el detalle y los comentarios se abren al pulsarlos. Puedes consultar toda la operación; **Mis clientes** muestra tus clientes y cargas seguidas. Los filtros solo cambian la vista. **Limpiar filtros** recupera la lista general.
 3. En el expediente, **Etapa** indica el avance, **Prioridad** el orden de trabajo y **Atención** el motivo para revisarlo. Unidad es el tractocamión; trailer es la caja; cita es la hora acordada.
 4. **Revisión operativa** depende del estatus, por ejemplo revisar tránsito cada tres horas. **Seguimiento personal** guarda una próxima acción propia. Atender una no completa la otra. Vencer significa «ya toca», no elimina nada. El expediente indica **Programado para**, **Pendiente de atender** o **Sin seguimiento programado**. Pulsa **Completar seguimiento** cuando hayas terminado o **Reprogramar** si aún falta trabajo.
 5. Prepara el mensaje al cliente y envíalo por tu canal habitual. Después registra que ya avisaste. Preparar o copiar el texto no equivale a enviarlo.

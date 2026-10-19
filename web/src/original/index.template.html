@@ -252,8 +252,8 @@
 
 </div>
 
-<div class="page-view" id="page-operation" hidden>
-  <div class="operation-page-head"><div><h1>Cargas</h1><p>Consulta, filtra y administra todas las cargas de la operación.</p></div><div class="operation-head-right"><button class="ws-btn" id="export-operation-report-btn">Exportar reporte (CSV)</button><div class="operation-meta" id="operation-meta"></div></div></div>
+<div class="page-view sheet-view" id="page-operation" hidden>
+  <div class="operation-page-head"><div><h1>Cargas <span id="operation-visible-count"></span></h1><p>Selecciona una carga para abrir su detalle. Pulsa un comentario para leerlo o agregar otro.</p></div><div class="operation-head-right"><button class="ws-btn" id="export-operation-report-btn">Exportar reporte (CSV)</button><div class="operation-meta" id="operation-meta"></div></div></div>
   <div class="stats" id="stats">
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:80px;height:0.7rem;"></div></div>
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:60px;height:0.7rem;"></div></div>
@@ -261,14 +261,13 @@
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:90px;height:0.7rem;"></div></div>
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:110px;height:0.7rem;"></div></div>
   </div>
-  <div class="home-operation-wrap"><div class="toolbar">
-    <button class="chip" data-filter="all" aria-pressed="true">Todas</button>
-    <button class="chip" data-filter="active" title="Cargas cuyo pickup ya ocurrió y que todavía no terminan">Activas</button>
-    <button class="chip" data-filter="attention" title="Cargas en curso con algo pendiente (incluye las que aún no salen a ruta)">Necesitan atención</button>
-    <button class="chip" data-filter="cruce-hoy">Cruzan hoy</button>
-    <button class="chip" data-filter="cruce-semana">Cruzan esta semana</button>
-    <button class="chip" data-filter="done">Entregadas</button>
-    <button class="chip" data-filter="cancelada">Canceladas/Finalizadas</button>
+  <div class="home-operation-wrap"><div class="toolbar sheet-toolbar">
+    <label class="sheet-filter">Mostrar<select id="operation-state-filter" aria-label="Estado de las cargas">
+      <option value="all">Todas</option><option value="active">Activas</option>
+      <option value="attention">Necesitan atención</option><option value="cruce-hoy">Cruzan hoy</option>
+      <option value="cruce-semana">Cruzan esta semana</option><option value="done">Entregadas</option>
+      <option value="cancelada">Canceladas / finalizadas</option>
+    </select></label>
     <select class="cliente-filter" id="cliente-filter" aria-label="Filtrar por cliente">
       <option value="">Todos los clientes</option>
     </select>
@@ -316,8 +315,8 @@
       <div class="table-wrap">
         <table class="loads-table" role="table">
           <caption class="loads-table-caption">Ordenar listado por</caption>
-          <colgroup><col class="c-load"><col class="c-customer"><col class="c-status"><col class="c-date"><col class="c-trailer"><col class="c-city"><col class="c-city"><col class="c-comment"></colgroup>
-          <thead><tr><th data-sort="load">Carga</th><th data-sort="customer">Cliente</th><th data-sort="status">Etapa / estatus</th><th data-sort="delivery_appt">Entrega · cita</th><th data-sort="trailer">Trailer</th><th data-sort="origin_city">Origen</th><th data-sort="dest_city">Destino</th><th>Último comentario</th></tr></thead>
+          <colgroup><col class="c-load"><col class="c-customer"><col class="c-city"><col class="c-city"><col class="c-date"><col class="c-truck"><col class="c-trailer"><col class="c-status"><col class="c-csr"><col class="c-comment"></colgroup>
+          <thead><tr><th data-sort="load">Load</th><th data-sort="customer">Cliente</th><th data-sort="origin_city">Origen</th><th data-sort="dest_city">Destino</th><th data-sort="delivery_appt">Entrega</th><th data-sort="truck">Truck</th><th data-sort="trailer">Trailer</th><th data-sort="status">Estatus</th><th data-sort="csr">CSR</th><th>Comentarios</th></tr></thead>
           <tbody role="rowgroup" id="table-body"></tbody>
         </table>
         <div class="table-empty" id="table-empty" style="display:none;">Sin resultados con los filtros actuales.</div>
@@ -325,6 +324,7 @@
       </div>
     </section>
 
+    <dialog id="table-detail-dialog" class="sheet-detail-dialog" aria-labelledby="table-detail-load-label">
     <section class="table-section table-detail-section" id="table-detail-panel" hidden>
       <h2 class="table-section-h2">Detalle de la carga</h2>
       <div class="table-detail-panel-inner">
@@ -335,6 +335,7 @@
         <div class="t-detail-content" id="table-detail-body"></div>
       </div>
     </section>
+    </dialog>
   </div>
 
 </div>

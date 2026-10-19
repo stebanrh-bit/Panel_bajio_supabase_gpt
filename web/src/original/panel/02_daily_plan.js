@@ -1926,8 +1926,7 @@
     if (!document.getElementById("page-calendario").hidden) renderCalendario_();
   }
 
-  // Carga seleccionado en la vista de tabla (su detalle se muestra en el panel fijo de abajo —
-  // ver renderTableDetailPanel). El panel rehace el HTML de la tabla completa cada vez que llega
+  // Carga seleccionada en la hoja; su detalle se abre en un diálogo (renderTableDetailPanel). El panel rehace el HTML de la tabla completa cada vez que llega
   // un dato nuevo (autoRefresh cada 60s, o cualquier guardado optimista: estatus, POD, recargos,
   // etc.); guardar esto aparte (y no solo una clase en el DOM) es lo que permite que el panel de
   // detalle se vuelva a pintar con datos frescos después de cada uno de esos renders, en vez de
@@ -1970,6 +1969,11 @@
 
   var currentView = "table";
   try {
+    // La primera entrada a esta entrega abre la hoja simple, incluso si antes se usaban tarjetas.
+    if (localStorage.getItem("bajio_sheet_version") !== "1") {
+      localStorage.setItem("bajio_sheet_version", "1");
+      localStorage.setItem("bajio_view", "table");
+    }
     currentView = localStorage.getItem("bajio_view") || "table";
   } catch (e) {}
 

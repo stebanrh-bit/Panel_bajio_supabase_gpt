@@ -1,3 +1,7 @@
+import {
+  clickOperationOption,
+  runSimpleSheetReview,
+} from "./simple_sheet_checks.mjs";
 import { runPanelReview } from "./panel_review_checks.mjs";
 import { runCalendarTasksReview } from "./calendar_tasks_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
@@ -429,6 +433,7 @@ async function newPage(
   viewport = { width: 1440, height: 1024 },
   view = "internal",
   identity = profiles[0],
+  initialSheet = false,
 ) {
   const page = await browser.newPage({
     viewport,
@@ -610,7 +615,7 @@ async function newPage(
     },
   );
   await page.addInitScript(
-    ({ id, displayName, fixtures, golden, view }) => {
+    ({ id, displayName, fixtures, golden, view, initialSheet }) => {
       const claims = {
         sub: id,
         role: "authenticated",
@@ -637,7 +642,10 @@ async function newPage(
           },
         }),
       );
-      localStorage.setItem("bajio_view", "cards");
+      if (!initialSheet) {
+        localStorage.setItem("bajio_sheet_version", "1");
+        localStorage.setItem("bajio_view", "cards");
+      }
       localStorage.setItem(
         "bajio_inicio_turno_" + displayName,
         new Date().toDateString(),
@@ -691,6 +699,7 @@ async function newPage(
     {
       id: identity.id,
       displayName: identity.display_name,
+      initialSheet,
       fixtures,
       golden,
       view,
@@ -755,8 +764,21 @@ async function newPage(
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
 }
-let panelReview, calendarTasksReview;
+let panelReview, calendarTasksReview, simpleSheetReview;
 try {
+  simpleSheetReview = await runSimpleSheetReview({
+    newPage,
+    rawLoads,
+    profiles,
+  });
+  if (process.argv.includes("--simple-sheet-only")) {
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log(
+      "Vista sencilla verificada: filtros, detalle, teclado, edición y once anchos.",
+    );
+    process.exit(0);
+  }
   calendarTasksReview = await runCalendarTasksReview({
     newPage,
     rawLoads,
@@ -902,7 +924,7 @@ try {
     );
     await compare("incidencias");
     await both((page) => page.locator("#incidencia-close").click());
-    await both((page) => page.locator("#view-toggle-btn").click());
+    await both((page) => clickOperationOption(page, "#view-toggle-btn"));
     await compare("tabla");
     await both((page) => page.locator("[data-page=calendario]").click());
     await compare("calendario");
@@ -990,7 +1012,7 @@ try {
     // Validación usando la UI entregada y el SDK real contra el transporte interceptado.
     const page = pages[1];
     await page.locator("[data-page=operation]").click();
-    await page.locator("#view-toggle-btn").click();
+    await clickOperationOption(page, "#view-toggle-btn");
     await page
       .locator("#page-operation [data-incidencias-load=VISUAL-001]")
       .first()
@@ -2294,23 +2316,27 @@ try {
     // El identificador completo se lee fuera del editor y persiste al volver a cargar.
     const oldTrailer = rawLoads[0].trailer;
     const longTrailer = "TRAILER-BAJIO-123456789012345678901234567890";
-    await ux.locator("#view-toggle-btn").click();
+    await clickOperationOption(ux, "#view-toggle-btn");
     const trailerCell = ux.locator(
       '#table-body tr[data-load="VISUAL-001"] .t-trailer',
     );
-    await trailerCell.locator("summary").click();
+    await trailerCell.locator(".trailer-full-value").click();
     const trailerSaved = ux.waitForResponse(
       (response) =>
         response.request().method() === "PATCH" &&
         response.url().includes("/loads?"),
     );
-    await trailerCell.locator("input").fill(longTrailer);
-    await trailerCell.locator("input").press("Tab");
+    await ux
+      .locator('#table-detail-body [data-trailer-load="VISUAL-001"]')
+      .fill(longTrailer);
+    await ux
+      .locator('#table-detail-body [data-trailer-load="VISUAL-001"]')
+      .press("Tab");
     await trailerSaved;
     assert.equal(rawLoads[0].trailer, longTrailer);
     await ux.reload();
     await ux.locator('[data-page="operation"]').click();
-    await ux.locator("#view-toggle-btn").click();
+    await clickOperationOption(ux, "#view-toggle-btn");
     await trailerCell
       .locator(".trailer-full-value")
       .filter({ hasText: longTrailer })
@@ -2367,15 +2393,19 @@ try {
     // Caso reportado: T0132 debe caber en el editor con el detalle abierto, también en laptop.
     await trailerCell.locator(".trailer-full-value").click();
     await ux.locator("#table-detail-panel:not([hidden])").waitFor();
-    await trailerCell.locator("summary").click();
+
     assert.equal(await ux.locator("#table-detail-panel").isVisible(), true);
-    await trailerCell.locator("input").fill("T0132");
+    await ux
+      .locator('#table-detail-body [data-trailer-load="VISUAL-001"]')
+      .fill("T0132");
     const shortTrailerSaved = ux.waitForResponse(
       (response) =>
         response.request().method() === "PATCH" &&
         response.url().includes("/loads?"),
     );
-    await trailerCell.locator("input").press("Tab");
+    await ux
+      .locator('#table-detail-body [data-trailer-load="VISUAL-001"]')
+      .press("Tab");
     await shortTrailerSaved;
     await ux
       .locator("#table-detail-load-label")
@@ -2389,22 +2419,24 @@ try {
       1920, 1533, 1440, 1280, 1180, 1100, 1050, 1024, 820, 768, 390, 360, 320,
     ]) {
       await ux.setViewportSize({ width, height: 900 });
-      const editor = await trailerCell.locator("input").evaluate((input) => {
-        const style = getComputedStyle(input);
-        const context = document.createElement("canvas").getContext("2d");
-        context.font = style.font;
-        const cell = input.closest("td").getBoundingClientRect();
-        const box = input.getBoundingClientRect();
-        return {
-          available:
-            input.clientWidth -
-            parseFloat(style.paddingLeft) -
-            parseFloat(style.paddingRight),
-          required: context.measureText(input.value).width,
-          insideCell: box.right <= cell.right && box.left >= cell.left,
-          documentFits: document.documentElement.scrollWidth <= innerWidth,
-        };
-      });
+      const editor = await ux
+        .locator('#table-detail-body [data-trailer-load="VISUAL-001"]')
+        .evaluate((input) => {
+          const style = getComputedStyle(input);
+          const context = document.createElement("canvas").getContext("2d");
+          context.font = style.font;
+          const cell = input.closest(".field").getBoundingClientRect();
+          const box = input.getBoundingClientRect();
+          return {
+            available:
+              input.clientWidth -
+              parseFloat(style.paddingLeft) -
+              parseFloat(style.paddingRight),
+            required: context.measureText(input.value).width,
+            insideCell: box.right <= cell.right && box.left >= cell.left,
+            documentFits: document.documentElement.scrollWidth <= innerWidth,
+          };
+        });
       assert.ok(
         editor.available > editor.required,
         `T0132 recortado a ${width}px`,
@@ -2431,7 +2463,8 @@ try {
       path: "/tmp/panel-original-comparison/trailer-detalle-T0132.png",
       animations: "disabled",
     });
-    await ux.locator("#view-toggle-btn").click();
+    await ux.locator("#table-detail-close").click();
+    await clickOperationOption(ux, "#view-toggle-btn");
     await ux
       .locator(
         '#page-operation .card[data-load="VISUAL-001"] .card-extra > summary',
@@ -2686,6 +2719,7 @@ try {
         personalBellChecks,
         panelReview,
         calendarTasksReview,
+        simpleSheetReview,
       },
       null,
       2,

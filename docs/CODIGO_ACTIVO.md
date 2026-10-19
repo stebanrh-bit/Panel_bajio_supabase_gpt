@@ -2,6 +2,8 @@
 
 La actualización de calendario, tareas y listado está documentada en [CALENDARIO_TAREAS_Y_LISTADO_2026-10-16.md](CALENDARIO_TAREAS_Y_LISTADO_2026-10-16.md). La presentación activa se modifica en las fuentes siguientes; los archivos históricos de la raíz conservan su contenido.
 
+La vista sencilla de Cargas está documentada en [VISTA_SENCILLA_2026-10-19.md](VISTA_SENCILLA_2026-10-19.md). Usa la misma tabla y los mismos adaptadores; no modifica la campana ni añade consultas de datos. Sus estilos se limitan a `.sheet-view` en `usability.css`.
+
 ## Sitio actual
 
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.

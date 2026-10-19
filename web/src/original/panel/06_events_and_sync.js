@@ -395,6 +395,19 @@ function clicWorkspaceYAvisos_(e) {
   function clicTabla_(e) {
     var btn;
 
+    if ((btn = e.target.closest("[data-table-select]"))) {
+      var selectedLoad = btn.getAttribute("data-table-select");
+      if (masivo_.activo) {
+        if (masivo_.sel[selectedLoad]) delete masivo_.sel[selectedLoad];
+        else masivo_.sel[selectedLoad] = true;
+        renderMasivo_();
+      } else {
+        selectedTableLoad = selectedLoad;
+        renderTableDetailPanel();
+      }
+      return;
+    }
+
     // Modo "Seleccionar varias": el clic en el renglón lo marca o desmarca (no abre el detalle).
     if (masivo_.activo) {
       var filaSel = e.target.closest("#table-body tr.t-row");
@@ -423,7 +436,7 @@ function clicWorkspaceYAvisos_(e) {
 
     var row = e.target.closest("tr.t-row");
     if (row) {
-      // Editar el trailer no debe abrir/cerrar el detalle ni cambiar el ancho durante la captura.
+      // Los controles conservan su acción propia; los demás datos abren el detalle.
       if (e.target.closest("select, input, button, details, a, label")) return;
       var load = row.getAttribute("data-load");
       selectedTableLoad =
@@ -485,10 +498,44 @@ function clicWorkspaceYAvisos_(e) {
     var tableDetailClose = document.getElementById("table-detail-close");
     if (tableDetailClose) {
       tableDetailClose.addEventListener("click", function () {
-        selectedTableLoad = null;
-        renderTableDetailPanel();
+        cerrarDetalleRapido_();
       });
     }
+    var detailDialog = document.getElementById("table-detail-dialog");
+    function cerrarDetalleRapido_() {
+      var previousLoad = String(selectedTableLoad);
+      selectedTableLoad = null;
+      renderTableDetailPanel();
+      // Un guardado puede sustituir la fila que abrió el diálogo: recuperar su botón vigente.
+      document
+        .querySelectorAll("[data-table-select]")
+        .forEach(function (button) {
+          if (button.getAttribute("data-table-select") === previousLoad)
+            button.focus();
+        });
+    }
+    detailDialog.addEventListener("cancel", function (event) {
+      event.preventDefault();
+      cerrarDetalleRapido_();
+    });
+    detailDialog.addEventListener("click", function (event) {
+      if (event.target === detailDialog) cerrarDetalleRapido_();
+    });
+    // Liberar la capa modal antes de abrir el expediente, comentarios o una tarea.
+    document.addEventListener(
+      "click",
+      function (event) {
+        if (!detailDialog.open || !detailDialog.contains(event.target)) return;
+        if (
+          event.target.closest(
+            "[data-workspace-load],[data-comments-load],[data-incidencias-load],[data-create-task-load],[data-recordatorio-edit]",
+          )
+        ) {
+          cerrarDetalleRapido_();
+        }
+      },
+      true,
+    );
   }
 
   function wireCardEvents() {

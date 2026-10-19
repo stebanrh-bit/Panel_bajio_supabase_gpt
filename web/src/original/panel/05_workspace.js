@@ -1645,7 +1645,7 @@ var commentsCurrentLoad = null;
       }, 30);
     else window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  // Operación completa siempre abre en la píldora "Activas" al entrar desde la barra lateral.
+  // Cargas abre con el selector en "Activas" al entrar desde la barra lateral.
   document.querySelectorAll(".sidebar-btn[data-page]").forEach(function (b) {
     b.addEventListener("click", function () {
       var p = b.getAttribute("data-page");
@@ -3131,6 +3131,7 @@ var commentsCurrentLoad = null;
       var rec = recPorLoad_(load);
       var prev = rec ? rec.truck : null;
       if (rec) rec.truck = val;
+      actualizarUnidadEnTabla_(load, "truck", val);
       guardarConVerificacion_(
         function () {
           showToast("Truck actualizado — Carga " + load, "good");
@@ -3138,6 +3139,7 @@ var commentsCurrentLoad = null;
         function (err) {
           if (rec) rec.truck = prev;
           input.value = prev || "";
+          actualizarUnidadEnTabla_(load, "truck", prev);
           showToast("No se pudo guardar el truck: " + err.message, "error");
         },
       ).saveTruck(load, val, myRealIdentity, myPassword);
@@ -3159,10 +3161,7 @@ var commentsCurrentLoad = null;
         rec.trailer = val;
         actualizarTituloDetalleTabla_(rec);
       }
-      var fullValue = input
-        .closest("td")
-        ?.querySelector("[data-trailer-value]");
-      if (fullValue) fullValue.textContent = val || "Sin asignar";
+      actualizarUnidadEnTabla_(load, "trailer", val);
       guardarConVerificacion_(
         function () {
           showToast("Trailer actualizado — Carga " + load, "good");
@@ -3173,7 +3172,7 @@ var commentsCurrentLoad = null;
             actualizarTituloDetalleTabla_(rec);
           }
           input.value = prev || "";
-          if (fullValue) fullValue.textContent = prev || "Sin asignar";
+          actualizarUnidadEnTabla_(load, "trailer", prev);
           showToast("No se pudo guardar el trailer: " + err.message, "error");
         },
       ).saveTrailer(load, val, myRealIdentity, myPassword);

@@ -1,3 +1,4 @@
+import { clickOperationOption } from "./simple_sheet_checks.mjs";
 /** Verifica vistas, asignación y cierre de seguimiento con datos y transporte locales. */
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
@@ -99,11 +100,9 @@ export async function runCalendarTasksReview({
     );
     for (const view of ["agenda", "week", "list"]) {
       await page.locator(`[data-cal-view="${view}"]`).click();
-      await page
-        .locator("#cal-grid")
-        .screenshot({
-          path: `/tmp/panel-original-comparison/calendario-vista-${view}.png`,
-        });
+      await page.locator("#cal-grid").screenshot({
+        path: `/tmp/panel-original-comparison/calendario-vista-${view}.png`,
+      });
     }
     await page
       .locator('#cal-grid [data-cal-load="VISUAL-001"]')
@@ -130,13 +129,13 @@ export async function runCalendarTasksReview({
     );
     await page.reload();
     await page.locator('[data-page="operation"]').click();
-    await page.locator("#view-toggle-btn").click();
+    await clickOperationOption(page, "#view-toggle-btn");
     const row = page.locator('#table-body [data-load="VISUAL-001"]');
     await row.locator(".t-comment-text").waitFor();
     const labels = await row
       .locator("td")
       .evaluateAll((cells) => cells.map((cell) => cell.dataset.label));
-    assert.equal(labels.length, 8);
+    assert.equal(labels.length, 10);
     assert.ok(labels.indexOf("Origen") < labels.indexOf("Destino"));
     assert.ok(!labels.includes("Recolección · cita"));
     await row.locator(".t-trailer .trailer-full-value").click();
@@ -168,11 +167,9 @@ export async function runCalendarTasksReview({
       /Marcar pendiente|Asignar a alguien en especial/,
     );
     await page.setViewportSize({ width: 1533, height: 1000 });
-    await page
-      .locator("#table-view")
-      .screenshot({
-        path: "/tmp/panel-original-comparison/cargas-origen-comentarios.png",
-      });
+    await page.locator("#table-view").screenshot({
+      path: "/tmp/panel-original-comparison/cargas-origen-comentarios.png",
+    });
     checks.push(
       "Listado conserva origen antes de destino y comentarios con detalle abierto; la recolección queda en el detalle",
     );
@@ -195,6 +192,15 @@ export async function runCalendarTasksReview({
     const createTask = page.locator(
       "#table-detail-body [data-create-task-load]",
     );
+    if (
+      !(await page
+        .locator("#table-detail-dialog")
+        .evaluate((node) => node.open))
+    ) {
+      await page
+        .locator('#table-body [data-table-select="VISUAL-001"]')
+        .click();
+    }
     await createTask.click();
     await page.locator("#bitacora-nota").fill("Confirmar documentos con Ana");
     await page.locator("#bitacora-asignado").selectOption("Ana");
@@ -203,6 +209,15 @@ export async function runCalendarTasksReview({
     assert.equal(tasks[0].assigned_to, profiles[1].id);
     assert.equal(tasks[0].assigned_csr, null);
     assert.deepEqual(tasks[0].loads, ["VISUAL-001"]);
+    if (
+      !(await page
+        .locator("#table-detail-dialog")
+        .evaluate((node) => node.open))
+    ) {
+      await page
+        .locator('#table-body [data-table-select="VISUAL-001"]')
+        .click();
+    }
     await createTask.click();
     await page.locator("#bitacora-assignment-mode").selectOption("coverage");
     assert.equal(
@@ -220,6 +235,15 @@ export async function runCalendarTasksReview({
     await page.locator("#bitacora-backdrop.show").waitFor({ state: "hidden" });
     assert.equal(tasks[1].assigned_to, null);
     assert.equal(tasks[1].assigned_csr, profiles[1].id);
+    if (
+      !(await page
+        .locator("#table-detail-dialog")
+        .evaluate((node) => node.open))
+    ) {
+      await page
+        .locator('#table-body [data-table-select="VISUAL-001"]')
+        .click();
+    }
     await createTask.click();
     await page.locator("#bitacora-assignment-mode").selectOption("coverage");
     await page.locator('[data-bitacora-load-remove="VISUAL-001"]').click();
@@ -238,6 +262,7 @@ export async function runCalendarTasksReview({
       "Crear tarea guarda persona o cobertura con destinos distintos; quitar la carga retira la cobertura anterior",
     );
 
+    await page.locator('#table-body [data-table-select="VISUAL-001"]').click();
     await page
       .locator('#table-detail-body [data-workspace-load="VISUAL-001"]')
       .click();
@@ -279,7 +304,7 @@ export async function runCalendarTasksReview({
     await state.filter({ hasText: "Programado para" }).waitFor();
     await page.reload();
     await page.locator('[data-page="operation"]').click();
-    await page.locator("#view-toggle-btn").click();
+    await clickOperationOption(page, "#view-toggle-btn");
     await page
       .locator(
         '#table-body [data-load="VISUAL-001"] .t-trailer .trailer-full-value',
@@ -296,11 +321,9 @@ export async function runCalendarTasksReview({
     checks.push(
       "Seguimiento distingue vencido y programado, permite reintentar y completar sin alterar tránsito ni avisos al cliente",
     );
-    await page
-      .locator("#workspace-body .review-card")
-      .screenshot({
-        path: "/tmp/panel-original-comparison/seguimiento-estado.png",
-      });
+    await page.locator("#workspace-body .review-card").screenshot({
+      path: "/tmp/panel-original-comparison/seguimiento-estado.png",
+    });
     const result = { checks, layouts };
     await writeFile(
       "/tmp/panel-original-comparison/calendario-tareas.json",

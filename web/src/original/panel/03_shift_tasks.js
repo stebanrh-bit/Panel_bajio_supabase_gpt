@@ -1260,6 +1260,10 @@
         return Number(rec.load) || 0;
       case "customer":
         return (rec.customer || "").toLowerCase();
+      case "truck":
+        return (rec.truck || "").toLowerCase();
+      case "csr":
+        return csrDeLoad(rec).toLowerCase();
       case "trailer":
         return (rec.trailer || "").toLowerCase();
       case "status":
