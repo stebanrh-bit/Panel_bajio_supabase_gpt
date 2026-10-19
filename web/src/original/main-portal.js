@@ -1,6 +1,7 @@
 import { formatMoment } from "./usability.js";
 import { createClient } from "@supabase/supabase-js";
 import template from "virtual:portal-template";
+import theme from "./theme-light.css?raw";
 import config from "./config.js";
 import { originalPage } from "./page.js";
 import { createOriginalApi } from "./api/index.js";
@@ -18,7 +19,7 @@ async function start() {
   const view = __PANEL_VIEW__;
   const page = originalPage({
     template,
-
+    theme,
     config,
     view,
   });

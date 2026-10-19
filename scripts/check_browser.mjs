@@ -3,6 +3,7 @@ import {
   runSimpleSheetReview,
 } from "./simple_sheet_checks.mjs";
 import { runPanelReview } from "./panel_review_checks.mjs";
+import { runLightThemeReview } from "./light_theme_checks.mjs";
 import { runCalendarTasksReview } from "./calendar_tasks_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
 import { readPanelSource } from "./panel_source.mjs";
@@ -329,6 +330,7 @@ const original = originalPage({
     "\n" +
     (await read("web/src/original/organization.css")),
   script: await readPanelSource(),
+  theme: await read("web/src/original/theme-light.css"),
   config,
 });
 const helperSource = (
@@ -709,6 +711,7 @@ async function newPage(
   if (view !== "internal") {
     const pageData = originalPage({
       template: await read(`web/src/original/${view}.template.html`),
+      theme: await read("web/src/original/theme-light.css"),
       config,
       view,
     });
@@ -764,8 +767,15 @@ async function newPage(
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
 }
-let panelReview, calendarTasksReview, simpleSheetReview;
+let panelReview, calendarTasksReview, simpleSheetReview, lightThemeReview;
 try {
+  lightThemeReview = await runLightThemeReview({ newPage });
+  if (process.argv.includes("--theme-only")) {
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log("Tema claro, contraste y controles compactos verificados.");
+    process.exit(0);
+  }
   simpleSheetReview = await runSimpleSheetReview({
     newPage,
     rawLoads,
@@ -2720,6 +2730,7 @@ try {
         panelReview,
         calendarTasksReview,
         simpleSheetReview,
+        lightThemeReview,
       },
       null,
       2,

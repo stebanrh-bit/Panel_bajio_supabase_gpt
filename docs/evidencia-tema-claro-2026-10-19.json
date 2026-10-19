@@ -1,0 +1,969 @@
+{
+  "date": "2026-10-19",
+  "source_base": "dafbd8c",
+  "status": "passed",
+  "artifacts": [
+    {
+      "path": "google-apps-script/index-sitio.html",
+      "sha256": "1fb3e31ed3ee3ef73c04c2f6dbd674a78a2f36f6aaab9c62e2057cf0082cdb1d",
+      "bytes": 893447
+    },
+    {
+      "path": "google-apps-script/index-cliente.html",
+      "sha256": "1a928379fce46036cd98bace8924e170373988094a0a3b07a9535b9752d48a35",
+      "bytes": 305419
+    },
+    {
+      "path": "google-apps-script/index-gerencia.html",
+      "sha256": "5aa5ff116e69cc4d2637760407832814d2b738426c49ee4a28c24af3fb259be4",
+      "bytes": 303013
+    }
+  ],
+  "unit_and_database_tests": {
+    "tests": 152,
+    "passed": 152,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "light_theme_review": {
+    "cards": [
+      {
+        "width": 585,
+        "height": 323.203125
+      },
+      {
+        "width": 585,
+        "height": 187.1875
+      }
+    ],
+    "results": [
+      {
+        "section": "home-1440",
+        "checked": 66,
+        "issues": []
+      },
+      {
+        "section": "operation-1440",
+        "checked": 65,
+        "issues": []
+      },
+      {
+        "section": "calendario-1440",
+        "checked": 101,
+        "issues": []
+      },
+      {
+        "section": "indicadores-1440",
+        "checked": 76,
+        "issues": []
+      },
+      {
+        "section": "apartados-1440",
+        "checked": 54,
+        "issues": []
+      },
+      {
+        "section": "radar-1440",
+        "checked": 42,
+        "issues": []
+      },
+      {
+        "section": "historico-1440",
+        "checked": 40,
+        "issues": []
+      },
+      {
+        "section": "home-390",
+        "checked": 54,
+        "issues": []
+      },
+      {
+        "section": "operation-390",
+        "checked": 56,
+        "issues": []
+      },
+      {
+        "section": "calendario-390",
+        "checked": 92,
+        "issues": []
+      },
+      {
+        "section": "indicadores-390",
+        "checked": 67,
+        "issues": []
+      },
+      {
+        "section": "apartados-390",
+        "checked": 45,
+        "issues": []
+      },
+      {
+        "section": "radar-390",
+        "checked": 42,
+        "issues": []
+      },
+      {
+        "section": "historico-390",
+        "checked": 31,
+        "issues": []
+      },
+      {
+        "section": "opciones",
+        "checked": 89,
+        "issues": []
+      },
+      {
+        "section": "tarjetas",
+        "checked": 65,
+        "issues": []
+      },
+      {
+        "section": "detalle-rapido",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "expediente-operacion",
+        "checked": 128,
+        "issues": []
+      },
+      {
+        "section": "expediente-tracking",
+        "checked": 86,
+        "issues": []
+      },
+      {
+        "section": "expediente-comunicacion",
+        "checked": 86,
+        "issues": []
+      },
+      {
+        "section": "expediente-documentos",
+        "checked": 85,
+        "issues": []
+      },
+      {
+        "section": "expediente-incidencias",
+        "checked": 76,
+        "issues": []
+      },
+      {
+        "section": "expediente-historial",
+        "checked": 119,
+        "issues": []
+      },
+      {
+        "section": "ventana-comments",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "ventana-incidencia",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "ventana-pendiente",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "ventana-bitacora",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "ventana-apartado",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "ventana-recordatorio",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "ventana-csr",
+        "checked": 59,
+        "issues": []
+      },
+      {
+        "section": "organizar-turno",
+        "checked": 100,
+        "issues": []
+      },
+      {
+        "section": "client",
+        "checked": 33,
+        "issues": []
+      },
+      {
+        "section": "client-detalle",
+        "checked": 15,
+        "issues": []
+      },
+      {
+        "section": "manager",
+        "checked": 37,
+        "issues": []
+      },
+      {
+        "section": "manager-detalle",
+        "checked": 46,
+        "issues": []
+      }
+    ],
+    "controls": [
+      {
+        "id": "own-clients-toggle",
+        "width": 89.921875,
+        "height": 32
+      },
+      {
+        "id": "view-toggle-btn",
+        "width": 81.90625,
+        "height": 32
+      },
+      {
+        "id": "mensaje-a-cliente",
+        "width": 123.390625,
+        "height": 32
+      },
+      {
+        "id": "own-clients-toggle",
+        "viewport": 390,
+        "width": 89.921875,
+        "height": 40
+      },
+      {
+        "id": "view-toggle-btn",
+        "viewport": 390,
+        "width": 81.90625,
+        "height": 40
+      },
+      {
+        "id": "mensaje-a-cliente",
+        "viewport": 390,
+        "width": 123.390625,
+        "height": 40
+      }
+    ],
+    "layouts": [
+      {
+        "section": "home",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "operation",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "calendario",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "indicadores",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "apartados",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "radar",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "historico",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "home",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "operation",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "calendario",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "indicadores",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "apartados",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "radar",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "historico",
+        "width": 390,
+        "content": 390
+      }
+    ],
+    "issues": []
+  },
+  "contrast_text_checks": 2268,
+  "general_review": {
+    "checks": [
+      "Siete secciones principales abren y caben en cuatro anchos de 320 a 1440 px",
+      "Búsqueda: selección accesible, flecha arriba, Escape y Enter sin abrir resultados ocultos",
+      "Histórico: error claro para fechas invertidas y recuperación al corregir",
+      "Histórico: una consulta anterior que tarda más no reemplaza los filtros actuales",
+      "Histórico: un error muestra cómo reintentar y Actualizar recupera la lista sin borrar filtros",
+      "Campana: avisos locales y del servidor abren su tarea; revisión de carga abre el expediente",
+      "Organizar turno: espera, fallo visible y reintento correcto",
+      "Formularios: campos obligatorios con un solo mensaje y limpieza al corregir, sin guardar el borrador",
+      "Cerrar sesión impide que una lectura anterior reabra Organizar turno",
+      "Portal Cliente: una respuesta lenta no reemplaza el embarque abierto después",
+      "Gerencia: búsqueda y recuperación de un filtro sin coincidencias"
+    ],
+    "layouts": [
+      {
+        "section": "home",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "operation",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "calendario",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "indicadores",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "apartados",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "radar",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "historico",
+        "width": 1440,
+        "content": 1440
+      },
+      {
+        "section": "home",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "operation",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "calendario",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "indicadores",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "apartados",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "radar",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "historico",
+        "width": 768,
+        "content": 768
+      },
+      {
+        "section": "home",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "operation",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "calendario",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "indicadores",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "apartados",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "radar",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "historico",
+        "width": 390,
+        "content": 390
+      },
+      {
+        "section": "home",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "operation",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "calendario",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "indicadores",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "apartados",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "radar",
+        "width": 320,
+        "content": 320
+      },
+      {
+        "section": "historico",
+        "width": 320,
+        "content": 320
+      }
+    ],
+    "errors": []
+  },
+  "personal_bell_accounts": [
+    {
+      "user": "Esteban",
+      "role": "admin",
+      "ownCustomersOnly": true
+    },
+    {
+      "user": "Ana",
+      "role": "csr",
+      "ownCustomersOnly": true
+    },
+    {
+      "user": "Abraham",
+      "role": "admin",
+      "ownCustomersOnly": true
+    }
+  ],
+  "simple_sheet": {
+    "checks": [
+      "Primera entrada en tabla sencilla, diez columnas y acciones secundarias cerradas",
+      "Selector de estado, cliente y búsqueda conservan sus filtros y resultados",
+      "Tabla, trailer y comentarios legibles sin scroll lateral en once anchos",
+      "Abrir por teclado mantiene el ancho; editar trailer persiste; Escape cierra el diálogo",
+      "Las tareas y los comentarios siguen abriendo al salir del detalle modal",
+      "El cambio de estatus en la fila utiliza el guardado existente"
+    ],
+    "layouts": [
+      {
+        "page": 1920,
+        "screen": 1920,
+        "width": 1504,
+        "content": 1504
+      },
+      {
+        "page": 1533,
+        "screen": 1533,
+        "width": 1273,
+        "content": 1273
+      },
+      {
+        "page": 1440,
+        "screen": 1440,
+        "width": 1180,
+        "content": 1180
+      },
+      {
+        "page": 1280,
+        "screen": 1280,
+        "width": 1020,
+        "content": 1020
+      },
+      {
+        "page": 1180,
+        "screen": 1180,
+        "width": 920,
+        "content": 920
+      },
+      {
+        "page": 1024,
+        "screen": 1024,
+        "width": 764,
+        "content": 764
+      },
+      {
+        "page": 820,
+        "screen": 820,
+        "width": 560,
+        "content": 560
+      },
+      {
+        "page": 768,
+        "screen": 768,
+        "width": 508,
+        "content": 508
+      },
+      {
+        "page": 390,
+        "screen": 390,
+        "width": 334,
+        "content": 334
+      },
+      {
+        "page": 360,
+        "screen": 360,
+        "width": 304,
+        "content": 304
+      },
+      {
+        "page": 320,
+        "screen": 320,
+        "width": 264,
+        "content": 264
+      }
+    ]
+  },
+  "calendar_and_tasks": {
+    "checks": [
+      "Tres vistas conservan los movimientos y caben en seis anchos; Lista muestra todos sin desplegables",
+      "Cambiar vista conserva cliente, tipo y semana; la preferencia permanece al recargar",
+      "Listado conserva origen antes de destino y comentarios con detalle abierto; la recolección queda en el detalle",
+      "Crear tarea guarda persona o cobertura con destinos distintos; quitar la carga retira la cobertura anterior",
+      "Seguimiento distingue vencido y programado, permite reintentar y completar sin alterar tránsito ni avisos al cliente"
+    ],
+    "layouts": [
+      {
+        "view": "agenda",
+        "width": 1920,
+        "page": 1920,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "week",
+        "width": 1920,
+        "page": 1920,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "list",
+        "width": 1920,
+        "page": 1920,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "agenda",
+        "width": 1440,
+        "page": 1440,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "week",
+        "width": 1440,
+        "page": 1440,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "list",
+        "width": 1440,
+        "page": 1440,
+        "available": 1184,
+        "content": 1184
+      },
+      {
+        "view": "agenda",
+        "width": 1024,
+        "page": 1024,
+        "available": 804,
+        "content": 804
+      },
+      {
+        "view": "week",
+        "width": 1024,
+        "page": 1024,
+        "available": 804,
+        "content": 804
+      },
+      {
+        "view": "list",
+        "width": 1024,
+        "page": 1024,
+        "available": 804,
+        "content": 804
+      },
+      {
+        "view": "agenda",
+        "width": 768,
+        "page": 768,
+        "available": 548,
+        "content": 548
+      },
+      {
+        "view": "week",
+        "width": 768,
+        "page": 768,
+        "available": 548,
+        "content": 548
+      },
+      {
+        "view": "list",
+        "width": 768,
+        "page": 768,
+        "available": 548,
+        "content": 548
+      },
+      {
+        "view": "agenda",
+        "width": 390,
+        "page": 390,
+        "available": 362,
+        "content": 362
+      },
+      {
+        "view": "week",
+        "width": 390,
+        "page": 390,
+        "available": 362,
+        "content": 362
+      },
+      {
+        "view": "list",
+        "width": 390,
+        "page": 390,
+        "available": 362,
+        "content": 362
+      },
+      {
+        "view": "agenda",
+        "width": 320,
+        "page": 320,
+        "available": 292,
+        "content": 292
+      },
+      {
+        "view": "week",
+        "width": 320,
+        "page": 320,
+        "available": 292,
+        "content": 292
+      },
+      {
+        "view": "list",
+        "width": 320,
+        "page": 320,
+        "available": 292,
+        "content": 292
+      }
+    ]
+  },
+  "loads_layouts": [
+    {
+      "viewport": 1920,
+      "detail": false,
+      "available": 1504,
+      "content": 1504,
+      "tableWidth": 1504,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": false,
+      "available": 1273,
+      "content": 1273,
+      "tableWidth": 1273,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": false,
+      "available": 1180,
+      "content": 1180,
+      "tableWidth": 1180,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": false,
+      "available": 1020,
+      "content": 1020,
+      "tableWidth": 1020,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": false,
+      "available": 920,
+      "content": 920,
+      "tableWidth": 920,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": false,
+      "available": 840,
+      "content": 840,
+      "tableWidth": 840,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": false,
+      "available": 790,
+      "content": 790,
+      "tableWidth": 790,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": false,
+      "available": 764,
+      "content": 764,
+      "tableWidth": 764,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": false,
+      "available": 560,
+      "content": 560,
+      "tableWidth": 560,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": false,
+      "available": 508,
+      "content": 508,
+      "tableWidth": 508,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": false,
+      "available": 334,
+      "content": 334,
+      "tableWidth": 334,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": false,
+      "available": 304,
+      "content": 304,
+      "tableWidth": 304,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": false,
+      "available": 264,
+      "content": 264,
+      "tableWidth": 264,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1920,
+      "detail": true,
+      "available": 1584,
+      "content": 1584,
+      "tableWidth": 1584,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1533,
+      "detail": true,
+      "available": 1273,
+      "content": 1273,
+      "tableWidth": 1273,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1440,
+      "detail": true,
+      "available": 1180,
+      "content": 1180,
+      "tableWidth": 1180,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1280,
+      "detail": true,
+      "available": 1020,
+      "content": 1020,
+      "tableWidth": 1020,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1180,
+      "detail": true,
+      "available": 920,
+      "content": 920,
+      "tableWidth": 920,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1100,
+      "detail": true,
+      "available": 840,
+      "content": 840,
+      "tableWidth": 840,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1050,
+      "detail": true,
+      "available": 790,
+      "content": 790,
+      "tableWidth": 790,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 1024,
+      "detail": true,
+      "available": 764,
+      "content": 764,
+      "tableWidth": 764,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 820,
+      "detail": true,
+      "available": 560,
+      "content": 560,
+      "tableWidth": 560,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 768,
+      "detail": true,
+      "available": 508,
+      "content": 508,
+      "tableWidth": 508,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 390,
+      "detail": true,
+      "available": 334,
+      "content": 334,
+      "tableWidth": 334,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 360,
+      "detail": true,
+      "available": 304,
+      "content": 304,
+      "tableWidth": 304,
+      "overflow": "visible",
+      "documentFits": true
+    },
+    {
+      "viewport": 320,
+      "detail": true,
+      "available": 264,
+      "content": 264,
+      "tableWidth": 264,
+      "overflow": "visible",
+      "documentFits": true
+    }
+  ],
+  "javascript_errors": [],
+  "imports": [
+    "CSV",
+    "XLSX",
+    "XLS"
+  ],
+  "production_writes": false,
+  "google_deployment_performed": false,
+  "manual_tests": "cancelled_by_user",
+  "commands": [
+    "npm --prefix web run build",
+    "npm --prefix web test",
+    "node scripts/check_browser.mjs --imports-only --legacy-xls",
+    "node scripts/check_browser.mjs --theme-only",
+    "python scripts/package_site.py --check"
+  ]
+}

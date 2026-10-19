@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import template from "./index.template.html?raw";
 import styles from "./panel-styles.css?raw";
+import theme from "./theme-light.css?raw";
 import script from "./panel-source.js";
 import config from "./config.js";
 import { originalPage } from "./page.js";
@@ -45,6 +46,7 @@ async function start() {
   const view = "internal";
   const page = originalPage({
     template,
+    theme,
     styles:
       styles +
       "\n" +

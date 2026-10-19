@@ -4,6 +4,10 @@ Esta entrega reutiliza las tres interfaces originales: panel interno, Portal Cli
 
 La versión publicada de Google todavía no cambia hasta completar estos pasos. El código está preparado en la rama `supabase-inicial`. Las cargas y cuentas existentes se conservan.
 
+## Tema claro en todo el sitio
+
+La entrega más reciente aplica el tema claro al panel interno y a los dos portales, y reduce el tamaño de controles y tarjetas. Esta vez hay que actualizar **index.html, index-cliente.html e index-gerencia.html**. [Capturas y pasos](TEMA_CLARO_2026-10-19.md).
+
 ## Vista sencilla de Cargas
 
 La entrega más reciente convierte Cargas en una hoja clara y compacta, con filtros en una fila y acciones dentro de **Opciones** o del detalle. Conserva notificaciones, datos y permisos. Requiere actualizar únicamente **index.html**. [Capturas y pasos](VISTA_SENCILLA_2026-10-19.md).

@@ -4,6 +4,8 @@ La actualización de calendario, tareas y listado está documentada en [CALENDAR
 
 La vista sencilla de Cargas está documentada en [VISTA_SENCILLA_2026-10-19.md](VISTA_SENCILLA_2026-10-19.md). Usa la misma tabla y los mismos adaptadores; no modifica la campana ni añade consultas de datos. Sus estilos se limitan a `.sheet-view` en `usability.css`.
 
+El tema compartido está en `web/src/original/theme-light.css`. Las entradas del panel y los portales lo pasan a `page.js`; su carga al final evita modificar las hojas históricas. [Tema claro y controles compactos](TEMA_CLARO_2026-10-19.md).
+
 ## Sitio actual
 
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.

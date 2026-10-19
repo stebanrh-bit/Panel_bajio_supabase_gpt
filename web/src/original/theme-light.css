@@ -1,0 +1,498 @@
+/* Paleta compartida por panel, Portal Cliente y Gerencia.
+   Se carga después de sus estilos: cambia presentación y no reglas operativas. */
+:root {
+  color-scheme: light;
+  --paper: #f3f6fa;
+  --surface: #ffffff;
+  --surface-2: #edf2f7;
+  --panel: #ffffff;
+  --ink: #26374c;
+  --ink-soft: #53657a;
+  --ink-faint: #586b80;
+  --line: #d6e0ea;
+  --accent: #285e91;
+  --accent-soft: #e7f0fa;
+  --info: #285e91;
+  --info-soft: #e7f0fa;
+  --good: #216c4a;
+  --good-soft: #e5f3eb;
+  --warn: #845600;
+  --warn-soft: #fff2d7;
+  --critical: #b33945;
+  --critical-soft: #fbe9eb;
+  --purple: #72539b;
+  --purple-soft: #f0eaf8;
+  --teal: #246e70;
+  --teal-soft: #e6f3f1;
+  --pink: #995479;
+  --pink-soft: #f8e9f1;
+  --brown: #8a5c35;
+  --brown-soft: #f3ede5;
+  --slate: #536b83;
+  --slate-soft: #ebf0f5;
+  --shadow: 0 1px 3px #26374c09;
+  --shadow-md: 0 10px 30px -12px #26374c26;
+}
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+h1,
+h2,
+h3 {
+  font-family:
+    "Inter",
+    "Public Sans",
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+input,
+select,
+textarea {
+  accent-color: var(--accent);
+}
+:focus-visible {
+  outline-color: var(--accent);
+}
+::placeholder {
+  color: var(--ink-faint);
+  opacity: 1;
+}
+.panel-internal svg,
+.panel-internal img {
+  filter: none;
+}
+.panel-internal
+  :is(button, h1, h2, h3, strong, b, .n, .load-number, .status-select) {
+  text-shadow: none;
+}
+
+/* Superficies que antes usaban colores oscuros fijos, fuera de las variables del tema. */
+.panel-internal
+  :is(
+    .sidebar,
+    .barra-movil,
+    .home-command,
+    .home-mini-panel,
+    .home-priority-kpi,
+    .action-row,
+    .home-tab-btn,
+    .radar-tab-btn,
+    .home-global-search input
+  ) {
+  background: var(--surface);
+  border-color: var(--line);
+}
+.panel-internal :is(.home-tab-btn.active, .radar-tab-btn.active) {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: #c4d7eb;
+}
+.panel-internal #action-center {
+  background: var(--surface);
+}
+.panel-internal .action-row:hover {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+.panel-internal :is(.home-mini-row, .carga-csr-detail-row, .deliv-card) {
+  border-color: var(--line);
+}
+.panel-internal
+  :is(
+    .file-btn,
+    .chip,
+    .sidebar-badge,
+    .home-priority-kpi,
+    .status-select,
+    .card,
+    .stat
+  ) {
+  box-shadow: none;
+}
+.panel-internal :is(.file-btn:hover, .chip:hover, .card:hover) {
+  box-shadow: var(--shadow);
+  filter: none;
+}
+.panel-internal
+  :is(
+    .search-resultados,
+    .avisos-panel,
+    .modal-box,
+    .who-drawer,
+    .workspace,
+    .sheet-detail-dialog
+  ) {
+  box-shadow: var(--shadow-md);
+}
+.panel-internal
+  :is(.modal-backdrop, .workspace-backdrop, .who-drawer-backdrop) {
+  background: #26374c55;
+}
+.panel-internal #identity-backdrop.gate-active {
+  background: #edf2f7f5;
+}
+.panel-internal :is(.organize-dialog, .sheet-detail-dialog)::backdrop {
+  background: #26374c55;
+}
+.panel-internal .chip[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: #bfd2e7;
+}
+.panel-internal
+  :is(.field-validation-error, .organize-error, .organize-load-status) {
+  color: var(--critical);
+}
+
+/* Plan diario y calendario: conservar los colores por tipo sin usar tonos de neón. */
+.panel-internal .attention-lane {
+  --lane-color: var(--info);
+}
+.panel-internal .attention-lane-now {
+  --lane-color: var(--critical);
+}
+.panel-internal .attention-lane-today {
+  --lane-color: var(--warn);
+}
+.panel-internal .attention-lane-future {
+  --lane-color: var(--teal);
+}
+.panel-internal #action-center .attention-load {
+  background: var(--surface);
+  box-shadow: none;
+}
+.panel-internal .attention-equipment {
+  background: var(--surface-2);
+}
+.panel-internal
+  :is(
+    .attention-customer,
+    .attention-equipment dt,
+    .attention-equipment dd,
+    .attention-main-reason,
+    .attention-next-time,
+    .attention-actions summary
+  ) {
+  color: var(--ink-soft);
+}
+.panel-internal .attention-actions[open] {
+  background: #f7f9fc;
+}
+.panel-internal .attention-actions > summary {
+  color: var(--accent);
+}
+.panel-internal #cal-grid .cal-dia {
+  background: var(--surface);
+}
+.panel-internal #cal-grid .cal-chip {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+  border-top-color: var(--event-color);
+}
+.panel-internal #cal-grid .cal-chip:hover {
+  background: var(--surface-2);
+  border-color: var(--event-color);
+}
+.panel-internal .cal-chip.t-pickup {
+  --event-color: var(--info);
+}
+.panel-internal .cal-chip.t-cruce {
+  --event-color: var(--warn);
+}
+.panel-internal .cal-chip.t-entrega {
+  --event-color: var(--good);
+}
+.panel-internal .cal-chip.t-apartado {
+  --event-color: var(--purple);
+}
+.panel-internal
+  #cal-grid
+  :is(
+    .cal-day-name,
+    .cal-day-count,
+    .cal-vacio,
+    .cal-event-equipment,
+    .cal-event-status,
+    .cal-event-client
+  ) {
+  color: var(--ink-soft);
+}
+.panel-internal #cal-grid .cal-event-top time {
+  color: var(--ink);
+}
+.panel-internal #cal-grid .cal-event-status {
+  border-color: var(--line);
+}
+.panel-internal #cal-grid .cal-today-label {
+  color: var(--accent);
+}
+.panel-internal #cal-grid .cal-dia.hoy {
+  border-color: #abc6e3;
+  box-shadow: inset 3px 0 var(--accent);
+}
+.panel-internal #cal-grid .cal-day-more summary {
+  color: var(--accent);
+  border-color: #b8cadf;
+}
+
+/* Organizar turno y sus formularios siguen la misma paleta que las demás ventanas. */
+.panel-internal .organize-dialog {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.panel-internal .organize-dialog :is(input, select, textarea) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.panel-internal
+  :is(
+    .organize-dialog button,
+    .organize-toolbar button,
+    .organize-tabs button
+  ) {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.panel-internal .organize-hub .organize-hub-head {
+  background: #f7f9fc;
+  border-color: var(--line);
+}
+.panel-internal .organize-hub .organize-tabs {
+  background: #f3f6fa;
+  border-color: var(--line);
+}
+.panel-internal .organize-hub .organize-tabs button {
+  background: transparent;
+  color: var(--ink);
+}
+.panel-internal .organize-hub .organize-tabs button:hover {
+  background: var(--surface-2);
+}
+.panel-internal .organize-hub .organize-tabs button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: #c2d5ea;
+}
+.panel-internal .organize-tabs [aria-pressed="true"] {
+  box-shadow: none;
+}
+.panel-internal
+  .organize-tabs
+  button[aria-pressed="true"]
+  :is(svg, .organize-nav-arrow) {
+  color: var(--accent);
+}
+.panel-internal
+  :is(
+    .organize-eyebrow,
+    .organize-nav-arrow,
+    .organize-content-title,
+    .organize-nav-label
+  ) {
+  color: var(--accent);
+}
+.panel-internal
+  :is(
+    .organize-hub-head p,
+    .organize-tabs small,
+    .organize-row small,
+    .organize-content small,
+    .organize-content-head p,
+    .decision-summary dt
+  ) {
+  color: var(--ink-soft);
+}
+.panel-internal .organize-content .organize-row {
+  background: var(--surface);
+  border-color: var(--line);
+}
+.panel-internal .organize-content .organize-row button {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.panel-internal .decision-summary {
+  background: var(--surface-2);
+}
+.panel-internal .organize-dialog [aria-invalid="true"] {
+  border-color: var(--critical);
+}
+
+/* Opciones: los resúmenes ocupan su fila y no estiran los botones vecinos. */
+.panel-internal #ux-advanced-filters .ux-advanced-content {
+  align-items: flex-start;
+  gap: 8px;
+}
+.panel-internal
+  #ux-advanced-filters
+  .ux-advanced-content
+  > :is(button, .file-btn, .chip) {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  width: auto;
+  min-width: 0;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  border-radius: 6px;
+  box-shadow: none;
+}
+.panel-internal
+  #ux-advanced-filters
+  :is(#operation-meta, #stats, #vistas-bar, #active-filter-pills) {
+  flex: 1 0 100%;
+  margin: 4px 0 0;
+}
+.panel-internal #ux-advanced-filters #operation-meta {
+  text-align: left;
+  font-size: 12px;
+}
+.panel-internal #ux-advanced-filters #stats {
+  gap: 7px;
+}
+.panel-internal #ux-advanced-filters #stats .stat {
+  background: var(--surface);
+  border-color: var(--line);
+}
+.panel-internal #ux-advanced-filters #stats :is(.n, .l) {
+  color: var(--ink-soft);
+}
+.panel-internal #ux-advanced-filters #vistas-bar button {
+  min-height: 30px;
+  font-size: 12px;
+  padding: 4px 9px;
+}
+
+/* Vista tarjetas: rejilla compacta, acciones secundarias desplegables y texto legible. */
+.panel-internal #cards-view .cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.panel-internal #cards-view .card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.panel-internal #cards-view .card-top {
+  gap: 8px;
+  align-items: flex-start;
+}
+.panel-internal #cards-view :is(.load-number, .load) {
+  font-size: 21px;
+}
+.panel-internal #cards-view .customer {
+  font-size: 14px;
+}
+.panel-internal #cards-view .route {
+  font-size: 13px;
+}
+.panel-internal
+  #cards-view
+  :is(.comments-row, .card-secondary-actions .ux-advanced-content) {
+  gap: 6px;
+}
+.panel-internal
+  #cards-view
+  :is(.workspace-open-btn, .comments-btn, .incidencias-btn) {
+  min-height: 32px;
+  padding: 5px 9px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.panel-internal #cards-view .status-select {
+  min-height: 32px;
+  font-size: 13px;
+}
+.panel-internal #cards-view .card-extra {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+.panel-internal #cards-view .card-extra > summary {
+  padding: 4px 0;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .panel-internal
+    #ux-advanced-filters
+    .ux-advanced-content
+    > :is(button, .file-btn, .chip),
+  .panel-internal
+    #cards-view
+    :is(.workspace-open-btn, .comments-btn, .incidencias-btn) {
+    min-height: 40px;
+  }
+}
+
+/* Texto secundario sobre superficies claras: contraste de lectura, también en estados vacíos. */
+.panel-internal #action-center .attention-open {
+  background: var(--accent-soft);
+  border-color: #c2d5ea;
+  color: var(--accent);
+}
+.panel-internal #cal-grid .cal-chip .cal-event-client {
+  color: var(--ink-soft);
+}
+.panel-internal :is(#operation-visible-count, .sheet-filter),
+.panel-internal .sheet-view .operation-page-head p,
+.panel-internal .organize-content > p {
+  color: var(--ink-soft);
+}
+.panel-internal #page-operation #table-view .t-comment-empty {
+  color: var(--ink-faint);
+}
+.panel-internal * {
+  text-shadow: none;
+}
+.panel-internal .organize-content section > p {
+  color: var(--ink-soft);
+}
+.panel-internal .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    #dfe7f0 37%,
+    var(--surface-2) 63%
+  );
+}
+.panel-internal .workspace-panel {
+  box-shadow: -12px 0 36px #26374c20;
+}
+
+/* Quitar espacio duplicado entre secciones de las tarjetas, sin ocultar sus pendientes. */
+.panel-internal #cards-view .card {
+  gap: 8px;
+}
+.panel-internal #cards-view .card-commitment {
+  margin: 4px 0;
+  gap: 5px 12px;
+  font-size: 13px;
+}
+.panel-internal #cards-view .card-extra {
+  margin-top: 0;
+  padding-top: 6px;
+}
+.panel-internal #cards-view .client-notify-bar {
+  margin-top: 0;
+  padding: 8px;
+}
+.panel-internal #cards-view .card-secondary-actions > summary {
+  padding: 5px 4px;
+  font-size: 12px;
+  line-height: 1.4;
+}

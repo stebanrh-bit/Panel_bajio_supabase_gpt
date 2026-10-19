@@ -57,29 +57,28 @@
     "Descompuesta",
     "En resguardo",
   ];
-  /* Chips traslúcidos "de neón" sobre el fondo oscuro: fondo = el mismo color del texto a
-     baja opacidad (efecto de brillo), texto = el color saturado. */
+  /** Cada estatus usa colores semánticos del tema, con contraste sobre fondos claros. */
   var STATUS_STYLES = {
-    Cargando: ["rgba(185,140,255,0.16)", "#c9a6ff"],
-    "En transito": ["rgba(46,232,129,0.15)", "#4ade80"],
-    "En yarda MX": ["rgba(255,217,61,0.15)", "#ffd93d"],
-    Descargando: ["rgba(255,159,67,0.15)", "#ff9f43"],
-    "Pte. Arrivo": ["rgba(255,107,107,0.15)", "#ff8080"],
-    "Pendiente arrivo": ["rgba(255,107,107,0.15)", "#ff8080"], // por si alguna carga vieja se guardó con el nombre largo
-    TONU: ["rgba(226,114,91,0.16)", "#e88a72"],
-    DELIVERED: ["rgba(45,226,200,0.15)", "#2de2c8"],
-    "En AA": ["rgba(167,139,250,0.15)", "#a78bfa"],
-    "En Yarda US": ["rgba(244,114,182,0.15)", "#f472b6"],
-    "Patio permisionario": ["rgba(212,196,102,0.14)", "#d4c466"],
-    "Cancelado.": ["rgba(255,92,92,0.17)", "#ff5c5c"],
-    COMPLETED: ["rgba(96,165,250,0.15)", "#60a5fa"],
-    "(HOS)": ["rgba(147,162,201,0.14)", "#93a2c9"],
-    Cruzando: ["rgba(63,176,255,0.15)", "#3fb0ff"],
-    "EN PLANTA": ["rgba(255,111,176,0.15)", "#ff6fb0"],
-    "PATIO MTY": ["rgba(255,133,82,0.15)", "#ff8552"],
-    Recolectando: ["rgba(232,178,77,0.15)", "#e8b24d"],
-    Descompuesta: ["rgba(255,92,92,0.15)", "#ff5c5c"],
-    "En resguardo": ["rgba(143,163,189,0.14)", "#8fa3bd"],
+    Cargando: ["var(--purple-soft)", "var(--purple)"],
+    "En transito": ["var(--good-soft)", "var(--good)"],
+    "En yarda MX": ["var(--warn-soft)", "var(--warn)"],
+    Descargando: ["var(--brown-soft)", "var(--brown)"],
+    "Pte. Arrivo": ["var(--critical-soft)", "var(--critical)"],
+    "Pendiente arrivo": ["var(--critical-soft)", "var(--critical)"],
+    TONU: ["var(--critical-soft)", "var(--critical)"],
+    DELIVERED: ["var(--good-soft)", "var(--good)"],
+    "En AA": ["var(--info-soft)", "var(--info)"],
+    "En Yarda US": ["var(--pink-soft)", "var(--pink)"],
+    "Patio permisionario": ["var(--warn-soft)", "var(--warn)"],
+    "Cancelado.": ["var(--critical-soft)", "var(--critical)"],
+    COMPLETED: ["var(--good-soft)", "var(--good)"],
+    "(HOS)": ["var(--slate-soft)", "var(--slate)"],
+    Cruzando: ["var(--info-soft)", "var(--info)"],
+    "EN PLANTA": ["var(--pink-soft)", "var(--pink)"],
+    "PATIO MTY": ["var(--brown-soft)", "var(--brown)"],
+    Recolectando: ["var(--warn-soft)", "var(--warn)"],
+    Descompuesta: ["var(--critical-soft)", "var(--critical)"],
+    "En resguardo": ["var(--slate-soft)", "var(--slate)"],
   };
 
   /** Una carga solo se considera "Entregada" (y se mueve a esa sección) cuando su estatus es Delivered/Completed Y ya se compartió el POD con el cliente. */

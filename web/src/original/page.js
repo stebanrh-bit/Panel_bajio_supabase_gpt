@@ -2,6 +2,7 @@
 export function originalPage({
   template,
   styles = "",
+  theme = "",
   script = "",
   config,
   view = "internal",
@@ -26,7 +27,9 @@ export function originalPage({
     scripts.push(body.replace(/google\.script\.run/g, "window.panelApi.run"));
     return "";
   });
-  const head = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] || "";
+  const head =
+    (html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] || "") +
+    (theme ? `<style data-panel-theme="light">${theme}</style>` : "");
   const body = html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1] || "";
   if (html.includes("<?"))
     throw Error("La plantilla original contiene instrucciones sin resolver.");
