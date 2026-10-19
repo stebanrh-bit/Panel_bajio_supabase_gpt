@@ -353,7 +353,7 @@ export function mountUsability(doc) {
       details.append(summary, content);
       toolbar.append(details);
       for (const node of toolbar.querySelectorAll(
-        "#own-clients-toggle,#view-toggle-btn,[data-abrir-multi-msg],#masivo-btn,#densidad-btn",
+        "#own-clients-toggle,#view-toggle-btn,[data-abrir-multi-msg],#masivo-btn,#densidad-control",
       ))
         content.append(node);
       for (const id of [

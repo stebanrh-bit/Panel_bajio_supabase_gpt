@@ -331,6 +331,9 @@ function tableRowHtml(rec) {
     var cardsView = document.getElementById("cards-view");
     var tableView = document.getElementById("table-view");
     var btn = document.getElementById("view-toggle-btn");
+    // El espaciado solo corresponde al listado; no cambia la vista elegida.
+    document.getElementById("densidad-control").hidden =
+      currentView !== "table";
     if (currentView === "table") {
       cardsView.style.display = "none";
       tableView.style.display = "";
@@ -2349,7 +2352,7 @@ function tableRowHtml(rec) {
     aplicarMasivo_("pod", true, "¿Marcar POD enviado");
   });
 
-  // ---- Tabla compacta / cómoda (se recuerda en este navegador) ----
+  // ---- Espacio entre filas (preferencia local; no modifica datos ni filtros) ----
   var tablaCompacta_ = false;
   try {
     tablaCompacta_ = localStorage.getItem("bajio_tabla_compacta") === "1";
@@ -2358,14 +2361,14 @@ function tableRowHtml(rec) {
     document
       .getElementById("table-view")
       .classList.toggle("tabla-compacta", tablaCompacta_);
-    document.getElementById("densidad-btn").textContent = tablaCompacta_
-      ? "Tabla cómoda"
-      : "Tabla compacta";
+    document.getElementById("densidad-select").value = tablaCompacta_
+      ? "compacta"
+      : "normal";
   }
   document
-    .getElementById("densidad-btn")
-    .addEventListener("click", function () {
-      tablaCompacta_ = !tablaCompacta_;
+    .getElementById("densidad-select")
+    .addEventListener("change", function () {
+      tablaCompacta_ = this.value === "compacta";
       try {
         localStorage.setItem(
           "bajio_tabla_compacta",
@@ -2373,13 +2376,6 @@ function tableRowHtml(rec) {
         );
       } catch (e) {}
       aplicarDensidad_();
-      if (currentView !== "table") {
-        currentView = "table";
-        try {
-          localStorage.setItem("bajio_view", currentView);
-        } catch (e) {}
-        applyView();
-      }
     });
   aplicarDensidad_();
 

@@ -99,6 +99,56 @@ export async function runSimpleSheetReview({ newPage, rawLoads, profiles }) {
       "Primera entrada en tabla sencilla, diez columnas y acciones secundarias cerradas",
     );
 
+    // Medir el efecto real en la fila: la clase CSS por sí sola no demuestra un cambio visible.
+    const density = page.locator("#densidad-select");
+    const rowPresentation = () =>
+      row.evaluate((node) => ({
+        height: node.getBoundingClientRect().height,
+        font: getComputedStyle(node.querySelector("td")).fontSize,
+        columns: [...node.cells].map((cell) => cell.textContent),
+      }));
+    await page.locator("#ux-advanced-filters > summary").click();
+    assert.equal(await density.inputValue(), "normal");
+    const normal = await rowPresentation();
+    await density.selectOption("compacta");
+    const reduced = await rowPresentation();
+    assert.ok(
+      reduced.height <= normal.height - 12,
+      JSON.stringify({ normal, reduced }),
+    );
+    assert.equal(reduced.font, normal.font);
+    assert.deepEqual(reduced.columns, normal.columns);
+    await page.locator("#page-operation").screenshot({
+      path: "/tmp/panel-original-comparison/cargas-filas-reducidas.png",
+    });
+    await page.reload();
+    await page.locator('[data-page="operation"]').click();
+    await row.waitFor();
+    await page.locator("#ux-advanced-filters > summary").click();
+    assert.equal(await density.inputValue(), "compacta");
+    assert.equal((await rowPresentation()).height, reduced.height);
+    await density.selectOption("normal");
+    assert.equal((await rowPresentation()).height, normal.height);
+    await page.locator("#page-operation").screenshot({
+      path: "/tmp/panel-original-comparison/cargas-filas-normales.png",
+    });
+    await clickOperationOption(page, "#view-toggle-btn");
+    await page.locator("#ux-advanced-filters > summary").click();
+    assert.equal(await page.locator("#cards-view").isVisible(), true);
+    assert.equal(await page.locator("#densidad-control").isVisible(), false);
+    await clickOperationOption(page, "#view-toggle-btn");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator("#ux-advanced-filters > summary").click();
+    const normalMobile = await rowPresentation();
+    await density.selectOption("compacta");
+    assert.ok((await rowPresentation()).height < normalMobile.height);
+    await density.selectOption("normal");
+    await page.locator("#ux-advanced-filters > summary").click();
+    await page.setViewportSize({ width: 1533, height: 1000 });
+    checks.push(
+      `Espacio entre filas visible y persistente: ${normal.height}px normal / ${reduced.height}px reducido; sin perder columnas ni reducir texto; oculto en tarjetas y operativo en móvil`,
+    );
+
     await page.locator("#operation-state-filter").selectOption("done");
     assert.deepEqual(
       await page

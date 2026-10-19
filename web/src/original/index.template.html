@@ -276,7 +276,12 @@
     <button class="file-btn" type="button" id="view-toggle-btn">Vista tabla</button>
     <button class="file-btn" type="button" data-abrir-multi-msg title="Un solo mensaje para varias cargas de un cliente">Mensaje a cliente</button>
     <button class="file-btn file-btn-sec" type="button" id="masivo-btn" title="Elegir varias cargas para cambiarles el estatus o marcar POD de una vez">Seleccionar varias</button>
-    <button class="file-btn file-btn-sec" type="button" id="densidad-btn" title="Cambiar entre tabla compacta y cómoda">Tabla compacta</button>
+    <label class="sheet-filter" id="densidad-control">Espacio entre filas
+      <select id="densidad-select" title="Cambia la separación entre los renglones sin ocultar columnas">
+        <option value="normal">Normal</option>
+        <option value="compacta">Reducido</option>
+      </select>
+    </label>
   </div>
   <!-- Mis vistas: combinaciones de filtro + cliente + búsqueda guardadas con nombre (en este navegador). -->
   <div class="vistas-bar" id="vistas-bar"></div><div id="active-filter-pills" class="organize-toolbar" aria-live="polite"></div>

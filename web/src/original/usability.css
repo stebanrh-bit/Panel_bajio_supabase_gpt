@@ -1973,6 +1973,9 @@
   max-width: 1600px;
 }
 .panel-internal #page-operation #table-view .loads-table {
+  /* La densidad cambia solo espacios, nunca las columnas ni el tamaño del texto. */
+  --load-row-space: 12px;
+  --load-heading-space: 11px;
   --column-load: 6%;
   --column-customer: 11%;
   --column-city: 8%;
@@ -1992,7 +1995,7 @@
 .panel-internal #page-operation #table-view .loads-table th {
   background: #edf2f8;
   color: #53657d;
-  padding: 9px 7px;
+  padding: var(--load-heading-space) 7px;
   font-size: 11px;
   letter-spacing: 0;
   text-transform: none;
@@ -2017,10 +2020,24 @@
 .panel-internal #page-operation #table-view .loads-table td {
   color: #34465e;
   border: 1px solid #e4e9f1;
-  padding: 8px 7px;
+  padding: var(--load-row-space) 7px;
   font-size: 12px;
   line-height: 1.35;
   vertical-align: middle;
+}
+.panel-internal #page-operation #table-view.tabla-compacta .loads-table {
+  --load-row-space: 4px;
+  --load-heading-space: 7px;
+}
+#densidad-control[hidden] {
+  display: none;
+}
+#densidad-control {
+  align-self: flex-start;
+}
+#densidad-select {
+  width: 150px;
+  min-width: 0;
 }
 .panel-internal #page-operation #table-view .loads-table .t-customer {
   color: #324d6f;
@@ -2198,7 +2215,7 @@
   }
   .panel-internal #page-operation #table-view .loads-table tr.t-row > td {
     border: 0;
-    padding: 6px;
+    padding: var(--load-row-space) 6px;
   }
   .panel-internal
     #page-operation
@@ -2219,6 +2236,9 @@
   }
 }
 @media (max-width: 600px) {
+  #densidad-select {
+    min-height: 40px;
+  }
   .panel-internal #page-operation.sheet-view {
     padding: 12px;
   }
