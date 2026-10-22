@@ -1,6 +1,6 @@
 {
   "checks": [
-    "Ocho opciones con nombre, máximo tres por carga, cancelar no escribe; error conserva selección y solo se muestran iconos tras confirmar el servidor",
+    "Ocho alertas sin nombres visibles; máximo tres por carga, cancelar no escribe; error conserva selección y guardado confirmado",
     "Gerencia consulta los iconos compartidos con selector de solo lectura",
     "Los señalamientos persisten al recargar y aparecen debajo del trailer, en detalle y en tarjetas; Escape del selector conserva el detalle abierto",
     "Selector usable con teclado y en anchos 320–1920; quitar todos persiste sin modificar estatus, color ni pendientes/seguimientos"

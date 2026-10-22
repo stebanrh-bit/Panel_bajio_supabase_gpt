@@ -54,11 +54,19 @@ export async function runLogisticsSignalsReview({
       false,
     );
     assert.equal(await dialog.locator("[data-signal-option]").count(), 8);
+    assert.equal(
+      (await dialog.locator("#load-signals-options").innerText()).trim(),
+      "",
+    );
+    assert.equal(
+      await dialog.locator("#load-signals-options [title]").count(),
+      0,
+    );
     await dialog.locator('[data-signal-option="workshop"]').check();
     await dialog.locator('[data-signal-option="delay"]').check();
     await dialog.locator("[data-signals-cancel]").last().click();
     assert.equal(calls, 0);
-    assert.equal(await trigger.locator("svg").count(), 0);
+    assert.equal(await trigger.locator("[data-signal-id]").count(), 0);
     await trigger.click();
     assert.equal(await dialog.locator("input:checked").count(), 0);
     await dialog.locator('[data-signal-option="workshop"]').check();
@@ -68,11 +76,9 @@ export async function runLogisticsSignalsReview({
       await dialog.locator("input:disabled:not(:checked)").count(),
       5,
     );
-    await page
-      .locator("#load-signals-dialog")
-      .screenshot({
-        path: "/tmp/panel-original-comparison/senalamientos-selector.png",
-      });
+    await page.locator("#load-signals-dialog").screenshot({
+      path: "/tmp/panel-original-comparison/senalamientos-selector.png",
+    });
     reject = true;
     await dialog.locator("[data-signals-save]").click();
     await page.waitForFunction(() =>
@@ -81,7 +87,7 @@ export async function runLogisticsSignalsReview({
         ?.textContent.includes("cambió"),
     );
     assert.equal(await dialog.locator("input:checked").count(), 3);
-    assert.equal(await trigger.locator("svg").count(), 0);
+    assert.equal(await trigger.locator("[data-signal-id]").count(), 0);
     reject = false;
     await dialog.locator("[data-signals-save]").click();
     await dialog.waitFor({ state: "hidden" });
@@ -96,7 +102,7 @@ export async function runLogisticsSignalsReview({
       "workshop",
     ]);
     checks.push(
-      "Ocho opciones con nombre, máximo tres por carga, cancelar no escribe; error conserva selección y solo se muestran iconos tras confirmar el servidor",
+      "Ocho alertas sin nombres visibles; máximo tres por carga, cancelar no escribe; error conserva selección y guardado confirmado",
     );
     await page.reload();
     await page.locator('[data-page="operation"]').click();
@@ -135,21 +141,17 @@ export async function runLogisticsSignalsReview({
     } finally {
       await viewer.close();
     }
-    const bounds = await row
-      .locator(".t-trailer")
-      .evaluate((cell) => ({
-        trailer: cell
-          .querySelector("[data-trailer-value]")
-          .getBoundingClientRect().bottom,
-        icons: cell.querySelector("[data-load-signals]").getBoundingClientRect()
-          .top,
-      }));
+    const bounds = await row.locator(".t-trailer").evaluate((cell) => ({
+      trailer: cell
+        .querySelector("[data-trailer-value]")
+        .getBoundingClientRect().bottom,
+      icons: cell.querySelector("[data-load-signals]").getBoundingClientRect()
+        .top,
+    }));
     assert.ok(bounds.icons >= bounds.trailer);
-    await page
-      .locator("#page-operation")
-      .screenshot({
-        path: "/tmp/panel-original-comparison/senalamientos-listado.png",
-      });
+    await page.locator("#page-operation").screenshot({
+      path: "/tmp/panel-original-comparison/senalamientos-listado.png",
+    });
     await row.locator("[data-table-select]").click();
     const detail = page.locator("#table-detail-body [data-load-signals]");
     assert.equal(await detail.locator("svg").count(), 3);
@@ -205,10 +207,10 @@ export async function runLogisticsSignalsReview({
     assert.equal(await dialog.locator("input:checked").count(), 0);
     await dialog.locator("[data-signals-save]").click();
     await dialog.waitFor({ state: "hidden" });
-    assert.equal(await trigger.locator("svg").count(), 0);
+    assert.equal(await trigger.locator("[data-signal-id]").count(), 0);
     await page.reload();
     await page.locator('[data-page="operation"]').click();
-    assert.equal(await trigger.locator("svg").count(), 0);
+    assert.equal(await trigger.locator("[data-signal-id]").count(), 0);
     for (const field of [
       "status",
       "color",
