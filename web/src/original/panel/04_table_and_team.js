@@ -356,7 +356,9 @@
       "</td>" +
       '<td role="cell" data-label="Trailer" class="t-truck t-trailer"><span class="trailer-full-value" data-trailer-value>' +
       esc(rec.trailer || "Sin asignar") +
-      "</span></td>" +
+      "</span>" +
+      window.panelSignals.signalStrip(rec.load, rec.logistics_signals) +
+      "</td>" +
       '<td role="cell" data-label="Estatus" class="t-status"><select class="status-select t-status-select" aria-label="Estatus de la carga ' +
       esc(rec.load) +
       '" data-status-load="' +
@@ -403,7 +405,9 @@
       esc(rec.trailer) +
       '" data-trailer-load="' +
       esc(rec.load) +
-      '" aria-label="Editar trailer"></div>' +
+      '" aria-label="Editar trailer">' +
+      window.panelSignals.signalStrip(rec.load, rec.logistics_signals) +
+      "</div>" +
       '<div class="field"><div class="k">Cita de recolección</div><input class="v field-input" type="datetime-local" value="' +
       apptDatetimeLocalValue(rec.pickup_appt) +
       '" data-pickup-appt-load="' +

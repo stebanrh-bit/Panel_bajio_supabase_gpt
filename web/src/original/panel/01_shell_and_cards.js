@@ -1083,6 +1083,7 @@
       esc(
         [rec.truck, rec.trailer].filter(Boolean).join(" / ") || "Sin asignar",
       ) +
+      window.panelSignals.signalStrip(rec.load, rec.logistics_signals) +
       "</span><span>Entrega: " +
       esc(
         rec.delivery_appt

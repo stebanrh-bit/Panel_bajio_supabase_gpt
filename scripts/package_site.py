@@ -6,11 +6,11 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from package_google import package_html, package_reader
 
 ROOT=Path(__file__).resolve().parents[1]
-MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql','013_punctual_pending.sql']
+MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql','013_punctual_pending.sql','014_load_signals.sql']
 
-def combined_sql():
-    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–013.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
-    for name in MIGRATIONS:
+def combined_sql(names=None, label='ACTUALIZACIÓN CONJUNTA 004–014', requires='001, 002 y 003'):
+    parts=[f'-- PANEL BAJÍO: {label}.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere {requires}.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
+    for name in (MIGRATIONS if names is None else names):
         content=(ROOT/'supabase/migrations'/name).read_text()
         lines=content.splitlines()
         starts=[index for index,line in enumerate(lines) if line.strip().lower()=='begin;']
@@ -27,6 +27,7 @@ def main():
     args=parser.parse_args()
     targets={
         ROOT/'supabase/actualizar_sitio.sql':combined_sql(),
+        ROOT/'supabase/actualizar_senalamientos.sql':combined_sql(['013_punctual_pending.sql','014_load_signals.sql'],'PENDIENTES PUNTUALES Y SEÑALAMIENTOS 013–014','001 a 012'),
         ROOT/'google-apps-script/index-sitio.html':package_html(lambda path:(ROOT/'web/dist/internal'/path).read_text()),
     }
     for view,label in [('client','cliente'),('manager','gerencia')]:
@@ -57,6 +58,14 @@ def main():
         'MILLAS_GOOGLE_AUTOMATICAS.md':ROOT/'docs/MILLAS_GOOGLE_AUTOMATICAS.md',
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',
         '013_punctual_pending.sql':ROOT/'supabase/migrations/013_punctual_pending.sql',
+        '014_load_signals.sql':ROOT/'supabase/migrations/014_load_signals.sql',
+        'actualizar_senalamientos.sql':ROOT/'supabase/actualizar_senalamientos.sql',
+        'SENALAMIENTOS_CARGAS.md':ROOT/'docs/SENALAMIENTOS_CARGAS.md',
+        'evidencia-senalamientos.json':ROOT/'docs/evidencia-senalamientos.json',
+        'imagenes/senalamientos-listado.png':ROOT/'docs/imagenes/senalamientos-listado.png',
+        'imagenes/senalamientos-selector.png':ROOT/'docs/imagenes/senalamientos-selector.png',
+        'imagenes/senalamientos-movil.png':ROOT/'docs/imagenes/senalamientos-movil.png',
+        'LICENCIA_ICONOS_LUCIDE.txt':ROOT/'docs/LICENCIA_ICONOS_LUCIDE.txt',
         'PENDIENTES_PUNTUALES.md':ROOT/'docs/PENDIENTES_PUNTUALES.md',
         'evidencia-pendientes-puntuales.json':ROOT/'docs/evidencia-pendientes-puntuales.json',
         'imagenes/pendientes-puntuales-inicio.png':ROOT/'docs/imagenes/pendientes-puntuales-inicio.png',

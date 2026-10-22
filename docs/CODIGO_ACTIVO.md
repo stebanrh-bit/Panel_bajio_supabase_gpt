@@ -8,6 +8,8 @@ El tema compartido está en `web/src/original/theme-light.css`. Las entradas del
 
 Los [pendientes puntuales](PENDIENTES_PUNTUALES.md) usan la migración 013 y el RPC `ops_set_punctual_pending`. La presentación y sus eventos están en `panel/04_table_and_team.js`; se reutiliza el mismo editor en el detalle rápido y en el expediente. Inicio muestra hasta cinco notas y el filtro de Cargas permite consultar todas.
 
+Los [señalamientos de logística](SENALAMIENTOS_CARGAS.md) usan el catálogo `logistics-signals.js`, SVG locales de Lucide, la migración 014 y el RPC `ops_set_load_signals`. El mismo selector se abre desde el trailer, el detalle y el expediente.
+
 ## Sitio actual
 
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.
@@ -21,7 +23,7 @@ Los [pendientes puntuales](PENDIENTES_PUNTUALES.md) usan la migración 013 y el 
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
-- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–013, sobre 001–003.
+- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–014, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
 - `google-apps-script/Code-sitio.gs`: alojamiento, consultas Google y proceso horario limitado. No usa claves privilegiadas.
 

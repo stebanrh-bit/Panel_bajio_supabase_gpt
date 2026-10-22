@@ -386,6 +386,7 @@ var commentsCurrentLoad = null;
     var unidad =
       manualFieldHtml(r, "truck", "Unidad") +
       manualFieldHtml(r, "trailer", "Trailer") +
+      window.panelSignals.signalStrip(r.load, r.logistics_signals) +
       wsBox("Work order", r.work_order);
     // El estatus se cambia aquí mismo con el mismo selector de las tarjetas (mismo manejador
     // delegado: recordatorios, revisión de tránsito, aviso al cliente y "Deshacer").

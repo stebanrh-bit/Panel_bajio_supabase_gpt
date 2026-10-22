@@ -5,6 +5,7 @@ import { createShiftsService } from "../../features/shifts/service.js";
 import { prepareIncident } from "../../features/incidents/rules.js";
 import { loadHistoryItems } from "../history.js";
 import { taskFollowUpISO } from "../task-time.js";
+import { validateLogisticsSignals } from "../logistics-signals.js";
 import {
   json,
   date,
@@ -121,10 +122,11 @@ export function operationMethods(ctx) {
       };
     });
   }
-  async function loadRpc(load, method, extra = {}) {
+  async function loadRpc(load, method, extra = {}, validate = () => {}) {
     ctx.staff(true);
     return ctx.serial(`load:${load}`, async () => {
       const old = previous("loads", load);
+      validate(old);
       const result = await rpc(method, {
         p_load: load,
         p_version: old.updated_at,
@@ -136,9 +138,32 @@ export function operationMethods(ctx) {
     });
   }
   const methods = {
+    setSenalamientosCarga: (load, values, original) =>
+      loadRpc(
+        load,
+        "ops_set_load_signals",
+        {
+          p_signals: validateLogisticsSignals(values),
+        },
+        (old) => {
+          // Conservar el borrador si otro usuario cambió estas marcas. La versión de la carga
+          // se toma de la caché confirmada, que también incluye nuestros guardados de otros campos.
+          if (
+            original &&
+            JSON.stringify(old.logistics_signals || []) !==
+              JSON.stringify(validateLogisticsSignals(original))
+          )
+            throw Error(
+              "Los señalamientos cambiaron. Cierra esta ventana y vuelve a abrirlos antes de guardar.",
+            );
+        },
+      ),
     // El RPC valida permisos y versión; la nota y la resolución se guardan juntas.
     setPendientePuntual: (load, active, note) =>
-      loadRpc(load, "ops_set_punctual_pending", { p_active: active, p_note: note }),
+      loadRpc(load, "ops_set_punctual_pending", {
+        p_active: active,
+        p_note: note,
+      }),
     getDetalleCarga: async (load) => {
       ctx.staff();
       const old = previous("loads", load);

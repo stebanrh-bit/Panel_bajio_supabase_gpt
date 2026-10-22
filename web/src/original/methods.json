@@ -112,6 +112,7 @@
   "setPersonaPassword",
   "setPersonaRol",
   "setPortalClienteActivo",
+  "setSenalamientosCarga",
   "setVistaLecturaPassword",
   "verifyIdentityLogin",
   "vincularPendiente"

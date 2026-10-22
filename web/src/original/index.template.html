@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<!-- Iconos Lucide 0.468.0 — https://lucide.dev
+ISC License
+
+Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT). All other copyright (c) for Lucide are held by Lucide Contributors 2022.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
   <base target="_top">
   <meta charset="utf-8">
   <title>TCI-CSR-FD-007 / Balance Scorecard Bajío</title>
@@ -520,6 +537,14 @@
   </div>
 
 
+  <dialog id="load-signals-dialog" class="load-signals-dialog" aria-labelledby="load-signals-title" aria-describedby="load-signals-help">
+    <div class="load-signals-head"><h2 id="load-signals-title">Señalamientos de la carga</h2><button type="button" class="signal-close" data-signals-cancel aria-label="Cerrar señalamientos">×</button></div>
+    <p id="load-signals-help">Elige hasta 3 para destacar esta carga. Son marcas visuales compartidas por el equipo.</p>
+    <div id="load-signals-options" class="load-signals-options"></div>
+    <div class="load-signals-summary"><span id="load-signals-count" aria-live="polite"></span><button type="button" class="signal-clear" data-signals-clear>Quitar todos</button></div>
+    <p id="load-signals-error" class="load-signals-error" role="alert" hidden></p>
+    <div class="load-signals-footer"><button type="button" class="file-btn file-btn-sec" data-signals-cancel>Cancelar</button><button type="button" class="file-btn" data-signals-save>Guardar señalamientos</button></div>
+  </dialog>
   <div class="workspace-backdrop" id="workspace-backdrop" aria-hidden="true">
     <aside class="workspace-panel" role="dialog" aria-modal="true" aria-labelledby="workspace-title">
       <div class="workspace-head"><div class="workspace-head-row"><div><div class="workspace-kicker">Expediente de carga</div><h2 class="workspace-title" id="workspace-title">Carga</h2><div class="workspace-route" id="workspace-route"></div></div><div class="workspace-follow" id="workspace-follow"></div><button type="button" class="workspace-close" id="workspace-close">×</button></div></div>

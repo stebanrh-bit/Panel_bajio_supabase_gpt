@@ -6,6 +6,7 @@ import { runPanelReview } from "./panel_review_checks.mjs";
 import { runLightThemeReview } from "./light_theme_checks.mjs";
 import { runCalendarTasksReview } from "./calendar_tasks_checks.mjs";
 import { runLoadOrderReview } from "./load_order_checks.mjs";
+import { runLogisticsSignalsReview } from "./logistics_signals_checks.mjs";
 import { runPunctualPendingReview } from "./punctual_pending_checks.mjs";
 import { runColorsTasksReview } from "./colors_tasks_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
@@ -336,17 +337,21 @@ const original = originalPage({
   theme: await read("web/src/original/theme-light.css"),
   config,
 });
-const helperSource = (
-  (await read("web/src/original/guidance.js")) +
-  "\n" +
-  (await read("web/src/original/people.js")) +
-  "\n" +
-  (await read("web/src/original/usability.js")) +
-  "\n" +
-  (await read("web/src/original/history.js")) +
-  "\n" +
-  (await read("web/src/original/calendar.js"))
-).replace(/^export /gm, "");
+const helperSource =
+  "const signalsSummary=window.panelSignals.signalsSummary;\n" +
+  (
+    (await read("web/src/original/guidance.js")) +
+    "\n" +
+    (await read("web/src/original/people.js")) +
+    "\n" +
+    (await read("web/src/original/usability.js")) +
+    "\n" +
+    (await read("web/src/original/history.js")) +
+    "\n" +
+    (await read("web/src/original/calendar.js"))
+  )
+    .replace(/^import .*;\n/gm, "")
+    .replace(/^export /gm, "");
 const newHelpers = (
   await Promise.all(
     [
@@ -356,6 +361,11 @@ const newHelpers = (
         "load-order",
         "readOrder,saveOrder,orderedRecords,moveVisible,mountRowReordering",
         "panelLoadOrder",
+      ],
+      [
+        "logistics-signals",
+        "logisticsSignals,maxLogisticsSignals,validateLogisticsSignals,selectedSignals,signalsSummary,signalStrip,signalOptions",
+        "panelSignals",
       ],
       ["network", "fetchExternal,cancel", "panelNetwork"],
       [
@@ -372,10 +382,12 @@ const newHelpers = (
     ].map(
       async ([file, exports, key]) =>
         "<script>(function(){" +
-        (await read("web/src/original/" + file + ".js")).replace(
-          /^export /gm,
-          "",
-        ) +
+        (file === "logistics-signals"
+          ? "const escapeHtml=window.panelContent.escapeHtml;"
+          : "") +
+        (await read("web/src/original/" + file + ".js"))
+          .replace(/^import .*;\n/gm, "")
+          .replace(/^export /gm, "") +
         ";window." +
         key +
         "={" +
@@ -786,8 +798,22 @@ let panelReview,
   lightThemeReview,
   loadOrderReview,
   colorsTasksReview,
-  punctualPendingReview;
+  punctualPendingReview,
+  logisticsSignalsReview;
 try {
+  logisticsSignalsReview = await runLogisticsSignalsReview({
+    newPage,
+    rawLoads,
+    profiles,
+  });
+  if (process.argv.includes("--signals-only")) {
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log(
+      "Señalamientos de logística: selector, guardado, retiro y vista móvil verificados.",
+    );
+    process.exit(0);
+  }
   punctualPendingReview = await runPunctualPendingReview({
     newPage,
     rawLoads,

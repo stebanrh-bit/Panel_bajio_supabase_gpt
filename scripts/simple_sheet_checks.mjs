@@ -102,7 +102,11 @@ export async function runSimpleSheetReview({ newPage, rawLoads, profiles }) {
         .count(),
       0,
     );
-    assert.equal(await row.locator("button:visible").count(), 3);
+    assert.equal(await row.locator("button:visible").count(), 4);
+    assert.equal(
+      await row.locator(".t-trailer [data-load-signals]").count(),
+      1,
+    );
     assert.equal(await row.locator(".t-status-select").count(), 1);
     assert.equal(await row.locator("[data-trailer-load],summary").count(), 0);
     checks.push(

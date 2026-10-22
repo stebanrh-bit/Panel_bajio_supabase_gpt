@@ -1,4 +1,178 @@
-function clicWorkspaceYAvisos_(e) {
+// El borrador vive solo dentro del diálogo. Cancelar nunca escribe en Supabase.
+  var senalamientosEdicion_ = null;
+  function opcionesSenalamientos_() {
+    return Array.from(
+      document.querySelectorAll("#load-signals-options input:checked"),
+    ).map(function (input) {
+      return input.dataset.signalOption;
+    });
+  }
+  function actualizarSelectorSenalamientos_() {
+    var dialog = document.getElementById("load-signals-dialog");
+    var selected = opcionesSenalamientos_();
+    var readonly = senalamientosEdicion_ && senalamientosEdicion_.readonly;
+    var busy = senalamientosEdicion_ && senalamientosEdicion_.busy;
+    dialog.querySelectorAll("[data-signal-option]").forEach(function (input) {
+      input.disabled =
+        readonly ||
+        busy ||
+        (!input.checked &&
+          selected.length >= window.panelSignals.maxLogisticsSignals);
+    });
+    dialog
+      .querySelectorAll(
+        "[data-signals-cancel], [data-signals-clear], [data-signals-save]",
+      )
+      .forEach(function (button) {
+        button.disabled = !!busy;
+      });
+    dialog.querySelector("[data-signals-clear]").hidden = !!readonly;
+    dialog.querySelector("[data-signals-save]").hidden = !!readonly;
+    dialog.querySelector("[data-signals-save]").textContent = busy
+      ? "Guardando…"
+      : "Guardar señalamientos";
+    document.getElementById("load-signals-count").textContent =
+      selected.length +
+      " de 3 seleccionados" +
+      (readonly ? " · Solo consulta" : "");
+  }
+  function cambioSenalamientosCarga_(event) {
+    if (!event.target.closest("[data-signal-option]")) return SIGUE_;
+    document.getElementById("load-signals-error").hidden = true;
+    actualizarSelectorSenalamientos_();
+    return;
+  }
+  function cerrarSenalamientosCarga_() {
+    if (!senalamientosEdicion_ || senalamientosEdicion_.busy) return;
+    document.getElementById("load-signals-dialog").close();
+  }
+  function abrirSenalamientosCarga_(button) {
+    var rec = recPorLoad_(button.dataset.loadSignals);
+    if (!rec) return;
+    var dialog = document.getElementById("load-signals-dialog");
+    if (dialog.open) return;
+    senalamientosEdicion_ = {
+      load: String(rec.load),
+      original: (rec.logistics_signals || []).slice(),
+      opener: button,
+      readonly: !["admin", "csr"].includes(
+        window.panelApi.profile && window.panelApi.profile.role,
+      ),
+      busy: false,
+    };
+    document.getElementById("load-signals-title").textContent =
+      "Señalamientos · Carga " + rec.load;
+    document.getElementById("load-signals-options").innerHTML =
+      window.panelSignals.signalOptions(rec.logistics_signals || []);
+    document.getElementById("load-signals-error").hidden = true;
+    actualizarSelectorSenalamientos_();
+    dialog.showModal();
+  }
+  function clicSenalamientosCarga_(event) {
+    var open = event.target.closest("[data-load-signals]");
+    if (open) {
+      abrirSenalamientosCarga_(open);
+      return;
+    }
+    var cancel = event.target.closest("[data-signals-cancel]");
+    if (cancel) {
+      cerrarSenalamientosCarga_();
+      return;
+    }
+    var clear = event.target.closest("[data-signals-clear]");
+    if (clear) {
+      if (
+        !senalamientosEdicion_ ||
+        senalamientosEdicion_.busy ||
+        senalamientosEdicion_.readonly
+      )
+        return;
+      document
+        .querySelectorAll("[data-signal-option]")
+        .forEach(function (input) {
+          input.checked = false;
+        });
+      actualizarSelectorSenalamientos_();
+      return;
+    }
+    if (!event.target.closest("[data-signals-save]")) return SIGUE_;
+    var editing = senalamientosEdicion_;
+    if (!editing || editing.busy || editing.readonly) return;
+    var values = opcionesSenalamientos_();
+    var error = document.getElementById("load-signals-error");
+    function fail(err) {
+      editing.busy = false;
+      actualizarSelectorSenalamientos_();
+      error.textContent =
+        (err && err.message) || "No se pudieron guardar los señalamientos";
+      error.hidden = false;
+    }
+    try {
+      values = window.panelSignals.validateLogisticsSignals(values);
+    } catch (err) {
+      fail(err);
+      return;
+    }
+    error.hidden = true;
+    editing.busy = true;
+    actualizarSelectorSenalamientos_();
+    // Esperar confirmación evita mostrar iconos como guardados si hubo un rechazo o desconexión.
+    guardarConVerificacion_(function (result) {
+      if (
+        !result ||
+        JSON.stringify(result.logistics_signals) !== JSON.stringify(values)
+      ) {
+        fail(
+          new Error(
+            "No se confirmó el guardado. Cierra esta ventana y actualiza el panel.",
+          ),
+        );
+        return;
+      }
+      var rec = recPorLoad_(editing.load);
+      if (rec) Object.assign(rec, result);
+      editing.busy = false;
+      render(currentData);
+      if (workspaceCurrentLoad === editing.load) renderWorkspace();
+      cerrarSenalamientosCarga_();
+      showToast(
+        values.length ? "Señalamientos guardados" : "Señalamientos retirados",
+        "good",
+      );
+    }, fail).setSenalamientosCarga(editing.load, values, editing.original);
+    return;
+  }
+  function wireSignalDialogOnce_() {
+    var dialog = document.getElementById("load-signals-dialog");
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") event.stopPropagation(); // Conservar el detalle abierto debajo.
+    });
+    dialog.addEventListener("cancel", function (event) {
+      if (senalamientosEdicion_ && senalamientosEdicion_.busy)
+        event.preventDefault();
+    });
+    dialog.addEventListener("close", function () {
+      var previous = senalamientosEdicion_;
+      senalamientosEdicion_ = null;
+      if (!previous) return;
+      if (previous.opener.isConnected) previous.opener.focus();
+      else {
+        var replacements = Array.from(
+          document.querySelectorAll("[data-load-signals]"),
+        );
+        var visible = replacements.find(function (button) {
+          return (
+            button.dataset.loadSignals === previous.load &&
+            button.getClientRects().length &&
+            !button.closest("[hidden]")
+          );
+        });
+        if (visible) visible.focus();
+      }
+    });
+  }
+
+  function clicWorkspaceYAvisos_(e) {
     var btn;
 
     var workspaceBtn;
@@ -452,12 +626,14 @@ function clicWorkspaceYAvisos_(e) {
   }
 
   var MANEJADORES_CAMBIO_ = [
+    cambioSenalamientosCarga_,
     cambioPendientePuntual_,
     cambioCamposCarga_,
     cambioEstatus_,
     cambioCasillas_,
   ];
   var MANEJADORES_CLIC_ = [
+    clicSenalamientosCarga_,
     clicPendientePuntual_,
     clicWorkspaceYAvisos_,
     clicRecordatoriosYColor_,
@@ -482,6 +658,7 @@ function clicWorkspaceYAvisos_(e) {
   function wireDelegatedEventsOnce() {
     if (delegatedEventsWired) return;
     delegatedEventsWired = true;
+    wireSignalDialogOnce_();
 
     document.addEventListener("change", function (e) {
       despachar_(MANEJADORES_CAMBIO_, e);

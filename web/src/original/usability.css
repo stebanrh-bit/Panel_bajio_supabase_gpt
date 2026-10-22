@@ -2578,3 +2578,236 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Iconos locales de logística: debajo del trailer y con nombre accesible, nunca solo color. */
+.load-signals-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 100%;
+  width: fit-content;
+  margin-top: 5px;
+  padding: 2px;
+  border: 1px dashed #a9b8cb;
+  border-radius: 6px;
+  background: #fff;
+  color: #35516e;
+  cursor: pointer;
+  font: inherit;
+}
+.load-signals-control:hover {
+  border-color: #366da2;
+  background: #edf4fc;
+}
+.load-signals-control:focus-visible,
+.signal-option:focus-within {
+  outline: 2px solid #245d96;
+  outline-offset: 2px;
+}
+.load-signals-empty {
+  font-size: 10px;
+  line-height: 18px;
+  white-space: nowrap;
+  padding: 0 3px;
+}
+.logistics-signal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 23px;
+  height: 23px;
+  border-radius: 5px;
+  background: #edf3fc;
+  color: #245781;
+}
+.logistics-signal svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+.signal-red {
+  background: #ffe3e5;
+  color: #b42332;
+}
+.signal-orange {
+  background: #ffead8;
+  color: #994708;
+}
+.signal-amber {
+  background: #fff0c4;
+  color: #795307;
+}
+.signal-blue {
+  background: #e5efff;
+  color: #245781;
+}
+.signal-purple {
+  background: #f0e7ff;
+  color: #6e3ea4;
+}
+.signal-teal {
+  background: #dcf3ef;
+  color: #146b60;
+}
+.load-signals-dialog {
+  box-sizing: border-box;
+  width: min(590px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  border: 1px solid #c4d0df;
+  border-radius: 13px;
+  padding: 20px;
+  color: #243247;
+  background: #fff;
+  box-shadow: 0 20px 80px #19283e30;
+}
+.load-signals-dialog::backdrop {
+  background: #172b4780;
+}
+.load-signals-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.load-signals-head h2 {
+  margin: 0;
+  color: #243247;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.signal-close {
+  border: 0;
+  background: transparent;
+  color: #53647b;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 25px;
+  cursor: pointer;
+}
+#load-signals-help {
+  color: #53647b;
+  line-height: 1.5;
+  font-size: 13px;
+  margin: 8px 0 16px;
+}
+.load-signals-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.signal-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid #cbd6e3;
+  border-radius: 9px;
+  padding: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+.signal-option:has(input:checked) {
+  border-color: #3a70a8;
+  background: #edf4ff;
+  box-shadow: inset 0 0 0 1px #3a70a8;
+}
+.signal-option:has(input:disabled:not(:checked)) {
+  opacity: 0.65;
+  cursor: default;
+}
+.signal-option input {
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: #245d96;
+}
+.signal-option .logistics-signal {
+  width: 31px;
+  height: 31px;
+}
+.signal-option .logistics-signal svg {
+  width: 23px;
+  height: 23px;
+}
+.signal-option-text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.signal-option-text strong {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #243247;
+}
+.signal-option-text small {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #53647b;
+}
+.load-signals-summary,
+.load-signals-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 16px;
+}
+#load-signals-count {
+  font-size: 12px;
+  color: #53647b;
+}
+.signal-clear {
+  border: 0;
+  padding: 5px;
+  background: transparent;
+  color: #245d96;
+  text-decoration: underline;
+  font-size: 12px;
+  cursor: pointer;
+}
+.load-signals-footer {
+  justify-content: flex-end;
+  border-top: 1px solid #dde5ee;
+  padding-top: 14px;
+}
+.load-signals-error {
+  color: #a32323;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 12px 0 0;
+}
+.load-signals-dialog [hidden] {
+  display: none !important;
+}
+@media (max-width: 480px) {
+  .load-signals-dialog {
+    padding: 14px;
+  }
+  .load-signals-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* En la columna de trailer, tres marcas ocupan una sola línea cuando hay espacio. */
+.sheet-view .t-trailer .load-signals-control {
+  gap: 2px;
+  padding: 1px;
+}
+.sheet-view .t-trailer .logistics-signal {
+  width: 20px;
+  height: 20px;
+}
+.sheet-view .t-trailer .logistics-signal svg {
+  width: 16px;
+  height: 16px;
+}
+
+.panel-internal #cards-view .card-commitment .load-signals-control {
+  display: inline-flex;
+  vertical-align: middle;
+  margin: 0 0 0 6px;
+}

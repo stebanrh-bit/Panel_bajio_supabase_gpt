@@ -1,3 +1,5 @@
+import { signalsSummary } from "./logistics-signals.js";
+
 /** Campos operativos del historial. La auditoría original se conserva íntegra en Supabase. */
 export const historyFieldLabels = {
   customer: "Cliente",
@@ -54,6 +56,9 @@ export const historyFieldLabels = {
   etd_operativa: "Salida estimada",
   cruce_confirmado: "Cruce confirmado",
   client_notify_since: "Aviso pendiente desde",
+  logistics_signals: "Señalamientos de la carga",
+  logistics_signals_at: "Señalamientos actualizados el",
+  logistics_signals_by: "Señalamientos actualizados por",
   punctual_pending: "Pendiente puntual",
   punctual_note: "Qué resolver ahora",
   punctual_opened_at: "Pendiente puntual abierto el",
@@ -76,6 +81,7 @@ const historyBooleans = new Set([
   "archived",
 ]);
 const historyDates = new Set([
+  "logistics_signals_at",
   "punctual_opened_at",
   "punctual_resolved_at",
   "pickup_appt",
@@ -93,6 +99,7 @@ const historyDates = new Set([
   "client_notify_since",
 ]);
 const historyPeople = new Set([
+  "logistics_signals_by",
   "punctual_opened_by",
   "punctual_resolved_by",
   "client_notified_by",
@@ -168,6 +175,7 @@ export function loadHistoryItems(records, load, personName = (value) => value) {
 export function presentHistoryChange(item, formatDate) {
   const field = item.campo;
   function value(raw) {
+    if (field === "logistics_signals") return signalsSummary(raw);
     if (blank(raw)) return "Sin información";
     if (historyBooleans.has(field)) {
       const yes = truth(raw);
