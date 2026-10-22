@@ -136,6 +136,9 @@ export function operationMethods(ctx) {
     });
   }
   const methods = {
+    // El RPC valida permisos y versión; la nota y la resolución se guardan juntas.
+    setPendientePuntual: (load, active, note) =>
+      loadRpc(load, "ops_set_punctual_pending", { p_active: active, p_note: note }),
     getDetalleCarga: async (load) => {
       ctx.staff();
       const old = previous("loads", load);

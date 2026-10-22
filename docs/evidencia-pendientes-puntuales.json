@@ -1,0 +1,9 @@
+{
+  "checks": [
+    "Nota obligatoria; un rechazo del servidor conserva el texto sin marcar la carga; confirmación guarda el pendiente",
+    "Persistencia tras recargar; Inicio muestra cliente, equipo y nota escapada; Ver en Cargas filtra solo los pendientes",
+    "Otro CSR ve el pendiente compartido; el apartado conserva filtros de cliente y búsqueda",
+    "Detalle rápido y expediente permiten editar/resolver; resolución persiste y conserva estatus, avisos y seguimiento con fecha; sin scroll lateral de 320 a 1920 px"
+  ],
+  "productionWrites": 0
+}

@@ -6,6 +6,8 @@ La vista sencilla de Cargas está documentada en [VISTA_SENCILLA_2026-10-19.md](
 
 El tema compartido está en `web/src/original/theme-light.css`. Las entradas del panel y los portales lo pasan a `page.js`; su carga al final evita modificar las hojas históricas. [Tema claro y controles compactos](TEMA_CLARO_2026-10-19.md).
 
+Los [pendientes puntuales](PENDIENTES_PUNTUALES.md) usan la migración 013 y el RPC `ops_set_punctual_pending`. La presentación y sus eventos están en `panel/04_table_and_team.js`; se reutiliza el mismo editor en el detalle rápido y en el expediente. Inicio muestra hasta cinco notas y el filtro de Cargas permite consultar todas.
+
 ## Sitio actual
 
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.
@@ -19,7 +21,7 @@ El tema compartido está en `web/src/original/theme-light.css`. Las entradas del
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
-- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–012, sobre 001–003.
+- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–013, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
 - `google-apps-script/Code-sitio.gs`: alojamiento, consultas Google y proceso horario limitado. No usa claves privilegiadas.
 

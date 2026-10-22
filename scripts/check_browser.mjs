@@ -6,6 +6,7 @@ import { runPanelReview } from "./panel_review_checks.mjs";
 import { runLightThemeReview } from "./light_theme_checks.mjs";
 import { runCalendarTasksReview } from "./calendar_tasks_checks.mjs";
 import { runLoadOrderReview } from "./load_order_checks.mjs";
+import { runPunctualPendingReview } from "./punctual_pending_checks.mjs";
 import { runColorsTasksReview } from "./colors_tasks_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
 import { readPanelSource } from "./panel_source.mjs";
@@ -784,8 +785,22 @@ let panelReview,
   simpleSheetReview,
   lightThemeReview,
   loadOrderReview,
-  colorsTasksReview;
+  colorsTasksReview,
+  punctualPendingReview;
 try {
+  punctualPendingReview = await runPunctualPendingReview({
+    newPage,
+    rawLoads,
+    profiles,
+  });
+  if (process.argv.includes("--punctual-only")) {
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log(
+      "Pendientes puntuales: guardado, filtros, persistencia y resolución verificados.",
+    );
+    process.exit(0);
+  }
   lightThemeReview = await runLightThemeReview({ newPage });
   if (process.argv.includes("--theme-only")) {
     assert.deepEqual(errors, []);

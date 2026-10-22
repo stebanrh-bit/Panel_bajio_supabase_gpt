@@ -2406,3 +2406,175 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Pendientes puntuales: notas breves y compartidas, sin ocupar otra columna en Cargas. */
+.punctual-section {
+  margin: 0 0 18px;
+  padding: 16px;
+  border: 1px solid #d6b461;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #332a19;
+}
+.punctual-section[hidden],
+.punctual-editor [hidden] {
+  display: none !important;
+}
+.punctual-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.punctual-section-head h2 {
+  margin: 0;
+  font-size: 17px;
+  color: #5f400a;
+}
+.punctual-section-head p,
+.punctual-more {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: #63543b;
+}
+.punctual-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+.punctual-item {
+  display: grid;
+  grid-template-columns: minmax(155px, 1fr) minmax(0, 2fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #e5d8ba;
+  border-radius: 8px;
+  background: #fff;
+  min-width: 0;
+}
+.punctual-item-unit {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.punctual-item-unit strong {
+  font-size: 13px;
+}
+.punctual-item-unit span,
+.punctual-item-unit small {
+  font-size: 12px;
+  color: #566171;
+  overflow-wrap: anywhere;
+}
+.punctual-item p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.punctual-editor {
+  grid-column: 1 / -1;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+  min-width: 0;
+}
+.punctual-editor.is-active {
+  border-color: #d6b461;
+  background: #fffaf0;
+}
+.punctual-choice,
+.punctual-fields label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.punctual-choice {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+}
+.punctual-editor select,
+.punctual-editor textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #adb8c8;
+  border-radius: 6px;
+  background: #fff;
+  color: #243247;
+  font: inherit;
+}
+.punctual-fields {
+  margin-top: 10px;
+}
+.punctual-editor textarea {
+  resize: vertical;
+  font-size: 13px;
+  font-weight: 400;
+}
+.punctual-fields p,
+.punctual-origin {
+  margin: 6px 0;
+  color: #63543b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.punctual-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.punctual-error {
+  margin: 8px 0 0;
+  color: #a32323;
+  font-size: 13px;
+}
+.punctual-dot {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 3px;
+  border-radius: 50%;
+  background: #815400;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+.punctual-badge {
+  display: inline-block;
+  margin: 4px;
+  padding: 3px 7px;
+  background: #fff0c4;
+  color: #654107;
+  border-radius: 4px;
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .punctual-section {
+    padding: 12px;
+  }
+  .punctual-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .punctual-item {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .punctual-item p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .punctual-choice {
+    grid-template-columns: 1fr;
+  }
+}

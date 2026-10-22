@@ -54,10 +54,17 @@ export const historyFieldLabels = {
   etd_operativa: "Salida estimada",
   cruce_confirmado: "Cruce confirmado",
   client_notify_since: "Aviso pendiente desde",
+  punctual_pending: "Pendiente puntual",
+  punctual_note: "Qué resolver ahora",
+  punctual_opened_at: "Pendiente puntual abierto el",
+  punctual_opened_by: "Pendiente puntual abierto por",
+  punctual_resolved_at: "Pendiente puntual resuelto el",
+  punctual_resolved_by: "Pendiente puntual resuelto por",
   archived: "Archivo de la carga",
 };
 
 const historyBooleans = new Set([
+  "punctual_pending",
   "bol",
   "doda",
   "entry",
@@ -69,6 +76,8 @@ const historyBooleans = new Set([
   "archived",
 ]);
 const historyDates = new Set([
+  "punctual_opened_at",
+  "punctual_resolved_at",
   "pickup_appt",
   "pickup_actual",
   "delivery_appt",
@@ -84,6 +93,8 @@ const historyDates = new Set([
   "client_notify_since",
 ]);
 const historyPeople = new Set([
+  "punctual_opened_by",
+  "punctual_resolved_by",
   "client_notified_by",
   "next_review_by",
   "ultima_revision_csr_by",
@@ -165,6 +176,7 @@ export function presentHistoryChange(item, formatDate) {
         recargos_vg: ["Pendientes", "Registrados"],
         cruce_confirmado: ["No confirmado", "Confirmado"],
         client_notify_pending: ["Sin aviso pendiente", "Aviso pendiente"],
+        punctual_pending: ["Sin pendiente puntual", "Pendiente puntual activo"],
         archived: ["Activa", "Archivada"],
       }[field] || ["Pendiente", "Recibido"];
       return terms[Number(yes)];

@@ -424,6 +424,7 @@ var commentsCurrentLoad = null;
       wsGroup("Ruta y cruce", ruta) +
       wsGroup("Unidad", unidad, 1) +
       "</div>" +
+      pendientePuntualHtml_(r) +
       workspaceReviewHtml(r) +
       '<div class="ws-actions"><button class="ws-btn primary" data-ws-comments="' +
       esc(r.load) +

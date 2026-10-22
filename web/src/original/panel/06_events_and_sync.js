@@ -452,11 +452,13 @@ function clicWorkspaceYAvisos_(e) {
   }
 
   var MANEJADORES_CAMBIO_ = [
+    cambioPendientePuntual_,
     cambioCamposCarga_,
     cambioEstatus_,
     cambioCasillas_,
   ];
   var MANEJADORES_CLIC_ = [
+    clicPendientePuntual_,
     clicWorkspaceYAvisos_,
     clicRecordatoriosYColor_,
     clicAbrirModales_,

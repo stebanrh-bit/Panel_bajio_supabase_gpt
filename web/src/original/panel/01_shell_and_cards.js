@@ -1014,6 +1014,8 @@
       ) +
       '" data-status="' +
       esc(rec.status) +
+      '" data-punctual="' +
+      !!rec.punctual_pending +
       '" data-attention="' +
       needsAttention(rec) +
       '" data-pod="' +
@@ -1040,6 +1042,11 @@
       '</span></span> - <span class="customer">' +
       esc(rec.customer) +
       "</span>" +
+      (rec.punctual_pending
+        ? '<span class="punctual-badge" title="' +
+          esc(rec.punctual_note) +
+          '">Pendiente puntual</span>'
+        : "") +
       (rec.client_notify_pending
         ? '<span class="notify-badge">Cliente pendiente</span>'
         : "") +

@@ -1313,6 +1313,7 @@
   var homeDetailsOpen_ = new Set(); // Mantener solo los detalles que el usuario decidió abrir.
   /** Plan en tres grupos: cada tarjeta reúne equipo, ruta y acciones de una sola carga. */
   function renderActionCenter(data, journey) {
+    renderPendientesPuntuales_(actionCenterScope(data));
     var list = document.getElementById("action-center-list");
     if (!list) return;
     var j = journey || computeActiveJourney(data);

@@ -107,6 +107,7 @@
   "saveTruck",
   "seguirLoad",
   "setMiSeguimiento",
+  "setPendientePuntual",
   "setPersonaCorreo",
   "setPersonaPassword",
   "setPersonaRol",

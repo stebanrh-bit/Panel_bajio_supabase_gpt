@@ -6,10 +6,10 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from package_google import package_html, package_reader
 
 ROOT=Path(__file__).resolve().parents[1]
-MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql']
+MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql','013_punctual_pending.sql']
 
 def combined_sql():
-    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–012.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
+    parts=['-- PANEL BAJÍO: ACTUALIZACIÓN CONJUNTA 004–013.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere 001, 002 y 003.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
     for name in MIGRATIONS:
         content=(ROOT/'supabase/migrations'/name).read_text()
         lines=content.splitlines()
@@ -56,6 +56,11 @@ def main():
         '010_google_miles_worker.sql':ROOT/'supabase/migrations/010_google_miles_worker.sql',
         'MILLAS_GOOGLE_AUTOMATICAS.md':ROOT/'docs/MILLAS_GOOGLE_AUTOMATICAS.md',
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',
+        '013_punctual_pending.sql':ROOT/'supabase/migrations/013_punctual_pending.sql',
+        'PENDIENTES_PUNTUALES.md':ROOT/'docs/PENDIENTES_PUNTUALES.md',
+        'evidencia-pendientes-puntuales.json':ROOT/'docs/evidencia-pendientes-puntuales.json',
+        'imagenes/pendientes-puntuales-inicio.png':ROOT/'docs/imagenes/pendientes-puntuales-inicio.png',
+        'imagenes/pendiente-puntual-detalle.png':ROOT/'docs/imagenes/pendiente-puntual-detalle.png',
         'ENTREGA_49_OPCIONES.md':ROOT/'docs/ENTREGA_49_OPCIONES.md',
         'MANUAL_POR_ROL.md':ROOT/'docs/MANUAL_POR_ROL.md',
         'CODIGO_ACTIVO.md':ROOT/'docs/CODIGO_ACTIVO.md',

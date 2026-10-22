@@ -1,4 +1,181 @@
-var tablaOrdenMostrado_ = [];
+/** Pendiente inmediato compartido. No reutiliza ni reinicia los recordatorios con fecha. */
+  function pendientePuntualHtml_(rec) {
+    var active = !!rec.punctual_pending;
+    return (
+      '<section class="punctual-editor' +
+      (active ? " is-active" : "") +
+      '" data-punctual-load="' +
+      esc(rec.load) +
+      '" data-punctual-saved="' +
+      active +
+      '">' +
+      '<label class="punctual-choice"><span>Pendiente puntual</span><select data-punctual-select aria-label="Pendiente puntual de la carga ' +
+      esc(rec.load) +
+      '">' +
+      '<option value="false"' +
+      (!active ? " selected" : "") +
+      ">Sin pendiente puntual</option>" +
+      '<option value="true"' +
+      (active ? " selected" : "") +
+      ">Atender ahora</option></select></label>" +
+      '<div class="punctual-fields"' +
+      (!active ? " hidden" : "") +
+      '><label>¿Qué hay que resolver ahora?<textarea data-punctual-note rows="2" minlength="3" maxlength="1000" placeholder="Ejemplo: confirmar con el taller a qué hora estará lista la unidad">' +
+      escHtml(active ? rec.punctual_note : "") +
+      "</textarea></label>" +
+      "<p>Visible en Inicio y en Cargas → Pendientes puntuales, hasta que lo marques resuelto.</p></div>" +
+      (active
+        ? '<p class="punctual-origin">Abierto ' +
+          escHtml(fmtDateTime(rec.punctual_opened_at)) +
+          (rec.punctual_opened_by
+            ? " · " + escHtml(rec.punctual_opened_by)
+            : "") +
+          "</p>"
+        : "") +
+      '<div class="punctual-actions"' +
+      (!active ? " hidden" : "") +
+      '><button type="button" class="file-btn" data-punctual-save>Guardar pendiente</button>' +
+      (active
+        ? '<button type="button" class="file-btn file-btn-sec" data-punctual-resolve>Marcar resuelto</button>'
+        : "") +
+      "</div>" +
+      '<p class="punctual-error" role="alert" hidden></p></section>'
+    );
+  }
+
+  /** Inicio muestra cinco notas; el filtro de Cargas permite consultar el apartado completo. */
+  function renderPendientesPuntuales_(data) {
+    var section = document.getElementById("punctual-section");
+    if (!section) return;
+    var pending = (data || []).filter(function (r) {
+      return !r.archived && r.punctual_pending;
+    });
+    pending.sort(function (a, b) {
+      return (
+        String(b.punctual_opened_at || "").localeCompare(
+          String(a.punctual_opened_at || ""),
+        ) || String(a.load).localeCompare(String(b.load))
+      );
+    });
+    section.hidden = !pending.length;
+    document.getElementById("punctual-count").textContent =
+      "(" + pending.length + ")";
+    var html = pending
+      .slice(0, 5)
+      .map(function (r) {
+        return (
+          '<article class="punctual-item" data-punctual-item="' +
+          esc(r.load) +
+          '"><div class="punctual-item-unit"><strong>Carga ' +
+          escHtml(r.load) +
+          "</strong><span>" +
+          escHtml(r.customer || "") +
+          "</span><small>Truck: " +
+          escHtml(r.truck || "Sin asignar") +
+          " · Trailer: " +
+          escHtml(r.trailer || "Sin asignar") +
+          "</small></div><p>" +
+          escHtml(r.punctual_note) +
+          '</p><button type="button" class="file-btn file-btn-sec" data-workspace-load="' +
+          esc(r.load) +
+          '">Abrir</button></article>'
+        );
+      })
+      .join("");
+    if (pending.length > 5)
+      html +=
+        '<p class="punctual-more">Hay ' +
+        (pending.length - 5) +
+        " más. Usa «Ver en Cargas» para consultar todos.</p>";
+    var list = document.getElementById("punctual-list");
+    if (list.innerHTML !== html) list.innerHTML = html;
+  }
+
+  function cambioPendientePuntual_(event) {
+    var select = event.target.closest("[data-punctual-select]");
+    if (!select) return SIGUE_;
+    var editor = select.closest(".punctual-editor"),
+      active = select.value === "true";
+    editor.querySelector(".punctual-fields").hidden = !active;
+    editor.querySelector(".punctual-actions").hidden =
+      !active && editor.dataset.punctualSaved !== "true";
+    editor.querySelector("[data-punctual-save]").textContent = active
+      ? "Guardar pendiente"
+      : "Marcar resuelto";
+    var resolve = editor.querySelector("[data-punctual-resolve]");
+    if (resolve) resolve.hidden = !active;
+    editor.querySelector(".punctual-error").hidden = true;
+    return;
+  }
+
+  /** Solo actualiza la vista al confirmar Supabase; un rechazo conserva la nota escrita. */
+  function clicPendientePuntual_(event) {
+    var filter = event.target.closest("[data-punctual-filter]");
+    if (filter) {
+      forcedVisibleLoad = null;
+      marcarFiltroOperacion_("punctual");
+      showMainPage("operation");
+      applyFilters();
+      return;
+    }
+    var button = event.target.closest(
+      "[data-punctual-save], [data-punctual-resolve]",
+    );
+    if (!button) return SIGUE_;
+    var editor = button.closest(".punctual-editor");
+    var load = editor.dataset.punctualLoad;
+    var active =
+      !button.hasAttribute("data-punctual-resolve") &&
+      editor.querySelector("[data-punctual-select]").value === "true";
+    var note = editor.querySelector("[data-punctual-note]").value.trim();
+    var error = editor.querySelector(".punctual-error");
+    function fail(err) {
+      editor.querySelectorAll("button,select,textarea").forEach(function (el) {
+        el.disabled = false;
+      });
+      error.textContent =
+        err && err.message
+          ? err.message
+          : String(err || "No se pudo guardar el pendiente");
+      error.hidden = false;
+    }
+    if (active && (note.length < 3 || note.length > 1000)) {
+      fail("Escribe qué hay que resolver, entre 3 y 1000 caracteres.");
+      editor.querySelector("[data-punctual-note]").focus();
+      return;
+    }
+    if (!myRealIdentity || !myPassword) {
+      ensureLoggedIn(function () {
+        button.click();
+      });
+      return;
+    }
+    error.hidden = true;
+    editor.querySelectorAll("button,select,textarea").forEach(function (el) {
+      el.disabled = true;
+    });
+    flushPendingFieldSaves(load, function () {
+      guardarConVerificacion_(function (result) {
+        if (!result || result.punctual_pending !== active) {
+          fail(
+            "No se confirmó el pendiente. Actualiza la página antes de volver a guardar.",
+          );
+          return;
+        }
+        var rec = recPorLoad_(load);
+        if (rec) Object.assign(rec, result);
+        render(currentData);
+        if (workspaceCurrentLoad === String(load)) renderWorkspace();
+        showToast(
+          active ? "Pendiente puntual guardado" : "Pendiente puntual resuelto",
+          "good",
+        );
+      }, fail).setPendientePuntual(load, active, note);
+    });
+    return;
+  }
+
+  var tablaOrdenMostrado_ = [];
   function usuarioOrdenCargas_() {
     return (
       (window.panelApi.profile && window.panelApi.profile.id) ||
@@ -97,6 +274,8 @@ var tablaOrdenMostrado_ = [];
       esc(rec.status) +
       '" data-plant="' +
       esEstatusPlanta_(rec.status) +
+      '" data-punctual="' +
+      !!rec.punctual_pending +
       '" data-attention="' +
       needsAttention(rec) +
       '" data-pod="' +
@@ -140,7 +319,13 @@ var tablaOrdenMostrado_ = [];
       esc(rec.load) +
       '">' +
       esc(rec.load) +
-      "</button></td>" +
+      "</button>" +
+      (rec.punctual_pending
+        ? '<span class="punctual-dot" role="img" aria-label="Pendiente puntual" title="' +
+          esc(rec.punctual_note) +
+          '">!</span>'
+        : "") +
+      "</td>" +
       '<td role="cell" data-label="Cliente" class="t-customer" title="' +
       esc(rec.customer) +
       '">' +
@@ -266,6 +451,7 @@ var tablaOrdenMostrado_ = [];
         : "") +
       (tieneRecordatorio(rec.status) ? recordatorioTagHtml(rec) : "") +
       notesHtml(rec) +
+      pendientePuntualHtml_(rec) +
       updatedLineHtml(rec) +
       '<div class="comments-row">' +
       '<button type="button" class="workspace-open-btn" data-workspace-load="' +
@@ -664,6 +850,16 @@ var tablaOrdenMostrado_ = [];
     var canceladaCount = currentData.filter(function (r) {
       return isCanceladaFinalizada(r) && matches(r);
     }).length;
+    var punctualOption = document.querySelector(
+      '#operation-state-filter option[value="punctual"]',
+    );
+    if (punctualOption)
+      punctualOption.textContent =
+        "Pendientes puntuales (" +
+        currentData.filter(function (r) {
+          return !r.archived && r.punctual_pending && matches(r);
+        }).length +
+        ")";
     document.getElementById("count-active").textContent = activeCount;
     document.getElementById("count-done").textContent = doneCount;
     document.getElementById("count-cancelada").textContent = canceladaCount;
@@ -826,6 +1022,8 @@ var tablaOrdenMostrado_ = [];
         var isFuturePickup = pickupIsFuture(card.getAttribute("data-pickup"));
         var matchesFilter =
           currentFilter === "all" ||
+          (currentFilter === "punctual" &&
+            card.getAttribute("data-punctual") === "true") ||
           (currentFilter === "active" &&
             !isFuturePickup &&
             !isDone &&
@@ -2497,6 +2695,7 @@ var tablaOrdenMostrado_ = [];
   var FILTRO_NOMBRES_ = {
     all: "Todas",
     active: "Activas",
+    punctual: "Pendientes puntuales",
     attention: "Necesitan atención",
     "cruce-hoy": "Cruzan hoy",
     "cruce-semana": "Cruzan esta semana",

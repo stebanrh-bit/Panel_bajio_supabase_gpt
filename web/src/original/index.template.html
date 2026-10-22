@@ -151,6 +151,12 @@
     <div class="home-priority-kpi monitor" data-kpi-detail="monitor"><span class="home-n" id="home-monitor">0</span><div><b>EN SEGUIMIENTO</b><small>Seguimiento activo</small></div></div>
   </div>
 </section>
+<section id="punctual-section" class="punctual-section" aria-labelledby="punctual-title" hidden>
+  <div class="punctual-section-head"><div><h2 id="punctual-title">Pendientes puntuales <span id="punctual-count"></span></h2>
+  <p>Atender ahora. Permanecen aquí hasta marcarlos como resueltos.</p></div>
+  <button type="button" class="file-btn" data-punctual-filter>Ver en Cargas</button></div>
+  <div id="punctual-list" class="punctual-list"></div>
+</section>
 <section class="action-center" id="action-center">
     <div class="action-center-head">
       <div>
@@ -264,7 +270,7 @@
   <div class="home-operation-wrap"><div class="toolbar sheet-toolbar">
     <label class="sheet-filter">Mostrar<select id="operation-state-filter" aria-label="Estado de las cargas">
       <option value="all">Todas</option><option value="active">Activas</option>
-      <option value="attention">Necesitan atención</option><option value="cruce-hoy">Cruzan hoy</option>
+      <option value="punctual">Pendientes puntuales</option><option value="attention">Necesitan atención</option><option value="cruce-hoy">Cruzan hoy</option>
       <option value="cruce-semana">Cruzan esta semana</option><option value="done">Entregadas</option>
       <option value="cancelada">Canceladas / finalizadas</option>
     </select></label>
