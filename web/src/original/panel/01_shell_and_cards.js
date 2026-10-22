@@ -154,8 +154,12 @@
     return !isNaN(fecha.getTime()) && fecha.getTime() <= Date.now();
   }
 
+  function esEstatusPlanta_(status) {
+    return /^(en\s+)?planta$/i.test(String(status || "").trim());
+  }
   function statusStyle(status) {
     var c = STATUS_STYLES[status];
+    if (esEstatusPlanta_(status)) c = STATUS_STYLES["EN PLANTA"];
     if (!c) return "background:var(--surface-2);color:var(--ink-soft);";
     return "background:" + c[0] + ";color:" + c[1] + ";";
   }

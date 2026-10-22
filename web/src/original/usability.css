@@ -1977,12 +1977,12 @@
   --load-row-space: 12px;
   --load-heading-space: 11px;
   --column-load: 6%;
-  --column-customer: 11%;
-  --column-city: 8%;
+  --column-customer: 10%;
+  --column-city: 7.5%;
   --column-date: 9%;
   --column-trailer: 7%;
-  --column-status: 14%;
-  --column-comment: 21%;
+  --column-status: 13%;
+  --column-comment: 19%;
   border-collapse: collapse;
   background: #fff;
   color: #283548;
@@ -1990,6 +1990,74 @@
 }
 .panel-internal #page-operation #table-view .loads-table col.c-truck {
   width: 7%;
+}
+.panel-internal #page-operation #table-view .loads-table col.c-position {
+  width: 5%;
+}
+.panel-internal #page-operation #table-view .loads-table .t-position {
+  text-align: center;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.table-order-help {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.load-order-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 30px;
+  min-height: 32px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.load-order-grip {
+  color: var(--ink-soft);
+}
+.load-order-handle:active {
+  cursor: grabbing;
+}
+.panel-internal #page-operation #table-view .loads-table .load-dragging {
+  opacity: 0.5;
+}
+.panel-internal #page-operation #table-view .load-drop-before > td {
+  box-shadow: inset 0 3px var(--accent);
+}
+.panel-internal #page-operation #table-view .load-drop-after > td {
+  box-shadow: inset 0 -3px var(--accent);
+}
+.load-order-ghost {
+  position: fixed;
+  z-index: 100;
+  max-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+#table-manual-order[hidden] {
+  display: none;
+}
+#table-manual-order[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .panel-internal #page-operation #table-view .loads-table th {
   background: #edf2f8;
@@ -2154,6 +2222,16 @@
   background: #fff;
   color: #283548;
 }
+/* El selector de la hoja prevalecía sobre el rosa del estatus original. */
+.panel-internal
+  #page-operation
+  #table-view
+  tr[data-plant="true"]
+  .t-status-select {
+  background: var(--pink-soft) !important;
+  color: var(--pink) !important;
+  border-color: #d9adc6;
+}
 .panel-internal .sheet-detail-dialog {
   width: min(720px, calc(100vw - 24px));
   max-width: none;
@@ -2201,7 +2279,18 @@
 }
 @container loads-list (max-width: 850px) {
   .panel-internal #page-operation #table-view .loads-table tr.t-row {
-    grid-template-areas: "load status" "customer customer" "origin destination" "pickup delivery" "truck trailer" "comment comment";
+    grid-template-areas: "position status" "load load" "customer customer" "origin destination" "pickup delivery" "truck trailer" "comment comment";
+  }
+  .panel-internal #page-operation #table-view .loads-table .t-position {
+    grid-area: position;
+    text-align: left;
+  }
+  .panel-internal #page-operation #table-view .loads-table .t-position::before {
+    display: none;
+  }
+  .load-order-handle {
+    min-height: 40px;
+    min-width: 40px;
   }
   .panel-internal #page-operation #table-view .loads-table .t-truck-number {
     grid-area: truck;
@@ -2228,7 +2317,7 @@
 }
 @container loads-list (min-width: 600px) and (max-width: 850px) {
   .panel-internal #page-operation #table-view .loads-table tr.t-row {
-    grid-template-areas: "load status trailer" "customer customer customer" "origin destination truck" "pickup pickup delivery" "comment comment comment";
+    grid-template-areas: "position load status" "customer customer customer" "origin destination truck" "pickup delivery trailer" "comment comment comment";
   }
 }
 @media (max-width: 600px) {

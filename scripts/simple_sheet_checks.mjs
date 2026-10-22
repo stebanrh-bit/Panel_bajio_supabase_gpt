@@ -79,6 +79,7 @@ export async function runSimpleSheetReview({ newPage, rawLoads, profiles }) {
         .locator("td")
         .evaluateAll((cells) => cells.map((cell) => cell.dataset.label)),
       [
+        "N.º",
         "Load",
         "Cliente",
         "Origen",
@@ -101,11 +102,11 @@ export async function runSimpleSheetReview({ newPage, rawLoads, profiles }) {
         .count(),
       0,
     );
-    assert.equal(await row.locator("button:visible").count(), 2);
+    assert.equal(await row.locator("button:visible").count(), 3);
     assert.equal(await row.locator(".t-status-select").count(), 1);
     assert.equal(await row.locator("[data-trailer-load],summary").count(), 0);
     checks.push(
-      "Primera entrada en tabla sencilla, diez columnas y acciones secundarias cerradas",
+      "Primera entrada en tabla sencilla, numeración y diez campos de carga; acciones secundarias cerradas",
     );
 
     // Medir el efecto real en la fila: la clase CSS por sí sola no demuestra un cambio visible.

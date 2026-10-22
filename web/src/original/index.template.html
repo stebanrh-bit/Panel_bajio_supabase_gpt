@@ -276,6 +276,7 @@
     <button class="file-btn" type="button" id="view-toggle-btn">Vista tabla</button>
     <button class="file-btn" type="button" data-abrir-multi-msg title="Un solo mensaje para varias cargas de un cliente">Mensaje a cliente</button>
     <button class="file-btn file-btn-sec" type="button" id="masivo-btn" title="Elegir varias cargas para cambiarles el estatus o marcar POD de una vez">Seleccionar varias</button>
+    <button class="file-btn file-btn-sec" type="button" id="table-manual-order" aria-pressed="true" title="Volver al orden que acomodaste manualmente">Mi orden</button>
     <label class="sheet-filter" id="densidad-control">Espacio entre filas
       <select id="densidad-select" title="Cambia la separación entre los renglones sin ocultar columnas">
         <option value="normal">Normal</option>
@@ -317,11 +318,13 @@
         <button type="button" class="ws-btn" id="masivo-pod">Marcar POD enviado</button>
         <button type="button" class="ws-btn" id="masivo-salir">Terminar</button>
       </div>
+      <p class="table-order-help" id="table-order-help">Arrastra desde el número para mover una carga. Con el número enfocado, usa ↑ o ↓. Tu orden se guarda en este navegador.</p>
+      <span class="sr-only" id="table-order-status" role="status" aria-live="polite"></span>
       <div class="table-wrap">
         <table class="loads-table" role="table">
           <caption class="loads-table-caption">Ordenar listado por</caption>
-          <colgroup><col class="c-load"><col class="c-customer"><col class="c-city"><col class="c-city"><col class="c-date"><col class="c-date"><col class="c-truck"><col class="c-trailer"><col class="c-status"><col class="c-comment"></colgroup>
-          <thead><tr><th data-sort="load">Load</th><th data-sort="customer">Cliente</th><th data-sort="origin_city">Origen</th><th data-sort="dest_city">Destino</th><th data-sort="pickup_appt">Pickup</th><th data-sort="delivery_appt">Entrega</th><th data-sort="truck">Truck</th><th data-sort="trailer">Trailer</th><th data-sort="status">Estatus</th><th>Comentarios</th></tr></thead>
+          <colgroup><col class="c-position"><col class="c-load"><col class="c-customer"><col class="c-city"><col class="c-city"><col class="c-date"><col class="c-date"><col class="c-truck"><col class="c-trailer"><col class="c-status"><col class="c-comment"></colgroup>
+          <thead><tr><th scope="col">N.º</th><th data-sort="load">Load</th><th data-sort="customer">Cliente</th><th data-sort="origin_city">Origen</th><th data-sort="dest_city">Destino</th><th data-sort="pickup_appt">Pickup</th><th data-sort="delivery_appt">Entrega</th><th data-sort="truck">Truck</th><th data-sort="trailer">Trailer</th><th data-sort="status">Estatus</th><th>Comentarios</th></tr></thead>
           <tbody role="rowgroup" id="table-body"></tbody>
         </table>
         <div class="table-empty" id="table-empty" style="display:none;">Sin resultados con los filtros actuales.</div>

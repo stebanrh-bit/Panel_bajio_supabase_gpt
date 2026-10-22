@@ -1,4 +1,75 @@
-function tableRowHtml(rec) {
+var tablaOrdenMostrado_ = [];
+  function usuarioOrdenCargas_() {
+    return (
+      (window.panelApi.profile && window.panelApi.profile.id) ||
+      myRealIdentity ||
+      ""
+    );
+  }
+  function almacenOrdenCargas_() {
+    try {
+      return localStorage;
+    } catch (e) {
+      return null;
+    }
+  }
+  function leerOrdenCargas_() {
+    return window.panelLoadOrder.readOrder(
+      almacenOrdenCargas_(),
+      usuarioOrdenCargas_(),
+    );
+  }
+  function anunciarOrdenCargas_(message) {
+    document.getElementById("table-order-status").textContent = message;
+  }
+  function moverCargaEnTabla_(source, target, after) {
+    var visible = Array.from(document.querySelectorAll("#table-body tr.t-row"))
+      .filter(function (row) {
+        return row.style.display !== "none";
+      })
+      .map(function (row) {
+        return row.getAttribute("data-load");
+      });
+    var moved = window.panelLoadOrder.moveVisible(
+      tablaOrdenMostrado_,
+      visible,
+      source,
+      target,
+      after,
+    );
+    if (
+      moved.every(function (id, index) {
+        return id === tablaOrdenMostrado_[index];
+      })
+    )
+      return;
+    var saved = window.panelLoadOrder.saveOrder(
+      almacenOrdenCargas_(),
+      usuarioOrdenCargas_(),
+      moved.concat(leerOrdenCargas_()),
+    );
+    tableSort.col = null;
+    tableSort.dir = 1;
+    buildTableView();
+    applyFilters();
+    var row = Array.from(
+      document.querySelectorAll("#table-body tr.t-row"),
+    ).find(function (node) {
+      return node.getAttribute("data-load") === source;
+    });
+    var handle = row && row.querySelector("[data-load-order]");
+    if (handle) handle.focus({ preventScroll: true });
+    anunciarOrdenCargas_(
+      "Carga " +
+        source +
+        ", posición " +
+        (handle ? handle.dataset.position : "") +
+        (saved
+          ? ". Orden guardado en este navegador."
+          : ". Orden aplicado durante esta sesión."),
+    );
+  }
+  function tableRowHtml(rec) {
     var lc = ultimosComentarios[String(rec.load)];
     var commentCell = lc
       ? '<div class="t-comment-text" title="' +
@@ -24,6 +95,8 @@ function tableRowHtml(rec) {
       ) +
       '" data-status="' +
       esc(rec.status) +
+      '" data-plant="' +
+      esEstatusPlanta_(rec.status) +
       '" data-attention="' +
       needsAttention(rec) +
       '" data-pod="' +
@@ -41,6 +114,9 @@ function tableRowHtml(rec) {
       '" data-extra="' +
       esc(textoBusqueda_(rec).toLowerCase()) +
       '">' +
+      '<td role="cell" data-label="N.º" class="t-position"><button type="button" class="load-order-handle" data-load-order="' +
+      esc(rec.load) +
+      '" aria-describedby="table-order-help"><span class="load-order-grip" aria-hidden="true">⠿</span><span class="load-position-number"></span></button></td>' +
       '<td role="cell" data-label="Load" class="t-load">' +
       (needsAttention(rec) ||
       podPending(rec) ||
@@ -278,7 +354,7 @@ function tableRowHtml(rec) {
 
   function renderTable(data) {
     data = data || [];
-    var sorted = data.slice();
+    var sorted = window.panelLoadOrder.orderedRecords(data, leerOrdenCargas_());
     if (tableSort.col) {
       sorted.sort(function (a, b) {
         var va = sortValue(a, tableSort.col),
@@ -288,6 +364,12 @@ function tableRowHtml(rec) {
         return 0;
       });
     }
+    tablaOrdenMostrado_ = sorted.map(function (record) {
+      return String(record.load);
+    });
+    document
+      .getElementById("table-manual-order")
+      .setAttribute("aria-pressed", String(!tableSort.col));
     diffRenderContainer("table-body", sorted, loadKeyFn, tableRowHtml, {
       nodesPerItem: 1,
       wrapperTag: "tbody",
@@ -325,10 +407,28 @@ function tableRowHtml(rec) {
       });
     });
 
+  window.panelLoadOrder.mountRowReordering(
+    document.getElementById("table-body"),
+    {
+      onMove: moverCargaEnTabla_,
+      announce: anunciarOrdenCargas_,
+    },
+  );
+  document
+    .getElementById("table-manual-order")
+    .addEventListener("click", function () {
+      tableSort.col = null;
+      buildTableView();
+      applyFilters();
+      anunciarOrdenCargas_("Se muestra tu orden personal de cargas.");
+    });
+
   function applyView() {
     var cardsView = document.getElementById("cards-view");
     var tableView = document.getElementById("table-view");
     var btn = document.getElementById("view-toggle-btn");
+    document.getElementById("table-manual-order").hidden =
+      currentView !== "table";
     // El espaciado solo corresponde al listado; no cambia la vista elegida.
     document.getElementById("densidad-control").hidden =
       currentView !== "table";
@@ -824,6 +924,20 @@ function tableRowHtml(rec) {
     document.querySelectorAll("#table-body tr.t-row").forEach(function (tr) {
       if (tr.style.display === "none") return;
       visibles++;
+      var handle = tr.querySelector("[data-load-order]");
+      if (handle && handle.dataset.position !== String(visibles)) {
+        handle.querySelector(".load-position-number").textContent = visibles;
+        handle.dataset.position = visibles;
+        handle.setAttribute(
+          "aria-label",
+          "Mover carga " +
+            tr.getAttribute("data-load") +
+            ", posición " +
+            visibles,
+        );
+        handle.title =
+          "Arrastra para mover. Con el teclado: ↑ subir, ↓ bajar, Inicio o Fin.";
+      }
       var load = String(tr.getAttribute("data-load"));
       if (
         visibles > tablaLimite_ &&

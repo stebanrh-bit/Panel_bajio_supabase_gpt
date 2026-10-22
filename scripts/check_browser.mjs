@@ -5,6 +5,7 @@ import {
 import { runPanelReview } from "./panel_review_checks.mjs";
 import { runLightThemeReview } from "./light_theme_checks.mjs";
 import { runCalendarTasksReview } from "./calendar_tasks_checks.mjs";
+import { runLoadOrderReview } from "./load_order_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
 import { readPanelSource } from "./panel_source.mjs";
 /**
@@ -349,6 +350,11 @@ const newHelpers = (
     [
       ["content", "escapeHtml,csvCell,safeLink", "panelContent"],
       ["rendering", "renderKeyed,reset", "panelRendering"],
+      [
+        "load-order",
+        "readOrder,saveOrder,orderedRecords,moveVisible,mountRowReordering",
+        "panelLoadOrder",
+      ],
       ["network", "fetchExternal,cancel", "panelNetwork"],
       ["notice-scope", "customerNoticeScope", "panelNotices"],
       [
@@ -767,13 +773,26 @@ async function newPage(
   } else await page.locator("#shipments-tbody tr").first().waitFor();
   return page;
 }
-let panelReview, calendarTasksReview, simpleSheetReview, lightThemeReview;
+let panelReview,
+  calendarTasksReview,
+  simpleSheetReview,
+  lightThemeReview,
+  loadOrderReview;
 try {
   lightThemeReview = await runLightThemeReview({ newPage });
   if (process.argv.includes("--theme-only")) {
     assert.deepEqual(errors, []);
     await browser.close();
     console.log("Tema claro, contraste y controles compactos verificados.");
+    process.exit(0);
+  }
+  loadOrderReview = await runLoadOrderReview({ newPage, rawLoads, profiles });
+  if (process.argv.includes("--load-order-only")) {
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log(
+      "Rosa, numeración y orden manual con ratón, teclado y dedo verificados.",
+    );
     process.exit(0);
   }
   simpleSheetReview = await runSimpleSheetReview({
@@ -2731,6 +2750,7 @@ try {
         calendarTasksReview,
         simpleSheetReview,
         lightThemeReview,
+        loadOrderReview,
       },
       null,
       2,

@@ -179,7 +179,7 @@ export async function runCalendarTasksReview({
     const labels = await row
       .locator("td")
       .evaluateAll((cells) => cells.map((cell) => cell.dataset.label));
-    assert.equal(labels.length, 10);
+    assert.equal(labels.length, 11);
     assert.ok(labels.indexOf("Origen") < labels.indexOf("Destino"));
     assert.ok(labels.indexOf("Pickup") < labels.indexOf("Entrega"));
     assert.ok(!labels.includes("CSR"));
