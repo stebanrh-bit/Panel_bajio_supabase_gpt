@@ -23,6 +23,7 @@ import * as network from "./network.js";
 import * as calendar from "./calendar.js";
 import * as notices from "./notice-scope.js";
 import * as loadOrder from "./load-order.js";
+import * as taskTime from "./task-time.js";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -35,6 +36,7 @@ async function start() {
   window.panelDialogs = dialogs;
   window.panelRendering = rendering;
   window.panelLoadOrder = loadOrder;
+  window.panelTaskTime = taskTime;
   window.panelNetwork = network;
   window.panelPeople = people;
   window.panelContent = content;

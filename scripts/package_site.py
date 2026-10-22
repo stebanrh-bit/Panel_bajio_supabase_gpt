@@ -73,6 +73,8 @@ def main():
         'TEMA_CLARO_2026-10-19.md':ROOT/'docs/TEMA_CLARO_2026-10-19.md',
         'PICKUP_Y_COLORES_CALENDARIO.md':ROOT/'docs/PICKUP_Y_COLORES_CALENDARIO.md',
         'ORDEN_MANUAL_CARGAS_2026-10-22.md':ROOT/'docs/ORDEN_MANUAL_CARGAS_2026-10-22.md',
+        'COLORES_Y_HORA_TAREAS_2026-10-22.md':ROOT/'docs/COLORES_Y_HORA_TAREAS_2026-10-22.md',
+        'evidencia-colores-tareas-2026-10-22.json':ROOT/'docs/evidencia-colores-tareas-2026-10-22.json',
         'evidencia-orden-manual-2026-10-22.json':ROOT/'docs/evidencia-orden-manual-2026-10-22.json',
         'imagenes/cargas-orden-manual-2026-10-22.png':ROOT/'docs/imagenes/cargas-orden-manual-2026-10-22.png',
         'evidencia-pickup-calendario.json':ROOT/'docs/evidencia-pickup-calendario.json',

@@ -30,20 +30,14 @@
     if (b.fecha_seguimiento) {
       var fsDate = new Date(b.fecha_seguimiento);
       if (!isNaN(fsDate.getTime())) {
-        var vencido =
-          !b.resuelto && fsDate.getTime() < new Date().setHours(0, 0, 0, 0);
+        var vencido = window.panelTaskTime.taskReminderDue(b);
         followupHtml =
           '<span class="bitacora-followup' +
           (vencido ? " overdue" : "") +
           '">' +
           (vencido ? "⚠ " : "") +
           "Seguimiento: " +
-          esc(
-            fsDate.toLocaleDateString("es-MX", {
-              day: "2-digit",
-              month: "short",
-            }),
-          ) +
+          esc(fmtDateTime(b.fecha_seguimiento)) +
           "</span>";
       }
     }
@@ -671,7 +665,11 @@
     .getElementById("bitacora-assignment-mode")
     .addEventListener("change", actualizarAsignacionBitacora_);
 
+  var bitacoraSeguimientoOriginal_ = "";
   function openBitacoraModal(existing, preselectLoad) {
+    bitacoraSeguimientoOriginal_ = existing
+      ? existing.fecha_seguimiento || ""
+      : "";
     bitacoraEditingId = existing ? String(existing.id) : null;
     document.getElementById("bitacora-assignment-mode").value = "person";
     document.getElementById("bitacora-modal-title").textContent = existing
@@ -702,9 +700,7 @@
     renderBitacoraLoadSelected();
     renderBitacoraLoadOpciones(loadBuscado);
     document.getElementById("bitacora-fecha-seguimiento").value =
-      existing && existing.fecha_seguimiento
-        ? String(existing.fecha_seguimiento).slice(0, 10)
-        : "";
+      window.panelTaskTime.taskFollowUpInput(bitacoraSeguimientoOriginal_);
     setBitacoraColor(existing ? existing.color || "" : "");
     document.getElementById("bitacora-asignado-wrap").style.display =
       existing || bitacoraAutoAssignCsr ? "none" : "";
@@ -842,8 +838,24 @@
         document.getElementById("bitacora-error").style.display = "";
         return;
       }
-      var fechaSeguimiento =
-        document.getElementById("bitacora-fecha-seguimiento").value || "";
+      var campoSeguimiento = document.getElementById(
+        "bitacora-fecha-seguimiento",
+      );
+      if (!campoSeguimiento.reportValidity()) return;
+      var fechaSeguimiento;
+      try {
+        fechaSeguimiento =
+          bitacoraEditingId &&
+          campoSeguimiento.value ===
+            window.panelTaskTime.taskFollowUpInput(bitacoraSeguimientoOriginal_)
+            ? bitacoraSeguimientoOriginal_
+            : window.panelTaskTime.taskFollowUpISO(campoSeguimiento.value);
+      } catch (error) {
+        document.getElementById("bitacora-error").textContent = error.message;
+        document.getElementById("bitacora-error").style.display = "";
+        campoSeguimiento.focus();
+        return;
+      }
       var loadsParaGuardar = bitacoraLoadsSeleccionados.slice();
       var btn = document.getElementById("bitacora-submit");
       btn.disabled = true;

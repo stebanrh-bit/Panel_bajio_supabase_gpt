@@ -55,11 +55,20 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
     );
     var out = serverAlerts_
         .filter(function (a) {
+          if (a.task_id) {
+            var currentTask = tasks.get(String(a.task_id));
+            return (
+              !!currentTask &&
+              scope.hasTask(currentTask) &&
+              window.panelTaskTime.taskReminderDue(currentTask)
+            );
+          }
           if (a.load) return scope.hasLoad(a.load);
           var task = tasks.get(String(a.task_id));
           return !!task && scope.hasTask(task);
         })
         .map(function (a) {
+          var scheduledTask = tasks.get(String(a.task_id));
           return {
             id: "server:" + a.id,
             tipo: "server",
@@ -71,7 +80,11 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
             detalle:
               a.kind === "load_review"
                 ? "Revisión pendiente · abre esta carga para atenderla"
-                : "Tarea pendiente · abre su detalle para continuar",
+                : scheduledTask
+                  ? "Programada: " +
+                    fmtDateTime(scheduledTask.fecha_seguimiento) +
+                    " · abre su detalle para continuar"
+                  : "Tarea pendiente · abre su detalle para continuar",
             ts: a.created_at,
           };
         }),
@@ -191,12 +204,16 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
         });
       }
     });
-    var finDeHoy = new Date();
-    finDeHoy.setHours(23, 59, 59, 999);
     (bitacora || []).forEach(function (b) {
       if (b.resuelto || b.cancelado || !scope.hasTask(b)) return;
       var nota = String(b.nota || "").slice(0, 120);
-      if (bitacoraCargada_ && b.creado_por && b.creado_por !== yo) {
+      // Una tarea programada avisa al vencer, incluso si la creó otra persona.
+      if (
+        !b.fecha_seguimiento &&
+        bitacoraCargada_ &&
+        b.creado_por &&
+        b.creado_por !== yo
+      ) {
         out.push({
           id: "bit:" + b.id,
           taskId: b.id,
@@ -207,16 +224,20 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
           detalle: nota,
         });
       }
-      var seg = pd(b.fecha_seguimiento);
-      if (seg && !isNaN(seg.getTime()) && seg.getTime() <= finDeHoy.getTime()) {
+      if (
+        window.panelTaskTime.taskReminderDue(b, ahora) &&
+        !out.some(function (a) {
+          return String(a.taskId) === String(b.id);
+        })
+      ) {
         out.push({
           id: "bitseg:" + b.id + ":" + b.fecha_seguimiento,
           taskId: b.id,
           tipo: "bitseg",
           sev: "warn",
           destino: "bitacora",
-          titulo: "Pendiente de turno para hoy",
-          detalle: nota,
+          titulo: "Hora de atender tu tarea",
+          detalle: nota + " · Programada: " + fmtDateTime(b.fecha_seguimiento),
         });
       }
     });

@@ -4,6 +4,7 @@ import { createReservedLoadsService } from "../../features/reserved-loads/servic
 import { createShiftsService } from "../../features/shifts/service.js";
 import { prepareIncident } from "../../features/incidents/rules.js";
 import { loadHistoryItems } from "../history.js";
+import { taskFollowUpISO } from "../task-time.js";
 import {
   json,
   date,
@@ -577,7 +578,7 @@ export function operationMethods(ctx) {
         assigned_to: ctx.personId(assignee),
         assigned_csr: ctx.personId(csr),
         color: color || "",
-        follow_up_at: date(follow),
+        follow_up_at: taskFollowUpISO(follow),
       });
       records.forEach((row) => saved("shift_tasks", row));
       return {
@@ -592,7 +593,7 @@ export function operationMethods(ctx) {
       ctx.staff(true);
       const old = previous("shift_tasks", id);
       const records = await shifts.save(
-        { ...old, note, load, color, follow_up_at: date(follow) },
+        { ...old, note, load, color, follow_up_at: taskFollowUpISO(follow) },
         old,
       );
       records.forEach((row) => saved("shift_tasks", row));

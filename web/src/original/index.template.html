@@ -640,7 +640,8 @@
           <div class="bitacora-load-selected" id="bitacora-load-selected" aria-live="polite"></div>
           <div class="bitacora-load-list" id="bitacora-load-select"></div>
         </fieldset>
-        <label class="turno-field">Fecha de seguimiento (opcional)<input type="date" id="bitacora-fecha-seguimiento"></label>
+        <label class="turno-field">Fecha y hora de seguimiento (opcional)<input type="datetime-local" step="60" id="bitacora-fecha-seguimiento" aria-describedby="bitacora-hora-help"></label>
+        <p class="turno-form-help turno-field-wide" id="bitacora-hora-help">Hora del centro de México. La campana avisará al llegar la fecha y hora elegidas.</p>
         <label class="turno-field" id="bitacora-assignment-mode-wrap" hidden>Tipo de asignación<select id="bitacora-assignment-mode">
           <option value="person">Persona específica</option>
           <option value="coverage">Quien cubra al CSR del cliente</option>

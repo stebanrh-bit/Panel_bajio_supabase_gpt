@@ -6,6 +6,7 @@ import { runPanelReview } from "./panel_review_checks.mjs";
 import { runLightThemeReview } from "./light_theme_checks.mjs";
 import { runCalendarTasksReview } from "./calendar_tasks_checks.mjs";
 import { runLoadOrderReview } from "./load_order_checks.mjs";
+import { runColorsTasksReview } from "./colors_tasks_checks.mjs";
 import { formatMoment } from "../web/src/original/usability.js";
 import { readPanelSource } from "./panel_source.mjs";
 /**
@@ -356,6 +357,11 @@ const newHelpers = (
         "panelLoadOrder",
       ],
       ["network", "fetchExternal,cancel", "panelNetwork"],
+      [
+        "task-time",
+        "taskFollowUpISO,taskFollowUpInput,taskReminderDue",
+        "panelTaskTime",
+      ],
       ["notice-scope", "customerNoticeScope", "panelNotices"],
       [
         "validation",
@@ -777,13 +783,26 @@ let panelReview,
   calendarTasksReview,
   simpleSheetReview,
   lightThemeReview,
-  loadOrderReview;
+  loadOrderReview,
+  colorsTasksReview;
 try {
   lightThemeReview = await runLightThemeReview({ newPage });
   if (process.argv.includes("--theme-only")) {
     assert.deepEqual(errors, []);
     await browser.close();
     console.log("Tema claro, contraste y controles compactos verificados.");
+    process.exit(0);
+  }
+  colorsTasksReview = await runColorsTasksReview({
+    newPage,
+    rawLoads,
+    taskRow,
+    profiles,
+  });
+  if (process.argv.includes("--colors-tasks-only")) {
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log("Colores y tareas con hora y campana puntual verificados.");
     process.exit(0);
   }
   loadOrderReview = await runLoadOrderReview({ newPage, rawLoads, profiles });
@@ -2103,7 +2122,7 @@ try {
     await ux.locator("#bitacora-load-search").fill("VISUAL-001");
     await ux.locator('[data-bitacora-load-option="VISUAL-001"]').click();
     await ux.locator('#bitacora-color-swatches [data-color="warn"]').click();
-    await ux.locator("#bitacora-fecha-seguimiento").fill("2026-10-09");
+    await ux.locator("#bitacora-fecha-seguimiento").fill("2026-10-09T09:30");
     await ux.locator("#bitacora-asignado").selectOption("Ana");
     await ux.locator("#bitacora-submit").click();
     await ux.locator("#bitacora-backdrop.show").waitFor({ state: "hidden" });
@@ -2751,6 +2770,7 @@ try {
         simpleSheetReview,
         lightThemeReview,
         loadOrderReview,
+        colorsTasksReview,
       },
       null,
       2,

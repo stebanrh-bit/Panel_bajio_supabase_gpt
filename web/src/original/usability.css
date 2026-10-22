@@ -2084,6 +2084,71 @@
 .panel-internal #page-operation #table-view .loads-table tr.t-row.selected {
   background: #e7f0ff;
 }
+/* El color elegido manda sobre las franjas, hover y selección de la hoja clara. */
+.panel-internal :is(.t-color-critical, .manual-color.s-critical) {
+  --manual-background: var(--critical-soft);
+  --manual-border: var(--critical);
+}
+.panel-internal :is(.t-color-warn, .manual-color.s-warn) {
+  --manual-background: var(--warn-soft);
+  --manual-border: var(--warn);
+}
+.panel-internal :is(.t-color-good, .manual-color.s-good) {
+  --manual-background: var(--good-soft);
+  --manual-border: var(--good);
+}
+.panel-internal :is(.t-color-info, .manual-color.s-info) {
+  --manual-background: var(--info-soft);
+  --manual-border: var(--info);
+}
+.panel-internal :is(.t-color-purple, .manual-color.s-purple) {
+  --manual-background: var(--purple-soft);
+  --manual-border: var(--purple);
+}
+.panel-internal :is(.t-color-teal, .manual-color.s-teal) {
+  --manual-background: var(--teal-soft);
+  --manual-border: var(--teal);
+}
+.panel-internal :is(.t-color-pink, .manual-color.s-pink) {
+  --manual-background: var(--pink-soft);
+  --manual-border: var(--pink);
+}
+.panel-internal :is(.t-color-brown, .manual-color.s-brown) {
+  --manual-background: var(--brown-soft);
+  --manual-border: var(--brown);
+}
+.panel-internal :is(.t-color-slate, .manual-color.s-slate) {
+  --manual-background: var(--slate-soft);
+  --manual-border: var(--slate);
+}
+.panel-internal
+  #page-operation
+  #table-view
+  .loads-table
+  tr.t-row[class*="t-color-"] {
+  background: var(--manual-background, var(--surface));
+}
+.panel-internal
+  #page-operation
+  #table-view
+  .loads-table
+  tr.t-row[class*="t-color-"]
+  > td:first-child {
+  box-shadow: inset 3px 0 var(--manual-border);
+}
+.panel-internal
+  #page-operation
+  #table-view
+  .loads-table
+  tr.t-row[class*="t-color-"].selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.panel-internal .card.manual-color,
+.panel-internal #cards-view .card.manual-color {
+  background: var(--manual-background, var(--surface));
+  border-left-color: var(--manual-border);
+}
 .panel-internal #page-operation #table-view .loads-table td {
   color: #34465e;
   border: 1px solid #e4e9f1;

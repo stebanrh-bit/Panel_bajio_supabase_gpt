@@ -403,7 +403,7 @@
   function colorSwatchesHtml(rec) {
     var current = rec.color || "";
     return (
-      '<div class="color-swatches color-swatches-compact" title="Color de la tarjeta"><span class="color-swatches-label">Color</span>' +
+      '<div class="color-swatches color-swatches-compact" title="Color de la carga"><span class="color-swatches-label">Color</span>' +
       CARD_COLOR_OPTS.map(function (o) {
         return (
           '<button type="button" class="color-swatch sw-' +
