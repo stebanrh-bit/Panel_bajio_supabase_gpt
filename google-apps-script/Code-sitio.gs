@@ -6,29 +6,10 @@
 const SUPABASE_URL_ = "https://pwqibuunekrzfcztcfju.supabase.co";
 const SUPABASE_PUBLIC_KEY_ = "sb_publishable_slNN4K-4Ak-1RqD9z0GvnA_2hgsAL9J";
 
-/** Solo tres vistas permitidas; no inserta parámetros arbitrarios dentro del HTML. */
-function doGet(e) {
-  const portal = e && e.parameter && e.parameter.portal;
-  const view = ["cliente", "gerencia"].indexOf(portal) >= 0 ? portal : "";
-  const bootstrap =
-    "<script>window.PANEL_VIEW=" + JSON.stringify(view) + ";<\/script>";
-  const html = HtmlService.createHtmlOutputFromFile(
-    view === "cliente"
-      ? "index-cliente"
-      : view === "gerencia"
-        ? "index-gerencia"
-        : "index",
-  )
-    .getContent()
-    .replace("<!--PANEL_VIEW-->", bootstrap);
-  return HtmlService.createHtmlOutput(html)
-    .setTitle(
-      view === "cliente"
-        ? "Portal Cliente"
-        : view === "gerencia"
-          ? "Vista Gerencia"
-          : "Panel Bajío",
-    )
+/** Versión interna: todos los enlaces abren el control de cargas. */
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile("index")
+    .setTitle("Panel Bajío · Mis cargas")
     .addMetaTag("viewport", "width=device-width, initial-scale=1");
 }
 
@@ -77,7 +58,7 @@ function requirePanelStaff_(accessToken) {
   if (
     profiles.length !== 1 ||
     profiles[0].active === false ||
-    ["admin", "csr", "manager"].indexOf(profiles[0].role) < 0
+    ["admin", "csr"].indexOf(profiles[0].role) < 0
   )
     throw new Error("Tu cuenta no tiene acceso a mapas.");
 }

@@ -16,14 +16,18 @@ export function teamMethods(ctx, operations) {
   async function people() {
     if (!ctx.profile) {
       const result = await ctx.account("directory");
-      return json(result.items);
+      return json(
+        result.items.filter(
+          (p) => p.rol !== "Seguimiento" && p.rol !== "Cliente",
+        ),
+      );
     }
     ctx.staff();
     const profiles = ctx.remember("profiles", await service.people());
     const following = await service.following();
     return json(
       profiles
-        .filter((row) => row.active && row.role !== "client")
+        .filter((row) => row.active && ["admin", "csr"].includes(row.role))
         .map((row) => ({
           nombre: row.display_name,
           rol: roles[row.role] || "",
@@ -64,12 +68,17 @@ export function teamMethods(ctx, operations) {
         await service.assignments(),
         "customer_key",
       );
-      return json(
-        records.map((row) => ({
-          cliente: row.customer,
-          csr: name(row.owner_id),
-        })),
-      );
+      const result = records.map((row) => ({
+        cliente: row.customer,
+        csr: name(row.owner_id),
+      }));
+      if (ctx.profile.role === "admin") {
+        const unassigned = await ctx.rpc("ops_internal_customer_directory");
+        result.push(
+          ...unassigned.map((customer) => ({ cliente: customer, csr: "" })),
+        );
+      }
+      return json(result);
     },
     asignarCliente: async (customer, owner) => {
       ctx.staff(true);
@@ -173,8 +182,28 @@ export function teamMethods(ctx, operations) {
         items: (await service.events()).map((row) => ({
           fecha: row.created_at,
           quien: name(row.actor),
-          accion: row.action,
-          detalle: JSON.stringify(row.details),
+          accion:
+            row.action === "route_instruction_case_merged"
+              ? "Caso incorporado al instructivo"
+              : row.action === "route_instruction_saved"
+                ? {
+                    draft: "Propuesta guardada",
+                    approved: "Instructivo publicado",
+                    paused: "Instructivo pausado",
+                  }[row.details?.template?.state] || "Instructivo guardado"
+                : row.action,
+          detalle: row.action.startsWith("route_instruction_")
+            ? [
+                row.details?.template?.name,
+                row.details?.template?.customer,
+                row.details?.template?.origin_city &&
+                  row.details.template.origin_city +
+                    " → " +
+                    row.details.template.dest_city,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            : JSON.stringify(row.details),
         })),
       };
     },

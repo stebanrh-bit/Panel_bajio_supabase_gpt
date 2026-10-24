@@ -1,3 +1,4 @@
+import config from "../config.js";
 import { tableColumns } from "../../data/columns.js";
 import { fetchAll, unwrap } from "../../data/supabase.js";
 
@@ -125,14 +126,21 @@ export function createContext(client) {
         .eq("id", data.session.user.id)
         .single(),
     );
-    if (!profile.active || profile.role === "pending") {
+    if (
+      !profile.active ||
+      profile.role === "pending" ||
+      (config.INTERNAL_ONLY && !["admin", "csr"].includes(profile.role))
+    ) {
       await logout();
       throw Error("Tu cuenta necesita acceso autorizado al panel.");
     }
     return profile;
   }
   function staff(write = false) {
-    const roles = write ? ["admin", "csr"] : ["admin", "csr", "manager"];
+    const roles =
+      write || config.INTERNAL_ONLY
+        ? ["admin", "csr"]
+        : ["admin", "csr", "manager"];
     if (!profile?.active || !roles.includes(profile.role))
       throw Error("Inicia sesión con una cuenta del equipo.");
   }

@@ -305,7 +305,7 @@
           esc(
             needsAttentionReasons(rec)
               .concat(
-                podPending(rec) ? ["Falta enviar POD"] : [],
+                podPending(rec) ? ["POD pendiente"] : [],
                 recargosPending(rec) ? ["Faltan recargos VG"] : [],
                 isRecordatorioVencido(rec) ? ["Recordatorio vencido"] : [],
               )
@@ -374,7 +374,9 @@
       esc(rec.load) +
       '">' +
       commentCell +
-      "</button></td>" +
+      "</button>" +
+      window.panelInstructionUI.instructionLine(rec) +
+      "</td>" +
       "</tr>"
     );
   }
@@ -384,6 +386,7 @@
   function detailPanelHtml(rec) {
     return (
       alertBannerHtml(rec) +
+      window.panelInstructionUI.instructionCard(rec) +
       '<div class="field"><div class="k">Cliente</div><div class="v small">' +
       esc(rec.customer) +
       "</div></div>" +
@@ -438,7 +441,7 @@
       '"' +
       (rec.pod_sent ? " checked" : "") +
       ">" +
-      "<span>POD enviado a cliente</span>" +
+      "<span>POD registrado</span>" +
       "</label>" +
       "</div>" +
       (rec.status === "TONU"
@@ -752,6 +755,8 @@
       applyFilters();
     });
   function currentCsrClienteFiltro() {
+    if (PANEL_CONFIG.PERSONAL_OPERATION)
+      return myRealIdentity ? clientesDeCsr(myRealIdentity) : [];
     if (!currentWho) return null;
     var persona = personas.filter(function (p) {
       return p.nombre === currentWho;
@@ -776,7 +781,7 @@
   /** Llena el selector de "filtrar por cliente" con el nombre completo de cada cliente visible
    * en el alcance actual (si hay un CSR/usuario seleccionado, solo sus clientes asignados; si es
    * "Todos", cualquier cliente que aparezca en las cargas cargadas). Conserva la selección actual
-   * si sigue siendo válida; si ya no aplica (cambiaste de CSR), regresa a "Todos los clientes". */
+   * si sigue siendo válida; si ya no aplica (cambiaste de CSR), regresa a "Todos mis clientes". */
   function renderClienteFilterOptions() {
     var sel = document.getElementById("cliente-filter");
     if (!sel) return;
@@ -809,7 +814,7 @@
     }
 
     sel.innerHTML =
-      '<option value="">Todos los clientes</option>' +
+      '<option value="">Todos mis clientes</option>' +
       nombres
         .map(function (n) {
           var v = n.toLowerCase();
@@ -1514,7 +1519,11 @@
     }
     el.innerHTML = personas
       .map(function (p) {
-        var rolOpts = ["CSR", "Seguimiento", "Supervisor"]
+        var rolOpts = (
+          PANEL_CONFIG.INTERNAL_ONLY
+            ? ["CSR", "Supervisor"]
+            : ["CSR", "Seguimiento", "Supervisor"]
+        )
           .map(function (r) {
             return (
               '<option value="' +

@@ -298,7 +298,8 @@ export function mountUsability(doc) {
       nav.append(button);
       for (const id of ids) {
         const section = doc.getElementById(id)?.closest(".csr-section");
-        if (section) sections.push({ key, section });
+        if (section && !section.hasAttribute("data-retired-client-feature"))
+          sections.push({ key, section });
       }
       button.addEventListener("click", () => {
         for (const item of sections) item.section.hidden = item.key !== key;

@@ -104,7 +104,10 @@ var commentsCurrentLoad = null;
     var r = recPorLoad_(load);
     if (!r) return;
     workspaceCurrentLoad = String(load);
-    workspaceCurrentTab = tab || "operacion";
+    workspaceCurrentTab =
+      PANEL_CONFIG.INTERNAL_ONLY && tab === "comunicacion"
+        ? "operacion"
+        : tab || "operacion";
     document.getElementById("workspace-title").textContent =
       "Carga " + r.load + " · " + (r.customer || "Sin cliente");
     document.getElementById("workspace-route").textContent =
@@ -419,6 +422,7 @@ var commentsCurrentLoad = null;
       "</dd></div><div><dt>Atención</dt><dd>" +
       esc(needsAttentionReasons(r).join(" · ") || "Sin pendientes") +
       "</dd></div></dl>" +
+      window.panelInstructionUI.instructionCard(r) +
       workspaceJourneyHtml(r) +
       '<h3 class="ws-section-title">Control operativo</h3><div class="ws-group-row">' +
       wsGroup("Citas y tiempos", citas) +
@@ -447,7 +451,7 @@ var commentsCurrentLoad = null;
     var ready = !!String(r.tracking_link || "").trim();
     return (
       '<h3 class="ws-section-title">Tracking Center</h3>' +
-      '<div class="tracking-card"><div class="tracking-head"><div><div class="tracking-title">Samsara · Link para cliente</div><div class="tracking-note">Guarda aquí el enlace compartible correspondiente a este Load.</div></div><span class="tracking-state ' +
+      '<div class="tracking-card"><div class="tracking-head"><div><div class="tracking-title">Samsara · Seguimiento de la unidad</div><div class="tracking-note">Guarda aquí el enlace para revisar la ubicación de esta unidad.</div></div><span class="tracking-state ' +
       (ready ? "ready" : "missing") +
       '">' +
       (ready ? "✓ Tracking disponible" : "Tracking pendiente") +
@@ -792,6 +796,7 @@ var commentsCurrentLoad = null;
    * desde selectWho()/el toggle de "¿Quién eres?" — el Centro de mensajes es de quien redacta
    * (myRealIdentity), no del perfil que esté viendo en ese momento. */
   function loadMisPlantillas() {
+    if (PANEL_CONFIG.INTERNAL_ONLY) return;
     if (!myRealIdentity || !myPassword) {
       myTemplates = {};
       myTemplateLabels = {};
@@ -1089,6 +1094,7 @@ var commentsCurrentLoad = null;
     return html;
   }
   function workspaceHistoryHtml(r) {
+    if (PANEL_CONFIG.INTERNAL_ONLY) workspaceHistorialSubTab = "cambios";
     return (
       '<h3 class="ws-section-title">Trazabilidad operativa</h3><div class="ws-timeline"><div class="ws-event"><div class="ws-event-type">Última actualización</div><div class="ws-event-meta">' +
       esc(wsDate(r.updated_at)) +
@@ -1104,7 +1110,9 @@ var commentsCurrentLoad = null;
       (workspaceHistorialSubTab === "cambios" ? " active" : "") +
       '" data-historial-subtab="cambios">Cambios</button><button type="button" class="ws-subtab-btn' +
       (workspaceHistorialSubTab === "comunicacion" ? " active" : "") +
-      '" data-historial-subtab="comunicacion">Comunicación</button></div>' +
+      '" data-historial-subtab="comunicacion"' +
+      (PANEL_CONFIG.INTERNAL_ONLY ? " hidden inert" : "") +
+      ">Comunicación</button></div>" +
       (workspaceHistorialSubTab === "comunicacion"
         ? '<div id="workspace-comms">Cargando…</div>'
         : '<div id="workspace-historial-cambios">Cargando…</div>')
@@ -1515,6 +1523,8 @@ var commentsCurrentLoad = null;
     var wf = document.getElementById("workspace-follow");
     if (wf) wf.innerHTML = workspaceFollowHtml(r);
     var b = document.getElementById("workspace-body");
+    if (PANEL_CONFIG.INTERNAL_ONLY && workspaceCurrentTab === "comunicacion")
+      workspaceCurrentTab = "operacion";
     if (workspaceCurrentTab === "tracking")
       b.innerHTML = workspaceTrackingHtml(r);
     else if (workspaceCurrentTab === "comunicacion")

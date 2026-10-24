@@ -6,7 +6,8 @@ import { createTestDatabase } from "./helpers/database.js";
 const files = (
   await readdir(new URL("../../supabase/migrations/", import.meta.url))
 )
-  .filter((f) => /^\d.*sql$/.test(f))
+  // Contrato de compatibilidad hasta 015; la restricción personal 016 tiene su propia prueba.
+  .filter((f) => /^\d.*sql$/.test(f) && !f.startsWith("016_"))
   .sort();
 
 test("organización: deltas, checklist, programación y permisos en PostgreSQL", async (t) => {

@@ -10,6 +10,8 @@ Los [pendientes puntuales](PENDIENTES_PUNTUALES.md) usan la migración 013 y el 
 
 Los [señalamientos de logística](SENALAMIENTOS_CARGAS.md) usan el catálogo `logistics-signals.js`, SVG locales de Lucide, la migración 014 y el RPC `ops_set_load_signals`. El mismo selector se abre desde el trailer, el detalle y el expediente.
 
+La entrega activa es la [versión personal con instructivos por ruta](VERSION_PERSONAL_E_INSTRUCTIVOS.md). Solo arranca la operación interna para Admin/CSR. Las entregas de Gerencia/cliente son mensajes estáticos; los archivos originales de esas vistas se conservan como historia. `instructions/content.js` presenta la instrucción vigente y los avisos; `instructions/ui.js` administra plantillas y casos. Las migraciones 015/016 implementan asignación, autorización y alcance personal de las cargas.
+
 ## Sitio actual
 
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.
@@ -23,7 +25,7 @@ Los [señalamientos de logística](SENALAMIENTOS_CARGAS.md) usan el catálogo `l
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
-- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–014, sobre 001–003.
+- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–016, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
 - `google-apps-script/Code-sitio.gs`: alojamiento, consultas Google y proceso horario limitado. No usa claves privilegiadas.
 
@@ -54,3 +56,5 @@ node scripts/rehearse_backup.mjs /ruta/privada/respaldo.json
 Para navegador, servir `google-apps-script/` localmente y ejecutar `scripts/check_browser.mjs --legacy-xls` y `scripts/check_organization_browser.mjs`, con Chromium y `playwright-core` disponibles. La opción `--reader-files` de `check_organization_browser.mjs` además verifica XLSX/XLS del Radar con el puente Google simulado y los archivos sintéticos `web/test/fixtures/radar.*`; requiere la biblioteca heredada almacenada en `PANEL_SHEETJS_FILE` (por defecto `/tmp/panel-audit-sheetjs.js`). Ambos interceptan Supabase; el segundo usa PostgreSQL efímero. Los requisitos y rutas de herramientas están al principio de esos scripts. Nunca se requieren contraseñas o `service_role` para estas pruebas.
 
 La revisión general se ejecuta con `node scripts/check_browser.mjs --review-only` después de compilar y empaquetar. `scripts/panel_review_checks.mjs` contiene el recorrido de las siete secciones, búsqueda, errores de formulario, respuestas tardías, avisos y portales. Se incluye también al ejecutar el recorrido funcional completo con `--imports-only --legacy-xls`.
+
+Para esta entrega personal, el recorrido de navegador vigente es `node scripts/check_browser.mjs --internal-only`. Los recorridos anteriores que incluyen portales o consulta compartida corresponden a entregas históricas y no describen la interfaz actual. El script vigente intercepta Supabase y no escribe en producción.

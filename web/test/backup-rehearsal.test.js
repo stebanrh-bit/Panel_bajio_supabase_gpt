@@ -18,6 +18,30 @@ test("respaldo v2: recuperar operación, radar y preferencias en una base separa
     await db.exec(
       "insert into loads(load,customer,trailer) values ('BACKUP-1','ACME','T0132')",
     );
+    await db.exec(
+      "update loads set origin_city='Monterrey',origin_state='NL',dest_city='Laredo',dest_state='TX',status='Cargando' where load='BACKUP-1'",
+    );
+    await db.query(
+      "select * from ops_save_route_instruction(null,null,$1,true)",
+      [
+        {
+          name: "Ruta del respaldo",
+          customer: "ACME",
+          origin_city: "Monterrey",
+          origin_state: "NL",
+          dest_city: "Laredo",
+          dest_state: "TX",
+          flow: "export",
+          state: "approved",
+          steps: {
+            origin: {
+              action: "Confirmar instrucciones de recuperación",
+              requires: [],
+            },
+          },
+        },
+      ],
+    );
     await db.query("select ops_save_vg_contact(null,null,$1)", [
       { name: "VG externo", phone: "123" },
     ]);
@@ -105,6 +129,7 @@ test("respaldo v2: recuperar operación, radar y preferencias en una base separa
   const restored = await rehearseBackup(backup);
   assert.equal(restored.ok, true);
   assert.equal(restored.tables.loads, 1);
+  assert.equal(restored.tables.route_instruction_templates, 1);
   assert.equal(restored.tables.original_routes, 1);
   assert.equal(restored.tables.original_preferences, 1);
   assert.equal(restored.tables.vg_contacts, 1);

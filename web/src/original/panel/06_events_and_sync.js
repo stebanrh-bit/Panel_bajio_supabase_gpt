@@ -1,4 +1,25 @@
-// El borrador vive solo dentro del diálogo. Cancelar nunca escribe en Supabase.
+// Integración de instructivos: una confirmación del servidor actualiza la misma carga en todas las vistas.
+  window.addEventListener("panel:instruction-load", function (event) {
+    var result = event.detail,
+      record = result && recPorLoad_(result.load);
+    if (!record) return;
+    Object.assign(record, result);
+    render(currentData);
+    if (workspaceCurrentLoad === String(record.load)) renderWorkspace();
+    document
+      .querySelectorAll(".instruction-full-plan")
+      .forEach(function (node) {
+        var dialog = node.closest("dialog");
+        if (dialog) {
+          dialog.close();
+          dialog.remove();
+        }
+      });
+  });
+  window.addEventListener("panel:instruction-refresh", function () {
+    autoRefresh(true);
+  });
+  // El borrador vive solo dentro del diálogo. Cancelar nunca escribe en Supabase.
   var senalamientosEdicion_ = null;
   function opcionesSenalamientos_() {
     return Array.from(
@@ -567,6 +588,8 @@
 
   /** Clics en la tabla de Operación completa: celda de comentario y renglón (detalle). */
   function clicTabla_(e) {
+    if (e.target.closest("[data-instruction-open],[data-instruction-action]"))
+      return;
     var btn;
 
     if ((btn = e.target.closest("[data-table-select]"))) {
@@ -608,6 +631,8 @@
       }
     }
 
+    if (e.target.closest("[data-instruction-open],[data-instruction-action]"))
+      return;
     var row = e.target.closest("tr.t-row");
     if (row) {
       // Los controles conservan su acción propia; los demás datos abren el detalle.
@@ -1369,6 +1394,7 @@
     });
   }
   function abrirMultiMsg_(clientePre) {
+    if (PANEL_CONFIG.INTERNAL_ONLY) return;
     var activas = computeActiveJourney(currentData).active,
       clientes = {};
     activas.forEach(function (r) {
@@ -1717,7 +1743,7 @@
     if (calCliente_ && !clients.has(calCliente_)) calCliente_ = "";
     var clientSelect = document.getElementById("cal-cliente");
     clientSelect.innerHTML =
-      '<option value="">Todos los clientes</option>' +
+      '<option value="">Todos mis clientes</option>' +
       Array.from(clients.entries())
         .sort(function (a, b) {
           return a[1].localeCompare(b[1], "es-MX");
@@ -1768,7 +1794,7 @@
       (visible === 1 ? " movimiento" : " movimientos") +
       (calCliente_
         ? " · " + clients.get(calCliente_)
-        : " · Todos los clientes");
+        : " · Todos mis clientes");
     document.getElementById("cal-no-results").hidden = visible > 0;
     var nombres = [
         "Lunes",

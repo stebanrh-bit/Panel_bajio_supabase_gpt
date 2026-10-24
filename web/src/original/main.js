@@ -25,6 +25,9 @@ import * as notices from "./notice-scope.js";
 import * as loadOrder from "./load-order.js";
 import * as taskTime from "./task-time.js";
 import * as signals from "./logistics-signals.js";
+import * as instructionContent from "./instructions/content.js";
+import { mountInstructions } from "./instructions/ui.js";
+import instructionStyles from "./instructions/style.css?raw";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -39,6 +42,7 @@ async function start() {
   window.panelLoadOrder = loadOrder;
   window.panelTaskTime = taskTime;
   window.panelSignals = signals;
+  window.panelInstructionUI = instructionContent;
   window.panelNetwork = network;
   window.panelPeople = people;
   window.panelContent = content;
@@ -60,7 +64,9 @@ async function start() {
       "\n" +
       usabilityStyles +
       "\n" +
-      organizationStyles,
+      organizationStyles +
+      "\n" +
+      instructionStyles,
     script,
     config,
     view,
@@ -75,7 +81,11 @@ async function start() {
     localStorage.removeItem("portalClienteSesion");
   if (view === "manager" && !["manager", "admin"].includes(profile?.role))
     localStorage.removeItem("vistaGerenciaSesion");
-  if (view === "internal" && profile?.role === "client") {
+  if (
+    view === "internal" &&
+    profile &&
+    !["admin", "csr"].includes(profile.role)
+  ) {
     await api.logout();
     profile = null;
   }
@@ -84,7 +94,7 @@ async function start() {
   if (
     profile &&
     view === "internal" &&
-    ["admin", "csr", "manager"].includes(profile.role)
+    ["admin", "csr"].includes(profile.role)
   ) {
     localStorage.setItem("bajio_identity_nombre", profile.display_name);
     localStorage.setItem("bajio_identity_token", "supabase-session");
@@ -120,6 +130,7 @@ async function start() {
   if (view === "internal") {
     guidance.mountGuidance(document);
     mountOrganization(api, document);
+    mountInstructions(api, document);
   }
 }
 start().catch((error) => {

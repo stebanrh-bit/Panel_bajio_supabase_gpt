@@ -1,0 +1,12 @@
+{
+  "checks": [
+    "La versión activa no muestra mensajes al cliente, vista gerencial ni selector de otros perfiles",
+    "Editor con cuatro/seis etapas, error conserva formulario, publicación asigna la plantilla a las cargas actuales sin instructivo",
+    "Requisitos y condición quedan visibles; confirmar condición no omite documentos; completar cambia la instrucción a Atendida",
+    "Una etapa distinta abre el seguimiento siguiente; guardar un caso genera una propuesta sin publicarla automáticamente",
+    "Aprobar un caso incorpora solo las etapas revisadas a la plantilla publicada y conserva las versiones que ya usan las cargas",
+    "La siguiente acción del listado abre el instructivo y actualizar desde plantilla adopta la versión nueva solo por decisión expresa",
+    "Inicio conserva solo atención interna; anchos 320–1533 sin desbordes; la entrega gerencial es estática y no consulta expedientes"
+  ],
+  "productionWrites": 0
+}

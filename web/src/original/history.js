@@ -1,7 +1,13 @@
+import {
+  requirementLabels,
+  instructionStateLabels,
+} from "./instructions/content.js";
 import { signalsSummary } from "./logistics-signals.js";
 
 /** Campos operativos del historial. La auditoría original se conserva íntegra en Supabase. */
 export const historyFieldLabels = {
+  instruction_exception: "Indicación particular de la carga",
+  instruction_context: "Seguimiento del instructivo",
   customer: "Cliente",
   origin_city: "Ciudad de origen",
   origin_state: "Estado de origen",
@@ -112,6 +118,10 @@ const truth = (value) =>
 
 function comparable(field, value) {
   if (blank(value)) return "";
+  if (field === "instruction_context" && value && typeof value === "object") {
+    const { changed_at, event_key, ...meaningful } = value;
+    return JSON.stringify(meaningful);
+  }
   if (historyBooleans.has(field)) return truth(value) ? "true" : "false";
   if (historyDates.has(field) && Number.isFinite(Date.parse(value)))
     return String(Date.parse(value));
@@ -145,6 +155,8 @@ export function loadHistoryItems(records, load, personName = (value) => value) {
       continue;
     }
     for (const field of Object.keys(historyFieldLabels)) {
+      if (globalThis.PANEL_CONFIG?.INTERNAL_ONLY && /^client_/.test(field))
+        continue;
       const before = record.before_data[field],
         after = record.after_data?.[field];
       // Un campo ausente en una instantánea antigua no se interpreta como borrado.
@@ -175,6 +187,26 @@ export function loadHistoryItems(records, load, personName = (value) => value) {
 export function presentHistoryChange(item, formatDate) {
   const field = item.campo;
   function value(raw) {
+    if (field === "instruction_context") {
+      if (!raw || typeof raw !== "object") return "Sin instructivo";
+      return [
+        instructionStateLabels[raw.state] || "Sin instructivo",
+        raw.stage_label,
+        raw.action,
+        raw.condition ? "Condición: " + raw.condition : "",
+        raw.missing?.length
+          ? "Falta: " +
+            raw.missing.map((key) => requirementLabels[key] || key).join(", ")
+          : "",
+        raw.exception ? "Excepción: " + raw.exception : "",
+        raw.on_issue ? "Si hay un problema: " + raw.on_issue : "",
+        raw.contact ? "Contacto: " + raw.contact : "",
+        raw.notify_at ? "Aviso: " + formatDate(raw.notify_at) : "",
+        raw.approved_at ? "Aprobado: " + formatDate(raw.approved_at) : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
+    }
     if (field === "logistics_signals") return signalsSummary(raw);
     if (blank(raw)) return "Sin información";
     if (historyBooleans.has(field)) {

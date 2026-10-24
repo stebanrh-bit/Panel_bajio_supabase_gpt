@@ -30,6 +30,12 @@ const templateOptions = (data) => [
 /** Iconos locales: acompañan al texto sin descargar imágenes ni añadir dependencias. */
 const organizationSections = [
   {
+    id: "instructions",
+    label: "Instructivos por ruta",
+    detail: "Procedimientos y casos aprobados",
+    icon: "M4 3h16v18H4zM8 8h8M8 12h8M8 16h5",
+  },
+  {
     id: "tasks",
     label: "Tareas y checklist",
     detail: "Asigna acciones y revisa sus pasos",
@@ -126,7 +132,7 @@ export function mountOrganization(api, doc = document) {
   async function help() {
     await formDialog(
       "Guía del panel",
-      `<div class="organize-help"><p><b>Inicio:</b> comienza por lo vencido y lo que requiere atención. «Próxima revisión» es la fecha para volver a revisar; al vencer sigue visible hasta que lo atiendas.</p><p><b>Revisión operativa:</b> depende del estatus de la carga. <b>Seguimiento personal:</b> es el pendiente que tú programas. Completar uno no completa el otro.</p><p><b>Cargas:</b> unidad = tractocamión; trailer = caja; cita = horario acordado. La etapa indica el avance, la prioridad el orden de trabajo y atención lo que necesita revisión.</p><p><b>Solicitudes:</b> viajes sin número de carga confirmado. <b>Tareas:</b> acciones asignadas a personas del panel. <b>Apartados:</b> viajes reservados para regreso; el CSR de VG se escribe manualmente.</p><p><b>CSR:</b> consulta toda la operación y usa «Mis clientes» para enfocarte. <b>Supervisor:</b> revisa pendientes y cierres. <b>Admin:</b> administra cuentas, clientes y reglas. El nombre del perfil conserva Admin/Supervisor según tu cuenta.</p><p><b>Turno:</b> asigna las tareas, completa sus pasos y entrega pendientes críticos con responsable y próxima acción. Una tarea dependiente se completa después de sus antecedentes.</p><p><b>Millas:</b> revisa fuente y fecha. OSRM usa mapas abiertos; Google actualiza cuando el proceso programado tiene cuota.</p><p>Fechas mostradas en hora del centro de México. «Sin fecha» significa que no se capturó; 0 es un valor válido.</p><p>Los avisos externos están desactivados hasta elegir el canal.</p></div>`,
+      `<div class="organize-help"><p><b>Inicio:</b> comienza por lo vencido y lo que requiere atención. «Próxima revisión» es la fecha para volver a revisar; al vencer sigue visible hasta que lo atiendas.</p><p><b>Revisión operativa:</b> depende del estatus de la carga. <b>Seguimiento personal:</b> es el pendiente que tú programas. Completar uno no completa el otro.</p><p><b>Cargas:</b> unidad = tractocamión; trailer = caja; cita = horario acordado. La etapa indica el avance, la prioridad el orden de trabajo y atención lo que necesita revisión. Los instructivos publicados muestran qué hacer por cliente y ruta.</p><p><b>Solicitudes:</b> viajes sin número de carga confirmado. <b>Tareas:</b> acciones asignadas a personas del panel. <b>Apartados:</b> viajes reservados para regreso; el CSR de VG se escribe manualmente.</p><p><b>CSR:</b> consulta las cargas de sus clientes asignados. <b>Admin:</b> administra cuentas, clientes y reglas. El nombre del perfil conserva Admin/Supervisor según tu cuenta.</p><p><b>Turno:</b> asigna las tareas, completa sus pasos y entrega pendientes críticos con responsable y próxima acción. Una tarea dependiente se completa después de sus antecedentes.</p><p><b>Millas:</b> revisa fuente y fecha. OSRM usa mapas abiertos; Google actualiza cuando el proceso programado tiene cuota.</p><p>Fechas mostradas en hora del centro de México. «Sin fecha» significa que no se capturó; 0 es un valor válido.</p><p>Los avisos de esta versión son internos.</p></div>`,
       "Entendido",
     );
   }
@@ -195,6 +201,9 @@ export function mountOrganization(api, doc = document) {
         .forEach((b) =>
           b.setAttribute("aria-pressed", String(b.dataset.id === key)),
         );
+      if (key === "instructions")
+        section.innerHTML =
+          '<p>Registra una vez qué hacer en cada punto de la ruta. Los casos propuestos requieren aprobación antes de aplicarse automáticamente.</p><button type="button" data-instruction-library>Abrir instructivos</button>';
       if (key === "tasks") {
         // La pestaña inicial debe explicar qué muestra y permitir crear una tarea aquí mismo.
         section.innerHTML = `<p>Estas son tus tareas abiertas. Pulsa «Abrir» para agregar o completar sus pasos obligatorios.</p>${button("new-task", "Nueva tarea de turno")}${data.tasks.length ? data.tasks.map((t) => row(t.note, `${t.load || "Sin carga"} · ${date(t.follow_up_at)}`, button("task", "Abrir", t.id))).join("") : "<p>No hay tareas abiertas. Crea una con «Nueva tarea de turno».</p>"}`;
@@ -217,13 +226,13 @@ export function mountOrganization(api, doc = document) {
         call("getAvisosOperacion")
           .then((r) => {
             if (tab === "alerts" && dialog.isConnected)
-              section.innerHTML = `<p>Leer el aviso no completa su tarea. Los avisos resueltos o reprogramados dejan de mostrarse.</p>${r.map((a) => row(a.message, date(a.created_at), button("read", "Marcar leído", a.id))).join("") || empty}<p>Envío externo: desactivado hasta elegir canal.</p>`;
+              section.innerHTML = `<p>Leer el aviso no completa su tarea. Los avisos resueltos o reprogramados dejan de mostrarse.</p>${r.map((a) => row(a.message, date(a.created_at), button("read", "Marcar leído", a.id))).join("") || empty}<p>Avisos internos del panel.</p>`;
           })
           .catch((e) => notice(status, e));
       }
       if (key === "rules") {
         const c = data.panel_settings[0];
-        section.innerHTML = `<p>CSR: toda la operación, con filtro «Mis clientes». No hay envíos ni borrados automáticos activados.</p>${button("rules", "Editar reglas")}<p>Escalamiento: ${c.escalation_enabled ? "activo a las " + esc(c.escalation_hours) + " horas" : "desactivado"}. Archivo manual: ${c.archive_days ? esc(c.archive_days) + " días" : "sin plazo"}. Instantáneas de importación: ${c.import_retention_days ? esc(c.import_retention_days) + " días" : "sin eliminación"}.</p><p>Las transiciones conservan el funcionamiento actual hasta que registres una regla.</p>${button("transition", "Configurar transición")}${Object.entries(
+        section.innerHTML = `<p>Cada cuenta consulta las cargas de sus clientes asignados. No hay envíos ni borrados automáticos activados.</p>${button("rules", "Editar reglas")}<p>Escalamiento: ${c.escalation_enabled ? "activo a las " + esc(c.escalation_hours) + " horas" : "desactivado"}. Archivo manual: ${c.archive_days ? esc(c.archive_days) + " días" : "sin plazo"}. Instantáneas de importación: ${c.import_retention_days ? esc(c.import_retention_days) + " días" : "sin eliminación"}.</p><p>Las transiciones conservan el funcionamiento actual hasta que registres una regla.</p>${button("transition", "Configurar transición")}${Object.entries(
           c.status_transitions,
         )
           .map(([from, to]) =>

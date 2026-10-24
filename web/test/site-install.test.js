@@ -41,6 +41,8 @@ test("instalación conjunta: un error revierte todo; repetir conserva datos y pe
       "CONSERVAR",
     );
     await db.exec(sql);
+    await asUser("admin");
+    await rpc("ops_assign_customer",["ACME",(await db.query("select id from profiles where display_name='csr'")).rows[0].id,null]);
     await asUser("csr");
     await rpc("ops_save_structured_closure", [
       "Cierre conservado",
@@ -60,12 +62,7 @@ test("instalación conjunta: un error revierte todo; repetir conserva datos y pe
     assert.equal((await db.query("select * from geo_places")).rows.length, 1);
     const load = (await db.query("select * from loads where load='CONSERVAR'"))
       .rows[0];
-    await rpc("confirm_client_notice", [
-      load.load,
-      load.updated_at,
-      "Correo",
-      "Prueba conjunta",
-    ]);
+    await assert.rejects(rpc("confirm_client_notice",[load.load,load.updated_at,"Correo","Prueba conjunta"]),/permission denied/);
     await assert.rejects(
       db.exec(
         "update loads set client_notified_at='false' where load='CONSERVAR'",

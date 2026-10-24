@@ -82,8 +82,9 @@
       " cargas activas. " +
       snap.urgent.length +
       " requieren atención inmediata, " +
-      snap.client.length +
-      " tienen comunicación pendiente con cliente, " +
+      (PANEL_CONFIG.INTERNAL_ONLY
+        ? ""
+        : snap.client.length + " tienen comunicación pendiente con cliente, ") +
       snap.today.length +
       " tienen entrega programada hoy y " +
       snap.overdue.length +
@@ -129,8 +130,10 @@
         }),
       ),
     );
-    lines.push("- Avisar al cliente: " + snap.client.length);
-    lines = lines.concat(detailLines_(snap.client));
+    if (!PANEL_CONFIG.INTERNAL_ONLY) {
+      lines.push("- Avisar al cliente: " + snap.client.length);
+      lines = lines.concat(detailLines_(snap.client));
+    }
     lines.push("- Entregas hoy: " + snap.today.length);
     lines = lines.concat(detailLines_(snap.today));
     lines.push("- Revisiones vencidas: " + snap.overdue.length);
@@ -994,6 +997,7 @@
   var lastSlaPairs = [];
   var slaLoaded = false;
   function loadSlaMetrics() {
+    if (PANEL_CONFIG.INTERNAL_ONLY) return;
     google.script.run
       .withSuccessHandler(function (res) {
         lastSlaPairs =
@@ -1142,6 +1146,8 @@
       });
     }
     if (isCancelledStatus(rec.status)) return reasons;
+    var instruction = window.panelInstructionUI.instructionNotice(rec);
+    if (instruction) add("warn", 85, instruction.detalle, "instruction");
     if (rec.client_notify_pending) {
       var notifyParts = String(rec.client_notify_reason || "actualización")
         .split(" · ")
@@ -1178,13 +1184,13 @@
       st === "entregado" ||
       st === "completado"
     ) {
-      if (!rec.pod_sent) add("warn", 88, "POD pendiente de compartir");
+      if (!rec.pod_sent) add("warn", 88, "POD pendiente");
     } else if (
       isPteArriboStatus(rec.status) ||
       pickupIsFuture(rec.pickup_appt)
     ) {
       // Excepción acordada: no forzar revisión cada 3h antes del arribo/pickup futuro.
-    } else if (st === "en transito") {
+    } else if (st === "en transito" && !PANEL_CONFIG.INTERNAL_ONLY) {
       var commAge = hoursBetween(rec.client_notified_at);
       if (commAge === null)
         add(

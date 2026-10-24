@@ -120,6 +120,8 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
         });
       });
     activas.forEach(function (rec) {
+      var instruction = window.panelInstructionUI.instructionNotice(rec, ahora);
+      if (instruction) out.push(instruction);
       var motivo = String(
         rec.client_notify_reason || "Actualización operativa",
       );
@@ -297,7 +299,11 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
       }
     });
     // Los clientes sin asignación se consultan en Administración; no son avisos personales.
-    return out;
+    return PANEL_CONFIG.INTERNAL_ONLY
+      ? out.filter(function (a) {
+          return a.tipo !== "com" && a.tipo !== "com60" && a.tipo !== "sla";
+        })
+      : out;
   }
 
   function programarAvisos_() {

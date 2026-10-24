@@ -1,0 +1,179 @@
+/* Operación interna e instructivos: una sola instrucción visible; recorrido y edición plegables. */
+[data-retired-client-feature] {
+  display: none !important;
+}
+.instruction-card {
+  grid-column: 1/-1;
+  border: 1px solid #bed0e6;
+  border-left: 3px solid #3675ae;
+  border-radius: 9px;
+  background: #f4f8fe;
+  padding: 12px;
+  margin: 10px 0;
+  color: #243247;
+  min-width: 0;
+}
+.instruction-card p {
+  margin: 7px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.instruction-heading {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+}
+.instruction-heading h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.instruction-heading > span {
+  font-size: 11px;
+  border: 1px solid #bdcee3;
+  border-radius: 20px;
+  padding: 3px 8px;
+}
+.instruction-card .instruction-stage,
+.instruction-card .instruction-source {
+  color: #52647d;
+  font-size: 12px;
+}
+.instruction-card .instruction-action {
+  font-weight: 600;
+}
+.instruction-card summary {
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.instruction-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 10px 0 0;
+}
+.instruction-empty {
+  background: #fff;
+  border-left-color: #a8b5c7;
+  padding: 9px 12px;
+}
+.instruction-blockers,
+.instruction-exception {
+  background: #fff3d7;
+  border-radius: 6px;
+  padding: 8px;
+  color: #70500e;
+}
+.instruction-list-line {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #f0f6fe;
+  color: #285581;
+  border: 0;
+  border-left: 2px solid #5b86b3;
+  padding: 5px 7px;
+  margin-top: 5px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.instruction-list-line strong {
+  font-weight: 600;
+}
+.instruction-dialog {
+  width: min(820px, calc(100vw - 24px));
+}
+.instruction-route-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.instruction-step-fields {
+  display: grid;
+  gap: 8px;
+}
+.instruction-step-editor {
+  padding: 12px;
+  border: 1px solid #cad6e5;
+  border-radius: 8px;
+  background: #f8fafd;
+}
+.instruction-step-editor summary {
+  cursor: pointer;
+  color: #284d74;
+  font-weight: 600;
+}
+.instruction-step-editor label {
+  margin-top: 10px;
+}
+.instruction-step-editor textarea {
+  min-height: 70px;
+}
+.instruction-step-editor fieldset {
+  border: 1px solid #d2dce9;
+  margin-top: 12px;
+}
+.instruction-check {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.instruction-check input {
+  width: auto !important;
+}
+.instruction-library-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 15px;
+}
+.instruction-library-list article {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #d0dce9;
+  border-radius: 8px;
+}
+.instruction-library-list p {
+  margin: 5px 0;
+}
+.instruction-library-list small {
+  color: #53647b;
+}
+.instruction-full-plan {
+  border-top: 1px solid #d0dce9;
+  padding-top: 12px;
+}
+.instruction-full-plan details {
+  padding: 9px 0;
+}
+@media (max-width: 600px) {
+  .instruction-route-fields {
+    grid-template-columns: 1fr;
+  }
+  .instruction-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .instruction-library-list article {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* El listado resume dos líneas; el detalle conserva la instrucción completa. */
+.instruction-list-line {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

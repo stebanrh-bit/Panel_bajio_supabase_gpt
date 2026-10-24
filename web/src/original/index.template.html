@@ -59,7 +59,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     </button>
     <div class="sidebar-tools">
       <div class="sidebar-sep"></div>
-      <button type="button" class="sidebar-btn" id="who-toggle-btn" title="¿Quién eres?">
+      <button type="button" class="sidebar-btn" id="who-toggle-btn" title="¿Quién eres?" hidden inert data-retired-client-feature>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 1 0-16 0"></path><circle cx="12" cy="8" r="4.5"></circle></svg>
         <span id="who-toggle-label" class="sr-only">Usuario</span>
       </button>
@@ -155,7 +155,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   </div>
 <details class="home-guide" id="home-guide"><summary>¿Qué significa cada pendiente?</summary>
 <ul><li><b>Revisiones y seguimientos:</b> cuándo debes volver a revisar una carga. Vencer no borra el recordatorio.</li>
-<li><b>Avisos al cliente:</b> información que debes comunicarle. Registra el aviso cuando ya lo enviaste.</li>
+
 <li><b>Solicitudes y tareas:</b> solicitudes sin carga confirmada y trabajo que registraste o te asignaron.</li></ul>
 <p>Las revisiones en tránsito se repiten cada 3 horas. Un seguimiento que programas tú se completa o cambia de fecha desde la carga.</p>
 </details>
@@ -189,7 +189,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
       <details class="attention-extra-filters"><summary>Más filtros</summary><div>
         <button type="button" class="ws-btn" data-attention-filter="all" aria-pressed="false">Todas <span data-attention-count>0</span></button>
         <button type="button" class="ws-btn" data-attention-filter="review" aria-pressed="false">Revisiones y seguimientos <span data-attention-count>0</span></button>
-        <button type="button" class="ws-btn" data-attention-filter="notify" aria-pressed="false">Avisar al cliente <span data-attention-count>0</span></button>
+        <button type="button" class="ws-btn" data-attention-filter="notify" aria-pressed="false" hidden inert data-retired-client-feature>Avisar al cliente <span data-attention-count>0</span></button>
       </div></details>
       <span id="attention-reminder-count" class="home-section-help"></span>
     </div>
@@ -199,7 +199,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
 <section class="home-mini-panel home-mini-panel-wide" id="group-recordatorios" hidden><div class="home-mini-head"><h3>Revisiones y seguimientos</h3><span id="home-recordatorio-count">0 por atender</span></div><p class="home-section-help">Por atender significa que la fecha ya llegó o falta programarla. Las próximas fechas están en Programados.</p><div class="home-mini-list" id="home-recordatorios"></div></section>
-<section class="home-mini-panel" hidden><div class="home-mini-head"><h3>Avisar al cliente</h3><span id="home-comm-count">0 pendientes</span><button type="button" class="ws-btn" data-abrir-multi-msg>Preparar aviso de varias cargas</button></div><p class="home-section-help">El panel registra el aviso; envíalo por tu canal habitual y después confirma que ya avisaste.</p><div class="home-mini-list" id="home-communications"></div></section>
+<section class="home-mini-panel" hidden><div class="home-mini-head"><h3>Avisar al cliente</h3><span id="home-comm-count">0 pendientes</span><button type="button" class="ws-btn" data-abrir-multi-msg hidden inert data-retired-client-feature>Preparar aviso de varias cargas</button></div><p class="home-section-help">El panel registra el aviso; envíalo por tu canal habitual y después confirma que ya avisaste.</p><div class="home-mini-list" id="home-communications"></div></section>
 <details class="home-more" id="home-more-info"><summary>Agenda y resumen de la operación</summary>
 <div class="home-summary-kpis">    <div class="home-priority-kpi clear" data-kpi-detail="clear"><span class="home-n" id="home-clear">0</span><div><b>AL DÍA</b><small>Operación en orden</small></div></div>
     <div class="home-priority-kpi" data-kpi-detail="today"><span class="home-n" id="journey-today">0</span><div><b>ENTREGAS HOY</b><small>Con cita de entrega hoy</small></div></div>
@@ -223,7 +223,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 <section class="home-mini-panel home-mini-panel-wide" id="group-cruce-confirm"><div class="home-mini-head"><h3>¿YA CRUZÓ LA CAJA?</h3><span id="home-cruce-confirm-count">0 pendientes</span></div><div class="home-mini-list" id="home-cruce-confirm"></div></section>
 <section class="home-mini-panel home-mini-panel-wide" id="group-incidencias-abiertas"><div class="home-mini-head"><h3>INCIDENCIAS ABIERTAS</h3><span id="home-incidencias-count">0 cargas</span></div><div class="home-mini-list" id="home-incidencias"></div></section>
 <section class="home-mini-panel home-mini-panel-wide" id="group-clientes-inactivos"><div class="home-mini-head"><h3>CLIENTES SIN ACTIVIDAD RECIENTE</h3><span id="home-clientes-inactivos-count">0 clientes</span></div><div class="home-mini-list" id="home-clientes-inactivos"></div></section>
-<section class="home-mini-panel home-mini-panel-wide" id="group-sla"><div class="home-mini-head"><h3>TIEMPO DE RESPUESTA AL CLIENTE</h3><span>Últimos 30 días</span></div><div class="home-mini-list" id="home-sla"><div class="action-empty">Cargando…</div></div></section>
+<section class="home-mini-panel home-mini-panel-wide" id="group-sla" hidden inert data-retired-client-feature><div class="home-mini-head"><h3>TIEMPO DE RESPUESTA AL CLIENTE</h3><span>Últimos 30 días</span></div><div class="home-mini-list" id="home-sla"><div class="action-empty">Cargando…</div></div></section>
 <section class="home-mini-panel home-mini-panel-wide" id="group-carga-csr" hidden><div class="home-mini-head"><h3>CARGA DE TRABAJO POR CSR</h3><span id="home-carga-csr-count">0 CSR</span></div><div class="home-mini-list" id="home-carga-csr"></div></section>
 <section class="home-mini-panel home-mini-panel-wide" id="group-cierres-recibidos" hidden><div class="home-mini-head"><h3>CIERRES DE TURNO RECIBIDOS</h3><span id="home-cierres-count">0</span></div><div class="home-mini-list" id="home-cierres"><div class="action-empty">Cargando…</div></div></section>
 </details>
@@ -234,7 +234,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     <div class="brief-head"><div><h2 class="brief-title" id="brief-greeting">Resumen de turno</h2><p class="brief-sub" id="brief-time">Situación operativa actual</p></div>
       <div class="brief-actions"><button class="ws-btn" type="button" id="brief-copy">Copiar resumen</button><button class="ws-btn primary" type="button" id="handoff-toggle">Preparar cierre de turno</button></div></div>
     <div class="brief-summary" id="brief-summary">Cargando resumen…</div>
-    <div class="brief-kpis"><div class="brief-kpi"><b id="brief-active">0</b><span>Activas</span></div><div class="brief-kpi"><b id="brief-now">0</b><span>Atender ahora</span></div><div class="brief-kpi"><b id="brief-client">0</b><span>Cliente pendiente</span></div><div class="brief-kpi"><b id="brief-today">0</b><span>Entregas hoy</span></div><div class="brief-kpi"><b id="brief-overdue">0</b><span>Revisiones vencidas</span></div></div>
+    <div class="brief-kpis"><div class="brief-kpi"><b id="brief-active">0</b><span>Activas</span></div><div class="brief-kpi"><b id="brief-now">0</b><span>Atender ahora</span></div><div class="brief-kpi" hidden inert data-retired-client-feature><b id="brief-client">0</b><span>Cliente pendiente</span></div><div class="brief-kpi"><b id="brief-today">0</b><span>Entregas hoy</span></div><div class="brief-kpi"><b id="brief-overdue">0</b><span>Revisiones vencidas</span></div></div>
     <div class="handoff-box" id="handoff-box" hidden><h3 class="ws-section-title">Cierre de turno</h3><textarea class="handoff-text" id="handoff-text" aria-label="Texto del cierre de turno"></textarea><div class="brief-actions" style="margin-top:.55rem"><button class="ws-btn" id="handoff-regenerate" type="button">Regenerar</button><button class="ws-btn" id="handoff-copy" type="button">Copiar cierre</button><button class="ws-btn primary" id="handoff-send" type="button">Enviar</button></div><div class="handoff-list" id="handoff-list"></div></div>
   </section>
 <div class="home-secondary-grid"><section class="group" id="group-pendientes">
@@ -276,7 +276,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 </div>
 
 <div class="page-view sheet-view" id="page-operation" hidden>
-  <div class="operation-page-head"><div><h1>Cargas <span id="operation-visible-count"></span></h1><p>Selecciona una carga para abrir su detalle. Pulsa un comentario para leerlo o agregar otro.</p></div><div class="operation-head-right"><button class="ws-btn" id="export-operation-report-btn">Exportar reporte (CSV)</button><div class="operation-meta" id="operation-meta"></div></div></div>
+  <div class="operation-page-head"><div><h1>Mis cargas <span id="operation-visible-count"></span></h1><p>Selecciona una carga para abrir su detalle. Pulsa un comentario para leerlo o agregar otro.</p></div><div class="operation-head-right"><button class="ws-btn" id="export-operation-report-btn">Exportar reporte (CSV)</button><div class="operation-meta" id="operation-meta"></div></div></div>
   <div class="stats" id="stats">
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:80px;height:0.7rem;"></div></div>
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:60px;height:0.7rem;"></div></div>
@@ -292,12 +292,12 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
       <option value="cancelada">Canceladas / finalizadas</option>
     </select></label>
     <select class="cliente-filter" id="cliente-filter" aria-label="Filtrar por cliente">
-      <option value="">Todos los clientes</option>
+      <option value="">Todos mis clientes</option>
     </select>
-    <button type="button" class="chip" id="own-clients-toggle" aria-pressed="false">Mis clientes</button>
+    <button type="button" class="chip" id="own-clients-toggle" aria-pressed="false" hidden inert data-retired-client-feature>Mis clientes</button>
     <input class="search" id="search" type="text" placeholder="Buscar carga, cliente, trailer…" title="Busca por carga, cliente, ciudad, unidad o trailer">
     <button class="file-btn" type="button" id="view-toggle-btn">Vista tabla</button>
-    <button class="file-btn" type="button" data-abrir-multi-msg title="Un solo mensaje para varias cargas de un cliente">Mensaje a cliente</button>
+    <button class="file-btn" type="button" data-abrir-multi-msg title="Un solo mensaje para varias cargas de un cliente" hidden inert data-retired-client-feature>Mensaje a cliente</button>
     <button class="file-btn file-btn-sec" type="button" id="masivo-btn" title="Elegir varias cargas para cambiarles el estatus o marcar POD de una vez">Seleccionar varias</button>
     <button class="file-btn file-btn-sec" type="button" id="table-manual-order" aria-pressed="true" title="Volver al orden que acomodaste manualmente">Mi orden</button>
     <label class="sheet-filter" id="densidad-control">Espacio entre filas
@@ -378,7 +378,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     <div class="cal-nav"><button type="button" class="ws-btn" id="cal-prev" aria-label="Semana anterior">‹ Anterior</button><button type="button" class="ws-btn" id="cal-hoy">Esta semana</button><button type="button" class="ws-btn" id="cal-next" aria-label="Semana siguiente">Siguiente ›</button></div></div>
   <!-- Los filtros solo cambian la vista; Todos recupera los cuatro tipos de movimiento. -->
   <div class="cal-filters">
-    <label class="cal-client-field">Cliente<select id="cal-cliente"><option value="">Todos los clientes</option></select></label>
+    <label class="cal-client-field">Cliente<select id="cal-cliente"><option value="">Todos mis clientes</option></select></label>
     <div class="cal-type-field"><span id="cal-type-label">Mostrar movimientos</span>
       <div class="cal-leyenda" role="group" aria-labelledby="cal-type-label">
         <button type="button" class="cal-type-btn" data-cal-type="all" aria-pressed="true">Todos <span data-cal-count="all">0</span></button>
@@ -548,7 +548,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   <div class="workspace-backdrop" id="workspace-backdrop" aria-hidden="true">
     <aside class="workspace-panel" role="dialog" aria-modal="true" aria-labelledby="workspace-title">
       <div class="workspace-head"><div class="workspace-head-row"><div><div class="workspace-kicker">Expediente de carga</div><h2 class="workspace-title" id="workspace-title">Carga</h2><div class="workspace-route" id="workspace-route"></div></div><div class="workspace-follow" id="workspace-follow"></div><button type="button" class="workspace-close" id="workspace-close">×</button></div></div>
-      <div class="workspace-tabs" id="workspace-tabs"><button class="workspace-tab active" data-workspace-tab="operacion">Operación</button><button class="workspace-tab" data-workspace-tab="tracking">Seguimiento</button><button class="workspace-tab" data-workspace-tab="comunicacion">Comunicación</button><button class="workspace-tab" data-workspace-tab="documentos">Documentos</button><button class="workspace-tab" data-workspace-tab="incidencias">Incidencias</button><button class="workspace-tab" data-workspace-tab="historial">Historial</button></div>
+      <div class="workspace-tabs" id="workspace-tabs"><button class="workspace-tab active" data-workspace-tab="operacion">Operación</button><button class="workspace-tab" data-workspace-tab="tracking">Seguimiento</button><button class="workspace-tab" data-workspace-tab="comunicacion" hidden inert data-retired-client-feature>Comunicación</button><button class="workspace-tab" data-workspace-tab="documentos">Documentos</button><button class="workspace-tab" data-workspace-tab="incidencias">Incidencias</button><button class="workspace-tab" data-workspace-tab="historial">Historial</button></div>
       <div class="workspace-body" id="workspace-body"></div>
     </aside>
   </div>
@@ -839,7 +839,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
           <input type="email" id="csr-new-correo" placeholder="Correo de contacto (opcional)">
           <select id="csr-new-rol" aria-label="Rol de la persona nueva">
             <option value="CSR">CSR</option>
-            <option value="Seguimiento">General</option>
+
             <option value="Supervisor">Admin</option>
           </select>
           <button type="button" class="csr-btn" id="csr-add-persona-btn">Agregar</button>
@@ -872,7 +872,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
         </div>
       </div>
 
-      <div class="csr-section">
+      <div class="csr-section" hidden inert data-retired-client-feature>
         <h3>Cuentas del Portal Cliente</h3>
         <p class="who-hint" style="margin:0 0 .5rem">Cada cliente entra con su usuario y solo ve sus propias cargas. Deja la contraseña vacía para editar una cuenta sin cambiársela.</p>
         <div class="csr-form">
@@ -885,7 +885,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
         <div class="csr-list" id="pc-lista"></div>
       </div>
 
-      <div class="csr-section">
+      <div class="csr-section" hidden inert data-retired-client-feature>
         <h3>Contraseña de la Vista Gerencia</h3>
         <div class="csr-form">
           <input type="text" id="vista-pw-nueva" placeholder="Nueva contraseña (mín. 8)" aria-label="Nueva contraseña de la Vista Gerencia" autocomplete="off">

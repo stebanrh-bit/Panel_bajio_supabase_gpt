@@ -1,3 +1,4 @@
+import { runInternalInstructionsReview } from "./internal_instructions_checks.mjs";
 import {
   clickOperationOption,
   runSimpleSheetReview,
@@ -338,7 +339,7 @@ const original = originalPage({
   config,
 });
 const helperSource =
-  "const signalsSummary=window.panelSignals.signalsSummary;\n" +
+  "const signalsSummary=window.panelSignals.signalsSummary;const instructionStateLabels=window.panelInstructionUI.instructionStateLabels;const requirementLabels=window.panelInstructionUI.requirementLabels;\n" +
   (
     (await read("web/src/original/guidance.js")) +
     "\n" +
@@ -350,7 +351,7 @@ const helperSource =
     "\n" +
     (await read("web/src/original/calendar.js"))
   )
-    .replace(/^import .*;\n/gm, "")
+    .replace(/^import[\s\S]*?;\n/gm, "")
     .replace(/^export /gm, "");
 const newHelpers = (
   await Promise.all(
@@ -366,6 +367,11 @@ const newHelpers = (
         "logistics-signals",
         "logisticsSignals,maxLogisticsSignals,validateLogisticsSignals,selectedSignals,signalsSummary,signalStrip,signalOptions",
         "panelSignals",
+      ],
+      [
+        "instructions/content",
+        "instructionStages,requirementLabels,instructionStateLabels,instructionNotice,instructionCard,instructionLine",
+        "panelInstructionUI",
       ],
       ["network", "fetchExternal,cancel", "panelNetwork"],
       [
@@ -384,9 +390,11 @@ const newHelpers = (
         "<script>(function(){" +
         (file === "logistics-signals"
           ? "const escapeHtml=window.panelContent.escapeHtml;"
-          : "") +
+          : file === "instructions/content"
+            ? "const esc=window.panelContent.escapeHtml;"
+            : "") +
         (await read("web/src/original/" + file + ".js"))
-          .replace(/^import .*;\n/gm, "")
+          .replace(/^import[\s\S]*?;\n/gm, "")
           .replace(/^export /gm, "") +
         ";window." +
         key +
@@ -399,10 +407,10 @@ const newHelpers = (
 const organizationHelpers =
   "<script>(function(){const esc=window.panelContent.escapeHtml;const validateForm=window.panelValidation.validateForm;" +
   (await read("web/src/original/dialogs.js"))
-    .replace(/^import .*;\n/gm, "")
+    .replace(/^import[\s\S]*?;\n/gm, "")
     .replace(/^export /gm, "") +
   (await read("web/src/original/organization.js"))
-    .replace(/^import .*;\n/gm, "")
+    .replace(/^import[\s\S]*?;\n/gm, "")
     .replace(/^export /gm, "") +
   ";mountOrganization(window.panelApi,document);})()</script>";
 const goldenHtml =
@@ -607,11 +615,21 @@ async function newPage(
           ok: true,
           full: !input.p_after,
           revision: 100 + incidents.length,
-          items: rawLoads.map((row) => ({
-            ...row,
-            incidenciasCount: incidents.filter((i) => i.load === row.load)
-              .length,
-          })),
+          items: rawLoads
+            .filter(
+              (row) =>
+                !config.PERSONAL_OPERATION ||
+                customerAssignments.some(
+                  (a) =>
+                    a.owner_id === identity.id &&
+                    a.customer.toLowerCase() === row.customer.toLowerCase(),
+                ),
+            )
+            .map((row) => ({
+              ...row,
+              incidenciasCount: incidents.filter((i) => i.load === row.load)
+                .length,
+            })),
           removed: [],
           next: null,
         };
@@ -801,6 +819,23 @@ let panelReview,
   punctualPendingReview,
   logisticsSignalsReview;
 try {
+  if (process.argv.includes("--internal-only")) {
+    customerAssignments[0].owner_id = adminId;
+    await runInternalInstructionsReview({
+      newPage,
+      rawLoads,
+      profiles,
+      customerAssignments,
+      browser,
+      base,
+    });
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log(
+      "Versión personal e instructivos: interfaz, conocimiento aprobado, campana y vistas retiradas verificados.",
+    );
+    process.exit(0);
+  }
   logisticsSignalsReview = await runLogisticsSignalsReview({
     newPage,
     rawLoads,

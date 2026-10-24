@@ -9,7 +9,8 @@ import {
 const files = (
   await readdir(new URL("../../supabase/migrations/", import.meta.url))
 )
-  .filter((f) => /^\d.*sql$/.test(f))
+  // Contrato de compatibilidad hasta 015; la restricción personal 016 tiene su propia prueba.
+  .filter((f) => /^\d.*sql$/.test(f) && !f.startsWith("016_"))
   .sort();
 
 test("pendientes puntuales: persistencia, resolución, permisos y aislamiento de seguimientos", async (t) => {
@@ -41,6 +42,7 @@ test("pendientes puntuales: persistencia, resolución, permisos y aislamiento de
     await db.exec(
       "insert into loads(load,customer,status,next_review_at,next_review_note,recordatorio_fecha) values('A','ACME','Descompuesta','2026-10-25T18:00:00Z','Revisión de mañana','2026-10-25T20:00:00Z')",
     );
+    await rpc("ops_assign_customer",["ACME",people.Admin,null]);
     original = await get();
     await t.test(
       "no permite nota vacía ni escritura directa de banderas/autor",

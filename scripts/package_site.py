@@ -6,9 +6,9 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from package_google import package_html, package_reader
 
 ROOT=Path(__file__).resolve().parents[1]
-MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql','013_punctual_pending.sql','014_load_signals.sql']
+MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql','013_punctual_pending.sql','014_load_signals.sql','015_route_instructions.sql','016_personal_internal_mode.sql']
 
-def combined_sql(names=None, label='ACTUALIZACIÓN CONJUNTA 004–014', requires='001, 002 y 003'):
+def combined_sql(names=None, label='ACTUALIZACIÓN CONJUNTA 004–016', requires='001, 002 y 003'):
     parts=[f'-- PANEL BAJÍO: {label}.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere {requires}.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
     for name in (MIGRATIONS if names is None else names):
         content=(ROOT/'supabase/migrations'/name).read_text()
@@ -27,6 +27,7 @@ def main():
     args=parser.parse_args()
     targets={
         ROOT/'supabase/actualizar_sitio.sql':combined_sql(),
+        ROOT/'supabase/actualizar_version_personal.sql':combined_sql(['013_punctual_pending.sql','014_load_signals.sql','015_route_instructions.sql','016_personal_internal_mode.sql'],'VERSIÓN PERSONAL E INSTRUCTIVOS 013–016','001 a 012'),
         ROOT/'supabase/actualizar_senalamientos.sql':combined_sql(['013_punctual_pending.sql','014_load_signals.sql'],'PENDIENTES PUNTUALES Y SEÑALAMIENTOS 013–014','001 a 012'),
         ROOT/'google-apps-script/index-sitio.html':package_html(lambda path:(ROOT/'web/dist/internal'/path).read_text()),
     }
@@ -59,6 +60,13 @@ def main():
         'actualizar_sitio.sql':ROOT/'supabase/actualizar_sitio.sql',
         '013_punctual_pending.sql':ROOT/'supabase/migrations/013_punctual_pending.sql',
         '014_load_signals.sql':ROOT/'supabase/migrations/014_load_signals.sql',
+        '015_route_instructions.sql':ROOT/'supabase/migrations/015_route_instructions.sql',
+        '016_personal_internal_mode.sql':ROOT/'supabase/migrations/016_personal_internal_mode.sql',
+        'actualizar_version_personal.sql':ROOT/'supabase/actualizar_version_personal.sql',
+        'VERSION_PERSONAL_E_INSTRUCTIVOS.md':ROOT/'docs/VERSION_PERSONAL_E_INSTRUCTIVOS.md',
+        'evidencia-version-personal-instructivos.json':ROOT/'docs/evidencia-version-personal-instructivos.json',
+        'imagenes/version-personal-instructivos.png':ROOT/'docs/imagenes/version-personal-instructivos.png',
+        'imagenes/instructivo-que-hacer.png':ROOT/'docs/imagenes/instructivo-que-hacer.png',
         'actualizar_senalamientos.sql':ROOT/'supabase/actualizar_senalamientos.sql',
         'SENALAMIENTOS_CARGAS.md':ROOT/'docs/SENALAMIENTOS_CARGAS.md',
         'evidencia-senalamientos.json':ROOT/'docs/evidencia-senalamientos.json',

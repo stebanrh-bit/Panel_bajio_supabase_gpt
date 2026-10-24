@@ -5,7 +5,8 @@ import { createTestDatabase } from "./helpers/database.js";
 const files = (
   await readdir(new URL("../../supabase/migrations/", import.meta.url))
 )
-  .filter((f) => /^\d.*sql$/.test(f))
+  // Contrato de compatibilidad hasta 015; la restricción personal 016 tiene su propia prueba.
+  .filter((f) => /^\d.*sql$/.test(f) && !f.startsWith("016_"))
   .sort();
 test("señalamientos en PostgreSQL: permisos, guardado, aislamiento y reinstalación", async (t) => {
   const { db, people, asUser, rpc } = await createTestDatabase(files, {
@@ -40,6 +41,7 @@ test("señalamientos en PostgreSQL: permisos, guardado, aislamiento y reinstalac
       true,
       "Llamar al taller ahora",
     ]);
+    await rpc("ops_assign_customer",["ACME",people.Admin,null]);
     const original = await get();
     await t.test(
       "rechaza catálogo desconocido, nulos, duplicados y más de tres",

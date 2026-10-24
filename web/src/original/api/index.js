@@ -1,3 +1,4 @@
+import config from "../config.js";
 import { coordinatePoll } from "../coordination.js";
 import { createContext } from "./context.js";
 import { operationMethods } from "./operations.js";
@@ -91,6 +92,29 @@ export function createOriginalApi(client) {
     ...radarMethods(ctx),
     ...importMethods(ctx),
   };
+  if (config.INTERNAL_ONLY) {
+    for (const method of [
+      "addPortalCliente",
+      "removePortalCliente",
+      "getPortalClientes",
+      "setPortalClienteActivo",
+      "setVistaLecturaPassword",
+      "checkClientLogin",
+      "checkVistaLecturaPassword",
+      "getLoadsForCliente",
+      "getLoadDetailForCliente",
+      "getLoadsParaVista",
+      "getIncidenciasParaVista",
+      "registrarComunicacionCliente",
+      "markClientNotified",
+      "getSlaComunicacion",
+    ]) {
+      if (methods[method])
+        methods[method] = async () => {
+          throw Error("Esta función no está disponible en la versión interna.");
+        };
+    }
+  }
   const getChanges = async (known = {}, since = 0) => {
     ctx.staff();
     const marks = await ctx.rpc("ops_original_marks");
@@ -104,7 +128,7 @@ export function createOriginalApi(client) {
       data.seguimientos = await team.getLoadSeguimientos();
     }
     const calls = {
-      loads: () => methods.getLoadsDelta(since),
+      loads: () => methods.getLoadsDelta(changed("personas") ? 0 : since),
       comentarios: operations.getUltimosComentarios,
       pendientes: operations.getPendientes,
       bitacora: operations.getBitacoraTurno,
@@ -123,7 +147,10 @@ export function createOriginalApi(client) {
     };
     const entries = await Promise.all(
       Object.entries(calls)
-        .filter(([key]) => changed(areas[key]))
+        .filter(
+          ([key]) =>
+            changed(areas[key]) || (key === "loads" && changed("personas")),
+        )
         .map(async ([key, call]) => [key, await call()]),
     );
     return {

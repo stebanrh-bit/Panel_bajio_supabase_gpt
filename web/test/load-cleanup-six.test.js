@@ -164,7 +164,7 @@ test("limpieza de seis cargas: SQL autónomo, relaciones actuales y conservació
       [JSON.stringify(radar), people.admin],
     );
     await db.query(
-      "insert into customer_assignments(customer,owner_id,updated_by) values('Cliente',$1,$1)",
+      "insert into customer_assignments(customer,owner_id,updated_by) values('Cliente',$1,$1) on conflict(customer_key) do nothing",
       [people.admin],
     );
     const before = await snapshot(db);

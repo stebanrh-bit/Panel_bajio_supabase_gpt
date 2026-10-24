@@ -25,7 +25,15 @@ export function loadModel(raw, name = (value) => value, now = Date.now()) {
   for (const field of booleanFields)
     row[field] =
       raw[field] == null || raw[field] === "" ? "" : marked(raw[field]);
-  row.client_notify_pending = marked(raw.client_notify_pending);
+  row.client_notify_pending = config.INTERNAL_ONLY
+    ? false
+    : marked(raw.client_notify_pending);
+  if (config.INTERNAL_ONLY) {
+    row.client_notify_reason = "";
+    row.client_notify_since = "";
+    row.client_notified_at = "";
+    row.client_notified_by = "";
+  }
   for (const field of Object.keys(row)) {
     if (field === "updated_by" || field.endsWith("_by"))
       row[field] = name(row[field]);

@@ -930,6 +930,7 @@
   }
 
   function clientCommunicationHtml(rec) {
+    if (PANEL_CONFIG.INTERNAL_ONLY) return "";
     if (rec.client_notify_pending) {
       return (
         '<div class="client-notify-bar">' +
@@ -990,6 +991,7 @@
   }
 
   function setLocalNotifyPending(rec, reason) {
+    if (PANEL_CONFIG.INTERNAL_ONLY) return;
     if (!rec) return;
     rec.client_notify_pending = true;
     rec.client_notify_since = new Date().toISOString();
@@ -1060,7 +1062,7 @@
       esc(rec.dest_state) +
       "</div>" +
       (podPending(rec)
-        ? '<div class="pod-pending-tag">Falta enviar POD</div>'
+        ? '<div class="pod-pending-tag">POD pendiente</div>'
         : "") +
       (recargosPending(rec)
         ? '<div class="pod-pending-tag">Falta ingresar recargos en VG</div>'
@@ -1142,7 +1144,7 @@
       '"' +
       (rec.pod_sent ? " checked" : "") +
       ">" +
-      "<span>POD enviado a cliente</span>" +
+      "<span>POD registrado</span>" +
       "</label>" +
       "</div>" +
       (rec.status === "TONU"

@@ -2794,12 +2794,14 @@ var RADAR_CONOCIDAS_ = {
           return '<option value="' + esc(c) + '">' + esc(c) + "</option>";
         })
         .join("");
-    google.script.run
-      .withSuccessHandler(function (res) {
-        portalClientes_ = res && res.ok ? res.items : [];
-        renderPortalClientes_();
-      })
-      .getPortalClientes(csrAdminPw);
+    if (!PANEL_CONFIG.INTERNAL_ONLY) {
+      google.script.run
+        .withSuccessHandler(function (res) {
+          portalClientes_ = res && res.ok ? res.items : [];
+          renderPortalClientes_();
+        })
+        .getPortalClientes(csrAdminPw);
+    }
     google.script.run
       .withSuccessHandler(renderBloqueos_)
       .getBloqueos(csrAdminPw);

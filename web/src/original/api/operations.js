@@ -1,3 +1,4 @@
+import config from "../config.js";
 import { unwrap } from "../../data/supabase.js";
 import { createPendingLoadsService } from "../../features/pending-loads/service.js";
 import { createReservedLoadsService } from "../../features/reserved-loads/service.js";
@@ -138,6 +139,62 @@ export function operationMethods(ctx) {
     });
   }
   const methods = {
+    getInstructivosRuta: async () => {
+      ctx.staff();
+      const items = await ctx.rows(
+        "route_instruction_templates",
+        (q) => q,
+        "updated_at",
+      );
+      ctx.remember("route_instruction_templates", items);
+      const routes = [
+        ...new Map(
+          ctx
+            .records("loads")
+            .map((row) => [
+              JSON.stringify([
+                row.customer,
+                row.origin_city,
+                row.origin_state,
+                row.dest_city,
+                row.dest_state,
+              ]),
+              Object.fromEntries(
+                [
+                  "load",
+                  "customer",
+                  "origin_city",
+                  "origin_state",
+                  "dest_city",
+                  "dest_state",
+                ].map((key) => [key, row[key] || ""]),
+              ),
+            ]),
+        ).values(),
+      ];
+      return { ok: true, items, routes, admin: ctx.profile.role === "admin" };
+    },
+    guardarInstructivoRuta: async (
+      id,
+      version,
+      values,
+      applyMissing = false,
+    ) => {
+      ctx.staff(true);
+      const row = await rpc("ops_save_route_instruction", {
+        p_id: id || null,
+        p_version: version || null,
+        p_values: values,
+        p_apply_missing: applyMissing,
+      });
+      return { ok: true, record: saved("route_instruction_templates", row) };
+    },
+    instruccionCarga: (load, action, values = {}, version) =>
+      loadRpc(load, "ops_load_instruction_action", {
+        p_action: action,
+        p_values: values,
+        ...(version ? { p_version: version } : {}),
+      }),
     setSenalamientosCarga: (load, values, original) =>
       loadRpc(
         load,
