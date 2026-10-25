@@ -1,6 +1,6 @@
 # Versión personal e instructivos por ruta
 
-La entrada activa es interna: Mis cargas, Mis clientes, comentarios, incidencias, radar, tareas, pendientes e instrucciones. Las vistas de Gerencia/cliente y las herramientas de comunicación externa quedan retiradas. Se conservan los datos históricos. Las cuentas manager/client no entran al panel actual y los RPC de los portales quedan sin permiso. La campana se usa para seguimiento interno.
+La entrada activa es interna: Mis cargas, Mis clientes, comentarios, incidencias, radar, tareas, pendientes e instrucciones. Las vistas de Gerencia/cliente quedan retiradas. Se conserva la preparación manual de mensajes para copiarlos o abrirlos en WhatsApp y registrar su envío. Se conservan los datos históricos. Las cuentas manager/client no entran al panel actual y los RPC de los portales quedan sin permiso. La campana se usa para seguimiento interno.
 
 ## Actualizar
 
@@ -10,6 +10,14 @@ La entrada activa es interna: Mis cargas, Mis clientes, comentarios, incidencias
 4. Guardar → Implementar → Administrar implementaciones → lápiz → Nueva versión → Implementar. Recargar con Ctrl + Shift + R.
 
 Se muestran las cargas de los clientes asignados a la sesión. Admin puede revisar las asignaciones desde Administración. Los clientes capturados sin asignación quedan vinculados al usuario que los crea. Los clientes que ya tienen otro dueño conservan su asignación. Si al iniciar no aparecen cargas, revisar Clientes y asignaciones antes de importar otra vez.
+
+Si ya está aplicada la versión personal 016, basta ejecutar `supabase/actualizar_cargas_y_mensajes.sql` y reemplazar `index.html`. `Code.gs` conserva su contenido.
+
+## Mensajes manuales y estatus inicial
+
+En Cargas → Mensaje a cliente se prepara un texto para varias cargas del mismo cliente. En el detalle → Notificar a cliente se prepara un mensaje individual. Se puede editar, copiar o abrir en WhatsApp y después pulsar Registrar como enviado. Solo esta confirmación registra el aviso; las cuentas externas y los envíos automáticos siguen desactivados.
+
+Las cargas nuevas comienzan con PTE. ARRIVO en rojo, incluso al importar un archivo. Las cargas existentes conservan su estatus. Los comentarios se escriben libremente sin botones de frases sugeridas; las plantillas de mensajes al cliente permanecen disponibles.
 
 ## Crear el primer instructivo
 
@@ -30,17 +38,17 @@ El detalle y el expediente muestran Qué hacer ahora. El listado resume la sigui
 
 Marcar atendida cierra la instrucción vigente; un cambio de etapa activa la siguiente. Se puede reabrir y guardar una Excepción de esta carga. Si cambia la ruta, se pide revisar el instructivo. Guardar caso como propuesta permite capturar lo que funcionó y revisarlo después. Si ya hay un instructivo publicado para esa ruta, el revisor puede incorporar expresamente las etapas revisadas; se conservan las demás y las versiones que ya usan las cargas. La propuesta queda marcada como Caso incorporado.
 
-La campana solo considera cargas propias, instrucciones vigentes y fechas cumplidas. Los avisos no se repiten por editar un trailer o un campo ajeno al instructivo. No se envían correos ni avisos a clientes.
+La campana solo considera cargas propias, instrucciones vigentes y fechas cumplidas. Los avisos no se repiten por editar un trailer o un campo ajeno al instructivo. El panel no envía mensajes automáticamente. Preparar o copiar un mensaje no lo marca como enviado; el usuario confirma el envío manualmente.
 
 ## Mantenimiento
 
-Las migraciones 015/016 agregan la base de conocimiento, las instantáneas por carga, control de versión, auditoría y el alcance personal. La base de conocimiento forma parte del respaldo paginado. Los expedientes antiguos y las comunicaciones históricas se conservan, aunque sus interfaces no forman parte de esta versión. Los archivos de portales entregados ahora son un mensaje estático sin login ni consulta de datos.
+Las migraciones 015/016 agregan la base de conocimiento, las instantáneas por carga, control de versión, auditoría y el alcance personal. La base de conocimiento forma parte del respaldo paginado. La migración 017 deja PTE. ARRIVO como estatus inicial de cargas nuevas y la 018 recupera los mensajes manuales con historial limitado a los clientes propios. Los expedientes y las comunicaciones históricas se conservan. Los archivos de portales entregados ahora son un mensaje estático sin login ni consulta de datos.
 
 La lógica de decisiones inicial usa reglas aprobadas. No conecta una IA externa ni consume una API de IA. El código de presentación se mantiene en `instructions/content.js`, el editor en `instructions/ui.js` y las decisiones/autorización en SQL.
 
 ## Verificaciones
 
-La entrega pasó 198 comprobaciones automáticas del proyecto y el recorrido de navegador de la versión interna, incluyendo publicación, incorporación de casos y actualización explícita de una carga.
+La entrega incluye comprobaciones automáticas de PostgreSQL y del recorrido de navegador de la versión interna: publicación, incorporación de casos, actualización explícita de una carga, estatus inicial y confirmación manual de avisos.
 
 Se usan PostgreSQL local y Supabase simulado en Chromium, sin operaciones sobre producción. Las pruebas nuevas comprueban aprobación, asignación, etapas de importación/exportación, condiciones/documentos, versiones por carga, excepciones, cambios de ruta, privacidad de cargas y retiro de portales. También se comprueban avisos futuros, cierre de seguimiento y restauración de la base de conocimiento con referencias desde cargas.
 

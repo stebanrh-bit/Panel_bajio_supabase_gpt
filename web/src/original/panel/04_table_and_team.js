@@ -464,6 +464,11 @@
       '<button type="button" class="workspace-open-btn" data-workspace-load="' +
       esc(rec.load) +
       '">Abrir expediente</button>' +
+      (PANEL_CONFIG.MANUAL_CLIENT_MESSAGES
+        ? '<button type="button" class="comments-btn" data-home-comm="' +
+          esc(rec.load) +
+          '">Notificar a cliente</button>'
+        : "") +
       '<button type="button" class="comments-btn" data-comments-load="' +
       esc(rec.load) +
       '">Comentarios</button>' +

@@ -732,7 +732,7 @@
         if (!detailDialog.open || !detailDialog.contains(event.target)) return;
         if (
           event.target.closest(
-            "[data-workspace-load],[data-comments-load],[data-incidencias-load],[data-create-task-load],[data-recordatorio-edit]",
+            "[data-workspace-load],[data-home-comm],[data-comments-load],[data-incidencias-load],[data-create-task-load],[data-recordatorio-edit]",
           )
         ) {
           cerrarDetalleRapido_();
@@ -1287,46 +1287,6 @@
     });
   })();
 
-  // ===== Comentarios rápidos =====
-  var COMENTARIOS_RAPIDOS_ = [
-    "Unidad en frontera",
-    "Esperando documentos",
-    "Cliente confirmó cita",
-    "Operador en camino a planta",
-    "Unidad cargada",
-    "Cruce realizado",
-    "Llegó a planta",
-    "En espera de descarga",
-    "Se envió POD al cliente",
-  ];
-  function pintarComentariosRapidos_() {
-    if (!COMENTARIOS_RAPIDOS_) return;
-    document.querySelectorAll(".quick-comments").forEach(function (box) {
-      if (box.childElementCount) return;
-      box.innerHTML = COMENTARIOS_RAPIDOS_.map(function (t) {
-        return (
-          '<button type="button" class="quick-comment" data-quick-text="' +
-          esc(t) +
-          '">' +
-          esc(t) +
-          "</button>"
-        );
-      }).join("");
-    });
-  }
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-quick-text]");
-    if (!b) return;
-    var ta = document.getElementById(
-      b.closest(".quick-comments").getAttribute("data-quick-target"),
-    );
-    if (!ta || ta.disabled) return;
-    var t = b.getAttribute("data-quick-text");
-    ta.value = ta.value.trim() ? ta.value.trim() + ". " + t : t;
-    ta.focus();
-  });
-  pintarComentariosRapidos_();
-
   // ===== Clientes sin CSR asignado =====
   // Si llega en el Excel un cliente que nadie tiene asignado, sus cargas no le aparecen a ningún
   // CSR. Se muestra a Supervisor y Seguimiento (que ven todo) para que alguien lo asigne.
@@ -1394,7 +1354,8 @@
     });
   }
   function abrirMultiMsg_(clientePre) {
-    if (PANEL_CONFIG.INTERNAL_ONLY) return;
+    if (PANEL_CONFIG.INTERNAL_ONLY && !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES)
+      return;
     var activas = computeActiveJourney(currentData).active,
       clientes = {};
     activas.forEach(function (r) {

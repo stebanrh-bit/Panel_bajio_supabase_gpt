@@ -25,7 +25,7 @@ La entrega activa es la [versión personal con instructivos por ruta](VERSION_PE
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
-- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–016, sobre 001–003.
+- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–018, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
 - `google-apps-script/Code-sitio.gs`: alojamiento, consultas Google y proceso horario limitado. No usa claves privilegiadas.
 
@@ -58,3 +58,7 @@ Para navegador, servir `google-apps-script/` localmente y ejecutar `scripts/chec
 La revisión general se ejecuta con `node scripts/check_browser.mjs --review-only` después de compilar y empaquetar. `scripts/panel_review_checks.mjs` contiene el recorrido de las siete secciones, búsqueda, errores de formulario, respuestas tardías, avisos y portales. Se incluye también al ejecutar el recorrido funcional completo con `--imports-only --legacy-xls`.
 
 Para esta entrega personal, el recorrido de navegador vigente es `node scripts/check_browser.mjs --internal-only`. Los recorridos anteriores que incluyen portales o consulta compartida corresponden a entregas históricas y no describen la interfaz actual. El script vigente intercepta Supabase y no escribe en producción.
+
+Las cargas nuevas usan `PTE. ARRIVO` mediante la migración 017, tanto en captura como en importación. El rojo contempla también las escrituras anteriores del mismo estatus. Los comentarios se escriben libremente, sin botones de frases preestablecidas.
+
+La migración 018 recupera la redacción y confirmación manual de mensajes para WhatsApp. `MANUAL_CLIENT_MESSAGES` muestra el compositor individual y «Mensaje a cliente» para varias cargas; mantiene los portales y envíos automáticos desactivados. El SQL breve está en `supabase/actualizar_cargas_y_mensajes.sql` y requiere 016.

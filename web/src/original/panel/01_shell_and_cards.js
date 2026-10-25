@@ -41,7 +41,7 @@
     "En transito",
     "En yarda MX",
     "Descargando",
-    "Pte. Arrivo",
+    "PTE. ARRIVO",
     "TONU",
     "DELIVERED",
     "En AA",
@@ -63,7 +63,7 @@
     "En transito": ["var(--good-soft)", "var(--good)"],
     "En yarda MX": ["var(--warn-soft)", "var(--warn)"],
     Descargando: ["var(--brown-soft)", "var(--brown)"],
-    "Pte. Arrivo": ["var(--critical-soft)", "var(--critical)"],
+    "PTE. ARRIVO": ["var(--critical-soft)", "var(--critical)"],
     "Pendiente arrivo": ["var(--critical-soft)", "var(--critical)"],
     TONU: ["var(--critical-soft)", "var(--critical)"],
     DELIVERED: ["var(--good-soft)", "var(--good)"],
@@ -160,6 +160,9 @@
   function statusStyle(status) {
     var c = STATUS_STYLES[status];
     if (esEstatusPlanta_(status)) c = STATUS_STYLES["EN PLANTA"];
+    // Reconocer también la escritura de cargas guardadas antes de esta actualización.
+    if (/^(pte\.?|pendiente)\s+arrivo$/i.test(String(status || "").trim()))
+      c = STATUS_STYLES["PTE. ARRIVO"];
     if (!c) return "background:var(--surface-2);color:var(--ink-soft);";
     return "background:" + c[0] + ";color:" + c[1] + ";";
   }
@@ -167,7 +170,7 @@
   function statusOptionsHtml(current) {
     var opts = STATUS_OPTIONS.slice();
     if (current && opts.indexOf(current) === -1) opts.unshift(current);
-    if (!current) opts.unshift(""); // el status siempre es manual: una carga nueva empieza sin estatus
+    if (!current) opts.unshift(""); // conservar registros anteriores que todavía no tienen estatus
     return opts
       .map(function (s) {
         var label = s === "" ? "Sin estatus" : s;
@@ -930,7 +933,8 @@
   }
 
   function clientCommunicationHtml(rec) {
-    if (PANEL_CONFIG.INTERNAL_ONLY) return "";
+    if (PANEL_CONFIG.INTERNAL_ONLY && !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES)
+      return "";
     if (rec.client_notify_pending) {
       return (
         '<div class="client-notify-bar">' +
@@ -991,7 +995,8 @@
   }
 
   function setLocalNotifyPending(rec, reason) {
-    if (PANEL_CONFIG.INTERNAL_ONLY) return;
+    if (PANEL_CONFIG.INTERNAL_ONLY && !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES)
+      return;
     if (!rec) return;
     rec.client_notify_pending = true;
     rec.client_notify_since = new Date().toISOString();

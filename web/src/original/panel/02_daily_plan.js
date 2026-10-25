@@ -361,7 +361,6 @@
     marcarPanelesVacios_();
   })();
   function completarAccesibilidad_() {
-    pintarComentariosRapidos_(); // los paneles de comentario del Expediente de carga se dibujan después
     document
       .querySelectorAll(".modal-box, .who-drawer")
       .forEach(function (box) {

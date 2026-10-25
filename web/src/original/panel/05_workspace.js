@@ -105,7 +105,9 @@ var commentsCurrentLoad = null;
     if (!r) return;
     workspaceCurrentLoad = String(load);
     workspaceCurrentTab =
-      PANEL_CONFIG.INTERNAL_ONLY && tab === "comunicacion"
+      PANEL_CONFIG.INTERNAL_ONLY &&
+      !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES &&
+      tab === "comunicacion"
         ? "operacion"
         : tab || "operacion";
     document.getElementById("workspace-title").textContent =
@@ -245,7 +247,7 @@ var commentsCurrentLoad = null;
     );
   }
   function inlineCommentHtml() {
-    return '<div class="inline-panel" id="ws-inline-comment" hidden><h3 class="ws-section-title">Agregar comentario</h3><div class="quick-comments" data-quick-target="ws-inline-comment-text"></div><textarea class="review-input" id="ws-inline-comment-text" placeholder="Escribe el comentario operativo…"></textarea><div class="ws-actions"><button class="ws-btn primary" data-inline-comment-save>Guardar comentario</button><button class="ws-btn" data-inline-close="ws-inline-comment">Cancelar</button></div><div id="ws-inline-comments-list"></div></div>';
+    return '<div class="inline-panel" id="ws-inline-comment" hidden><h3 class="ws-section-title">Agregar comentario</h3><textarea class="review-input" id="ws-inline-comment-text" placeholder="Escribe el comentario operativo…"></textarea><div class="ws-actions"><button class="ws-btn primary" data-inline-comment-save>Guardar comentario</button><button class="ws-btn" data-inline-close="ws-inline-comment">Cancelar</button></div><div id="ws-inline-comments-list"></div></div>';
   }
   function inlineIncidentHtml() {
     return '<div class="inline-panel" id="ws-inline-incident" hidden><h3 class="ws-section-title">Registrar incidencia</h3><select class="review-input" id="ws-inline-inc-category"><option>Documentación</option><option>Operador</option><option>Unidad</option><option>Aduana</option><option>Cliente</option><option>Otro</option></select><select class="review-input" id="ws-inline-inc-severity"><option value="warn">Media</option><option value="critical">Crítica</option><option value="good">Informativa</option></select><textarea class="review-input" id="ws-inline-inc-desc" placeholder="Describe la incidencia…"></textarea><textarea class="review-input" id="ws-inline-inc-action" placeholder="Acción tomada / siguiente paso…"></textarea><div class="ws-actions"><button class="ws-btn primary" data-inline-inc-save>Guardar incidencia</button><button class="ws-btn" data-inline-close="ws-inline-incident">Cancelar</button></div></div>';
@@ -436,6 +438,11 @@ var commentsCurrentLoad = null;
       '">Agregar comentario</button><button class="ws-btn" data-ws-incidencia="' +
       esc(r.load) +
       '">Registrar incidencia</button>' +
+      (PANEL_CONFIG.MANUAL_CLIENT_MESSAGES
+        ? '<button type="button" class="ws-btn" data-home-comm="' +
+          esc(r.load) +
+          '">Notificar a cliente</button>'
+        : "") +
       (r.client_notify_pending
         ? '<button class="ws-btn" data-client-notified-load="' +
           esc(r.load) +
@@ -727,6 +734,7 @@ var commentsCurrentLoad = null;
     return (
       '<h3 class="ws-section-title">Estado de comunicación</h3>' +
       st +
+      '<p class="tracking-note">Prepara el mensaje, cópialo o ábrelo en WhatsApp. Después de enviarlo, pulsa «Registrar como enviado».</p>' +
       '<div class="comm-composer"><div class="comm-composer-head"><b style="font-size:.76rem">Generar actualización para cliente</b><div class="comm-type-row">' +
       Object.keys(getCommTemplates())
         .map(function (k, i) {
@@ -796,7 +804,8 @@ var commentsCurrentLoad = null;
    * desde selectWho()/el toggle de "¿Quién eres?" — el Centro de mensajes es de quien redacta
    * (myRealIdentity), no del perfil que esté viendo en ese momento. */
   function loadMisPlantillas() {
-    if (PANEL_CONFIG.INTERNAL_ONLY) return;
+    if (PANEL_CONFIG.INTERNAL_ONLY && !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES)
+      return;
     if (!myRealIdentity || !myPassword) {
       myTemplates = {};
       myTemplateLabels = {};
@@ -1094,7 +1103,8 @@ var commentsCurrentLoad = null;
     return html;
   }
   function workspaceHistoryHtml(r) {
-    if (PANEL_CONFIG.INTERNAL_ONLY) workspaceHistorialSubTab = "cambios";
+    if (PANEL_CONFIG.INTERNAL_ONLY && !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES)
+      workspaceHistorialSubTab = "cambios";
     return (
       '<h3 class="ws-section-title">Trazabilidad operativa</h3><div class="ws-timeline"><div class="ws-event"><div class="ws-event-type">Última actualización</div><div class="ws-event-meta">' +
       esc(wsDate(r.updated_at)) +
@@ -1111,7 +1121,9 @@ var commentsCurrentLoad = null;
       '" data-historial-subtab="cambios">Cambios</button><button type="button" class="ws-subtab-btn' +
       (workspaceHistorialSubTab === "comunicacion" ? " active" : "") +
       '" data-historial-subtab="comunicacion"' +
-      (PANEL_CONFIG.INTERNAL_ONLY ? " hidden inert" : "") +
+      (PANEL_CONFIG.INTERNAL_ONLY && !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES
+        ? " hidden inert"
+        : "") +
       ">Comunicación</button></div>" +
       (workspaceHistorialSubTab === "comunicacion"
         ? '<div id="workspace-comms">Cargando…</div>'
@@ -1523,7 +1535,11 @@ var commentsCurrentLoad = null;
     var wf = document.getElementById("workspace-follow");
     if (wf) wf.innerHTML = workspaceFollowHtml(r);
     var b = document.getElementById("workspace-body");
-    if (PANEL_CONFIG.INTERNAL_ONLY && workspaceCurrentTab === "comunicacion")
+    if (
+      PANEL_CONFIG.INTERNAL_ONLY &&
+      !PANEL_CONFIG.MANUAL_CLIENT_MESSAGES &&
+      workspaceCurrentTab === "comunicacion"
+    )
       workspaceCurrentTab = "operacion";
     if (workspaceCurrentTab === "tracking")
       b.innerHTML = workspaceTrackingHtml(r);

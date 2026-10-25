@@ -1,6 +1,8 @@
 // Configuración pública del original: listas y umbrales compartidos.
 export default {
   INTERNAL_ONLY: true,
+  // Redacción y registro manual; no activa envíos automáticos ni portales externos.
+  MANUAL_CLIENT_MESSAGES: true,
   PERSONAL_OPERATION: true,
   // Puestos visibles por cuenta. Estas etiquetas no otorgan ni retiran permisos:
   // la autorización siempre depende del rol guardado en Supabase.

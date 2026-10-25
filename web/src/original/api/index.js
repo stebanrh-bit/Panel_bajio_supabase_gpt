@@ -105,8 +105,6 @@ export function createOriginalApi(client) {
       "getLoadDetailForCliente",
       "getLoadsParaVista",
       "getIncidenciasParaVista",
-      "registrarComunicacionCliente",
-      "markClientNotified",
       "getSlaComunicacion",
     ]) {
       if (methods[method])
@@ -114,6 +112,12 @@ export function createOriginalApi(client) {
           throw Error("Esta función no está disponible en la versión interna.");
         };
     }
+  }
+  if (config.INTERNAL_ONLY && !config.MANUAL_CLIENT_MESSAGES) {
+    for (const method of ["registrarComunicacionCliente", "markClientNotified"])
+      methods[method] = async () => {
+        throw Error("La preparación de mensajes está desactivada.");
+      };
   }
   const getChanges = async (known = {}, since = 0) => {
     ctx.staff();

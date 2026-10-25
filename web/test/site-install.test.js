@@ -42,7 +42,12 @@ test("instalación conjunta: un error revierte todo; repetir conserva datos y pe
     );
     await db.exec(sql);
     await asUser("admin");
-    await rpc("ops_assign_customer",["ACME",(await db.query("select id from profiles where display_name='csr'")).rows[0].id,null]);
+    await rpc("ops_assign_customer", [
+      "ACME",
+      (await db.query("select id from profiles where display_name='csr'"))
+        .rows[0].id,
+      null,
+    ]);
     await asUser("csr");
     await rpc("ops_save_structured_closure", [
       "Cierre conservado",
@@ -60,9 +65,21 @@ test("instalación conjunta: un error revierte todo; repetir conserva datos y pe
       1,
     );
     assert.equal((await db.query("select * from geo_places")).rows.length, 1);
-    const load = (await db.query("select * from loads where load='CONSERVAR'"))
-      .rows[0];
-    await assert.rejects(rpc("confirm_client_notice",[load.load,load.updated_at,"Correo","Prueba conjunta"]),/permission denied/);
+    const load = (
+      await db.query(
+        "select *, updated_at::text as version from loads where load='CONSERVAR'",
+      )
+    ).rows[0];
+    const confirmed = (
+      await rpc("confirm_client_notice", [
+        load.load,
+        load.version,
+        "WhatsApp",
+        "Envío manual",
+      ])
+    ).rows[0];
+    assert.equal(confirmed.client_notify_pending, "false");
+    assert.ok(confirmed.client_notified_at);
     await assert.rejects(
       db.exec(
         "update loads set client_notified_at='false' where load='CONSERVAR'",

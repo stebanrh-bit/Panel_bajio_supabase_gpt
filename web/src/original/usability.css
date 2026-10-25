@@ -2276,6 +2276,9 @@
     [data-status="Cancelado."],
     [data-status="Cancelado"],
     [data-status="Descompuesta"],
+    [data-status="PTE. ARRIVO" i],
+    [data-status="PTE ARRIVO" i],
+    [data-status="Pendiente arrivo" i],
     [data-status="TONU"]
   )
   .t-status-select {

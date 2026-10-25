@@ -19,7 +19,7 @@ export const statuses = [
   "En transito",
   "En yarda MX",
   "Descargando",
-  "Pte. Arrivo",
+  "PTE. ARRIVO",
   "TONU",
   "DELIVERED",
   "En AA",
@@ -78,7 +78,11 @@ export function stageIndex(row) {
   if (status === "Descargando") return 8;
   if (["EN PLANTA", "PATIO MTY"].includes(status) || row.delivery_actual)
     return 7;
-  if (["En transito", "En Yarda US", "Pte. Arrivo"].includes(status)) return 6;
+  if (
+    ["En transito", "En Yarda US"].includes(status) ||
+    /^(pte\.?|pendiente)\s+arrivo$/i.test(status)
+  )
+    return 6;
   if (row.cruce_usa_fecha) return 5;
   if (status === "Cruzando") return 4;
   if (row.salida_mexico_fecha) return 3;

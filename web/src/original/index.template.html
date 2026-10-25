@@ -297,7 +297,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     <button type="button" class="chip" id="own-clients-toggle" aria-pressed="false" hidden inert data-retired-client-feature>Mis clientes</button>
     <input class="search" id="search" type="text" placeholder="Buscar carga, cliente, trailer…" title="Busca por carga, cliente, ciudad, unidad o trailer">
     <button class="file-btn" type="button" id="view-toggle-btn">Vista tabla</button>
-    <button class="file-btn" type="button" data-abrir-multi-msg title="Un solo mensaje para varias cargas de un cliente" hidden inert data-retired-client-feature>Mensaje a cliente</button>
+    <button class="file-btn" type="button" data-abrir-multi-msg title="Prepara y copia un mensaje para enviarlo por WhatsApp">Mensaje a cliente</button>
     <button class="file-btn file-btn-sec" type="button" id="masivo-btn" title="Elegir varias cargas para cambiarles el estatus o marcar POD de una vez">Seleccionar varias</button>
     <button class="file-btn file-btn-sec" type="button" id="table-manual-order" aria-pressed="true" title="Volver al orden que acomodaste manualmente">Mi orden</button>
     <label class="sheet-filter" id="densidad-control">Espacio entre filas
@@ -548,7 +548,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   <div class="workspace-backdrop" id="workspace-backdrop" aria-hidden="true">
     <aside class="workspace-panel" role="dialog" aria-modal="true" aria-labelledby="workspace-title">
       <div class="workspace-head"><div class="workspace-head-row"><div><div class="workspace-kicker">Expediente de carga</div><h2 class="workspace-title" id="workspace-title">Carga</h2><div class="workspace-route" id="workspace-route"></div></div><div class="workspace-follow" id="workspace-follow"></div><button type="button" class="workspace-close" id="workspace-close">×</button></div></div>
-      <div class="workspace-tabs" id="workspace-tabs"><button class="workspace-tab active" data-workspace-tab="operacion">Operación</button><button class="workspace-tab" data-workspace-tab="tracking">Seguimiento</button><button class="workspace-tab" data-workspace-tab="comunicacion" hidden inert data-retired-client-feature>Comunicación</button><button class="workspace-tab" data-workspace-tab="documentos">Documentos</button><button class="workspace-tab" data-workspace-tab="incidencias">Incidencias</button><button class="workspace-tab" data-workspace-tab="historial">Historial</button></div>
+      <div class="workspace-tabs" id="workspace-tabs"><button class="workspace-tab active" data-workspace-tab="operacion">Operación</button><button class="workspace-tab" data-workspace-tab="tracking">Seguimiento</button><button class="workspace-tab" data-workspace-tab="comunicacion">Mensaje a cliente</button><button class="workspace-tab" data-workspace-tab="documentos">Documentos</button><button class="workspace-tab" data-workspace-tab="incidencias">Incidencias</button><button class="workspace-tab" data-workspace-tab="historial">Historial</button></div>
       <div class="workspace-body" id="workspace-body"></div>
     </aside>
   </div>
@@ -564,7 +564,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
       </div>
       <div class="comments-list" id="comments-list"></div>
       <div class="comments-new">
-        <div class="quick-comments" data-quick-target="comments-textarea"></div>
         <textarea id="comments-textarea" rows="3" placeholder="Escribe un comentario..." spellcheck="true" lang="es"></textarea>
         <button type="button" class="csr-btn" id="identity-verify-btn" style="align-self:flex-start; display:none;">Verificar identidad</button>
         <button type="button" class="comments-submit" id="comments-submit">Ingresar comentario</button>

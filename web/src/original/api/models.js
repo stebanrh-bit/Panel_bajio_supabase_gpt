@@ -25,10 +25,11 @@ export function loadModel(raw, name = (value) => value, now = Date.now()) {
   for (const field of booleanFields)
     row[field] =
       raw[field] == null || raw[field] === "" ? "" : marked(raw[field]);
-  row.client_notify_pending = config.INTERNAL_ONLY
-    ? false
-    : marked(raw.client_notify_pending);
-  if (config.INTERNAL_ONLY) {
+  row.client_notify_pending =
+    config.INTERNAL_ONLY && !config.MANUAL_CLIENT_MESSAGES
+      ? false
+      : marked(raw.client_notify_pending);
+  if (config.INTERNAL_ONLY && !config.MANUAL_CLIENT_MESSAGES) {
     row.client_notify_reason = "";
     row.client_notify_since = "";
     row.client_notified_at = "";

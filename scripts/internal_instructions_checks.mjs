@@ -195,14 +195,14 @@ export async function runInternalInstructionsReview({
     assert.equal(
       await page
         .locator(
-          '[data-abrir-multi-msg]:visible,[data-workspace-tab="comunicacion"]:visible,#who-toggle-btn:visible',
+          '#who-toggle-btn:visible,[data-retired-client-feature]:visible',
         )
         .count(),
       0,
     );
     assert.equal(await page.locator("#table-body tr.t-row").count(), 3);
     checks.push(
-      "La versión activa no muestra mensajes al cliente, vista gerencial ni selector de otros perfiles",
+      "La versión activa mantiene retirados los portales y otros perfiles; recupera mensajes manuales",
     );
     await page
       .getByRole("button", { name: "Organizar turno", exact: true })

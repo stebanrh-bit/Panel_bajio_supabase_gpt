@@ -366,10 +366,10 @@ test("instructivos y versión personal: conocimiento aprobado, condiciones, etap
       },
     );
     await t.test(
-      "sin avisos al cliente; historial interno y respaldo incluyen la base de conocimiento",
+      "avisos manuales disponibles; envíos automáticos apagados y respaldo incluye la base de conocimiento",
       async () => {
         await db.exec("update loads set status='En Yarda US' where load='A'");
-        assert.equal((await row()).client_notify_pending, "false");
+        assert.equal((await row()).client_notify_pending, "true");
         await db
           .exec(
             "update panel_settings set external_alerts_enabled=true,alert_channel='google_email' where singleton",
