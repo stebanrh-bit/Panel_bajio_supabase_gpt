@@ -28,6 +28,9 @@ import * as signals from "./logistics-signals.js";
 import * as instructionContent from "./instructions/content.js";
 import { mountInstructions } from "./instructions/ui.js";
 import instructionStyles from "./instructions/style.css?raw";
+import * as loadViews from "./load-views/rules.js";
+import { editMenu } from "./load-views/editor.js";
+import loadViewsStyles from "./load-views/style.css?raw";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -40,6 +43,7 @@ async function start() {
   window.panelDialogs = dialogs;
   window.panelRendering = rendering;
   window.panelLoadOrder = loadOrder;
+  window.panelLoadViews = { ...loadViews, editMenu };
   window.panelTaskTime = taskTime;
   window.panelSignals = signals;
   window.panelInstructionUI = instructionContent;
@@ -66,7 +70,9 @@ async function start() {
       "\n" +
       organizationStyles +
       "\n" +
-      instructionStyles,
+      instructionStyles +
+      "\n" +
+      loadViewsStyles,
     script,
     config,
     view,

@@ -1,0 +1,9 @@
+{
+  "source": "HTML empaquetado con Supabase simulado; PostgreSQL se valida por separado",
+  "checks": [
+    "Activas configurable incluye cargas futuras; nombre, orden, visibilidad y vista inicial se guardan juntos sin sobrescribir un borrador rechazado.",
+    "Las vistas nuevas filtran tabla y tarjetas; volver a Cargas conserva la selección.",
+    "Una recarga sin caché recupera el menú y la opción predeterminada desde la cuenta.",
+    "Cancelar y restaurar sin guardar conservan las preferencias; editor sin desbordamiento a 320, 390 y 1533 px."
+  ]
+}

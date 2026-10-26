@@ -1,3 +1,4 @@
+import { runLoadViewsReview } from "./load_views_checks.mjs";
 import { runInternalInstructionsReview } from "./internal_instructions_checks.mjs";
 import {
   clickOperationOption,
@@ -819,6 +820,20 @@ let panelReview,
   punctualPendingReview,
   logisticsSignalsReview;
 try {
+  if (process.argv.includes("--views-only")) {
+    await runLoadViewsReview({
+      newPage,
+      rawLoads,
+      profiles,
+      customerAssignments,
+    });
+    assert.deepEqual(errors, []);
+    await browser.close();
+    console.log(
+      "Mostrar configurable: filtros, guardado privado, errores, recarga y vista móvil verificados.",
+    );
+    process.exit(0);
+  }
   if (process.argv.includes("--internal-only")) {
     customerAssignments[0].owner_id = adminId;
     await runInternalInstructionsReview({

@@ -856,24 +856,14 @@
       );
     };
     var activeCount = currentData.filter(function (r) {
-      return !isArchived(r) && !isCanceladaFinalizada(r) && matches(r);
+      return window.panelLoadViews.lifecycle(r) === "open" && matches(r);
     }).length;
     var doneCount = currentData.filter(function (r) {
       return isArchived(r) && matches(r);
     }).length;
     var canceladaCount = currentData.filter(function (r) {
-      return isCanceladaFinalizada(r) && matches(r);
+      return window.panelLoadViews.lifecycle(r) === "closed" && matches(r);
     }).length;
-    var punctualOption = document.querySelector(
-      '#operation-state-filter option[value="punctual"]',
-    );
-    if (punctualOption)
-      punctualOption.textContent =
-        "Pendientes puntuales (" +
-        currentData.filter(function (r) {
-          return !r.archived && r.punctual_pending && matches(r);
-        }).length +
-        ")";
     document.getElementById("count-active").textContent = activeCount;
     document.getElementById("count-done").textContent = doneCount;
     document.getElementById("count-cancelada").textContent = canceladaCount;
@@ -894,7 +884,7 @@
         })
       : currentData;
     var active = scoped.filter(function (r) {
-      return !isArchived(r) && !isCanceladaFinalizada(r);
+      return window.panelLoadViews.lifecycle(r) === "open";
     });
     var attentionCount = active.filter(needsAttention).length;
     // "Docs completos" solo cuenta cargas en curso (activas) — una vez entregada o
@@ -975,6 +965,14 @@
     var csrClienteFiltro = currentCsrClienteFiltro();
     var loadsSeguidos = loadsSeguidosScope();
     renderClienteFilterOptions();
+    renderVistas_();
+    var operationView = vistaCargaActual_();
+    var viewRecords = new Map(
+      currentData.map(function (r) {
+        return [String(r.load), r];
+      }),
+    );
+    var filteredCount = 0;
     document.getElementById("operation-state-filter").value = currentFilter;
     var pills = document.getElementById("active-filter-pills");
     if (pills) {
@@ -1023,32 +1021,17 @@
     // applyFilters() posterior — el mismo bug ya visto con "Pendientes de load").
     document
       .querySelectorAll(
-        ".card:not([data-pendiente-id]):not([data-bitacora-id]), #table-body tr.t-row",
+        ".card[data-load]:not([data-pendiente-id]):not([data-bitacora-id]), #table-body tr.t-row",
       )
       .forEach(function (card) {
-        var status = card.getAttribute("data-status");
-        var isDone =
-          isDoneStatus(status) && card.getAttribute("data-pod") === "true";
-        var isCancelada =
-          statusNorm(status) === "tonu" &&
-          card.getAttribute("data-recargos") === "true";
         var isAttention = card.getAttribute("data-attention") === "true";
-        var isFuturePickup = pickupIsFuture(card.getAttribute("data-pickup"));
-        var matchesFilter =
-          currentFilter === "all" ||
-          (currentFilter === "punctual" &&
-            card.getAttribute("data-punctual") === "true") ||
-          (currentFilter === "active" &&
-            !isFuturePickup &&
-            !isDone &&
-            !isCancelada) ||
-          (currentFilter === "done" && isDone) ||
-          (currentFilter === "cancelada" && isCancelada) ||
-          (currentFilter === "attention" && isAttention) ||
-          (currentFilter === "cruce-hoy" &&
-            cruceWithinDays(card.getAttribute("data-cruce"), 0)) ||
-          (currentFilter === "cruce-semana" &&
-            cruceWithinDays(card.getAttribute("data-cruce"), 6));
+        var record = viewRecords.get(String(card.getAttribute("data-load")));
+        var matchesFilter = window.panelLoadViews.matchesView(
+          Object.assign({}, record, { needs_attention: isAttention }),
+          operationView.rules,
+          new Date(),
+          record ? textoBusqueda_(record) : "",
+        );
         var cardCustomer = card.getAttribute("data-customer");
         var haystack =
           card.getAttribute("data-load") +
@@ -1082,6 +1065,12 @@
           isForced ||
           (matchesFilter && matchesSearch && matchesCsr && matchesCliente);
         card.style.display = visible ? "" : "none";
+        if (
+          visible &&
+          ((currentView === "table" && card.classList.contains("t-row")) ||
+            (currentView !== "table" && card.classList.contains("card")))
+        )
+          filteredCount++;
         // Si el load que estaba seleccionado en el panel de detalle (ver renderTableDetailPanel)
         // queda escondido por el filtro/búsqueda actual, cerramos el panel — ya no tiene sentido
         // mostrar el detalle de una fila que ni siquiera se ve en la lista de arriba.
@@ -1094,17 +1083,20 @@
           renderTableDetailPanel();
         }
       });
-    var soloActivos =
-      currentFilter === "active" ||
-      currentFilter === "attention" ||
-      currentFilter === "cruce-hoy" ||
-      currentFilter === "cruce-semana";
-    document.getElementById("group-active").style.display =
-      currentFilter === "done" || currentFilter === "cancelada" ? "none" : "";
-    document.getElementById("group-done").style.display =
-      soloActivos || currentFilter === "cancelada" ? "none" : "";
-    document.getElementById("group-cancelada").style.display =
-      soloActivos || currentFilter === "done" ? "none" : "";
+    ["active", "done", "cancelada"].forEach(function (group) {
+      var box = document.getElementById("cards-" + group);
+      document.getElementById("group-" + group).style.display = Array.from(
+        box.querySelectorAll(".card"),
+      ).some(function (card) {
+        return card.style.display !== "none";
+      })
+        ? ""
+        : "none";
+    });
+    document.getElementById("load-view-summary").textContent =
+      filteredCount +
+      " cargas · " +
+      window.panelLoadViews.describeView(operationView);
     aplicarLimiteTabla_();
     marcarFilasMasivo_();
     updateCounts(csrClienteFiltro);
@@ -2009,7 +2001,9 @@
           autoRefresh(true);
           loadSlaMetrics();
           loadMisPlantillas(); // el Centro de mensajes también es de quien inició sesión
-          renderVistas_(); // "Mis vistas" es de cada quien
+          cargarVistasCargas_().catch(function (err) {
+            showToast(err.message, "error");
+          });
           closeIdentityModal();
           if (!opts.silent) showToast("Sesión iniciada: " + nombre, "good");
           if (pendingAfterLogin) {
@@ -2499,12 +2493,14 @@
   /** Un solo selector conserva el alcance y la lógica de los filtros de la operación. */
   function marcarFiltroOperacion_(filtro) {
     currentFilter = filtro;
-    document.getElementById("operation-state-filter").value = filtro;
+    loadViewsSelection_ = (loadViewsSelection_ || 0) + 1;
+    renderVistas_();
   }
   document
     .getElementById("operation-state-filter")
     .addEventListener("change", function (event) {
       marcarFiltroOperacion_(event.target.value);
+      aplicarPresentacionVista_(vistaCargaActual_());
       applyFilters();
     });
   document.getElementById("search").addEventListener("input", function (e) {
@@ -2707,139 +2703,202 @@
     });
   aplicarDensidad_();
 
-  // ---- Mis vistas: filtro + cliente + búsqueda + orden guardados con nombre ----
-  // Se guardan en este navegador, por persona (es una comodidad de cada quien, no un dato del equipo).
-  var VISTAS_MAX_ = 12;
-  var FILTRO_NOMBRES_ = {
-    all: "Todas",
-    active: "Activas",
-    punctual: "Pendientes puntuales",
-    attention: "Necesitan atención",
-    "cruce-hoy": "Cruzan hoy",
-    "cruce-semana": "Cruzan esta semana",
-    done: "Entregadas",
-    cancelada: "Canceladas",
-  };
-  function vistasKey_() {
-    return "bajio_vistas_" + (myRealIdentity || "sin-sesion");
+  // ---- Mostrar: opciones y reglas privadas de la cuenta, sincronizadas con Supabase ----
+  var loadViewsConfig_ = window.panelLoadViews.defaultConfig();
+  var loadViewsVersion_ = null;
+  var loadViewsOwner_ = "";
+  var loadViewsRequest_ = null;
+  var loadViewsSelection_ = 0;
+  function usuarioVistasCargas_() {
+    return (window.panelApi.profile || {}).id || myRealIdentity || "";
   }
-  function leerVistas_() {
+  function legacyVistasCargas_() {
     try {
-      return JSON.parse(localStorage.getItem(vistasKey_()) || "[]") || [];
-    } catch (e) {
+      return JSON.parse(
+        localStorage.getItem("bajio_vistas_" + myRealIdentity) || "[]",
+      );
+    } catch (_) {
       return [];
     }
   }
-  function guardarVistas_(v) {
+  function cacheVistasCargas_(config) {
     try {
-      localStorage.setItem(vistasKey_(), JSON.stringify(v));
-    } catch (e) {}
+      localStorage.setItem(
+        "bajio_load_views_" + usuarioVistasCargas_(),
+        JSON.stringify(config),
+      );
+    } catch (_) {
+      /* Supabase sigue siendo el guardado principal si el navegador bloquea esta caché. */
+    }
   }
-  function describirVista_(x) {
-    return [
-      FILTRO_NOMBRES_[x.filtro] || x.filtro,
-      x.cliente ? "cliente: " + x.cliente : "",
-      x.busqueda ? 'busca "' + x.busqueda + '"' : "",
-      x.vista === "table" ? "tabla" : "tarjetas",
-    ]
-      .filter(Boolean)
-      .join(" · ");
+  function vistaCargaActual_() {
+    var config = loadViewsConfig_ || window.panelLoadViews.defaultConfig();
+    return (
+      config.items.find(function (v) {
+        return v.id === currentFilter && v.visible;
+      }) ||
+      config.items.find(function (v) {
+        return v.id === config.defaultId;
+      }) ||
+      config.items[0]
+    );
   }
   function renderVistas_() {
-    var v = leerVistas_();
-    document.getElementById("vistas-bar").innerHTML =
-      '<span class="vistas-label">Mis vistas</span>' +
-      v
-        .map(function (x, i) {
-          return (
-            '<span class="vista-chip"><button type="button" data-vista="' +
-            i +
-            '" title="' +
-            esc(describirVista_(x)) +
-            '">' +
-            esc(x.nombre) +
-            "</button>" +
-            '<button type="button" class="vista-x" data-vista-borrar="' +
-            i +
-            '" aria-label="Borrar la vista ' +
-            esc(x.nombre) +
-            '">&times;</button></span>'
-          );
-        })
-        .join("") +
-      (v.length < VISTAS_MAX_
-        ? '<button type="button" class="link-btn" data-vista-guardar>+ Guardar la vista actual</button>'
-        : "");
+    if (!myRealIdentity) {
+      loadViewsConfig_ = window.panelLoadViews.defaultConfig();
+      loadViewsVersion_ = null;
+      loadViewsOwner_ = "";
+    }
+    var config = loadViewsConfig_ || window.panelLoadViews.defaultConfig();
+    var selector = document.getElementById("operation-state-filter");
+    var html = config.items
+      .filter(function (v) {
+        return v.visible;
+      })
+      .map(function (v) {
+        return '<option value="' + esc(v.id) + '">' + esc(v.name) + "</option>";
+      })
+      .join("");
+    if (selector.innerHTML !== html) selector.innerHTML = html;
+    currentFilter = vistaCargaActual_().id;
+    selector.value = currentFilter;
+    var old = document.getElementById("vistas-bar");
+    old.innerHTML = "";
+    old.hidden = true;
   }
-  function aplicarVista_(x) {
-    marcarFiltroOperacion_(x.filtro || "all");
-    currentClienteFiltro = x.cliente || "";
-    document.getElementById("cliente-filter").value = currentClienteFiltro;
-    document.getElementById("search").value = x.busqueda || "";
-    currentSearch = String(x.busqueda || "")
-      .trim()
-      .toLowerCase();
-    tableSort.col = x.orden ? x.orden.col : tableSort.col;
-    tableSort.dir = x.orden ? x.orden.dir : tableSort.dir;
-    if (x.vista && x.vista !== currentView) {
-      currentView = x.vista;
+  function aplicarPresentacionVista_(view) {
+    if (view.layout !== "keep" && view.layout !== currentView) {
+      currentView = view.layout;
+      viewDirty.table = true;
+      viewDirty.cards = true;
+      applyView();
+    }
+    if (view.sort) {
+      tableSort = { col: view.sort.col, dir: view.sort.dir };
+      viewDirty.table = true;
+      if (currentView === "table") buildTableView();
+    }
+  }
+  async function cargarVistasCargas_(force) {
+    if (!myRealIdentity) return;
+    var owner = usuarioVistasCargas_();
+    if (loadViewsOwner_ !== owner) {
+      loadViewsOwner_ = owner;
+      loadViewsVersion_ = null;
+      loadViewsSelection_ = 0;
+      var cached = null;
       try {
-        localStorage.setItem("bajio_view", currentView);
-      } catch (e) {}
-    }
-    viewDirty.table = true;
-    viewDirty.cards = true;
-    applyView();
-    applyFilters();
-    showToast("Vista: " + x.nombre, "good");
-  }
-  document.getElementById("vistas-bar").addEventListener("click", function (e) {
-    var b;
-    if ((b = e.target.closest("[data-vista]"))) {
-      var x = leerVistas_()[Number(b.getAttribute("data-vista"))];
-      if (x) aplicarVista_(x);
-      return;
-    }
-    if ((b = e.target.closest("[data-vista-borrar]"))) {
-      var v = leerVistas_(),
-        i = Number(b.getAttribute("data-vista-borrar"));
-      v.splice(i, 1);
-      guardarVistas_(v);
+        cached = JSON.parse(
+          localStorage.getItem("bajio_load_views_" + owner) || "null",
+        );
+      } catch (_) {}
+      try {
+        loadViewsConfig_ = window.panelLoadViews.initialConfig(
+          cached,
+          legacyVistasCargas_(),
+        );
+      } catch (_) {
+        loadViewsConfig_ = window.panelLoadViews.defaultConfig();
+      }
+      currentFilter = loadViewsConfig_.defaultId;
       renderVistas_();
-      return;
+      applyFilters();
     }
-    if (e.target.closest("[data-vista-guardar]")) {
-      var actual = {
-        filtro: currentFilter,
-        cliente: currentClienteFiltro,
-        busqueda: document.getElementById("search").value.trim(),
-        vista: currentView,
-        orden: tableSort.col
-          ? { col: tableSort.col, dir: tableSort.dir }
-          : null,
-      };
-      confirmarModal_(
-        "Guardar la vista actual",
-        '<p class="who-hint" style="margin:0 0 .5rem">' +
-          esc(describirVista_(actual)) +
-          "</p>" +
-          '<input type="text" id="vista-nombre" class="search" maxlength="30" placeholder="Nombre, por ejemplo: Bosch activas" style="width:100%">',
-        "Guardar",
-        function () {
-          actual.nombre =
-            document.getElementById("vista-nombre").value.trim() ||
-            describirVista_(actual).slice(0, 30);
-          var v = leerVistas_();
-          v.push(actual);
-          guardarVistas_(v.slice(0, VISTAS_MAX_));
-          renderVistas_();
-          showToast("Vista guardada: " + actual.nombre, "good");
-        },
-      );
-      setTimeout(function () {
-        var n = document.getElementById("vista-nombre");
-        if (n) n.focus();
-      }, 60);
-    }
-  });
+    if (loadViewsRequest_ && loadViewsRequest_.owner === owner)
+      return loadViewsRequest_.promise;
+    var selection = loadViewsSelection_;
+    var promise = window.panelApi.methods
+      .getVistasCargas()
+      .then(function (result) {
+        if (!myRealIdentity || usuarioVistasCargas_() !== owner) return;
+        loadViewsConfig_ = window.panelLoadViews.initialConfig(
+          result.config,
+          legacyVistasCargas_(),
+        );
+        loadViewsVersion_ = result.version;
+        cacheVistasCargas_(loadViewsConfig_);
+        if (!force && selection === loadViewsSelection_)
+          currentFilter = loadViewsConfig_.defaultId;
+        renderVistas_();
+        if (!force && selection === loadViewsSelection_)
+          aplicarPresentacionVista_(vistaCargaActual_());
+        applyFilters();
+        return result;
+      })
+      .finally(function () {
+        if (loadViewsRequest_ && loadViewsRequest_.promise === promise)
+          loadViewsRequest_ = null;
+      });
+    loadViewsRequest_ = { owner: owner, promise: promise };
+    return promise;
+  }
+  document
+    .getElementById("configure-load-views")
+    .addEventListener("click", async function () {
+      var button = this;
+      if (button.disabled) return;
+      button.disabled = true;
+      try {
+        await cargarVistasCargas_(true);
+        if (!myRealIdentity) return;
+        var owner = usuarioVistasCargas_(),
+          version = loadViewsVersion_;
+        await window.panelLoadViews.editMenu({
+          config: loadViewsConfig_,
+          initialId: currentFilter,
+          clients: Array.from(
+            new Set(
+              currentData
+                .map(function (r) {
+                  return r.customer;
+                })
+                .filter(Boolean),
+            ),
+          ),
+          statuses: Array.from(
+            new Set(
+              STATUS_OPTIONS.concat(
+                currentData
+                  .map(function (r) {
+                    return r.status;
+                  })
+                  .filter(Boolean),
+              ),
+            ),
+          ),
+          getRows: function () {
+            return currentData.map(function (r) {
+              return Object.assign({}, r, {
+                needs_attention: needsAttention(r),
+                view_search_text: textoBusqueda_(r),
+              });
+            });
+          },
+          save: async function (config) {
+            var result = await window.panelApi.methods.guardarVistasCargas(
+              config,
+              version,
+            );
+            if (!myRealIdentity || usuarioVistasCargas_() !== owner)
+              throw Error("La sesión cambió.");
+            loadViewsConfig_ = window.panelLoadViews.validateConfig(
+              result.config,
+            );
+            loadViewsVersion_ = result.version;
+            cacheVistasCargas_(loadViewsConfig_);
+            loadViewsSelection_++;
+            renderVistas_();
+            tablaFirmaFiltro_ = "";
+            aplicarPresentacionVista_(vistaCargaActual_());
+            applyFilters();
+            showToast("Menú guardado en tu cuenta", "good");
+            return result;
+          },
+        });
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        button.disabled = false;
+      }
+    });
   renderVistas_();

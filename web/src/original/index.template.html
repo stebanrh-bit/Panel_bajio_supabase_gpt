@@ -285,12 +285,12 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     <div class="stat skeleton-stat"><div class="skeleton" style="width:26px;height:26px;border-radius:7px;margin-bottom:0.6rem;"></div><div class="skeleton" style="width:44px;height:1.75rem;margin-bottom:0.4rem;"></div><div class="skeleton" style="width:110px;height:0.7rem;"></div></div>
   </div>
   <div class="home-operation-wrap"><div class="toolbar sheet-toolbar">
-    <label class="sheet-filter">Mostrar<select id="operation-state-filter" aria-label="Estado de las cargas">
+    <div class="load-view-picker"><label class="sheet-filter">Mostrar<select id="operation-state-filter" aria-label="Estado de las cargas">
       <option value="all">Todas</option><option value="active">Activas</option>
       <option value="punctual">Pendientes puntuales</option><option value="attention">Necesitan atención</option><option value="cruce-hoy">Cruzan hoy</option>
       <option value="cruce-semana">Cruzan esta semana</option><option value="done">Entregadas</option>
       <option value="cancelada">Canceladas / finalizadas</option>
-    </select></label>
+    </select></label><button type="button" class="load-view-configure" id="configure-load-views" aria-label="Configurar opciones de Mostrar">Configurar</button></div>
     <select class="cliente-filter" id="cliente-filter" aria-label="Filtrar por cliente">
       <option value="">Todos mis clientes</option>
     </select>
@@ -307,7 +307,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
       </select>
     </label>
   </div>
-  <!-- Mis vistas: combinaciones de filtro + cliente + búsqueda guardadas con nombre (en este navegador). -->
+  <p id="load-view-summary" class="load-view-summary" aria-live="polite"></p>
+  <!-- Contenedor de compatibilidad: las vistas anteriores se incorporan al menú Mostrar. -->
   <div class="vistas-bar" id="vistas-bar"></div><div id="active-filter-pills" class="organize-toolbar" aria-live="polite"></div>
 
   <div id="cards-view">

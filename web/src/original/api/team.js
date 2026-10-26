@@ -1,3 +1,5 @@
+import { validateConfig } from "../load-views/rules.js";
+import { unwrap as unwrapViews } from "../../data/supabase.js";
 import { createTeamService } from "../../features/team/service.js";
 import { createPortalService } from "../../features/portal/service.js";
 import {
@@ -127,6 +129,37 @@ export function teamMethods(ctx, operations) {
       ctx.staff(true);
       await service.setFollowing(names.map(ctx.personId));
       return { ok: true };
+    },
+    getVistasCargas: async () => {
+      ctx.staff();
+      const record = await ctx.safe(
+        unwrapViews(
+          ctx.client
+            .from("original_preferences")
+            .select("load_views,updated_at")
+            .eq("user_id", ctx.profile.id)
+            .maybeSingle(),
+          "SQL 019 de vistas personales",
+        ),
+      );
+      return {
+        ok: true,
+        config: record?.load_views || {},
+        version: record?.updated_at || null,
+      };
+    },
+    guardarVistasCargas: async (config, version) => {
+      ctx.staff(true);
+      const result = await ctx.safe(
+        unwrapViews(
+          ctx.client.rpc("ops_save_load_views", {
+            p_config: validateConfig(config),
+            p_version: version || null,
+          }),
+          "SQL 019 de vistas personales",
+        ),
+      );
+      return { ok: true, ...result };
     },
     getMisPlantillas: async () => {
       if (!ctx.profile) return { ok: true, templates: {}, labels: {} };

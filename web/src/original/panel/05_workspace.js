@@ -1673,11 +1673,10 @@ var commentsCurrentLoad = null;
       }, 30);
     else window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  // Cargas abre con el selector en "Activas" al entrar desde la barra lateral.
+  // Cargas conserva la vista personal seleccionada; el inicio se carga desde la cuenta.
   document.querySelectorAll(".sidebar-btn[data-page]").forEach(function (b) {
     b.addEventListener("click", function () {
       var p = b.getAttribute("data-page");
-      if (p === "operation") marcarFiltroOperacion_("active");
       showMainPage(p);
     });
   });
@@ -1711,7 +1710,6 @@ var commentsCurrentLoad = null;
         abrirAvisos_(document.getElementById("avisos-panel").hidden);
         return;
       }
-      if (a === "operation") marcarFiltroOperacion_("active");
       showMainPage(a);
     });
   document.addEventListener("click", function (e) {

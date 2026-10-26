@@ -1230,9 +1230,11 @@
   }
 
   function buildCardsView() {
-    var cancelada = currentData.filter(isCanceladaFinalizada);
+    var cancelada = currentData.filter(function (r) {
+      return window.panelLoadViews.lifecycle(r) === "closed";
+    });
     var resto = currentData.filter(function (r) {
-      return !isCanceladaFinalizada(r);
+      return window.panelLoadViews.lifecycle(r) !== "closed";
     });
     var active = resto.filter(function (r) {
       return !isArchived(r);

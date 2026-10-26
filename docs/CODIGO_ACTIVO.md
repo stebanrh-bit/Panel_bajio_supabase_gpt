@@ -25,7 +25,7 @@ La entrega activa es la [versión personal con instructivos por ruta](VERSION_PE
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
-- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–018, sobre 001–003.
+- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–019, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
 - `google-apps-script/Code-sitio.gs`: alojamiento, consultas Google y proceso horario limitado. No usa claves privilegiadas.
 
@@ -62,3 +62,5 @@ Para esta entrega personal, el recorrido de navegador vigente es `node scripts/c
 Las cargas nuevas usan `PTE. ARRIVO` mediante la migración 017, tanto en captura como en importación. El rojo contempla también las escrituras anteriores del mismo estatus. Los comentarios se escriben libremente, sin botones de frases preestablecidas.
 
 La migración 018 recupera la redacción y confirmación manual de mensajes para WhatsApp. `MANUAL_CLIENT_MESSAGES` muestra el compositor individual y «Mensaje a cliente» para varias cargas; mantiene los portales y envíos automáticos desactivados. El SQL breve está en `supabase/actualizar_cargas_y_mensajes.sql` y requiere 016.
+
+El [menú Mostrar configurable](MOSTRAR_CONFIGURABLE.md) usa `load-views/rules.js`, `load-views/editor.js` y la migración 019. Las preferencias se guardan por cuenta en `original_preferences.load_views`, separadas de las plantillas de WhatsApp. El recorrido de navegador es `node scripts/check_browser.mjs --views-only`.
