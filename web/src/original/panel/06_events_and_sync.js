@@ -1692,10 +1692,15 @@
     document.querySelectorAll("[data-cal-count]").forEach(function (count) {
       count.textContent = counts[count.dataset.calCount];
     });
+    // Los días ya representan la fecha de México. Formatearlos como días de calendario
+    // evita aplicar otra conversión de zona y retroceder al domingo en otros equipos.
+    var weekLabel = new Intl.DateTimeFormat("es-MX", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
     document.getElementById("cal-week-title").textContent =
-      window.panelUsability.formatMoment(dias[0], true) +
-      " — " +
-      window.panelUsability.formatMoment(dias[6], true);
+      weekLabel.format(dias[0]) + " — " + weekLabel.format(dias[6]);
     document.getElementById("cal-result").textContent =
       visible +
       (visible === 1 ? " movimiento" : " movimientos") +

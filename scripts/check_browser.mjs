@@ -1,3 +1,4 @@
+import { runCalendarDateReview } from "./calendar_date_checks.mjs";
 import { runPersonalReview } from "./personal_checks.mjs";
 import { runLoadViewsReview } from "./load_views_checks.mjs";
 import { runInternalInstructionsReview } from "./internal_instructions_checks.mjs";
@@ -475,10 +476,11 @@ async function newPage(
   view = "internal",
   identity = profiles[0],
   initialSheet = false,
+  timezoneId = "America/Mexico_City",
 ) {
   const page = await browser.newPage({
     viewport,
-    timezoneId: "America/Mexico_City",
+    timezoneId,
   });
   await page.clock.setFixedTime(now);
   page.on("pageerror", (error) => errors.push(error.message));
@@ -908,6 +910,25 @@ let panelReview,
   punctualPendingReview,
   logisticsSignalsReview;
 try {
+  if (process.argv.includes("--calendar-dates-only")) {
+    customerAssignments[0].owner_id = adminId;
+    const result = await runCalendarDateReview({
+      newPage,
+      rawLoads,
+      profiles,
+      personalPreferences,
+    });
+    assert.deepEqual(errors, []);
+    await writeFile(
+      new URL("docs/evidencia-calendario-fechas-2026-10-27.json", root),
+      JSON.stringify(result, null, 2),
+    );
+    console.log(
+      "Calendario: fechas, movimientos, horas de México y navegación verificados en tres zonas horarias.",
+    );
+    await browser.close();
+    process.exit(0);
+  }
   if (process.argv.includes("--personal-only")) {
     customerAssignments[0].owner_id = adminId;
     const result = await runPersonalReview({

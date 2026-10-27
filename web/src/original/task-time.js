@@ -21,6 +21,13 @@ function wallTime(value) {
 /** Una fecha heredada sin hora significa medianoche de México, nunca medianoche UTC. */
 export function taskFollowUpISO(value) {
   if (!value) return "";
+  // El calendario entrega objetos Date ya interpretados. Conservar su instante evita
+  // volver a analizar Date.toString(), cuyo formato depende del navegador.
+  if (value instanceof Date) {
+    if (!Number.isFinite(value.getTime()))
+      throw Error("Indica una fecha y hora válidas.");
+    return value.toISOString();
+  }
   const text = String(value).trim();
   if (/(Z|[+-]\d{2}:\d{2})$/i.test(text)) {
     const instant = new Date(text);

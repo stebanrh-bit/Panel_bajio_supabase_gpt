@@ -64,3 +64,16 @@ test("tareas: rechazar fechas inexistentes y respetar reglas históricas de la z
   assert.equal(taskFollowUpISO("2021-07-01T09:00"), "2021-07-01T14:00:00.000Z");
   assert.throws(() => taskFollowUpISO("2021-04-04T02:30"), /no existe/);
 });
+
+test("fechas Date del calendario conservan el instante y se muestran en hora de México", () => {
+  const date = new Date("2026-10-09T02:30:45.123Z");
+  assert.equal(taskFollowUpISO(date), "2026-10-09T02:30:45.123Z");
+  assert.equal(taskFollowUpInput(date), "2026-10-08T20:30");
+  assert.equal(date.toISOString(), "2026-10-09T02:30:45.123Z");
+  assert.equal(
+    taskFollowUpInput(new Date("2026-10-27T15:00:00Z")),
+    "2026-10-27T09:00",
+  );
+  assert.equal(taskFollowUpInput(new Date("")), "");
+  assert.throws(() => taskFollowUpISO(new Date("")), /fecha y hora válidas/);
+});

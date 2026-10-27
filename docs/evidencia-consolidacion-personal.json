@@ -1,5 +1,5 @@
 {
-  "version": "2026.10.27.1",
+  "version": "2026.10.27.2",
   "environment": "Chromium local; Supabase simulado",
   "checks": [
     "Versión del sitio y SQL 20 disponibles",
