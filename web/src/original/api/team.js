@@ -65,13 +65,25 @@ export function teamMethods(ctx, operations) {
     getAsignaciones: async () => {
       if (!ctx.profile) return json([]);
       ctx.staff();
+      const aliases = ctx.remember(
+        "customer_aliases",
+        await ctx.rows("customer_aliases", (q) => q, "alias_key"),
+        "alias_key",
+      );
       const records = ctx.remember(
         "customer_assignments",
         await service.assignments(),
         "customer_key",
       );
       const result = records.map((row) => ({
-        cliente: row.customer,
+        cliente: ctx.canonicalCustomer(row.customer),
+        aliases: aliases
+          .filter(
+            (a) =>
+              ctx.canonicalCustomer(a.alias) ===
+              ctx.canonicalCustomer(row.customer),
+          )
+          .map((a) => a.alias),
         csr: name(row.owner_id),
       }));
       if (ctx.profile.role === "admin") {

@@ -1,3 +1,4 @@
+import { runPersonalReview } from "./personal_checks.mjs";
 import { runLoadViewsReview } from "./load_views_checks.mjs";
 import { runInternalInstructionsReview } from "./internal_instructions_checks.mjs";
 import {
@@ -445,6 +446,10 @@ const usabilityLayouts = [];
 const planningChecks = [];
 const personalBellChecks = [];
 const incidents = [];
+const personalPreferences = {};
+const noticeStates = [],
+  documents = [],
+  manualMessages = [];
 const customerAssignments = [
   {
     customer: "ACME",
@@ -525,7 +530,73 @@ async function newPage(
                     : identity.role,
             }
           : profiles;
-      else if (table === "loads") {
+      else if (table === "ops_site_status")
+        result = { schema: 20, features: ["safe_import", "document_links"] };
+      else if (table === "original_preferences")
+        result = { personal_ui: personalPreferences, load_views: null };
+      else if (table === "ops_save_personal_ui") {
+        Object.assign(personalPreferences, request.postDataJSON().p_patch);
+        result = personalPreferences;
+      } else if (table === "ops_notice_state") {
+        for (const change of request.postDataJSON().p_changes || []) {
+          const old = noticeStates.find((x) => x.event_key === change.key) || {
+            event_key: change.key,
+          };
+          if (!noticeStates.includes(old)) noticeStates.push(old);
+          if (change.action === "read") old.read_at = now.toISOString();
+          else
+            old.snoozed_until = new Date(now.getTime() + 3600000).toISOString();
+        }
+        result = noticeStates;
+      } else if (table === "load_document_links")
+        result = documents.filter(
+          (d) =>
+            d.load === url.searchParams.get("load")?.slice(3) && !d.deleted_at,
+        );
+      else if (table === "ops_save_document_link") {
+        const input = request.postDataJSON();
+        let row = documents.find((d) => d.id === input.p_id);
+        if (!row) {
+          row = {
+            id: "document-" + documents.length,
+            load: input.p_load,
+            created_at: stamp,
+          };
+          documents.push(row);
+        }
+        Object.assign(row, {
+          kind: input.p_kind,
+          label: input.p_label,
+          url: input.p_url,
+          updated_at: now.toISOString(),
+        });
+        result = row;
+      } else if (table === "ops_remove_document_link") {
+        documents.find((d) => d.id === request.postDataJSON().p_id).deleted_at =
+          now.toISOString();
+        result = null;
+      } else if (table === "ops_miles_dashboard")
+        result = {
+          pending: 4,
+          retry: 1,
+          completed: 12,
+          no_route: 0,
+          last_run: stamp,
+          status: "ok",
+          last_calculation: stamp,
+          batch_limit: 20,
+        };
+      else if (table === "ops_record_manual_notice") {
+        const input = request.postDataJSON(),
+          row = rawLoads.find((r) => r.load === input.p_load);
+        Object.assign(row, {
+          client_notify_pending: "false",
+          client_notified_at: now.toISOString(),
+          updated_at: now.toISOString(),
+        });
+        manualMessages.push(input);
+        result = [row];
+      } else if (table === "loads") {
         const load = url.searchParams.get("load")?.slice(3);
         if (request.method() === "PATCH") {
           const row = rawLoads.find((item) => item.load === load);
@@ -558,20 +629,37 @@ async function newPage(
           new: !rawLoads.some((item) => item.load === record.load),
           version: null,
           changes: Object.keys(record).filter((key) => key !== "load"),
+          customer: record.customer || "ACME",
+          differences: [
+            {
+              field: "trailer",
+              before: "MANUAL",
+              after: record.trailer || "ARCHIVO",
+            },
+          ],
+          protected:
+            record.load === "VISUAL-001"
+              ? [{ field: "trailer", before: "MANUAL", after: record.trailer }]
+              : [],
+          validation_error: "",
         }));
       } else if (table === "ops_apply_import") {
         importSaves += 1;
         const input = request.postDataJSON();
         assert.deepEqual(input.p_records, previewedRecords);
         assert.equal(input.p_preview.length, input.p_records.length);
-        for (const record of input.p_records)
-          rawLoads.push({
-            ...record,
-            status: "Cargando",
-            archived: false,
-            updated_at: stamp,
-            updated_by: adminId,
-          });
+        for (const record of input.p_records) {
+          const current = rawLoads.find((row) => row.load === record.load);
+          if (current) Object.assign(current, record, { updated_at: stamp });
+          else
+            rawLoads.push({
+              ...record,
+              status: "PTE. ARRIVO",
+              archived: false,
+              updated_at: stamp,
+              updated_by: adminId,
+            });
+        }
         result = {
           id: "import-local",
           file_name: input.p_file_name,
@@ -820,6 +908,29 @@ let panelReview,
   punctualPendingReview,
   logisticsSignalsReview;
 try {
+  if (process.argv.includes("--personal-only")) {
+    customerAssignments[0].owner_id = adminId;
+    const result = await runPersonalReview({
+      newPage,
+      rawLoads,
+      manualMessages,
+      personalPreferences,
+      noticeStates,
+      documents,
+    });
+    assert.deepEqual(errors, []);
+    await writeFile(
+      new URL("docs/evidencia-consolidacion-personal.json", root),
+      JSON.stringify(result, null, 2),
+    );
+    await browser.close();
+    console.log(
+      "Consolidación personal: " +
+        result.checks.length +
+        " comprobaciones de navegador aprobadas.",
+    );
+    process.exit(0);
+  }
   if (process.argv.includes("--views-only")) {
     await runLoadViewsReview({
       newPage,

@@ -68,7 +68,7 @@ export function mountGuidance(doc) {
     ['[data-page="apartados"]', "Apartados"],
     ['[data-page="radar"]', "Radar"],
     ["#who-toggle-btn", "Mi vista"],
-    ["#sidebar-historico-btn", "Histórico"],
+    ["#sidebar-historico-btn", "Histórico de tareas"],
     ["#sidebar-manage-csr-btn", "Administrar"],
   ];
   for (const [selector, label] of labels) {

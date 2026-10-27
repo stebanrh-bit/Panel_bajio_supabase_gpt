@@ -78,11 +78,15 @@ export function stageIndex(row) {
   if (status === "Descargando") return 8;
   if (["EN PLANTA", "PATIO MTY"].includes(status) || row.delivery_actual)
     return 7;
-  if (
-    ["En transito", "En Yarda US"].includes(status) ||
-    /^(pte\.?|pendiente)\s+arrivo$/i.test(status)
-  )
-    return 6;
+  if (["En transito", "En Yarda US"].includes(status)) return 6;
+  // PTE. ARRIVO es también el estatus inicial: no supone que la carga ya está en tránsito.
+  if (/^(pte\.?|pendiente)\s+arrivo$/i.test(status)) {
+    if (marked(row.cruce_confirmado)) return 6;
+    if (row.cruce_usa_fecha) return 5;
+    if (row.salida_mexico_fecha) return 3;
+    if (row.pickup_actual) return 1;
+    return 0;
+  }
   if (row.cruce_usa_fecha) return 5;
   if (status === "Cruzando") return 4;
   if (row.salida_mexico_fecha) return 3;

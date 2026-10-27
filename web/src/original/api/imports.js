@@ -31,7 +31,7 @@ export function importMethods(ctx) {
       repeated: [...new Set(repeated)],
     };
   }
-  async function preview(records) {
+  async function preview(records, fileName = "Importación de cargas") {
     ctx.staff(true);
     const normalized = normalize(records);
     const [details, assignments] = await Promise.all([
@@ -68,6 +68,8 @@ export function importMethods(ctx) {
       ].sort(),
       duplicadosEnArchivo: normalized.repeated,
       vistaPrevia: true,
+      fileName: String(fileName).trim().slice(0, 200),
+      items: details,
     };
     prepared = {
       input: JSON.stringify(records),
@@ -89,12 +91,12 @@ export function importMethods(ctx) {
       )
         throw Error("Genera una nueva vista previa antes de importar.");
       const snapshot = prepared;
-      prepared = null;
       await service.apply(
         snapshot.records,
         snapshot.details,
-        "Importación del panel original",
+        snapshot.summary.fileName,
       );
+      prepared = null;
       return { ...snapshot.summary, vistaPrevia: false };
     },
     getImportInfo: async () => {

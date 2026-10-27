@@ -1,3 +1,4 @@
+import { chronologicalDates } from "../personal/domain.js";
 import config from "../config.js";
 import { unwrap } from "../../data/supabase.js";
 import { createPendingLoadsService } from "../../features/pending-loads/service.js";
@@ -33,6 +34,17 @@ export function operationMethods(ctx) {
     saved,
     personName: name,
   } = ctx;
+  const model = (row) =>
+    loadModel(
+      {
+        ...row,
+        customer_original: row.customer,
+        customer: ctx.canonicalCustomer
+          ? ctx.canonicalCustomer(row.customer)
+          : row.customer,
+      },
+      name,
+    );
   const pending = guarded(createPendingLoadsService(client));
   const reserved = guarded(createReservedLoadsService(client));
   const shifts = guarded(createShiftsService(client));
@@ -69,7 +81,7 @@ export function operationMethods(ctx) {
       updated.forEach((row) => saved("loads", row, "load"));
       ctx.forget("loads", result.removed || []);
     }
-    const models = updated.map((row) => loadModel(row, name));
+    const models = updated.map((row) => model(row));
     return {
       ok: true,
       full: !after,
@@ -82,7 +94,7 @@ export function operationMethods(ctx) {
   }
   async function listLoads() {
     await syncLoads();
-    return ctx.records("loads").map((row) => loadModel(row, name));
+    return ctx.records("loads").map((row) => model(row));
   }
   async function reasonFor(effect, supplied) {
     const reason =
@@ -102,6 +114,15 @@ export function operationMethods(ctx) {
     ctx.staff(true);
     return ctx.serial(`load:${load}`, async () => {
       const old = previous("loads", load);
+      if (
+        [
+          "pickup_appt",
+          "delivery_appt",
+          "pickup_actual",
+          "delivery_actual",
+        ].some((field) => field in values && values[field] !== old[field])
+      )
+        chronologicalDates({ ...old, ...values });
       const records = await safe(
         unwrap(
           client
@@ -119,7 +140,7 @@ export function operationMethods(ctx) {
         );
       return {
         ok: true,
-        ...loadModel(saved("loads", records[0], "load"), name),
+        ...model(saved("loads", records[0], "load")),
       };
     });
   }
@@ -135,7 +156,7 @@ export function operationMethods(ctx) {
       });
       const record = Array.isArray(result) ? result[0] : result;
       if (!record) throw Error("La carga cambió. Actualiza antes de guardar.");
-      return { ok: true, ...loadModel(saved("loads", record, "load"), name) };
+      return { ok: true, ...model(saved("loads", record, "load")) };
     });
   }
   const methods = {
@@ -238,7 +259,7 @@ export function operationMethods(ctx) {
         throw Error(
           "La carga cambió. Actualiza antes de abrir su detalle completo.",
         );
-      return { ok: true, record: loadModel({ ...old, ...record }, name) };
+      return { ok: true, record: model({ ...old, ...record }) };
     },
     getLoadsDelta: async (after = 0) =>
       ctx.profile
@@ -400,13 +421,18 @@ export function operationMethods(ctx) {
         p_channel: "Otro",
         p_notice_type: "Actualización operativa",
       }),
-    registrarComunicacionCliente: async (load, channel, message) => {
-      const result = await loadRpc(load, "confirm_client_notice", {
+    registrarComunicacionCliente: async (
+      load,
+      channel,
+      message,
+      _name,
+      _password,
+      options = {},
+    ) => {
+      const result = await loadRpc(load, "ops_record_manual_notice", {
         p_channel: channel === "Email" ? "Correo" : channel || "Otro",
-        p_notice_type: String(message || "Actualización operativa").slice(
-          0,
-          200,
-        ),
+        p_type: String(message || "Actualización operativa").slice(0, 200),
+        p_message: options.keep ? String(options.message || "").trim() : null,
       });
       return {
         ...result,
@@ -416,12 +442,17 @@ export function operationMethods(ctx) {
     },
     saveStatus: (load, status) => updateLoad(load, { status }),
     saveStatusConRecordatorio: (load, status, when) =>
-      updateLoad(load, { status, recordatorio_fecha: date(when) }),
+      updateLoad(load, {
+        status,
+        recordatorio_fecha: when ? taskFollowUpISO(when) : "",
+      }),
     saveRecordatorio: (load, when) =>
-      updateLoad(load, { recordatorio_fecha: date(when) }),
+      updateLoad(load, {
+        recordatorio_fecha: when ? taskFollowUpISO(when) : "",
+      }),
     saveNextReview: (load, when, note) =>
       updateLoad(load, {
-        next_review_at: date(when),
+        next_review_at: when ? taskFollowUpISO(when) : "",
         next_review_note: String(note || "").trim(),
       }),
     clearNextReview: (load) =>
@@ -431,7 +462,10 @@ export function operationMethods(ctx) {
         load,
         confirmed
           ? { cruce_confirmado: "true" }
-          : { cruce_confirmado: "false", cruce_usa_fecha: date(when) },
+          : {
+              cruce_confirmado: "false",
+              cruce_usa_fecha: when ? taskFollowUpISO(when) : "",
+            },
       ),
     saveDocItem: (load, field, value) => {
       if (!["bol", "doda", "entry", "sobre_listo"].includes(field))
@@ -762,7 +796,7 @@ export function operationMethods(ctx) {
     saveCruceUsa: "cruce_usa_fecha",
   }))
     methods[method] = (load, value) =>
-      updateLoad(load, { [field]: date(value) });
+      updateLoad(load, { [field]: value ? taskFollowUpISO(value) : "" });
   for (const [method, field] of Object.entries({
     savePodSent: "pod_sent",
     saveRecargosVg: "recargos_vg",

@@ -1,4 +1,4 @@
-// ===== Inicio / Action Center =====
+  // ===== Inicio / Action Center =====
   function isSameLocalDay(a, b) {
     if (!a || !b) return false;
     var da = new Date(a),
@@ -721,7 +721,7 @@
           loadKey +
           '</span><span class="hm-soft">' +
           esc(r.customer || "Sin cliente") +
-          '</span><span class="hm-soft">Unidad ' +
+          '</span><span class="hm-soft">Truck ' +
           esc(r.truck || "—") +
           " / Trailer " +
           esc(r.trailer || "—") +
@@ -826,7 +826,7 @@
     var section = document.getElementById("group-carga-csr");
     var box = document.getElementById("home-carga-csr");
     if (!box) return;
-    if (!currentWhoEsSupervisor_()) {
+    if (PANEL_CONFIG.INTERNAL_ONLY || !currentWhoEsSupervisor_()) {
       if (section) section.hidden = true;
       return;
     }
@@ -948,6 +948,11 @@
     var section = document.getElementById("group-cierres-recibidos");
     var box = document.getElementById("home-cierres");
     if (!box) return;
+    if (PANEL_CONFIG.INTERNAL_ONLY) {
+      section.hidden = true;
+      box.textContent = "Sin cierres de turno en esta versión personal.";
+      return;
+    }
     if (!currentWhoPuedeVerCierres_()) {
       if (section) section.hidden = true;
       return;
@@ -1425,19 +1430,30 @@
       future: 0,
       review: 0,
       notify: 0,
+      scheduled: 0,
+      completed: 0,
     };
     groups.forEach(function (entry) {
       counts[dayBucket(entry)]++;
       if (entry.reminders.length) counts.review++;
       if (entry.row.client_notify_pending) counts.notify++;
     });
-    if (homeAttentionFilter === null && groups.length) {
-      homeAttentionFilter = counts.now
-        ? "now"
-        : counts.today
-          ? "today"
-          : "future";
-    }
+    counts.scheduled = counts.today + counts.future;
+    (bitacora || [])
+      .filter(function (t) {
+        return (
+          !t.resuelto &&
+          !t.cancelado &&
+          [t.asignado_a, t.asignado_csr].includes(myRealIdentity)
+        );
+      })
+      .forEach(function (t) {
+        if (!t.fecha_seguimiento || window.panelTaskTime.taskReminderDue(t))
+          counts.now++;
+        else counts.scheduled++;
+      });
+    if (homeAttentionFilter === null && (counts.now || counts.scheduled))
+      homeAttentionFilter = counts.now ? "now" : "scheduled";
     var activeFilter = homeAttentionFilter || "now";
     document
       .querySelectorAll("[data-attention-filter]")
@@ -1459,6 +1475,7 @@
       extraLabel || "Más filtros";
     extraFilters.classList.toggle("has-active-filter", !!extraLabel);
     var filtered = groups.filter(function (entry) {
+      if (activeFilter === "scheduled") return dayBucket(entry) !== "now";
       if (["now", "today", "future"].indexOf(activeFilter) !== -1)
         return dayBucket(entry) === activeFilter;
       if (activeFilter === "review") return entry.reminders.length > 0;
@@ -1474,18 +1491,11 @@
       var upcoming = entry.reminders.filter(function (item) {
         return !item.needsAction;
       });
-      var reason = due.length
-        ? due.length +
-          (due.length === 1 ? " revisión pendiente" : " revisiones pendientes")
-        : r.client_notify_pending
-          ? "Avisar al cliente"
-          : entry.reasons.length
-            ? entry.reasons[0].text
-            : "Carga programada";
+      var reason = window.panelPersonal.nextAction(entry);
       var nextDate = due.length
-        ? due[0].time
+        ? due[0].when
         : upcoming.length
-          ? upcoming[0].time
+          ? upcoming[0].when
           : r.delivery_appt || r.pickup_appt;
       var actions = entry.reminders.length + (r.client_notify_pending ? 1 : 0);
       return (
@@ -1505,7 +1515,13 @@
         '<div class="attention-focus"><strong>' +
         esc(reason) +
         "</strong><span>" +
-        esc(nextDate ? fmtDate(new Date(nextDate)) : r.status || "Sin fecha") +
+        esc(
+          nextDate
+            ? fmtDate(new Date(nextDate))
+            : due.length
+              ? "Sin fecha · atender ahora"
+              : r.status || "Sin fecha",
+        ) +
         "</span></div>" +
         '<button type="button" class="ws-btn attention-open" data-home-open="' +
         esc(r.load) +
@@ -1578,30 +1594,37 @@
     var lanes = [
       {
         key: "now",
-        title: "Atender primero",
-        note: "Vencido o requiere atención",
+        title: "Ahora",
+        note: "Vencidos, urgentes o pendientes por atender",
       },
       {
-        key: "today",
-        title: "Durante el día",
-        note: "Revisiones y avisos de hoy",
-      },
-      {
-        key: "future",
-        title: "Próximos días",
-        note: "Lo que ya está programado",
+        key: "scheduled",
+        title: "Programados",
+        note: "Conservan su fecha y hora; aparecerán en Ahora cuando corresponda",
       },
     ].filter(function (lane) {
       return (
-        ["now", "today", "future"].indexOf(activeFilter) === -1 ||
+        !["now", "scheduled"].includes(activeFilter) ||
         lane.key === activeFilter
       );
     });
+    var completed = document.getElementById("personal-completed");
+    if (!completed) {
+      completed = document.createElement("section");
+      completed.id = "personal-completed";
+      list.after(completed);
+    }
+    list.hidden = activeFilter === "completed";
+    completed.hidden = activeFilter !== "completed";
+    if (activeFilter === "completed")
+      window.panelPersonal.renderCompleted(completed);
     list.classList.toggle("attention-single-lane", lanes.length === 1);
     list.innerHTML = lanes
       .map(function (lane) {
         var items = filtered.filter(function (entry) {
-          return dayBucket(entry) === lane.key;
+          return lane.key === "scheduled"
+            ? dayBucket(entry) !== "now"
+            : dayBucket(entry) === lane.key;
         });
         return (
           '<section class="attention-lane attention-lane-' +
@@ -1635,8 +1658,61 @@
         );
       })
       .join("");
+    var personalTasks = document.getElementById("personal-home-tasks");
+    if (!personalTasks) {
+      personalTasks = document.createElement("section");
+      personalTasks.id = "personal-home-tasks";
+      list.after(personalTasks);
+    }
+    personalTasks.hidden = activeFilter === "completed";
+    var mine = (bitacora || [])
+      .filter(function (t) {
+        return (
+          !t.resuelto &&
+          !t.cancelado &&
+          [t.asignado_a, t.asignado_csr].includes(myRealIdentity)
+        );
+      })
+      .filter(function (t) {
+        var due =
+          !t.fecha_seguimiento || window.panelTaskTime.taskReminderDue(t);
+        return activeFilter === "now"
+          ? due
+          : activeFilter === "scheduled"
+            ? !due
+            : true;
+      });
+    personalTasks.innerHTML = mine.length
+      ? "<h3>Mis tareas · " +
+        mine.length +
+        "</h3>" +
+        mine
+          .map(function (t) {
+            return (
+              '<article class="personal-completed-row"><div><b>' +
+              esc(t.nota) +
+              "</b><small>" +
+              (t.fecha_seguimiento
+                ? esc(wsDate(t.fecha_seguimiento))
+                : "Sin fecha · atender ahora") +
+              (t.load ? " · Load " + esc(t.load) : "") +
+              '</small></div><button class="ws-btn" type="button" data-personal-task="' +
+              esc(t.id) +
+              '">Abrir tarea</button></article>'
+            );
+          })
+          .join("")
+      : "";
     renderHomeReminders(scoped);
   }
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-personal-task]");
+    if (!button) return;
+    var task = (bitacora || []).find(function (t) {
+      return String(t.id) === button.dataset.personalTask;
+    });
+    if (task) openBitacoraModal(task);
+  });
   document.addEventListener("click", function (event) {
     var button = event.target.closest("[data-attention-filter]");
     if (!button) return;

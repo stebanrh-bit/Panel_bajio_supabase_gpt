@@ -1,4 +1,4 @@
-var commentsCurrentLoad = null;
+  var commentsCurrentLoad = null;
   var commentsCurrentKind = "load"; // 'load' o 'pendiente' — mismo modal e hilo de comentarios para ambos.
 
   function escHtml(v) {
@@ -237,13 +237,13 @@ var commentsCurrentLoad = null;
           (at ? " · " + esc(wsDate(at)) : "") +
           ". No confirmado por VG.</div>"
         : "") +
-      '<div class="inline-editor"><input class="review-input" data-manual-input="' +
+      '<details class="personal-edit"><summary>Editar</summary><div class="inline-editor"><input class="review-input" data-manual-input="' +
       field +
       '" placeholder="' +
       esc(r[field] || label) +
       '"><button class="ws-btn" data-manual-save="' +
       field +
-      '">Guardar</button></div></div>'
+      '">Guardar</button></div></details></div>'
     );
   }
   function inlineCommentHtml() {
@@ -310,34 +310,8 @@ var commentsCurrentLoad = null;
     return '<div class="ws-journey">' + parts.join("") + "</div>";
   }
 
-  function esEstadoMexicano_(estado) {
-    return /\.$/.test(String(estado || "").trim());
-  }
-  function esLaredoTX_(ciudad, estado) {
-    return (
-      /laredo/i.test(String(ciudad || "").trim()) &&
-      /^tx\.?$/i.test(String(estado || "").trim())
-    );
-  }
-  function esNuevoLaredo_(ciudad) {
-    return /nuevo\s*laredo/i.test(String(ciudad || "").trim());
-  }
   function loadDirection(r) {
-    var origenMx = esEstadoMexicano_(r.origin_state);
-    var destinoMx = esEstadoMexicano_(r.dest_state);
-    var destinoLaredoTX = esLaredoTX_(r.dest_city, r.dest_state);
-    // Transload: sale de Nuevo Laredo hacia EE.UU., EXCEPTO cuando el destino es Laredo TX (ese
-    // caso es un cruce normal, no transload) — cuenta con cualquier estatus, no solo Completed/
-    // Delivered, mismo criterio que el dashboard TCI.
-    var transload =
-      esNuevoLaredo_(r.origin_city) && !destinoMx && !destinoLaredoTX;
-    var code = null;
-    if (origenMx && !destinoMx)
-      code = "NB"; // México -> EE.UU. = Exportación (incluye México -> Laredo TX)
-    else if (!origenMx && destinoMx)
-      code = "SB"; // EE.UU. -> México = Importación
-    else if (!origenMx && !destinoMx && destinoLaredoTX) code = "SB"; // excepción: ambos lados EE.UU. pero el destino es Laredo TX
-    return { code: code, transload: transload };
+    return window.panelPersonal.domain.routeDirection(r);
   }
   function directionLabel(dir) {
     if (dir.transload) return "Transload";
@@ -345,11 +319,30 @@ var commentsCurrentLoad = null;
     if (dir.code === "SB") return "Importación (SB)";
     return "—";
   }
+  function workspaceAppointmentHtml_(r, field, label) {
+    var attr =
+      field === "pickup_appt"
+        ? "data-pickup-appt-load"
+        : "data-delivery-appt-load";
+    return (
+      '<div class="ws-box"><div class="ws-box-label">' +
+      esc(label) +
+      '</div><div class="ws-box-value">' +
+      esc(wsDate(r[field])) +
+      '</div><details class="personal-edit"><summary>Editar cita</summary><input type="datetime-local" class="review-input" ' +
+      attr +
+      '="' +
+      esc(r.load) +
+      '" value="' +
+      esc(window.panelTaskTime.taskFollowUpInput(r[field])) +
+      '"></details></div>'
+    );
+  }
   function workspaceOperationHtml(r) {
     var citas =
-      wsBox("Cita de recolección", wsDate(r.pickup_appt)) +
+      workspaceAppointmentHtml_(r, "pickup_appt", "Pickup") +
       wsBox("Recolección real", wsDate(r.pickup_actual)) +
-      wsBox("Entrega · cita", wsDate(r.delivery_appt)) +
+      workspaceAppointmentHtml_(r, "delivery_appt", "Entrega") +
       wsBox("Entrega real", wsDate(r.delivery_actual));
     var ruta =
       wsBox(
@@ -364,7 +357,7 @@ var commentsCurrentLoad = null;
       ) +
       wsBox("Dirección", directionLabel(loadDirection(r)));
     var unidad =
-      manualFieldHtml(r, "truck", "Unidad") +
+      manualFieldHtml(r, "truck", "Truck") +
       manualFieldHtml(r, "trailer", "Trailer") +
       window.panelSignals.signalStrip(r.load, r.logistics_signals) +
       wsBox("Work order", r.work_order);
@@ -404,7 +397,7 @@ var commentsCurrentLoad = null;
       '<h3 class="ws-section-title">Control operativo</h3><div class="ws-group-row">' +
       wsGroup("Citas y tiempos", citas) +
       wsGroup("Ruta", ruta) +
-      wsGroup("Unidad", unidad, 1) +
+      wsGroup("Truck y Trailer", unidad, 1) +
       "</div>" +
       pendientePuntualHtml_(r) +
       workspaceReviewHtml(r) +
@@ -459,7 +452,7 @@ var commentsCurrentLoad = null;
       esc(faltaDe_(r.load).html) +
       "</div></div>" +
       '<div class="ws-grid">' +
-      wsBox("Unidad", r.truck) +
+      wsBox("Truck", r.truck) +
       wsBox("Trailer", r.trailer) +
       wsBox("Estatus", r.status) +
       wsBox("Última actualización", wsDate(r.updated_at), true) +
@@ -729,7 +722,7 @@ var commentsCurrentLoad = null;
       (r.tracking_link
         ? '<label class="comm-track-check"><input type="checkbox" id="comm-include-tracking" checked> Incluir link de seguimiento Samsara en el mensaje</label>'
         : "") +
-      '<div class="comm-controls"><select class="comm-channel" id="comm-channel"><option>Email</option><option selected>WhatsApp</option></select>' +
+      '<label class="personal-check"><input type="checkbox" id="personal-keep-message" checked> Conservar el texto final en el historial privado</label><div class="comm-controls"><select class="comm-channel" id="comm-channel"><option>Email</option><option selected>WhatsApp</option></select>' +
       '<button class="ws-btn" type="button" data-comm-copy>Copiar</button>' +
       '<button class="ws-btn" type="button" data-comm-open>Abrir en WhatsApp</button>' +
       '<button class="ws-btn primary" data-comm-sent>Registrar como enviado</button></div>' +
@@ -848,7 +841,7 @@ var commentsCurrentLoad = null;
     { key: "reason", label: "Motivo" },
     { key: "crossing", label: "Cruce aduana" },
     { key: "destination", label: "Destino" },
-    { key: "truck", label: "Unidad" },
+    { key: "truck", label: "Truck" },
     { key: "trailer", label: "Trailer" },
     { key: "tracking", label: "Tracking" },
     { key: "customer", label: "Cliente" },
@@ -1130,7 +1123,11 @@ var commentsCurrentLoad = null;
       groupedTimelineHtml_(a, function (x, dt) {
         /* Ahora "mensaje" trae solo el tipo de aviso (Retraso, Cruce…); los registros viejos traen el texto completo y se dejan plegados. */ var m =
             String(x.mensaje || ""),
-          corto = m && m.length <= 80 && m.indexOf("\n") === -1;
+          corto =
+            !x.texto_conservado &&
+            m &&
+            m.length <= 80 &&
+            m.indexOf("\n") === -1;
         return (
           '<div class="ws-event comm-history-event"><div class="comm-history-head"><span class="comm-history-type">' +
           esc(x.tipo || "EVENTO") +
@@ -1151,7 +1148,7 @@ var commentsCurrentLoad = null;
             ? '<div class="ws-event-reason">' + esc(x.motivo) + "</div>"
             : "") +
           (m && !corto
-            ? '<details class="comm-history-old"><summary>Ver mensaje (registro anterior)</summary><div class="comm-history-message">' +
+            ? '<details class="comm-history-old"><summary>Ver texto registrado</summary><div class="comm-history-message">' +
               esc(m) +
               "</div></details>"
             : "") +
@@ -1328,116 +1325,31 @@ var commentsCurrentLoad = null;
       URL.revokeObjectURL(url);
     }, 1000);
   }
-  function buildReporteOperacionCsv_() {
-    var lines = [];
-    function addSection(title) {
-      if (lines.length) lines.push("");
-      lines.push(csvEscape_(title));
-    }
-    function addRow(arr) {
-      lines.push(arr.map(csvEscape_).join(","));
-    }
-
-    var all = currentData || [];
-    var active = all.filter(function (r) {
-      return !isArchived(r) && !isCanceladaFinalizada(r);
-    });
-    var attentionCount = active.filter(needsAttention).length;
-    var docsReadyCount = active.filter(function (r) {
-      return r.bol && r.doda && r.entry && r.sobre_listo;
-    }).length;
-    var recordatorioVencidoCount = all.filter(isRecordatorioVencido).length;
-
-    addSection("RESUMEN OPERATIVO — " + fmtDateTime(new Date().toISOString()));
-    addRow(["Cargas totales", all.length]);
-    addRow(["En curso", active.length]);
-    addRow(["Necesitan atención", attentionCount]);
-    addRow(["Docs completos", docsReadyCount + "/" + active.length]);
-    addRow(["Recordatorios vencidos", recordatorioVencidoCount]);
-
-    addSection("CARGA DE TRABAJO POR CSR");
-    addRow(["CSR", "Cargas activas", "Necesitan atención"]);
-    (personas || [])
-      .filter(function (p) {
-        return esCsrOperativo_(p);
+  function exportReporteOperacion() {
+    // La lista se captura antes de paginar: exportar no se limita a las primeras 200 filas.
+    var own = actionCenterScope(currentData)
+      .filter(function (r) {
+        return !r.archived;
       })
-      .forEach(function (p) {
-        var cargas = loadsOfCsr(p.nombre);
-        addRow([p.nombre, cargas.length, cargas.filter(needsAttention).length]);
+      .map(function (r) {
+        return Object.assign({}, r, {
+          latest_comment:
+            (ultimosComentarios[String(r.load)] || {}).text ||
+            r.latest_comment ||
+            "",
+        });
       });
-
-    addSection(
-      "TIEMPO DE RESPUESTA AL CLIENTE (SLA, últimos " +
-        SLA_LOOKBACK_DAYS +
-        " días)",
+    window.panelPersonal.exportSnapshot(
+      Array.from(filteredLoadIds_)
+        .map(function (id) {
+          return own.find(function (r) {
+            return String(r.load) === id;
+          });
+        })
+        .filter(Boolean),
+      own,
+      vistaCargaActual_().name,
     );
-    if (lastSlaPairs.length) {
-      var avgMin =
-        lastSlaPairs.reduce(function (s, p) {
-          return s + p.minutes;
-        }, 0) / lastSlaPairs.length;
-      addRow(["Promedio", fmtMinutesSla(avgMin)]);
-      addRow(["Avisos medidos", lastSlaPairs.length]);
-    } else {
-      addRow(["Sin comunicaciones registradas en el periodo."]);
-    }
-
-    addSection("DETALLE DE CARGAS ACTIVAS");
-    addRow([
-      "Load",
-      "Cliente",
-      "Estatus",
-      "Cita de recolección",
-      "Entrega cita",
-      "Salida planta",
-      "Cruce aduana",
-      "Incidencias",
-      "Recordatorio vencido",
-      "Última actualización",
-    ]);
-    active.forEach(function (r) {
-      addRow([
-        r.load,
-        r.customer || "",
-        r.status || "",
-        r.pickup_appt ? fmtDateTime(r.pickup_appt) : "",
-        r.delivery_appt ? fmtDateTime(r.delivery_appt) : "",
-        r.salida_mexico_fecha ? fmtDateTime(r.salida_mexico_fecha) : "",
-        r.cruce_usa_fecha ? fmtDateTime(r.cruce_usa_fecha) : "",
-        Number(r.incidenciasCount) || 0,
-        isRecordatorioVencido(r) ? "Sí" : "No",
-        r.updated_at ? fmtDateTime(r.updated_at) : "",
-      ]);
-    });
-
-    return "﻿" + lines.join("\r\n");
-  }
-  function exportReporteOperacion(btn) {
-    var original = btn ? btn.textContent : null;
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = "Generando…";
-    }
-    try {
-      var fecha = new Date().toISOString().slice(0, 10);
-      downloadTextFile_(
-        "reporte_operacion_" + fecha + ".csv",
-        buildReporteOperacionCsv_(),
-        "text/csv",
-      );
-      showToast("Reporte de la operación exportado", "good");
-    } catch (err) {
-      showToast(
-        "No se pudo generar el reporte: " +
-          (err && err.message ? err.message : err),
-        "error",
-      );
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = original;
-      }
-    }
   }
 
   function exportComunicacionesCliente(cliente, btn) {
@@ -1527,6 +1439,13 @@ var commentsCurrentLoad = null;
     else if (workspaceCurrentTab === "historial")
       b.innerHTML = workspaceHistoryHtml(r);
     else b.innerHTML = workspaceOperationHtml(r);
+    if (workspaceCurrentTab === "documentos") {
+      var documents = document.createElement("section");
+      documents.id = "load-document-links";
+      documents.className = "personal-documents";
+      b.append(documents);
+      window.panelPersonal.renderDocuments(r.load, documents);
+    }
     if (workspaceCurrentTab === "comunicacion") loadWorkspaceComms(r.load);
     if (workspaceCurrentTab === "historial") {
       if (workspaceHistorialSubTab === "comunicacion")
@@ -1611,7 +1530,12 @@ var commentsCurrentLoad = null;
     });
     if (page === "calendario") renderCalendario_();
     if (page === "apartados") renderApartados_();
-    if (page === "radar") radarAlAbrir_();
+    if (page === "radar") {
+      radarAlAbrir_();
+      window.panelPersonal.renderMiles(
+        document.getElementById("personal-miles-status"),
+      );
+    }
     if (page === "indicadores") renderIndicadores_();
     marcarNavegacion_(page, scrollId);
     document
@@ -2131,7 +2055,7 @@ var commentsCurrentLoad = null;
             render(currentData);
             renderWorkspace();
             showToast(
-              (field === "truck" ? "Unidad" : "Trailer") +
+              (field === "truck" ? "Truck" : "Trailer") +
                 " guardado como dato manual",
               "good",
             );
@@ -2308,12 +2232,6 @@ var commentsCurrentLoad = null;
           );
         return;
       }
-      if (e.target.closest("[data-comm-copy]")) {
-        var ta = document.getElementById("comm-message");
-        if (!ta) return;
-        copyTextGeneric(ta.value, "Mensaje copiado");
-        return;
-      }
       if ((b = e.target.closest("[data-comm-sent]"))) {
         if (!r) return;
         if (!myRealIdentity || !myPassword) {
@@ -2333,7 +2251,15 @@ var commentsCurrentLoad = null;
           tipoAviso = tipoBtn
             ? commTemplateLabel(tipoBtn.getAttribute("data-comm-type"))
             : "General";
-        /* Solo se registra qué aviso fue (canal + tipo), no el texto del mensaje. */ b.disabled = true;
+        var finalMessage = document.getElementById("comm-message").value.trim();
+        if (!finalMessage) {
+          showToast("Escribe el mensaje antes de registrarlo.", "error");
+          return;
+        }
+        var keepMessage = document.getElementById(
+          "personal-keep-message",
+        ).checked;
+        b.disabled = true;
         b.textContent = "Guardando…";
         if (fb) fb.textContent = "Registrando comunicación…";
         var finished = false;
@@ -2401,6 +2327,7 @@ var commentsCurrentLoad = null;
               tipoAviso,
               myRealIdentity,
               myPassword,
+              { keep: keepMessage, message: finalMessage },
             );
         });
         return;

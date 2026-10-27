@@ -1,3 +1,4 @@
+import { personalMethods } from "../personal/api.js";
 import config from "../config.js";
 import { coordinatePoll } from "../coordination.js";
 import { createContext } from "./context.js";
@@ -86,6 +87,7 @@ export function createOriginalApi(client) {
   const operations = operationMethods(ctx);
   const team = teamMethods(ctx, operations);
   const methods = {
+    ...personalMethods(ctx),
     ...organizationMethods(ctx),
     ...operations,
     ...team,

@@ -1,4 +1,4 @@
-/** Pendiente inmediato compartido. No reutiliza ni reinicia los recordatorios con fecha. */
+  /** Pendiente inmediato compartido. No reutiliza ni reinicia los recordatorios con fecha. */
   function pendientePuntualHtml_(rec) {
     var active = !!rec.punctual_pending;
     return (
@@ -383,6 +383,30 @@
 
   /** Campos y acciones del detalle rápido. Se muestran en un solo diálogo al abrir una
    * carga; la hoja conserva su ancho y evita repetir controles dentro de cada fila. */
+  function quickEditField_(r, field, label, attr) {
+    var appointment = field.endsWith("_appt");
+    return (
+      '<div class="field"><div class="k">' +
+      esc(label) +
+      '</div><div class="v small">' +
+      esc(appointment ? wsDate(r[field]) : r[field] || "Sin asignar") +
+      '</div><details class="personal-edit"><summary>Editar</summary><input class="v field-input" aria-label="Editar ' +
+      esc(label) +
+      '" type="' +
+      (appointment ? "datetime-local" : "text") +
+      '" value="' +
+      esc(
+        appointment
+          ? window.panelTaskTime.taskFollowUpInput(r[field])
+          : r[field] || "",
+      ) +
+      '" ' +
+      attr +
+      '="' +
+      esc(r.load) +
+      '"></details></div>'
+    );
+  }
   function detailPanelHtml(rec) {
     return (
       alertBannerHtml(rec) +
@@ -399,28 +423,16 @@
       ", " +
       esc(rec.dest_state) +
       "</div></div>" +
-      '<div class="field f-truck"><div class="k">Truck</div><input class="v field-input" type="text" placeholder="—" value="' +
-      esc(rec.truck) +
-      '" data-truck-load="' +
-      esc(rec.load) +
-      '"></div>' +
-      '<div class="field"><div class="k">Trailer</div><input class="v field-input t-trailer-input" type="text" placeholder="—" value="' +
-      esc(rec.trailer) +
-      '" data-trailer-load="' +
-      esc(rec.load) +
-      '" aria-label="Editar trailer">' +
+      quickEditField_(rec, "truck", "Truck", "data-truck-load") +
+      quickEditField_(rec, "trailer", "Trailer", "data-trailer-load") +
       window.panelSignals.signalStrip(rec.load, rec.logistics_signals) +
-      "</div>" +
-      '<div class="field"><div class="k">Cita de recolección</div><input class="v field-input" type="datetime-local" value="' +
-      apptDatetimeLocalValue(rec.pickup_appt) +
-      '" data-pickup-appt-load="' +
-      esc(rec.load) +
-      '"></div>' +
-      '<div class="field"><div class="k">Entrega cita</div><input class="v field-input" type="datetime-local" value="' +
-      apptDatetimeLocalValue(rec.delivery_appt) +
-      '" data-delivery-appt-load="' +
-      esc(rec.load) +
-      '"></div>' +
+      quickEditField_(rec, "pickup_appt", "Pickup", "data-pickup-appt-load") +
+      quickEditField_(
+        rec,
+        "delivery_appt",
+        "Entrega",
+        "data-delivery-appt-load",
+      ) +
       '<div class="field"><div class="k">Documentación</div><div class="docs">' +
       docDots(rec) +
       "</div></div>" +
@@ -658,9 +670,13 @@
       .filter(function (a) {
         return a.csr === csr;
       })
-      .map(function (a) {
-        return a.cliente.toLowerCase();
-      });
+      .reduce(function (out, a) {
+        return out.concat(
+          [a.cliente].concat(a.aliases || []).map(function (v) {
+            return String(v).toLowerCase();
+          }),
+        );
+      }, []);
   }
 
   function loadSeguidoPorCsr(loadNum, csr) {
@@ -1087,6 +1103,19 @@
       filteredCount +
       " cargas · " +
       window.panelLoadViews.describeView(operationView);
+    filteredLoadIds_ = new Set(
+      Array.from(
+        document.querySelectorAll(
+          currentView === "table" ? ".t-row[data-load]" : ".card[data-load]",
+        ),
+      )
+        .filter(function (node) {
+          return node.style.display !== "none";
+        })
+        .map(function (node) {
+          return String(node.getAttribute("data-load"));
+        }),
+    );
     aplicarLimiteTabla_();
     marcarFilasMasivo_();
     updateCounts(csrClienteFiltro);
@@ -1097,6 +1126,7 @@
   // cargas, pintar todos los renglones a la vez hacía lenta la pantalla. Al cambiar de filtro,
   // búsqueda o persona se regresa a las primeras 200. La carga abierta en el detalle o a la que
   // te mandaron desde la bitácora siempre se ve.
+  var filteredLoadIds_ = new Set();
   var TABLA_PASO_ = 200;
   var tablaLimite_ = TABLA_PASO_;
   var tablaFirmaFiltro_ = "";
@@ -1264,11 +1294,11 @@
       ownerName.textContent = ownClientsOnly_
         ? "Mis clientes · " + currentWho
         : selectedPerson?.rol === "Supervisor" && !currentOperationalScope
-          ? "Toda la operación"
+          ? "Mi operación"
           : currentWho + (currentOperationalScope ? " · CSR" : "");
       ownerCaption.hidden = false;
     } else {
-      ownerName.textContent = "Toda la operación";
+      ownerName.textContent = "Mi operación";
       ownerCaption.hidden = !myRealIdentity;
     }
   }
@@ -1928,6 +1958,7 @@
               document.getElementById("identity-new-password-input").value = "";
               document.getElementById("identity-change-pw-box").style.display =
                 "none";
+              window.dispatchEvent(new CustomEvent("panel:identity"));
               closeIdentityModal();
               return;
             }

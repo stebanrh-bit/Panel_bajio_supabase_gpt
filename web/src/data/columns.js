@@ -5,7 +5,7 @@ export const tableColumns = {
     "id,load,category,severity,description,action_taken,created_by,created_at,deleted_at,deleted_by",
   load_history: "id,load,actor,changed_at,before_data,after_data",
   communications:
-    "id,load,event_type,reason,actor,channel,notice_type,public_message,created_at",
+    "id,load,event_type,reason,actor,channel,notice_type,public_message,manual_message,created_at",
   profiles:
     "id,display_name,role,active,contact_email,password_ready,login_name,updated_at,original_removed",
   customer_assignments: "customer,customer_key,owner_id,updated_by,updated_at",

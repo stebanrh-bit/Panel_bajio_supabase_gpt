@@ -1,6 +1,40 @@
-var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
+  var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
   var AVISOS_MAX_ = 80;
   var avisosEstado_ = null;
+  var personalNoticeGroups_ = new Map();
+  var personalNoticeState_ = new Map();
+  function avisoIds_(id) {
+    return personalNoticeGroups_.get(id) || [id];
+  }
+  function syncAvisos_(changes) {
+    window.panelPersonal.syncNoticeState(changes).catch(function (error) {
+      showToast(error.message, "error");
+    });
+  }
+  window.addEventListener("panel:notice-state", function (event) {
+    personalNoticeState_ = new Map(
+      (event.detail || []).map(function (row) {
+        return [row.event_key, row];
+      }),
+    );
+    if (!avisosEstado_) return;
+    avisosEstado_.lista.forEach(function (a) {
+      var state = personalNoticeState_.get(a.id);
+      if (state && state.read_at) a.nuevo = false;
+    });
+    personalNoticeState_.forEach(function (state, key) {
+      if (state.snoozed_until)
+        avisosEstado_.pospuestos[key] = Date.parse(state.snoozed_until);
+    });
+    guardarAvisos_();
+    renderAvisos_();
+  });
+  window.addEventListener("panel:save", function (event) {
+    if (event.detail?.phase === "reset") {
+      personalNoticeState_.clear();
+      personalNoticeGroups_.clear();
+    }
+  });
   var bitacoraCargada_ = false;
   var avisosTimer_ = null;
   var avisosSonido_ = false;
@@ -110,7 +144,8 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
         if (rs.length && rs[0].kind === "notify" && rec.client_notify_pending)
           return;
         out.push({
-          id: "now:" + rec.load,
+          // Cada cambio operativo remoto constituye un evento nuevo; leer uno no silencia los siguientes.
+          id: "now:" + rec.load + ":" + String(rec.updated_at || rec.status),
           tipo: "now",
           sev: "critical",
           load: rec.load,
@@ -326,7 +361,10 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
     candidatosAvisos_().forEach(function (c) {
       if (vigentes[c.id]) return;
       vigentes[c.id] = c;
-      var hasta = est.pospuestos[c.id];
+      var remote = personalNoticeState_.get(c.id);
+      var hasta = remote?.snoozed_until
+        ? Date.parse(remote.snoozed_until)
+        : est.pospuestos[c.id];
       if (hasta) {
         if (hasta > ahoraMs) return; // sigue pospuesto: ni en la lista ni como nuevo
         delete est.pospuestos[c.id]; // se cumplió la hora: se vuelve a avisar
@@ -362,14 +400,17 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
       });
     nuevos.forEach(function (c) {
       c.ts = ts;
-      c.nuevo = true;
+      c.nuevo = !personalNoticeState_.get(c.id)?.read_at;
       est.lista.unshift(c);
     });
     if (est.lista.length > AVISOS_MAX_) est.lista.length = AVISOS_MAX_;
     guardarAvisos_();
     renderAvisos_();
     badgeApartados_(); // el conteo de "toca revisar" cambia con la hora, no solo con los datos
-    if (nuevos.length) anunciarAvisos_(nuevos);
+    var unread = nuevos.filter(function (a) {
+      return a.nuevo;
+    });
+    if (unread.length) anunciarAvisos_(unread);
     mostrarInicioTurno_();
   }
 
@@ -404,10 +445,19 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
 
   function quitarAviso_(id, posponer) {
     if (!avisosEstado_) return;
-    if (posponer)
-      avisosEstado_.pospuestos[id] = Date.now() + AVISO_POSPONER_MS_;
+    var ids = posponer ? avisoIds_(id) : [id];
+    if (posponer) {
+      ids.forEach(function (key) {
+        avisosEstado_.pospuestos[key] = Date.now() + AVISO_POSPONER_MS_;
+      });
+      syncAvisos_(
+        ids.map(function (key) {
+          return { key: key, action: "snooze" };
+        }),
+      );
+    }
     avisosEstado_.lista = avisosEstado_.lista.filter(function (x) {
-      return x.id !== id;
+      return !ids.includes(x.id);
     });
     guardarAvisos_();
     renderAvisos_();
@@ -675,6 +725,21 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
             })
             .concat(noticesWhileEditing_)
         : [];
+    items = items.filter(function (a) {
+      var state = personalNoticeState_.get(a.id);
+      if (state && state.read_at) a.nuevo = false;
+      return (
+        !state ||
+        !state.snoozed_until ||
+        Date.parse(state.snoozed_until) <= Date.now()
+      );
+    });
+    items = window.panelPersonal.groupNotices(items);
+    personalNoticeGroups_ = new Map(
+      items.map(function (a) {
+        return [a.id, a.memberIds];
+      }),
+    );
     var sinVer = items.filter(function (a) {
       return a.nuevo;
     }).length;
@@ -725,19 +790,36 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
     if (!panel) return;
     panel.hidden = !abrir;
     if (btn) btn.setAttribute("aria-expanded", String(!!abrir));
-    if (abrir) renderAvisos_();
+    if (abrir) {
+      renderAvisos_();
+      syncAvisos_([]);
+    }
   }
 
   function marcarAvisosVistos_(id) {
+    var ids = id
+      ? avisoIds_(id)
+      : avisosEstado_
+        ? avisosEstado_.lista.map(function (a) {
+            return a.id;
+          })
+        : [];
     noticesWhileEditing_.forEach(function (n) {
-      if (!id || n.id === id) n.nuevo = false;
+      if (!id || ids.includes(n.id)) n.nuevo = false;
     });
     if (!avisosEstado_) return;
     avisosEstado_.lista.forEach(function (a) {
-      if (!id || a.id === id) a.nuevo = false;
+      if (ids.includes(a.id)) a.nuevo = false;
     });
     guardarAvisos_();
     renderAvisos_();
+    // Solo sincroniza lectura; jamás resuelve tareas ni modifica cargas.
+    for (var offset = 0; offset < ids.length; offset += 200)
+      syncAvisos_(
+        ids.slice(offset, offset + 200).map(function (key) {
+          return { key: key, action: "read" };
+        }),
+      );
   }
 
   document.getElementById("avisos-btn").addEventListener("click", function (e) {
@@ -1021,9 +1103,9 @@ var AVISO_POSPONER_MS_ = 3600000; // "Posponer 1 h"
 
   google.script.run
     .withSuccessHandler(function (info) {
+      lastImportInfo_ = info;
       lastImportAt = (info && info.lastImportAt) || "";
       renderOperationMeta();
     })
     .getImportInfo();
 })();
-

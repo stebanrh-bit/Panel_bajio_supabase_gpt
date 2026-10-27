@@ -93,7 +93,9 @@
   }
 
   function isArchived(rec) {
-    return isDoneStatus(rec.status) && !!rec.pod_sent;
+    return (
+      !!rec.archived || window.panelLoadViews.lifecycle(rec) === "delivered"
+    );
   }
 
   /** True cuando el estatus ya es Delivered/Completed pero todavía falta marcar el POD como enviado. */
@@ -105,7 +107,7 @@
    * en VG, la carga se considera finalizada y se mueve a la sección "Canceladas/Finalizadas"
    * (no es una entrega real, así que nunca cuenta como "Entregadas"). */
   function isCanceladaFinalizada(rec) {
-    return rec.status === "TONU" && !!rec.recargos_vg;
+    return window.panelLoadViews.lifecycle(rec) === "closed";
   }
 
   /** True cuando el estatus ya es TONU pero todavía falta confirmar que se ingresaron los recargos. */
@@ -246,6 +248,7 @@
   }
 
   var lastImportAt = "";
+  var lastImportInfo_ = null;
   function renderOperationMeta() {
     var el = document.getElementById("operation-meta");
     if (!el) return;
@@ -258,7 +261,14 @@
     html +=
       "<div>Último Excel importado: <b>" +
       (lastImportAt ? esc(relativeTimeLabel(lastImportAt)) : "sin registro") +
-      "</b></div>";
+      "</b>" +
+      (lastImportInfo_ && lastImportInfo_.fileName
+        ? " · " +
+          esc(lastImportInfo_.fileName) +
+          " · " +
+          esc(lastImportInfo_.author || "")
+        : "") +
+      "</div>";
     el.innerHTML = html;
   }
 
@@ -1086,7 +1096,7 @@
       "</div>" +
       alertBannerHtml(rec) +
       clientCommunicationHtml(rec) +
-      '<div class="card-commitment"><span>Unidad: ' +
+      '<div class="card-commitment"><span>Truck: ' +
       esc(
         [rec.truck, rec.trailer].filter(Boolean).join(" / ") || "Sin asignar",
       ) +

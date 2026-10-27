@@ -156,7 +156,8 @@ export const communicationModel = (row, name) => ({
   motivo: row.reason,
   usuario: name(row.actor),
   canal: row.channel || "",
-  mensaje: row.public_message || row.notice_type || "",
+  mensaje: row.manual_message || row.public_message || row.notice_type || "",
+  texto_conservado: !!row.manual_message,
 });
 
 /** SLA del original: desde el cambio más reciente hasta la siguiente comunicación. */

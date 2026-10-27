@@ -1,0 +1,26 @@
+{
+  "version": "2026.10.27.1",
+  "environment": "Chromium local; Supabase simulado",
+  "checks": [
+    "Versión del sitio y SQL 20 disponibles",
+    "Resumen secundario plegado y secciones de equipo retiradas",
+    "Programados se separan de Ahora",
+    "Atendidos sin completar tareas por leer avisos",
+    "Calendario limpio, cruces ocultos y vista persistida",
+    "Días vacíos recuperables",
+    "Cliente de calendario guardado por cuenta",
+    "Edición secundaria plegada en expediente",
+    "Documento enlazado y visible por carga",
+    "Retiro lógico de documento",
+    "Copiar invoca una sola escritura al portapapeles",
+    "Registro privado del texto final",
+    "Exportar distingue vista actual y reporte completo",
+    "Importación por fila, nombre real y reemplazo manual explícito",
+    "Tablero de millas bajo demanda sin secreto",
+    "Inicio móvil sin desborde lateral",
+    "Lectura sincroniza claves sin editar cargas",
+    "Otro dispositivo recupera vista, cliente y semana completa",
+    "Otro dispositivo conserva los avisos leídos",
+    "Instalación incompleta muestra SQL 020 pendiente"
+  ]
+}

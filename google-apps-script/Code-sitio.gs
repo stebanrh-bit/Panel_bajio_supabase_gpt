@@ -400,6 +400,12 @@ function procesarMillasGoogle_() {
         GOOGLE_MILES_LAST_RUN_PROPERTY_,
         JSON.stringify(summary),
       );
+      // El resumen no contiene credenciales ni ubicaciones; SQL 020 lo presenta a Admin.
+      try {
+        googleMilesRpc_("ops_google_worker_report", { p_summary: summary });
+      } catch (_) {
+        Logger.log("Estado de millas disponible en el editor; instala SQL 020 para verlo en el panel.");
+      }
       Logger.log(JSON.stringify(summary));
     } finally {
       lock.releaseLock();

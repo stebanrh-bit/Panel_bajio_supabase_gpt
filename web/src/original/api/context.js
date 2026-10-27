@@ -1,3 +1,4 @@
+import { canonicalCustomer } from "../personal/domain.js";
 import config from "../config.js";
 import { tableColumns } from "../../data/columns.js";
 import { fetchAll, unwrap } from "../../data/supabase.js";
@@ -226,6 +227,8 @@ export function createContext(client) {
     logout,
     personName,
     personId,
+    canonicalCustomer: (value) =>
+      canonicalCustomer(value, records("customer_aliases")),
     get profile() {
       return profile;
     },

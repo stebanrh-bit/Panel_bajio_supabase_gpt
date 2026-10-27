@@ -1,4 +1,4 @@
-// Integración de instructivos: una confirmación del servidor actualiza la misma carga en todas las vistas.
+  // Integración de instructivos: una confirmación del servidor actualiza la misma carga en todas las vistas.
   window.addEventListener("panel:instruction-load", function (event) {
     var result = event.detail,
       record = result && recPorLoad_(result.load);
@@ -823,138 +823,38 @@
           if (importReadController_ === controller)
             importReadController_ = null;
         })
-        .then(function (records) {
-          try {
-            if (!records.length) {
-              statusEl.textContent =
-                "No se encontraron cargas con número de load en este archivo.";
-              statusEl.className = "import-status err";
-              return;
-            }
-
-            // Vista previa: el servidor calcula qué va a cambiar SIN escribir nada (previewImport) y
-            // se pide confirmación antes de guardar (importLoads). Antes se guardaba de inmediato.
-            var guardarImportacion = function () {
-              statusEl.textContent = "Guardando " + records.length + " cargas…";
-              statusEl.className = "import-status";
-              google.script.run
-                .withSuccessHandler(function (result) {
-                  if (result && result.ok === false) {
-                    statusEl.textContent =
-                      "No se importó: " +
-                      (result.error || "el servidor rechazó el archivo");
-                    statusEl.className = "import-status err";
-                    return;
-                  }
-                  var msg =
-                    "Listo: " +
-                    result.inserted +
-                    " nuevas, " +
-                    result.updated +
-                    " actualizadas" +
-                    (result.unchanged
-                      ? ", " + result.unchanged + " sin cambios"
-                      : "") +
-                    ".";
-                  if (result.skipped)
-                    msg +=
-                      " (" +
-                      result.skipped +
-                      " sin número de load, se ignoraron)";
-                  statusEl.textContent = msg;
-                  statusEl.className = "import-status ok";
-                  lastImportAt = new Date().toISOString();
-                  renderOperationMeta();
-                  loadData();
-                })
-                .withFailureHandler(function (err) {
-                  statusEl.textContent = "Error al guardar: " + err.message;
-                  statusEl.className = "import-status err";
-                })
-                .importLoads(records, adminCred_());
-            };
-            statusEl.textContent = "Revisando el archivo…";
-            google.script.run
-              .withSuccessHandler(function (p) {
-                if (!p || p.ok === false) {
-                  statusEl.textContent =
-                    "No se pudo revisar el archivo: " +
-                    ((p && p.error) || "error desconocido");
-                  statusEl.className = "import-status err";
-                  return;
-                }
-                statusEl.textContent = "Esperando tu confirmación…";
-                var html =
-                  "<ul>" +
-                  "<li><b>" +
-                  esc(p.inserted) +
-                  "</b> " +
-                  (p.inserted === 1 ? "carga nueva" : "cargas nuevas") +
-                  "</li>" +
-                  "<li><b>" +
-                  esc(p.updated) +
-                  "</b> con cambios" +
-                  (p.citasMovidas
-                    ? " (<b>" +
-                      esc(p.citasMovidas) +
-                      "</b> con cita movida — " +
-                      (p.citasMovidas === 1
-                        ? "quedará pendiente"
-                        : "quedarán pendientes") +
-                      " de avisar al cliente)"
-                    : "") +
-                  "</li>" +
-                  "<li><b>" +
-                  esc(p.unchanged) +
-                  "</b> sin cambios</li>" +
-                  (p.skipped
-                    ? "<li><b>" +
-                      esc(p.skipped) +
-                      "</b> filas sin número de load (se ignoran)</li>"
-                    : "") +
-                  "</ul>" +
-                  (p.clientesSinCsr && p.clientesSinCsr.length
-                    ? '<p class="aviso-fuerte">Clientes sin CSR asignado (sus cargas no le aparecerán a ningún CSR): ' +
-                      p.clientesSinCsr.map(esc).join(", ") +
-                      '. Asígnalos en "Gestionar CSR".</p>'
-                    : "") +
-                  (p.duplicadosEnArchivo && p.duplicadosEnArchivo.length
-                    ? '<p class="aviso-fuerte">Cargas repetidas en el archivo (se queda el último): ' +
-                      p.duplicadosEnArchivo.map(esc).join(", ") +
-                      "</p>"
-                    : "") +
-                  '<p>Si después necesitas regresar, en "Gestionar CSR" puedes deshacer la última importación.</p>';
-                confirmarModal_(
-                  "Importar " + records.length + " cargas",
-                  html,
-                  "Importar",
-                  guardarImportacion,
-                );
-                // Si se cierra sin confirmar, que la barra no se quede diciendo "Esperando…".
-                var limpiarSiCancela = function () {
-                  if (
-                    !document
-                      .getElementById("confirmar-backdrop")
-                      .classList.contains("show")
-                  ) {
-                    if (statusEl.textContent === "Esperando tu confirmación…") {
-                      statusEl.textContent = "Importación cancelada.";
-                      statusEl.className = "import-status";
-                    }
-                  } else setTimeout(limpiarSiCancela, 500);
-                };
-                setTimeout(limpiarSiCancela, 500);
-              })
-              .withFailureHandler(function (err) {
-                statusEl.textContent =
-                  "No se pudo revisar el archivo: " + err.message;
-                statusEl.className = "import-status err";
-              })
-              .previewImport(records, csrAdminPw);
-          } catch (err) {
-            statusEl.textContent = "Error al leer el archivo: " + err.message;
-            statusEl.className = "import-status err";
+        .then(async function (records) {
+          if (!records.length) {
+            statusEl.textContent = "No se encontraron cargas en este archivo.";
+            return;
           }
+          statusEl.textContent = "Revisando el archivo…";
+          var result = await window.panelPersonal.reviewImport(
+            records,
+            file.name,
+          );
+          if (!result) {
+            statusEl.textContent =
+              "Importación cancelada. No se guardaron cambios.";
+            return;
+          }
+          statusEl.textContent =
+            "Listo: " +
+            result.inserted +
+            " nuevas, " +
+            result.updated +
+            " actualizadas y " +
+            result.unchanged +
+            " sin cambios · " +
+            file.name;
+          statusEl.className = "import-status ok";
+          lastImportInfo_ = {
+            fileName: result.fileName,
+            author: myRealIdentity,
+          };
+          lastImportAt = new Date().toISOString();
+          renderOperationMeta();
+          loadData();
         })
         .catch(function (err) {
           // Una lectura inválida termina aquí, antes de consultar o guardar cargas.
@@ -1136,7 +1036,7 @@
       ["Load", r.load],
       ["Cliente", r.customer],
       ["Trailer", r.trailer],
-      ["Unidad", r.truck],
+      ["Truck", r.truck],
       ["WO", r.work_order],
       ["Estatus", r.status],
       ["Origen", r.origin_city],
@@ -1573,12 +1473,17 @@
           "Actualización de varias cargas",
           myRealIdentity,
           myPassword,
+          {
+            keep: document.getElementById("personal-keep-batch").checked,
+            message: texto,
+          },
         ); // solo qué fue, no el texto
       };
       siguiente(0);
     });
 
   // ===== Calendario de la semana =====
+  var calHideEmpty_ = true;
   var calTipo_ = "all",
     calCliente_ = ""; // Filtros locales, independientes del listado de Cargas.
   var calDiasAbiertos_ = new Set(); // Conserva el despliegue durante la actualización automática.
@@ -1594,10 +1499,18 @@
     var key = calVistaKey_();
     if (calVistaCuenta_ !== key) {
       calVistaCuenta_ = key;
-      calVista_ = "agenda";
+      var savedPreferences = window.panelPersonal.preferences;
+      calVista_ = savedPreferences.calendar_view || "agenda";
+      calCliente_ = savedPreferences.calendar_client || "";
+      calHideEmpty_ = savedPreferences.calendar_hide_empty !== false;
+      document.getElementById("cal-hide-empty").checked = calHideEmpty_;
       try {
         var saved = localStorage.getItem(key);
-        if (["agenda", "week", "list"].indexOf(saved) !== -1) calVista_ = saved;
+        if (
+          !savedPreferences.calendar_view &&
+          ["agenda", "week", "list"].indexOf(saved) !== -1
+        )
+          calVista_ = saved;
       } catch (e) {}
     }
     document.getElementById("cal-grid").dataset.view = calVista_;
@@ -1614,8 +1527,37 @@
       list: "Lista compacta: muestra todos los movimientos por día y hora, sin desplegables. Pulsa un registro para abrirlo.",
     }[calVista_];
   }
+  function guardarCalendario_(patch) {
+    window.panelPersonal.preference(patch).catch(function (error) {
+      showToast(error.message, "error");
+    });
+  }
+  document
+    .getElementById("cal-hide-empty")
+    .addEventListener("change", function (event) {
+      calHideEmpty_ = event.target.checked;
+      renderCalendario_();
+      guardarCalendario_({ calendar_hide_empty: calHideEmpty_ });
+    });
+  window.addEventListener("panel:personal-preferences", function (event) {
+    var p = event.detail;
+    calCliente_ = p.calendar_client || "";
+    calVista_ = p.calendar_view || "agenda";
+    calVistaCuenta_ = calVistaKey_();
+    calHideEmpty_ = p.calendar_hide_empty !== false;
+    document.getElementById("cal-hide-empty").checked = calHideEmpty_;
+    document.querySelector('[data-cal-type="cruce"]').hidden =
+      !p.show_crossings;
+    document.getElementById("group-cruce-confirm").hidden = !p.show_crossings;
+    if (!p.show_crossings && calTipo_ === "cruce") calTipo_ = "all";
+    renderCalendario_();
+    refreshOperationalAttention();
+  });
+  function wallCalendar_(value) {
+    return new Date(window.panelTaskTime.taskFollowUpInput(value));
+  }
   function lunesDe_(d) {
-    var x = new Date(d);
+    var x = wallCalendar_(d);
     x.setHours(0, 0, 0, 0);
     x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
     return x;
@@ -1642,13 +1584,14 @@
         ["cruce", r.cruce_usa_fecha, "Cruce"],
         ["entrega", r.delivery_appt, "Entrega"],
       ].forEach(function (ev) {
+        if (
+          ev[0] === "cruce" &&
+          !window.panelPersonal.preferences.show_crossings
+        )
+          return;
         var f = pd(ev[1]);
         if (!f || isNaN(f.getTime())) return;
-        var k = new Date(
-          f.getFullYear(),
-          f.getMonth(),
-          f.getDate(),
-        ).toDateString();
+        var k = wallCalendar_(f).toDateString();
         if (porDia[k])
           porDia[k].push({
             tipo: ev[0],
@@ -1667,13 +1610,14 @@
         [ap.fecha_entrega, "Entrega apartado"],
         [ap.fecha_mi_carga, "Mi carga (apartado)"],
       ].forEach(function (ev) {
+        if (
+          ev[1] === "Cruce apartado" &&
+          !window.panelPersonal.preferences.show_crossings
+        )
+          return;
         var f = pd(ev[0]);
         if (!f || isNaN(f.getTime())) return;
-        var k = new Date(
-          f.getFullYear(),
-          f.getMonth(),
-          f.getDate(),
-        ).toDateString();
+        var k = wallCalendar_(f).toDateString();
         if (porDia[k])
           porDia[k].push({
             tipo: "apartado",
@@ -1701,7 +1645,9 @@
       if (!apartadoCerrado_(ap))
         addClient(window.panelCalendar.reservationCalendarClient(ap, scope));
     });
-    if (calCliente_ && !clients.has(calCliente_)) calCliente_ = "";
+    // La consulta de preferencias puede terminar antes que la de cargas; no perder el cliente guardado.
+    if (calCliente_ && !clients.has(calCliente_))
+      clients.set(calCliente_, "Cliente guardado · sin cargas disponibles");
     var clientSelect = document.getElementById("cal-cliente");
     clientSelect.innerHTML =
       '<option value="">Todos mis clientes</option>' +
@@ -1766,13 +1712,10 @@
         "Sábado",
         "Domingo",
       ],
-      hoy = new Date().toDateString();
+      hoy = wallCalendar_(new Date()).toDateString();
     function calendarCard(x) {
       var record = x.ap || x.r;
-      var hh =
-        ("0" + x.fecha.getHours()).slice(-2) +
-        ":" +
-        ("0" + x.fecha.getMinutes()).slice(-2);
+      var hh = window.panelTaskTime.taskFollowUpInput(x.fecha).slice(11, 16);
       var target = x.ap
         ? 'data-cal-apartado="' + esc(x.ap.id)
         : 'data-cal-load="' + esc(x.r.load);
@@ -1813,6 +1756,7 @@
         var items = porDia[d.toDateString()].sort(function (a, b) {
           return a.fecha - b.fecha;
         });
+        if (calHideEmpty_ && !items.length) return "";
         var limit = calVista_ === "list" ? items.length : 3;
         var extra = items.length - limit;
         return (
@@ -1869,6 +1813,7 @@
       try {
         localStorage.setItem(calVistaCuenta_, calVista_);
       } catch (e) {}
+      guardarCalendario_({ calendar_view: calVista_ });
       renderCalendario_();
     });
   });
@@ -1876,6 +1821,7 @@
     .getElementById("cal-cliente")
     .addEventListener("change", function (event) {
       calCliente_ = event.target.value;
+      guardarCalendario_({ calendar_client: calCliente_ });
       renderCalendario_();
     });
   document.querySelectorAll("[data-cal-type]").forEach(function (button) {
@@ -1887,6 +1833,7 @@
   document.getElementById("cal-reset").addEventListener("click", function () {
     calTipo_ = "all";
     calCliente_ = "";
+    guardarCalendario_({ calendar_client: "" });
     renderCalendario_();
   });
   document.getElementById("cal-prev").addEventListener("click", function () {

@@ -10,7 +10,9 @@ export function customerNoticeScope(identity, assignments = [], loads = []) {
   const customers = new Set(
     assignments
       .filter((item) => name && String(item.csr || "").trim() === name)
-      .map((item) => customerKey(item.cliente))
+      .flatMap((item) =>
+        [item.cliente, ...(item.aliases || [])].map(customerKey),
+      )
       .filter(Boolean),
   );
   const ownLoads = new Set(

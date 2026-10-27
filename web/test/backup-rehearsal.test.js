@@ -112,6 +112,15 @@ test("respaldo v2: recuperar operación, radar y preferencias en una base separa
       "select ops_save_structured_closure('Resumen','Sin pendientes críticos',$1,'Revisar mañana')",
       [people.Admin],
     );
+    await db.query("select ops_save_personal_ui($1)", [
+      { calendar_view: "list", calendar_client: "acme" },
+    ]);
+    await db.query("select ops_notice_state($1)", [
+      [{ key: "backup-review", action: "read" }],
+    ]);
+    await db.query(
+      "select ops_save_document_link('BACKUP-1',null,null,'pod','POD de respaldo','https://example.org/pod.pdf')",
+    );
     const manifest = (await db.query("select ops_backup_manifest() as data"))
       .rows[0].data;
     backup = { format: manifest.format, tables: {}, counts: {} };
@@ -129,6 +138,8 @@ test("respaldo v2: recuperar operación, radar y preferencias en una base separa
   const restored = await rehearseBackup(backup);
   assert.equal(restored.ok, true);
   assert.equal(restored.tables.loads, 1);
+  assert.equal(restored.tables.load_document_links, 1);
+  assert.equal(restored.tables.personal_notice_state, 1);
   assert.equal(restored.tables.route_instruction_templates, 1);
   assert.equal(restored.tables.original_routes, 1);
   assert.equal(restored.tables.original_preferences, 1);

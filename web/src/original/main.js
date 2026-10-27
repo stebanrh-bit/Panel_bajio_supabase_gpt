@@ -31,6 +31,8 @@ import instructionStyles from "./instructions/style.css?raw";
 import * as loadViews from "./load-views/rules.js";
 import { editMenu } from "./load-views/editor.js";
 import loadViewsStyles from "./load-views/style.css?raw";
+import { mountPersonal } from "./personal/ui.js";
+import personalStyles from "./personal/style.css?raw";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -72,7 +74,9 @@ async function start() {
       "\n" +
       instructionStyles +
       "\n" +
-      loadViewsStyles,
+      loadViewsStyles +
+      "\n" +
+      personalStyles,
     script,
     config,
     view,
@@ -128,6 +132,8 @@ async function start() {
   document.body.innerHTML = page.body;
   if (view === "internal") usability.mountUsability(document);
   validation.mountValidation(document);
+  window.panelPersonal = mountPersonal(api, document);
+  document.body.classList.add("personal-operation");
   for (const source of page.scripts) {
     const tag = document.createElement("script");
     tag.textContent = source;
@@ -137,6 +143,7 @@ async function start() {
     guidance.mountGuidance(document);
     mountOrganization(api, document);
     mountInstructions(api, document);
+    await window.panelPersonal.start();
   }
 }
 start().catch((error) => {

@@ -1,0 +1,305 @@
+/* Consolidación personal: lectura compacta y controles secundarios a petición. */
+.personal-dialog {
+  color: #20334a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 0;
+  width: min(960px, 94vw);
+  max-height: 90dvh;
+  box-shadow: 0 24px 70px #19334a38;
+}
+.personal-dialog::backdrop {
+  background: #152b4373;
+  backdrop-filter: blur(2px);
+}
+.personal-dialog form {
+  display: flex;
+  flex-direction: column;
+  max-height: 90dvh;
+}
+.personal-dialog header,
+.personal-dialog footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  flex-shrink: 0;
+  background: #f8fafc;
+}
+.personal-dialog header {
+  border-bottom: 1px solid #e2e8f0;
+  justify-content: space-between;
+}
+.personal-dialog footer {
+  border-top: 1px solid #e2e8f0;
+  justify-content: flex-end;
+}
+.personal-dialog h2 {
+  font-size: 1.12rem;
+  margin: 0;
+}
+.personal-dialog button,
+.personal-documents button,
+.personal-miles-status button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #254d73;
+  border-radius: 7px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.personal-dialog button[type="submit"] {
+  background: #245b82;
+  color: #fff;
+  border-color: #245b82;
+}
+.personal-dialog button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.personal-body {
+  padding: 16px 20px;
+  overflow: auto;
+  min-height: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.personal-body > label {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0;
+}
+.personal-body input:not([type="checkbox"]):not([type="radio"]),
+.personal-body select {
+  padding: 9px;
+  border: 1px solid #bccad6;
+  border-radius: 6px;
+  max-width: 100%;
+  background: #fff;
+  color: #20334a;
+}
+.personal-check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #3e5369;
+  margin: 10px 0;
+}
+.personal-check input {
+  accent-color: #28648c;
+  flex-shrink: 0;
+}
+.personal-error {
+  color: #ab2635;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+}
+.personal-dialog form > .personal-error {
+  margin: 0;
+  padding: 0 20px 10px;
+}
+.personal-error:empty {
+  display: none;
+}
+.personal-help {
+  color: #62758a;
+  font-size: 0.78rem;
+}
+.personal-import-table {
+  overflow: auto;
+  max-height: 48dvh;
+  border: 1px solid #dbe3eb;
+  border-radius: 8px;
+}
+.personal-import-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.78rem;
+}
+.personal-import-table td,
+.personal-import-table th {
+  padding: 9px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+.personal-import-table th {
+  position: sticky;
+  top: 0;
+  background: #edf3f8;
+  z-index: 1;
+}
+.personal-import-table small {
+  display: block;
+  color: #62758a;
+}
+.personal-import-table details p {
+  overflow-wrap: anywhere;
+  max-width: 360px;
+}
+.personal-edit {
+  margin-top: 7px;
+  font-size: 0.78rem;
+}
+.personal-edit summary {
+  cursor: pointer;
+  color: #28618e;
+}
+.personal-edit .inline-editor {
+  margin-top: 6px;
+  display: flex;
+  gap: 7px;
+}
+.personal-edit input {
+  min-width: 0;
+  width: 100%;
+}
+.ws-group-row {
+  align-items: start;
+}
+.ws-group {
+  align-self: start;
+}
+.ws-box .manual-warning {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  padding: 4px 0;
+  color: #8a602b;
+  background: transparent;
+}
+.personal-documents,
+.personal-miles-status {
+  background: #fff;
+  border: 1px solid #dbe3eb;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 14px 0;
+  font-size: 0.8rem;
+}
+.personal-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+.personal-section-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.personal-document,
+.personal-completed-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e3e9ef;
+  padding: 12px 0;
+}
+.personal-document > div,
+.personal-completed-row > div {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.personal-document small,
+.personal-completed-row small {
+  display: block;
+  color: #62758a;
+  margin-top: 4px;
+}
+.personal-document a {
+  color: #245b82;
+}
+.personal-document:last-child,
+.personal-completed-row:last-child {
+  border: 0;
+}
+.personal-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 15px 0;
+}
+.personal-stat-row b {
+  display: block;
+  font-size: 1.4rem;
+  color: #245b82;
+}
+.personal-version {
+  font-size: 0.67rem;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #62758a;
+  border-radius: 7px;
+  padding: 6px 9px;
+  cursor: pointer;
+  margin: 8px;
+}
+.personal-version.needs-update {
+  color: #8a4b13;
+  background: #fff8e7;
+}
+.personal-feedback {
+  color: #a83333;
+  background: #fff1f2;
+  padding: 10px;
+  border-radius: 6px;
+}
+#personal-completed {
+  padding: 12px 4px;
+  font-size: 0.85rem;
+}
+#personal-completed[hidden],
+.action-list[hidden],
+.cal-type-btn[hidden],
+#group-cruce-confirm[hidden] {
+  display: none !important;
+}
+.attention-single-lane {
+  grid-template-columns: minmax(0, 1fr);
+}
+.attention-focus strong {
+  line-height: 1.45;
+}
+.attention-lane-head p {
+  max-width: 60ch;
+}
+#ind-csr-section[hidden] {
+  display: none !important;
+}
+body.personal-operation #shift-brief {
+  display: none !important;
+}
+@media (max-width: 620px) {
+  .personal-dialog {
+    width: 96vw;
+  }
+  .personal-body {
+    padding: 12px;
+  }
+  .personal-dialog header,
+  .personal-dialog footer {
+    padding: 12px;
+  }
+  .personal-document {
+    flex-wrap: wrap;
+  }
+  .personal-document > div {
+    flex-basis: 100%;
+  }
+  .personal-completed-row {
+    align-items: start;
+  }
+  .personal-section-head {
+    flex-wrap: wrap;
+  }
+  .personal-import-table {
+    max-height: 50dvh;
+  }
+  .personal-version {
+    max-width: 210px;
+    white-space: normal;
+    text-align: left;
+  }
+}

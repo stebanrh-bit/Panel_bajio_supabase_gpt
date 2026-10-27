@@ -1,4 +1,4 @@
-var RADAR_CONOCIDAS_ = {
+  var RADAR_CONOCIDAS_ = {
     // ciudades frecuentes (las del Radar original), sin red
     "three rivers|mi": [41.9445, -85.6336],
     "enid|ok": [36.3956, -97.8784],
@@ -2239,6 +2239,8 @@ var RADAR_CONOCIDAS_ = {
 
   function renderIndicadores_() {
     var scope = actionCenterScope(currentData);
+    document.getElementById("ind-frontera").closest("section").hidden =
+      !window.panelPersonal.preferences.show_crossings;
     var j = computeActiveJourney(currentData),
       activas = j.active,
       b = homeBuckets_(currentData);
@@ -2266,7 +2268,13 @@ var RADAR_CONOCIDAS_ = {
     document.getElementById("ind-resumen").innerHTML =
       kpi(activas.length, "Cargas activas", "") +
       kpi(b.now.length, "Atender ahora", "critical") +
-      kpi(sinAvisar.length, "Clientes sin avisar", "warn") +
+      kpi(
+        scope.filter(function (r) {
+          return isDoneStatus(r.status) && !r.pod_sent;
+        }).length,
+        "POD por registrar",
+        "warn",
+      ) +
       kpi(recVenc.length, "Recordatorios vencidos", "warn") +
       kpi(entHoy.length, "Entregas hoy", "") +
       kpi(conInc.length, "Con incidencias", "warn");
@@ -2296,8 +2304,8 @@ var RADAR_CONOCIDAS_ = {
 
     // Por CSR (solo Supervisor / Seguimiento)
     var secCsr = document.getElementById("ind-csr-section");
-    secCsr.hidden = !puedeVerTodo_();
-    if (puedeVerTodo_()) {
+    secCsr.hidden = PANEL_CONFIG.INTERNAL_ONLY || !puedeVerTodo_();
+    if (!PANEL_CONFIG.INTERNAL_ONLY && puedeVerTodo_()) {
       var slaPorCsr = {};
       (lastSlaPairs || []).forEach(function (p) {
         var rec = recPorLoad_(p.load);
@@ -2633,6 +2641,17 @@ var RADAR_CONOCIDAS_ = {
           ];
         }),
       );
+      if (!window.panelPersonal.preferences.show_crossings) {
+        filas = filas.filter(function (row) {
+          return row[0] !== "Tiempo promedio en frontera";
+        });
+        var headerIndex = filas.findIndex(function (row) {
+          return row[0] === "Load";
+        });
+        filas.slice(headerIndex).forEach(function (row) {
+          row.splice(13, 1);
+        });
+      }
       var csv =
         "﻿" +
         filas
@@ -3029,7 +3048,11 @@ var RADAR_CONOCIDAS_ = {
       return;
     }
     box.innerHTML =
-      "Última importación: <b>" +
+      "Archivo: <b>" +
+      esc(info.fileName || "Importación anterior") +
+      "</b> · " +
+      esc(info.author || "") +
+      "<br>Última importación: <b>" +
       esc(fmtDateTime(desde)) +
       "</b> (" +
       esc(relativeTimeLabel(desde)) +
@@ -3040,7 +3063,11 @@ var RADAR_CONOCIDAS_ = {
       .addEventListener("click", function () {
         confirmarModal_(
           "Deshacer la última importación",
-          "<p>Loads regresará a como estaba antes de la importación del <b>" +
+          "<p>Se restaurarán los cambios del archivo <b>" +
+            esc(info.fileName || "Importación anterior") +
+            "</b>, por " +
+            esc(info.author || "usuario registrado") +
+            ", importado el <b>" +
             esc(fmtDateTime(desde)) +
             "</b>.</p>" +
             '<p class="aviso-fuerte">Supabase comprobará que las cargas no hayan cambiado después de importar. Si alguien las editó, se cancelará la restauración para conservar ese trabajo.</p>' +
