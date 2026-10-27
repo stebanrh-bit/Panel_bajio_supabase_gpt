@@ -1,0 +1,168 @@
+{
+  "date": "2026-10-27",
+  "timezone": "America/Mexico_City",
+  "base_commit": "305bc0d",
+  "scope": "Revisión de la versión del repositorio con datos sintéticos. No se accedió a la sesión publicada, no se ejecutó SQL en producción ni se enviaron mensajes.",
+  "checks": {
+    "automated_tests": 204,
+    "failed_tests": 0,
+    "build_modes": 4,
+    "package_check": "passed",
+    "browser_views": 28,
+    "browser_errors": [],
+    "horizontal_overflow": []
+  },
+  "browser_pages": [
+    "home",
+    "operation",
+    "calendario",
+    "indicadores",
+    "apartados",
+    "radar",
+    "solicitudes",
+    "tareas",
+    "detalle",
+    "mensaje",
+    "expediente",
+    "expediente-tracking",
+    "expediente-documentos",
+    "expediente-incidencias",
+    "expediente-historial",
+    "organizar",
+    "organizar-tasks",
+    "organizar-schedules",
+    "organizar-rules",
+    "organizar-clients",
+    "organizar-retention",
+    "mostrar",
+    "movil-home",
+    "movil-operation",
+    "movil-calendario",
+    "movil-indicadores",
+    "movil-apartados",
+    "movil-radar"
+  ],
+  "reproductions": {
+    "instructions_and_aliases": {
+      "environment": "PostgreSQL local con datos sintéticos; no es producción",
+      "freshLoad": {
+        "load": "AUDIT-NEW",
+        "status": "PTE. ARRIVO",
+        "pickup": "2099-10-28T18:00:00Z",
+        "instructionStage": "destination",
+        "instructionAction": "Coordinar recepción con cliente final",
+        "displayedStage": "En tránsito"
+      },
+      "legacyAlias": {
+        "serverVisible": true,
+        "assignedCustomers": [
+          "AUDITORIA",
+          "Cliente principal"
+        ],
+        "actualCustomer": "Cliente histórico",
+        "bellVisible": false
+      }
+    },
+    "route_direction": {
+      "environment": "Funciones actuales ejecutadas localmente con rutas sintéticas",
+      "results": [
+        {
+          "route": {
+            "origin_city": "Monterrey",
+            "origin_state": "NL",
+            "dest_city": "Dallas",
+            "dest_state": "TX"
+          },
+          "result": {
+            "code": null,
+            "transload": false
+          }
+        },
+        {
+          "route": {
+            "origin_city": "Monterrey",
+            "origin_state": "NL",
+            "dest_city": "Laredo",
+            "dest_state": "TX"
+          },
+          "result": {
+            "code": "SB",
+            "transload": false
+          }
+        },
+        {
+          "route": {
+            "origin_city": "Dallas",
+            "origin_state": "TX",
+            "dest_city": "Monterrey",
+            "dest_state": "NL"
+          },
+          "result": {
+            "code": null,
+            "transload": false
+          }
+        },
+        {
+          "route": {
+            "origin_city": "San Luis Potosí",
+            "origin_state": "S.L.P.",
+            "dest_city": "Dallas",
+            "dest_state": "TX"
+          },
+          "result": {
+            "code": "NB",
+            "transload": false
+          }
+        }
+      ]
+    },
+    "manual_import": {
+      "environment": "PostgreSQL local; no se usó la base real",
+      "before": {
+        "load": "AUDIT-IMPORT",
+        "status": "En AA",
+        "truck": "TRUCK-MANUAL",
+        "trailer": "TRAILER-MANUAL",
+        "truck_source": "MANUAL",
+        "trailer_source": "MANUAL"
+      },
+      "after": {
+        "load": "AUDIT-IMPORT",
+        "status": "En AA",
+        "truck": "TRUCK-ARCHIVO",
+        "trailer": "TRAILER-ARCHIVO",
+        "truck_source": "IMPORT",
+        "trailer_source": "IMPORT"
+      },
+      "changedFields": [
+        "trailer",
+        "trailer_manual_at",
+        "trailer_manual_by",
+        "trailer_source",
+        "trailer_vg_value",
+        "truck",
+        "truck_manual_at",
+        "truck_manual_by",
+        "truck_source",
+        "truck_vg_value"
+      ]
+    },
+    "export_and_copy": {
+      "export": {
+        "visible": [
+          "VISUAL-001",
+          "VISUAL-002"
+        ],
+        "includesCancelledOrOtherCustomer": true,
+        "includesUnselectedDelivered": false,
+        "excerpt": "﻿\"RESUMEN OPERATIVO — 8 oct 2026, 12:00\"\r\nCargas totales,4\r\nEn curso,3\r\nNecesitan atención,3\r\nDocs completos,0/3\r\nRecordatorios vencidos,0\r\n\r\nCARGA DE TRABAJO POR CSR\r\nCSR,Cargas activas,Necesitan atención\r\nEsteban,3,3\r\nAna,0,0\r\n\r\n\"TIEMPO DE RESPUESTA AL CLIENTE (SLA, últimos 30 días)\"\r\nSin comunicaciones registradas en el periodo.\r\n\r\nDETALLE DE CARGAS ACTIVAS\r\nLoad,Cliente,Estatus,Cita de recolección,Entrega cita,Salida planta,Cruce aduana,Incidencias,Recordatorio vencido,Última actualización\r\nVISUAL-001,ACME,En transito,\"8 oct 2026, 11:00\",\"9 oct 2026, 12:00\",,,0,No,\"8 oct 2026, 11:00\"\r\nVISUAL-002,ACME,Cargando,,,,,0,No,\"8 oct 2026, 11:00\"\r\nAUDIT-B,OTRO CLIENTE,Cancelado.,,,,,0,No,\"8 oct 2026, 11:00\""
+      },
+      "copyCalls": 2
+    }
+  },
+  "notes": [
+    "El navegador usa una fecha fija de 2026-10-08 para mantener reproducibles los recorridos.",
+    "Las rutas, cargas, clientes y nombres del ensayo son ficticios.",
+    "No es una medición de recursos ni de cuotas del proyecto Supabase real."
+  ]
+}
