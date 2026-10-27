@@ -14,6 +14,8 @@ La entrega activa es la [versión personal con instructivos por ruta](VERSION_PE
 
 ## Sitio actual
 
+Gmail por carga está documentado en [GMAIL_POR_CARGA.md](GMAIL_POR_CARGA.md). Usa `gmail/`, la función Edge `panel-gmail` y SQL 021. Cada usuario conecta su propio Gmail mediante OAuth; Apps Script conserva su cuenta y no envía correos. WhatsApp permanece manual. La entrega conjunta incluye 004–021.
+
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.
 - `index.template.html`, `client.template.html`, `manager.template.html`: presentación de cada vista.
 - `panel-source.js` y `panel.parts.json`: ensamblan los nueve archivos de `panel/` en orden. Mantienen un único cierre para preservar los eventos heredados; no se ejecutan por separado.
@@ -25,7 +27,7 @@ La entrega activa es la [versión personal con instructivos por ruta](VERSION_PE
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
-- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–019, sobre 001–003.
+- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–021, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
 - `google-apps-script/Code-sitio.gs`: alojamiento, consultas Google y proceso horario limitado. No usa claves privilegiadas.
 

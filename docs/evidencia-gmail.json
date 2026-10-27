@@ -1,0 +1,14 @@
+{
+  "version": "2026.10.27.3",
+  "environment": "Chromium; Supabase y Gmail simulados",
+  "checks": [
+    "Liga por carga",
+    "Para y CC explícitos",
+    "Vista previa completa",
+    "Confirmación y un solo envío",
+    "Registro confirmado",
+    "WhatsApp manual conservado",
+    "Vista móvil sin desbordamiento"
+  ],
+  "realEmailsSent": 0
+}

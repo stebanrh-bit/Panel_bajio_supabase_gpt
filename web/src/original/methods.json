@@ -68,6 +68,7 @@
   "getSlaComunicacion",
   "getUltimosComentarios",
   "getVistasCargas",
+  "gmailCarga",
   "guardarAliasCliente",
   "guardarApartado",
   "guardarChecklist",

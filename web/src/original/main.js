@@ -33,6 +33,8 @@ import { editMenu } from "./load-views/editor.js";
 import loadViewsStyles from "./load-views/style.css?raw";
 import { mountPersonal } from "./personal/ui.js";
 import personalStyles from "./personal/style.css?raw";
+import { mountGmail } from "./gmail/ui.js";
+import gmailStyles from "./gmail/style.css?raw";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -76,7 +78,7 @@ async function start() {
       "\n" +
       loadViewsStyles +
       "\n" +
-      personalStyles,
+      personalStyles + "\n" + gmailStyles,
     script,
     config,
     view,
@@ -133,6 +135,7 @@ async function start() {
   if (view === "internal") usability.mountUsability(document);
   validation.mountValidation(document);
   window.panelPersonal = mountPersonal(api, document);
+  window.panelGmail = mountGmail(api);
   document.body.classList.add("personal-operation");
   for (const source of page.scripts) {
     const tag = document.createElement("script");

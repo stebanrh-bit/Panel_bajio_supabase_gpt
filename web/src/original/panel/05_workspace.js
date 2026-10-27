@@ -1446,7 +1446,12 @@
       b.append(documents);
       window.panelPersonal.renderDocuments(r.load, documents);
     }
-    if (workspaceCurrentTab === "comunicacion") loadWorkspaceComms(r.load);
+    if (workspaceCurrentTab === "comunicacion") {
+      loadWorkspaceComms(r.load);
+      var gmail = document.createElement("section");
+      b.append(gmail);
+      window.panelGmail.render(r.load, gmail);
+    }
     if (workspaceCurrentTab === "historial") {
       if (workspaceHistorialSubTab === "comunicacion")
         loadWorkspaceComms(r.load);

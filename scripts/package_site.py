@@ -6,9 +6,9 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from package_google import package_html, package_reader
 
 ROOT=Path(__file__).resolve().parents[1]
-MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql','013_punctual_pending.sql','014_load_signals.sql','015_route_instructions.sql','016_personal_internal_mode.sql','017_default_arrival_status.sql','018_manual_client_messages.sql','019_personal_load_views.sql','020_personal_consolidation.sql']
+MIGRATIONS=['004_reserved_loads.sql','005_team_and_shifts.sql','006_import_archive_and_messages.sql','007_radar_and_places.sql','008_incident_category_validation.sql','009_original_interface.sql','010_google_miles_worker.sql','011_queries_and_revisions.sql','012_turn_rules_and_tasks.sql','013_punctual_pending.sql','014_load_signals.sql','015_route_instructions.sql','016_personal_internal_mode.sql','017_default_arrival_status.sql','018_manual_client_messages.sql','019_personal_load_views.sql','020_personal_consolidation.sql','021_gmail_per_load.sql']
 
-def combined_sql(names=None, label='ACTUALIZACIÓN CONJUNTA 004–020', requires='001, 002 y 003'):
+def combined_sql(names=None, label='ACTUALIZACIÓN CONJUNTA 004–021', requires='001, 002 y 003'):
     parts=[f'-- PANEL BAJÍO: {label}.\n-- Copiar TODO a SQL Editor > New query > Run. Requiere {requires}.\n-- Conserva cargas, usuarios y expedientes; cualquier fallo revierte la actualización.\nbegin;\n']
     for name in (MIGRATIONS if names is None else names):
         content=(ROOT/'supabase/migrations'/name).read_text()
@@ -41,6 +41,10 @@ def main():
             if not path.exists() or path.read_text()!=content: raise SystemExit('Entrega desactualizada: '+str(path.relative_to(ROOT)))
         else: path.write_text(content)
     files={
+        'GMAIL_POR_CARGA.md':ROOT/'docs/GMAIL_POR_CARGA.md',
+        'evidencia-gmail.json':ROOT/'docs/evidencia-gmail.json',
+        '021_gmail_per_load.sql':ROOT/'supabase/migrations/021_gmail_per_load.sql',
+        **{'panel-gmail/'+name:ROOT/'supabase/functions/panel-gmail'/name for name in ['index.ts','domain.js','google.js','crypto.js']},
         'index-cliente.html':ROOT/'google-apps-script/index-cliente.html',
         'index-gerencia.html':ROOT/'google-apps-script/index-gerencia.html',
         'lector.html':ROOT/'google-apps-script/lector.html',

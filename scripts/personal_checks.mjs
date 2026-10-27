@@ -19,7 +19,7 @@ export async function runPersonalReview({
   await page.locator(".personal-dialog").waitFor();
   assert.match(
     await page.locator(".personal-dialog").innerText(),
-    /2026\.10\.27\.2/,
+    /2026\.10\.27\.3/,
   );
   check("Versión del sitio y SQL 20 disponibles");
   assert.equal(
@@ -234,7 +234,7 @@ export async function runPersonalReview({
   await second.close();
   await page.close();
   return {
-    version: "2026.10.27.2",
+    version: "2026.10.27.3",
     environment: "Chromium local; Supabase simulado",
     checks,
   };

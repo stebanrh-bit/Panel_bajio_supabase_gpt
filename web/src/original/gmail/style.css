@@ -1,0 +1,34 @@
+.gmail-load {
+  border: 1px solid var(--border, #ddd);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.gmail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.gmail-record {
+  border-top: 1px solid #ddd;
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+.gmail-record button {
+  margin-right: 8px;
+}
+.gmail-message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  background: #f5f7fa;
+  padding: 12px;
+}
+.personal-dialog dd {
+  margin: 0 0 10px;
+  overflow-wrap: anywhere;
+}
+.personal-dialog dt {
+  font-weight: 600;
+}

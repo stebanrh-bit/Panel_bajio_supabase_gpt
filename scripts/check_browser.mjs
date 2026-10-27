@@ -1,4 +1,5 @@
 import { runCalendarDateReview } from "./calendar_date_checks.mjs";
+import { runGmailReview } from "./gmail_checks.mjs";
 import { runPersonalReview } from "./personal_checks.mjs";
 import { runLoadViewsReview } from "./load_views_checks.mjs";
 import { runInternalInstructionsReview } from "./internal_instructions_checks.mjs";
@@ -910,6 +911,15 @@ let panelReview,
   punctualPendingReview,
   logisticsSignalsReview;
 try {
+  if (process.argv.includes("--gmail-only")) {
+    customerAssignments[0].owner_id = adminId;
+    const result = await runGmailReview({ newPage });
+    assert.deepEqual(errors, []);
+    await writeFile(new URL("docs/evidencia-gmail.json", root), JSON.stringify(result, null, 2)+"\n");
+    console.log("Gmail por carga verificado con Google y Supabase simulados; cero correos reales.");
+    await browser.close();
+    process.exit(0);
+  }
   if (process.argv.includes("--calendar-dates-only")) {
     customerAssignments[0].owner_id = adminId;
     const result = await runCalendarDateReview({
