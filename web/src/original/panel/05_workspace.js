@@ -259,12 +259,8 @@ var commentsCurrentLoad = null;
     if (isNaN(d.getTime())) return false;
     return d.getTime() <= Date.now();
   }
-  var TRANSIT_SUBSTAGE_STATUSES_ = [
-    "En transito",
-    "En yarda MX",
-    "Patio permisionario",
-    "Cruzando",
-  ];
+  // El recorrido visible se concentra en la recolección y la entrega.
+  // Las fechas históricas de salida y cruce se conservan para los demás módulos.
   function workspaceJourneyHtml(r) {
     var stages = [
       {
@@ -273,30 +269,11 @@ var commentsCurrentLoad = null;
         done: !!r.pickup_actual,
       },
       {
-        label: "Salida planta",
-        date: r.salida_mexico_fecha,
-        done: journeyStageDone_(r.salida_mexico_fecha),
+        label: "Entrega",
+        date: r.delivery_actual || r.delivery_appt,
+        done: !!r.delivery_actual,
       },
     ];
-    var salidaLista = journeyStageDone_(r.salida_mexico_fecha);
-    var cruceLista = journeyStageDone_(r.cruce_usa_fecha);
-    if (
-      salidaLista &&
-      !cruceLista &&
-      TRANSIT_SUBSTAGE_STATUSES_.indexOf(r.status) !== -1
-    ) {
-      stages.push({ label: r.status, date: "", done: false });
-    }
-    stages.push({
-      label: "Cruce aduana",
-      date: r.cruce_usa_fecha,
-      done: cruceLista,
-    });
-    stages.push({
-      label: "Entrega",
-      date: r.delivery_actual || r.delivery_appt,
-      done: !!r.delivery_actual,
-    });
     var activeIdx = -1;
     for (var i = 0; i < stages.length; i++) {
       if (!stages[i].done) {
@@ -385,9 +362,7 @@ var commentsCurrentLoad = null;
         titleCity(r.dest_city) +
           (r.dest_state ? ", " + String(r.dest_state).toUpperCase() : ""),
       ) +
-      wsBox("Dirección", directionLabel(loadDirection(r))) +
-      wsBox("Salida México", wsDate(r.salida_mexico_fecha)) +
-      wsBox("Cruce aduana", wsDate(r.cruce_usa_fecha));
+      wsBox("Dirección", directionLabel(loadDirection(r)));
     var unidad =
       manualFieldHtml(r, "truck", "Unidad") +
       manualFieldHtml(r, "trailer", "Trailer") +
@@ -428,7 +403,7 @@ var commentsCurrentLoad = null;
       workspaceJourneyHtml(r) +
       '<h3 class="ws-section-title">Control operativo</h3><div class="ws-group-row">' +
       wsGroup("Citas y tiempos", citas) +
-      wsGroup("Ruta y cruce", ruta) +
+      wsGroup("Ruta", ruta) +
       wsGroup("Unidad", unidad, 1) +
       "</div>" +
       pendientePuntualHtml_(r) +

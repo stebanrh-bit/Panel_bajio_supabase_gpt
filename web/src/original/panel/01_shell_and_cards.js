@@ -1117,16 +1117,6 @@
       '">' +
       deltaLabel(rec.delivery_delta_min) +
       "</span></div></div>" +
-      '<div class="field"><div class="k">Salida planta</div><input class="v field-input" type="datetime-local" value="' +
-      apptDatetimeLocalValue(rec.salida_mexico_fecha) +
-      '" data-salida-mexico-load="' +
-      esc(rec.load) +
-      '"></div>' +
-      '<div class="field"><div class="k">Cruce</div><input class="v field-input" type="datetime-local" value="' +
-      apptDatetimeLocalValue(rec.cruce_usa_fecha) +
-      '" data-cruce-usa-load="' +
-      esc(rec.load) +
-      '"></div>' +
       '<div class="field f-truck"><div class="k">Truck</div><input class="v field-input" type="text" placeholder="—" value="' +
       esc(rec.truck) +
       '" data-truck-load="' +

@@ -421,16 +421,6 @@
       '" data-delivery-appt-load="' +
       esc(rec.load) +
       '"></div>' +
-      '<div class="field"><div class="k">Salida planta</div><input class="v field-input" type="datetime-local" value="' +
-      apptDatetimeLocalValue(rec.salida_mexico_fecha) +
-      '" data-salida-mexico-load="' +
-      esc(rec.load) +
-      '"></div>' +
-      '<div class="field"><div class="k">Cruce</div><input class="v field-input" type="datetime-local" value="' +
-      apptDatetimeLocalValue(rec.cruce_usa_fecha) +
-      '" data-cruce-usa-load="' +
-      esc(rec.load) +
-      '"></div>' +
       '<div class="field"><div class="k">Documentación</div><div class="docs">' +
       docDots(rec) +
       "</div></div>" +

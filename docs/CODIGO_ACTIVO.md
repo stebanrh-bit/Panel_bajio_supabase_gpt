@@ -64,3 +64,5 @@ Las cargas nuevas usan `PTE. ARRIVO` mediante la migración 017, tanto en captur
 La migración 018 recupera la redacción y confirmación manual de mensajes para WhatsApp. `MANUAL_CLIENT_MESSAGES` muestra el compositor individual y «Mensaje a cliente» para varias cargas; mantiene los portales y envíos automáticos desactivados. El SQL breve está en `supabase/actualizar_cargas_y_mensajes.sql` y requiere 016.
 
 El [menú Mostrar configurable](MOSTRAR_CONFIGURABLE.md) usa `load-views/rules.js`, `load-views/editor.js` y la migración 019. Las preferencias se guardan por cuenta en `original_preferences.load_views`, separadas de las plantillas de WhatsApp. El recorrido de navegador es `node scripts/check_browser.mjs --views-only`.
+
+En la consulta de una carga se retiraron Salida de planta y Cruce del detalle rápido, la edición de tarjetas y la pestaña Operación del expediente. El recorrido visible muestra Pickup y Entrega; el grupo de datos se llama Ruta. Las fechas históricas se conservan en Supabase y siguen disponibles para calendario, historial e instructivos. Esta actualización de presentación solo requiere reemplazar `index.html` en Apps Script.
