@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "La versión activa mantiene retirados los portales y otros perfiles; recupera mensajes manuales",
+    "Buscar sin coincidencias informa el resultado y no escribe ni intenta aplicar una plantilla inexistente",
+    "Guardar borrador desde la carga confirma el guardado, conserva el texto ante error y bloquea el envío doble sin publicar automáticamente",
+    "Buscar encuentra el borrador persistido; revisar y publicar actualiza el mismo instructivo y lo asigna a la carga",
+    "La vista previa de aprobado no modifica la carga; aplicar exige confirmación, rechaza una versión vencida y funciona en anchos 320–1533",
+    "Editor con cuatro/seis etapas, error conserva formulario, publicación asigna la plantilla a las cargas actuales sin instructivo",
+    "Requisitos y condición quedan visibles; confirmar condición no omite documentos; completar cambia la instrucción a Atendida",
+    "Una etapa distinta abre el seguimiento siguiente; guardar un caso genera una propuesta sin publicarla automáticamente",
+    "Aprobar un caso incorpora solo las etapas revisadas a la plantilla publicada y conserva las versiones que ya usan las cargas",
+    "La siguiente acción del listado abre el instructivo y actualizar desde plantilla adopta la versión nueva solo por decisión expresa",
+    "Inicio conserva solo atención interna; anchos 320–1533 sin desbordes; la entrega gerencial es estática y no consulta expedientes"
+  ],
+  "productionWrites": 0,
+  "version": "2026.10.27.5",
+  "command": "node scripts/check_browser.mjs --internal-only",
+  "suite": {
+    "command": "node --test --test-concurrency=2 web/test/*.test.js",
+    "tests": 223,
+    "passed": 223,
+    "failed": 0
+  }
+}

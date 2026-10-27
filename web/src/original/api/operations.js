@@ -193,7 +193,13 @@ export function operationMethods(ctx) {
             ]),
         ).values(),
       ];
-      return { ok: true, items, routes, admin: ctx.profile.role === "admin" };
+      return {
+        ok: true,
+        items,
+        routes,
+        customerAliases: ctx.records("customer_aliases"),
+        admin: ctx.profile.role === "admin",
+      };
     },
     guardarInstructivoRuta: async (
       id,

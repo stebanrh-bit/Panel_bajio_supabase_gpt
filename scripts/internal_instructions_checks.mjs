@@ -20,7 +20,15 @@ export async function runInternalInstructionsReview({
     checks = [],
     templates = [];
   const snapshot = structuredClone(rawLoads);
-  let clock = 1;
+  let clock = 1,
+    saveCalls = 0,
+    applyCalls = 0,
+    failNextSave = false;
+  const closeSavedResult = async () => {
+    const result = page.locator(".instruction-dialog[data-instruction-result]");
+    await result.waitFor();
+    await result.locator("footer [data-close]").click();
+  };
   const stamp = () => `2026-10-08T18:01:${String(clock++).padStart(2, "0")}Z`;
   const recompute = (record) => {
     if (!record.instruction_plan) {
@@ -95,6 +103,17 @@ export async function runInternalInstructionsReview({
       "**/rest/v1/rpc/ops_save_route_instruction",
       async (route) => {
         const input = route.request().postDataJSON();
+        saveCalls++;
+        if (failNextSave) {
+          failNextSave = false;
+          return route.fulfill({
+            status: 400,
+            contentType: "application/json",
+            body: JSON.stringify({
+              message: "No se pudo guardar. Intenta otra vez.",
+            }),
+          });
+        }
         const record = {
           ...input.p_values,
           id: input.p_id || `template-${templates.length + 1}`,
@@ -139,6 +158,7 @@ export async function runInternalInstructionsReview({
         }
         if (input.p_apply_missing && record.state === "approved")
           rawLoads.filter((r) => !r.instruction_plan).forEach(apply);
+        await new Promise((resolve) => setTimeout(resolve, 100));
         await route.fulfill({
           contentType: "application/json",
           body: JSON.stringify(saved),
@@ -150,7 +170,15 @@ export async function runInternalInstructionsReview({
       async (route) => {
         const input = route.request().postDataJSON(),
           record = rawLoads.find((r) => r.load === input.p_load);
-        assert.equal(input.p_version, record.updated_at);
+        if (input.p_action === "apply") applyCalls++;
+        if (input.p_version !== record.updated_at)
+          return route.fulfill({
+            status: 400,
+            contentType: "application/json",
+            body: JSON.stringify({
+              message: "La carga cambió. Actualiza antes de guardar",
+            }),
+          });
         if (input.p_action === "condition")
           record.instruction_progress = {
             ...record.instruction_progress,
@@ -195,15 +223,210 @@ export async function runInternalInstructionsReview({
     assert.equal(
       await page
         .locator(
-          '#who-toggle-btn:visible,[data-retired-client-feature]:visible',
+          "#who-toggle-btn:visible,[data-retired-client-feature]:visible",
         )
         .count(),
       0,
     );
+    await page.locator("#table-body tr.t-row").first().waitFor();
     assert.equal(await page.locator("#table-body tr.t-row").count(), 3);
     checks.push(
       "La versión activa mantiene retirados los portales y otros perfiles; recupera mensajes manuales",
     );
+    // Regresión del acceso que reportó el usuario: directamente desde «Instructivo por definir».
+    {
+      const row = page.locator('#table-body tr[data-load="VISUAL-002"]');
+      await row.locator("[data-table-select]").click();
+      const detail = page.locator("#table-detail-body");
+      await detail.locator(".instruction-empty").evaluate((node) => {
+        node.open = true;
+      });
+      await detail
+        .getByRole("button", {
+          name: "Buscar instructivo aprobado",
+          exact: true,
+        })
+        .click();
+      let search = page.locator("[data-instruction-search]");
+      await search.waitFor();
+      assert.match(await search.innerText(), /No hay un instructivo publicado/);
+      assert.equal(await search.locator('[type="submit"]').count(), 0);
+      assert.equal(applyCalls, 0);
+      await search.locator("footer [data-close]").click();
+      checks.push(
+        "Buscar sin coincidencias informa el resultado y no escribe ni intenta aplicar una plantilla inexistente",
+      );
+
+      await detail
+        .getByRole("button", {
+          name: "Crear instructivo para esta ruta",
+          exact: true,
+        })
+        .click();
+      let editor = page.locator(".instruction-dialog").last();
+      assert.equal(
+        await editor.locator('[name="state"]').inputValue(),
+        "draft",
+      );
+      assert.equal(
+        await editor.locator('[name="origin_city"]').inputValue(),
+        "Bajío",
+      );
+      await editor
+        .locator('[name="origin.action"]')
+        .fill("Confirmar documentación con planta antes de despachar.");
+      failNextSave = true;
+      await editor
+        .getByRole("button", { name: "Guardar borrador", exact: true })
+        .click();
+      await page.waitForFunction(() =>
+        document
+          .querySelector(".instruction-dialog .organize-error")
+          ?.textContent.includes("Intenta otra vez"),
+      );
+      assert.match(
+        await editor.locator('[name="origin.action"]').inputValue(),
+        /Confirmar documentación/,
+      );
+      const beforeRetry = saveCalls;
+      await editor.locator("form").evaluate((form) => {
+        form.requestSubmit();
+        form.requestSubmit();
+      });
+      await page.locator('[data-instruction-result="draft"]').waitFor();
+      assert.equal(saveCalls, beforeRetry + 1);
+      assert.equal(templates.length, 1);
+      assert.equal(templates[0].state, "draft");
+      assert.equal(rawLoads[1].instruction_plan, undefined);
+      await page
+        .locator('[data-instruction-result="draft"] [data-review-saved]')
+        .click();
+      editor = page.locator(".instruction-dialog").last();
+      assert.equal(
+        await editor.locator('[name="state"]').inputValue(),
+        "approved",
+      );
+      assert.match(
+        await editor.locator('[name="origin.action"]').inputValue(),
+        /Confirmar documentación/,
+      );
+      await editor.locator("footer [data-close]").click();
+      assert.equal(templates[0].state, "draft");
+      checks.push(
+        "Guardar borrador desde la carga confirma el guardado, conserva el texto ante error y bloquea el envío doble sin publicar automáticamente",
+      );
+
+      await detail.locator(".instruction-empty").evaluate((node) => {
+        node.open = true;
+      });
+      await detail
+        .getByRole("button", {
+          name: "Buscar instructivo aprobado",
+          exact: true,
+        })
+        .click();
+      search = page.locator("[data-instruction-search]");
+      await search.waitFor();
+      assert.match(
+        await search.innerText(),
+        /Guardado como borrador; falta publicarlo/,
+      );
+      assert.equal(await search.locator('[type="submit"]').count(), 0);
+      await search
+        .getByRole("button", { name: "Revisar", exact: true })
+        .click();
+      editor = page.locator(".instruction-dialog").last();
+      assert.match(
+        await editor.locator('[name="origin.action"]').inputValue(),
+        /Confirmar documentación/,
+      );
+      await editor.locator('[name="state"]').selectOption("approved");
+      await editor
+        .getByRole("button", { name: "Guardar y publicar", exact: true })
+        .click();
+      await page.locator('[data-instruction-result="approved"]').waitFor();
+      assert.equal(templates.length, 1);
+      assert.equal(templates[0].state, "approved");
+      assert.ok(rawLoads[1].instruction_template_id);
+      await closeSavedResult();
+      checks.push(
+        "Buscar encuentra el borrador persistido; revisar y publicar actualiza el mismo instructivo y lo asigna a la carga",
+      );
+
+      delete rawLoads[1].instruction_plan;
+      rawLoads[1].instruction_template_id = null;
+      rawLoads[1].updated_at = stamp();
+      recompute(rawLoads[1]);
+      await page.evaluate(() =>
+        window.dispatchEvent(new CustomEvent("panel:instruction-refresh")),
+      );
+      await detail.locator(".instruction-empty > summary").waitFor();
+      await detail.locator(".instruction-empty").evaluate((node) => {
+        node.open = true;
+      });
+      const beforeSearch = applyCalls;
+      await detail
+        .getByRole("button", {
+          name: "Buscar instructivo aprobado",
+          exact: true,
+        })
+        .click();
+      search = page.locator("[data-instruction-search]");
+      await search.waitFor();
+      assert.match(
+        await search.innerText(),
+        /Confirmar documentación con planta/,
+      );
+      assert.equal(applyCalls, beforeSearch);
+      assert.equal(rawLoads[1].instruction_plan, undefined);
+      rawLoads[1].updated_at = stamp(); // Otra edición mientras se revisaba el resultado.
+      await search
+        .getByRole("button", { name: "Aplicar a esta carga", exact: true })
+        .click();
+      await page.waitForFunction(() =>
+        document
+          .querySelector("[data-instruction-search] .organize-error")
+          ?.textContent.includes("La carga cambió"),
+      );
+      assert.equal(rawLoads[1].instruction_plan, undefined);
+      await search.locator("footer [data-close]").click();
+      await page.evaluate(() =>
+        window.dispatchEvent(new CustomEvent("panel:instruction-refresh")),
+      );
+      await page.waitForTimeout(300);
+      await detail
+        .getByRole("button", {
+          name: "Buscar instructivo aprobado",
+          exact: true,
+        })
+        .click();
+      search = page.locator("[data-instruction-search]");
+      await search.waitFor();
+      for (const width of [320, 390, 1533]) {
+        await page.setViewportSize({ width, height: 1050 });
+        assert.equal(
+          await search.evaluate((node) => node.scrollWidth > node.clientWidth),
+          false,
+        );
+      }
+      await search.screenshot({
+        path: "/tmp/panel-original-comparison/instructivo-busqueda-aprobado.png",
+      });
+      await search
+        .getByRole("button", { name: "Aplicar a esta carga", exact: true })
+        .click();
+      await detail.locator(".state-ready").waitFor();
+      assert.ok(rawLoads[1].instruction_template_id);
+      checks.push(
+        "La vista previa de aprobado no modifica la carga; aplicar exige confirmación, rechaza una versión vencida y funciona en anchos 320–1533",
+      );
+      templates.length = 0;
+      rawLoads.splice(0, rawLoads.length, ...structuredClone(snapshot));
+      await page.evaluate(() =>
+        window.dispatchEvent(new CustomEvent("panel:instruction-refresh")),
+      );
+      await page.locator("#table-detail-close").click();
+    }
     await page
       .getByRole("button", { name: "Organizar turno", exact: true })
       .click();
@@ -234,7 +457,7 @@ export async function runInternalInstructionsReview({
     assert.equal(await editor.locator("[data-stage]").count(), 4);
     await editor.locator('[name="state"]').selectOption("approved");
     await editor
-      .getByRole("button", { name: "Guardar instructivo", exact: true })
+      .getByRole("button", { name: "Guardar y publicar", exact: true })
       .click();
     await page.waitForFunction(() =>
       [...document.querySelectorAll('.instruction-dialog [role="alert"]')].some(
@@ -256,8 +479,9 @@ export async function runInternalInstructionsReview({
       .fill("Contactar al responsable de planta y registrar la incidencia.");
     await editor.locator('[name="origin.requires"][value="bol"]').check();
     await editor
-      .getByRole("button", { name: "Guardar instructivo", exact: true })
+      .getByRole("button", { name: "Guardar y publicar", exact: true })
       .click();
+    await closeSavedResult();
     await page.waitForFunction(() =>
       document.querySelector(
         '#table-body tr[data-load="VISUAL-002"] [data-instruction-open]',
@@ -339,8 +563,9 @@ export async function runInternalInstructionsReview({
       .locator('[name="case_note"]')
       .fill("Caso resuelto: se confirmó recepción en planta.");
     await editor
-      .getByRole("button", { name: "Guardar instructivo", exact: true })
+      .getByRole("button", { name: "Guardar borrador", exact: true })
       .click();
+    await closeSavedResult();
     assert.equal(templates.at(-1).state, "draft");
     checks.push(
       "Una etapa distinta abre el seguimiento siguiente; guardar un caso genera una propuesta sin publicarla automáticamente",
@@ -374,8 +599,9 @@ export async function runInternalInstructionsReview({
       true,
     );
     await editor
-      .getByRole("button", { name: "Guardar instructivo", exact: true })
+      .getByRole("button", { name: "Guardar y publicar", exact: true })
       .click();
+    await closeSavedResult();
     await page.waitForFunction(() =>
       document
         .querySelector(".instruction-library-list")

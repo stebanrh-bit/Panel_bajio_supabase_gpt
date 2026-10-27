@@ -98,6 +98,32 @@
   display: grid;
   gap: 8px;
 }
+.instruction-save-help {
+  padding: 10px 12px;
+  border-left: 3px solid #3675ae;
+  background: #edf4fc;
+  color: #284d74;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.instruction-search-result {
+  padding: 12px;
+  border: 1px solid #cad6e5;
+  border-radius: 8px;
+  background: #f8fafd;
+}
+.instruction-search-result h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.instruction-search-result p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.instruction-search-result details {
+  margin-top: 10px;
+}
 .instruction-step-editor {
   padding: 12px;
   border: 1px solid #cad6e5;

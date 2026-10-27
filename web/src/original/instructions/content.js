@@ -144,7 +144,7 @@ export function instructionCard(record) {
     return (
       '<details class="instruction-card instruction-empty"><summary>Instructivo por definir</summary><p>Registra las instrucciones una vez por cliente y ruta. Las cargas siguientes las recibirán automáticamente.</p><div class="instruction-actions">' +
       button(record, "propose", "Crear instructivo para esta ruta") +
-      button(record, "apply", "Buscar instructivo aprobado") +
+      button(record, "search", "Buscar instructivo aprobado") +
       "</div></details>"
     );
   const blockers = (c.missing || []).map(

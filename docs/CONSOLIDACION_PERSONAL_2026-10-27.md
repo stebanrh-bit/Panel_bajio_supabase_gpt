@@ -2,6 +2,8 @@
 
 **Actualización disponible:** [corrección del calendario v2026.10.27.2](CORRECCION_FECHAS_CALENDARIO_2026-10-27.md), para resolver NaN / Invalid Date. Solo requiere reemplazar el HTML.
 
+**Entrega posterior:** [guardar y buscar instructivos v2026.10.27.5](CORRECCION_INSTRUCTIVOS_2026-10-27.md), con confirmación de borrador/publicación y búsqueda con vista previa. Incluye la corrección anterior y solo requiere reemplazar el HTML.
+
 Implementación de R01–R20 de la revisión del 27 de octubre. Aplicación en Google Apps Script, datos y sesión en Supabase. Conserva la operación personal y la preparación manual de mensajes.
 
 ## Instalar
