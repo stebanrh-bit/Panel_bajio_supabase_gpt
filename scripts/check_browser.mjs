@@ -913,10 +913,10 @@ let panelReview,
 try {
   if (process.argv.includes("--gmail-only")) {
     customerAssignments[0].owner_id = adminId;
-    const result = await runGmailReview({ newPage });
+    const result = await runGmailReview({ newPage, rawLoads, profiles });
     assert.deepEqual(errors, []);
     await writeFile(new URL("docs/evidencia-gmail.json", root), JSON.stringify(result, null, 2)+"\n");
-    console.log("Gmail por carga verificado con Google y Supabase simulados; cero correos reales.");
+    console.log("Gmail manual verificado sin OAuth ni llamadas a Google; cero correos reales.");
     await browser.close();
     process.exit(0);
   }

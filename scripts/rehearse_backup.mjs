@@ -9,7 +9,13 @@ export async function rehearseBackup(backup) {
   if (backup.format !== "panel-bajio-backup-v2" || !backup.tables)
     throw Error("Se requiere un respaldo completo v2.");
   const files = (await readdir(new URL("supabase/migrations/", root)))
-    .filter((n) => /^\d.*sql$/.test(n))
+    // SQL 021 fue opcional: un respaldo del flujo manual con SQL 020 no contiene sus tablas.
+    .filter(
+      (n) =>
+        /^\d.*sql$/.test(n) &&
+        (n !== "021_gmail_per_load.sql" ||
+          Object.hasOwn(backup.tables, "load_gmail_threads")),
+    )
     .sort();
   const { db } = await createTestDatabase(files, {});
   try {

@@ -1,101 +1,121 @@
 import assert from "node:assert/strict";
-/** Recorrido del HTML empaquetado; todo acceso Gmail se intercepta antes de abrir el expediente. */
-export async function runGmailReview({ newPage }) {
-  const page = await newPage();
-  let state = "prepared",
-    sends = 0,
-    linked = false;
+/** Recorrido manual: Supabase simulado y todos los destinos Gmail bloqueados. */
+export async function runGmailReview({ newPage, rawLoads, profiles }) {
+  const page = await newPage(),
+    records = [];
+  let confirmations = 0,
+    googleRequests = 0;
   const preview = {
     from: "operador@simulado.test",
-    to: ["cliente@simulado.test"],
-    cc: ["supervisor@simulado.test"],
+    to: "cliente@simulado.test",
+    cc: "supervisor@simulado.test",
     subject: "Re: VISUAL-001",
     body: "Entrega confirmada. Gracias.",
   };
-  const item = () => ({
-    id: "simulado",
-    state,
-    preview,
-    created_at: "2026-10-27T18:00:00Z",
-    sent_at: state === "sent" ? "2026-10-27T18:01:00Z" : null,
+  await page
+    .context()
+    .route(
+      /https:\/\/(?:mail\.google\.com|gmail\.googleapis\.com|accounts\.google\.com|oauth2\.googleapis\.com)\//,
+      (route) => {
+        googleRequests++;
+        return route.abort();
+      },
+    );
+  await page.route("**/functions/v1/panel-gmail", () => {
+    throw Error("El modo manual no debe llamar a Edge.");
   });
-  await page.route("**/functions/v1/panel-gmail", async (route) => {
-    const input = route.request().postDataJSON();
-    let result;
-    if (input.action === "status")
-      result = {
-        email: preview.from,
-        thread: linked
-          ? { url: "https://mail.google.com/mail/u/0/#all/abc123" }
-          : null,
-        items: linked ? [item()] : [],
-      };
-    else if (input.action === "link") {
-      linked = true;
-      result = { ok: true };
-    } else if (input.action === "prepare") {
-      assert.equal(input.to, preview.to[0]);
-      assert.equal(input.cc, preview.cc[0]);
-      assert.equal(input.body, preview.body);
-      result = { item: item() };
-    } else if (input.action === "send") {
-      assert.equal(input.confirm, true);
-      assert.equal(state, "prepared");
-      sends++;
-      state = "sent";
-      result = { item: item() };
-    } else throw Error("Acción inesperada en simulación: " + input.action);
+  await page.route("**/rest/v1/loads?**", async (route) => {
+    const request = route.request(),
+      load = new URL(request.url()).searchParams.get("load")?.slice(3);
+    if (request.method() !== "GET" || !load) return route.fallback();
     await route.fulfill({
       contentType: "application/json",
-      body: JSON.stringify(result),
+      body: JSON.stringify(rawLoads.filter((row) => row.load === load)),
+    });
+  });
+  await page.route("**/rest/v1/communications?**", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify(records),
+    }),
+  );
+  await page.route("**/rest/v1/rpc/ops_record_manual_notice", async (route) => {
+    const input = route.request().postDataJSON(),
+      row = rawLoads.find((r) => r.load === input.p_load);
+    assert.equal(input.p_channel, "Correo");
+    assert.equal(input.p_type, "Gmail manual");
+    assert.ok(input.p_message.includes(preview.from));
+    assert.ok(input.p_message.includes(preview.body));
+    confirmations++;
+    const stamp = "2026-10-08T18:01:00Z";
+    records.push({
+      id: "manual-1",
+      load: input.p_load,
+      actor: profiles[0].id,
+      channel: "Correo",
+      notice_type: "Gmail manual",
+      manual_message: input.p_message,
+      created_at: stamp,
+    });
+    Object.assign(row, {
+      updated_at: stamp,
+      client_notified_at: stamp,
+      client_notify_pending: "false",
+    });
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify([row]),
     });
   });
   await page.locator('[data-page="operation"]').first().click();
-  await page.evaluate(() =>
-    document.querySelector('[data-home-open="VISUAL-001"]')?.click(),
-  );
-  if (
-    !(await page
-      .locator("#workspace-backdrop")
-      .evaluate((e) => e.classList.contains("show")))
-  ) {
-    await page
-      .locator('[data-workspace-load="VISUAL-001"]')
-      .first()
-      .evaluate((button) => button.click());
-  }
+  await page
+    .locator('[data-workspace-load="VISUAL-001"]')
+    .first()
+    .evaluate((button) => button.click());
   await page.locator('[data-workspace-tab="comunicacion"]').click();
   await page.locator("[data-gmail-link]").click();
-  await page
-    .locator('.personal-dialog [name="url"]')
-    .fill("https://mail.google.com/mail/u/0/#all/abc123");
+  const link = "https://mail.google.com/mail/u/0/#all/FMfcSimulado";
+  await page.locator('.personal-dialog [name="url"]').fill(link);
   await page.locator('.personal-dialog button[type="submit"]').click();
   await page.locator("[data-gmail-compose]").click();
-  for (const [name, value] of Object.entries({
-    to: preview.to[0],
-    cc: preview.cc[0],
-    body: preview.body,
-  }))
+  for (const [name, value] of Object.entries(preview))
     await page.locator(`.personal-dialog [name="${name}"]`).fill(value);
   await page.locator('.personal-dialog button[type="submit"]').click();
   await page.locator('.personal-dialog [name="confirm"]').waitFor();
   const text = await page.locator(".personal-dialog").innerText();
-  for (const value of [
-    preview.from,
-    ...preview.to,
-    ...preview.cc,
-    preview.body,
-  ])
-    assert.ok(text.includes(value));
-  assert.equal(sends, 0);
+  for (const value of Object.values(preview)) assert.ok(text.includes(value));
+  assert.equal(confirmations, 0);
+  assert.equal(
+    await page.locator(".personal-dialog a").getAttribute("href"),
+    link,
+  );
+  await page.evaluate(() => {
+    window.__gmailCopied = "";
+    navigator.clipboard.writeText = async (text) => {
+      window.__gmailCopied = text;
+    };
+  });
+  await page.locator("[data-gmail-copy]").click();
+  assert.equal(await page.evaluate(() => window.__gmailCopied), preview.body);
+  assert.equal(confirmations, 0);
   await page.locator('.personal-dialog [name="confirm"]').check();
   await page.locator('.personal-dialog button[type="submit"]').dblclick();
   await page
     .locator(".gmail-record")
-    .filter({ hasText: "Envío confirmado por Gmail" })
+    .filter({ hasText: "Envío confirmado manualmente por el usuario" })
     .waitFor();
-  assert.equal(sends, 1);
-  // WhatsApp permanece disponible y manual dentro del mismo expediente.
+  assert.equal(confirmations, 1);
+  const repeated = await page.evaluate(
+    async (values) =>
+      window.panelApi.methods.gmailCarga("prepare", {
+        load: "VISUAL-001",
+        ...values,
+      }),
+    preview,
+  );
+  assert.equal(repeated.item.state, "confirmed");
+  assert.equal(confirmations, 1);
+  assert.equal(await page.locator("[data-gmail-connect]").count(), 0);
   assert.equal(await page.locator("#comm-message").isVisible(), true);
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(
@@ -104,19 +124,21 @@ export async function runGmailReview({ newPage }) {
     ),
     false,
   );
+  assert.equal(googleRequests, 0);
   await page.close();
   return {
-    version: "2026.10.27.3",
-    environment: "Chromium; Supabase y Gmail simulados",
+    version: "2026.10.27.4",
+    environment: "Chromium; Supabase simulado, destinos Google bloqueados",
     checks: [
-      "Liga por carga",
-      "Para y CC explícitos",
-      "Vista previa completa",
-      "Confirmación y un solo envío",
-      "Registro confirmado",
+      "Liga moderna de Gmail sin OAuth",
+      "Remitente, Para, CC y texto revisables",
+      "Copiar y preparar no registran envío",
+      "Confirmación manual explícita",
+      "Registro único en historial existente",
       "WhatsApp manual conservado",
       "Vista móvil sin desbordamiento",
     ],
     realEmailsSent: 0,
+    googleRequests,
   };
 }

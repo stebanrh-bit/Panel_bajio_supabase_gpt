@@ -10,7 +10,7 @@ test("Gmail UI: revisar todos los campos, confirmar y bloquear doble clic; mensa
     originals[name] = globalThis[name];
     globalThis[name] = win[name] || win.document;
   }
-  let sends = 0,
+  let confirmations = 0,
     state = "prepared";
   const preview = {
     from: "ana@example.com",
@@ -18,23 +18,25 @@ test("Gmail UI: revisar todos los campos, confirmar y bloquear doble clic; mensa
     cc: ["cc@example.com"],
     subject: "Re: Carga 123",
     body: "<script>alert(1)</script>",
+    threadUrl: "https://mail.google.com/mail/u/0/#inbox/FMfcSimulado",
   };
   const item = () => ({
     id: "simulado",
     state,
     preview,
+    record_text: "Confirmación manual registrada",
     created_at: "2026-10-27T18:00:00Z",
   });
   const api = {
     methods: {
       gmailCarga: async (action, args) => {
         if (action === "status")
-          return { email: preview.from, thread: null, items: [item()] };
-        if (action === "send") {
+          return { thread: { url: preview.threadUrl }, items: [item()] };
+        if (action === "confirm") {
           assert.equal(args.confirm, true);
-          sends++;
+          confirmations++;
           await tick();
-          state = "sent";
+          state = "confirmed";
           return { item: item() };
         }
         throw Error("Acción no simulada: " + action);
@@ -45,6 +47,7 @@ test("Gmail UI: revisar todos los campos, confirmar y bloquear doble clic; mensa
     const target = win.document.createElement("section");
     win.document.body.append(target);
     await mountGmail(api).render("123", target);
+    assert.equal(target.querySelector("[data-gmail-connect]"), null);
     target.querySelector("[data-gmail-review]").click();
     const dialog = win.document.querySelector("dialog"),
       form = dialog.querySelector("form");
@@ -63,14 +66,17 @@ test("Gmail UI: revisar todos los campos, confirmar y bloquear doble clic; mensa
       );
     submit();
     await tick();
-    assert.equal(sends, 0);
+    assert.equal(confirmations, 0);
     form.querySelector('[name="confirm"]').checked = true;
     submit();
     submit();
     await tick();
     await tick();
-    assert.equal(sends, 1);
-    assert.match(target.textContent, /Envío confirmado por Gmail/);
+    assert.equal(confirmations, 1);
+    assert.match(
+      target.textContent,
+      /Envío confirmado manualmente por el usuario/,
+    );
     target.querySelector("[data-gmail-review]").click();
     assert.equal(
       win.document.querySelector('dialog button[type="submit"]'),

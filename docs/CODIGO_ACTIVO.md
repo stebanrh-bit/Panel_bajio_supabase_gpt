@@ -14,7 +14,7 @@ La entrega activa es la [versión personal con instructivos por ruta](VERSION_PE
 
 ## Sitio actual
 
-Gmail por carga está documentado en [GMAIL_POR_CARGA.md](GMAIL_POR_CARGA.md). Usa `gmail/`, la función Edge `panel-gmail` y SQL 021. Cada usuario conecta su propio Gmail mediante OAuth; Apps Script conserva su cuenta y no envía correos. WhatsApp permanece manual. La entrega conjunta incluye 004–021.
+El [Gmail manual por carga](GMAIL_POR_CARGA.md) usa `gmail/` y los enlaces e historial de SQL 020. Solo requiere actualizar HTML. El usuario envía desde Gmail y luego registra su confirmación manual; no usa OAuth ni Edge. WhatsApp permanece manual. SQL 021 pertenece a la integración anterior y no se instala en la entrega activa.
 
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.
 - `index.template.html`, `client.template.html`, `manager.template.html`: presentación de cada vista.
@@ -27,7 +27,7 @@ Gmail por carga está documentado en [GMAIL_POR_CARGA.md](GMAIL_POR_CARGA.md). U
 - `content.js`, `rendering.js`, `network.js`, `coordination.js`, `usability.js`: texto/CSV seguros, actualización de nodos, plazos de red, sondeos y presentación.
 - `files.js` extrae el lector del contenedor HTML/JSON válido para HtmlService e inicia el Worker bajo demanda. `reader-worker.js` procesa archivos; `files-fallback.js` conserva el contrato del lector anterior para pruebas de compatibilidad y no se carga al arrancar.
 - `features/*/service.js`, `data/columns.js`: consultas reutilizadas y contratos de columnas.
-- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–021, sobre 001–003.
+- `supabase/migrations/`: cambios ordenados del esquema. La entrega conjunta se genera con 004–020, sobre 001–003.
 - `supabase/functions/panel-accounts/index.ts`: Auth y administración de cuentas en el servidor.
 - `google-apps-script/Code-sitio.gs`: alojamiento, consultas Google y proceso horario limitado. No usa claves privilegiadas.
 
