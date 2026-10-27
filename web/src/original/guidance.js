@@ -56,6 +56,34 @@ export function reminderEntries(rows, now, config) {
   );
 }
 
+/** Un aviso del servidor puede quedar en caché. Solo sigue vigente para el mismo plazo pendiente. */
+export function currentLoadReviewAlert(alert, record, now, config) {
+  if (
+    !record ||
+    alert.kind !== "load_review" ||
+    String(alert.load) !== String(record.load) ||
+    !alert.recipient
+  )
+    return null;
+  return (
+    reminderEntries([record], now, config).find((entry) => {
+      if (
+        !Number.isFinite(Date.parse(entry.when)) ||
+        Date.parse(entry.when) > now
+      )
+        return false;
+      const kind =
+        entry.kind === "personal"
+          ? "seguimiento_personal"
+          : "revision_operativa";
+      return (
+        alert.dedupe_key ===
+        `review:${record.load}:${kind}:${entry.when}:${alert.recipient}`
+      );
+    }) || null
+  );
+}
+
 /** Nombres visibles junto a los iconos; conserva los eventos y destinos originales. */
 export function mountGuidance(doc) {
   const labels = [

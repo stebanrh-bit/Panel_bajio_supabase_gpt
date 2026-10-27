@@ -626,7 +626,8 @@
     ensureLoggedIn(function () {
       button.disabled = true;
       guardarConVerificacion_(
-        function () {
+        function (result) {
+          Object.assign(rec, result);
           rec.next_review_at = "";
           rec.next_review_note = "";
           rec.next_review_by = "";

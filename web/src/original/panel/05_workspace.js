@@ -1915,6 +1915,7 @@
               );
               return;
             }
+            Object.assign(r, res);
             r.next_review_at = "";
             r.next_review_note = "";
             r.next_review_by = "";

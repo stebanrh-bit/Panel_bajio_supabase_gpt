@@ -1,5 +1,7 @@
 # Pendientes puntuales
 
+La entrega personal vigente incluye la [revisión del cierre de pendientes y seguimientos v2026.10.27.6](CIERRE_SEGUIMIENTOS_2026-10-27.md). Esa actualización solo requiere reemplazar el HTML; no agrega vencimiento automático ni SQL nuevo.
+
 Permiten destacar una carga para atender algo ahora, por ejemplo confirmar la salida de una unidad del taller. Son compartidos por el equipo y no cambian el estatus de la carga ni sus seguimientos con fecha.
 
 ## Instalar

@@ -1,0 +1,16 @@
+{
+  "version": "2026.10.27.6",
+  "checks": [
+    "Completar desde Expediente conserva el pendiente puntual y la revisión por estatus; un error no muestra éxito y permite reintentar",
+    "Resolver el pendiente puntual conserva su nota e historial; ambos cierres persisten al recargar y la alerta antigua no reaparece",
+    "Reprogramar retira el aviso del plazo anterior y conserva la nueva fecha y hora de México",
+    "Completar el seguimiento personal no silencia una revisión de tránsito independiente que sigue pendiente"
+  ],
+  "productionWrites": 0,
+  "suite": {
+    "command": "node --test --test-concurrency=2 web/test/*.test.js",
+    "tests": 225,
+    "passed": 225,
+    "failed": 0
+  }
+}

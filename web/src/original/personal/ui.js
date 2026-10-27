@@ -5,7 +5,7 @@ import { reviewImport } from "./import-review.js";
 import { personalDialog } from "./dialog.js";
 import { field, select } from "../dialogs.js";
 import { escapeHtml as esc, safeLink } from "../content.js";
-export const APP_VERSION = "2026.10.27.5";
+export const APP_VERSION = "2026.10.27.6";
 const kinds = [
   ["pod", "POD"],
   ["bol", "BOL"],

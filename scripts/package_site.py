@@ -76,6 +76,8 @@ def main():
         'imagenes/consolidacion-personal-movil.png':ROOT/'docs/imagenes/consolidacion-personal-movil.png',
         'CORRECCION_FECHAS_CALENDARIO_2026-10-27.md':ROOT/'docs/CORRECCION_FECHAS_CALENDARIO_2026-10-27.md',
         'CORRECCION_INSTRUCTIVOS_2026-10-27.md':ROOT/'docs/CORRECCION_INSTRUCTIVOS_2026-10-27.md',
+        'CIERRE_SEGUIMIENTOS_2026-10-27.md':ROOT/'docs/CIERRE_SEGUIMIENTOS_2026-10-27.md',
+        'evidencia-cierre-seguimientos.json':ROOT/'docs/evidencia-cierre-seguimientos.json',
         'evidencia-correccion-instructivos.json':ROOT/'docs/evidencia-correccion-instructivos.json',
         'imagenes/instructivo-busqueda-aprobado.png':ROOT/'docs/imagenes/instructivo-busqueda-aprobado.png',
         'evidencia-calendario-fechas-2026-10-27.json':ROOT/'docs/evidencia-calendario-fechas-2026-10-27.json',

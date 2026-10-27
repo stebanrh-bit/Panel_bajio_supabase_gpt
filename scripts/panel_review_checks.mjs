@@ -221,6 +221,8 @@ export async function runPanelReview({ newPage, rawLoads, taskRow, profiles }) {
             id: "review-load",
             kind: "load_review",
             load: "VISUAL-001",
+            recipient: profiles[0].id,
+            dedupe_key: `review:VISUAL-001:seguimiento_personal:${rawLoads[0].next_review_at}:${profiles[0].id}`,
             message: "Revisar esta carga",
             created_at: rawLoads[0].updated_at,
           },

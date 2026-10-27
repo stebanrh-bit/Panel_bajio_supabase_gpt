@@ -87,6 +87,11 @@
         return [String(item.id), item];
       }),
     );
+    var loadsById = new Map(
+      (currentData || []).map(function (record) {
+        return [String(record.load), record];
+      }),
+    );
     var out = serverAlerts_
         .filter(function (a) {
           if (a.task_id) {
@@ -97,7 +102,12 @@
               window.panelTaskTime.taskReminderDue(currentTask)
             );
           }
-          if (a.load) return scope.hasLoad(a.load);
+          if (a.load)
+            return scope.hasLoad(a.load) &&
+              (a.kind !== "load_review" ||
+                !!window.panelGuidance.currentLoadReviewAlert(
+                  a, loadsById.get(String(a.load)), Date.now(), PANEL_CONFIG,
+                ));
           var task = tasks.get(String(a.task_id));
           return !!task && scope.hasTask(task);
         })
@@ -419,7 +429,7 @@
     var acc = [];
     if (a.tipo === "com" || a.tipo === "com60")
       acc.push(["avisado", "Ya avisé al cliente"]);
-    if (a.tipo === "rev") acc.push(["revisado", "Ya revisé"]);
+    if (a.tipo === "rev") acc.push(["revisado", "Completar seguimiento"]);
     if (a.tipo === "rec" && a.transito)
       acc.push(["transito", "Ya revisé (+" + AUTO_REVIEW_HOURS + " h)"]);
     if (a.tipo === "apr") {
@@ -496,13 +506,14 @@
         showToast("Cliente marcado como avisado — Carga " + rec.load, "good");
       }, fallo).markClientNotified(rec.load, myRealIdentity, myPassword);
     } else if (accion === "revisado") {
-      guardarConVerificacion_(function () {
+      guardarConVerificacion_(function (result) {
+        Object.assign(rec, result);
         rec.next_review_at = "";
         rec.next_review_note = "";
         rec.next_review_by = "";
         quitarAviso_(a.id);
         render(currentData);
-        showToast("Revisión registrada — Carga " + rec.load, "good");
+        showToast("Seguimiento completado — Carga " + rec.load, "good");
       }, fallo).clearNextReview(rec.load, myRealIdentity, myPassword);
     } else if (accion === "transito") {
       var fechaISO = new Date(

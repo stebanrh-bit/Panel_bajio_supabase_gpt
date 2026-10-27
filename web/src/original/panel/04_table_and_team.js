@@ -23,7 +23,7 @@
       '><label>¿Qué hay que resolver ahora?<textarea data-punctual-note rows="2" minlength="3" maxlength="1000" placeholder="Ejemplo: confirmar con el taller a qué hora estará lista la unidad">' +
       escHtml(active ? rec.punctual_note : "") +
       "</textarea></label>" +
-      "<p>Visible en Inicio y en Cargas → Pendientes puntuales, hasta que lo marques resuelto.</p></div>" +
+      "<p>No vence por tiempo. Al terminar, pulsa «Marcar resuelto»: se retira de pendientes y se conserva en el historial.</p></div>" +
       (active
         ? '<p class="punctual-origin">Abierto ' +
           escHtml(fmtDateTime(rec.punctual_opened_at)) +

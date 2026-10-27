@@ -1,4 +1,5 @@
 import { runCalendarDateReview } from "./calendar_date_checks.mjs";
+import { runFollowupReview } from "./followup_checks.mjs";
 import { runGmailReview } from "./gmail_checks.mjs";
 import { runPersonalReview } from "./personal_checks.mjs";
 import { runLoadViewsReview } from "./load_views_checks.mjs";
@@ -424,7 +425,7 @@ const goldenHtml =
   original.body +
   "<script>(function(){" +
   helperSource +
-  ";window.panelGuidance={reminderEntries,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelCalendar={calendarClientKey,reservationCalendarClient,filterCalendarEvents};window.panelUsability.mountUsability(document);})()</script>" +
+  ";window.panelGuidance={reminderEntries,currentLoadReviewAlert,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelCalendar={calendarClientKey,reservationCalendarClient,filterCalendarEvents};window.panelUsability.mountUsability(document);})()</script>" +
   newHelpers +
   "<script>window.panelValidation.mountValidation(document);</script>" +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
@@ -911,6 +912,15 @@ let panelReview,
   punctualPendingReview,
   logisticsSignalsReview;
 try {
+  if (process.argv.includes("--followups-only")) {
+    customerAssignments[0].owner_id = adminId;
+    const result = await runFollowupReview({ newPage, rawLoads, profiles });
+    assert.deepEqual(errors, []);
+    await writeFile(new URL("docs/evidencia-cierre-seguimientos.json", root), JSON.stringify(result, null, 2) + "\n");
+    await browser.close();
+    console.log("Pendientes y seguimientos: cierre, reprogramación, errores y retiro de avisos antiguos verificados.");
+    process.exit(0);
+  }
   if (process.argv.includes("--gmail-only")) {
     customerAssignments[0].owner_id = adminId;
     const result = await runGmailReview({ newPage, rawLoads, profiles });
@@ -1510,6 +1520,8 @@ try {
                 id: "test-acme",
                 kind: "load_review",
                 load: "VISUAL-001",
+                recipient: identity.id,
+                dedupe_key: `review:VISUAL-001:seguimiento_personal:${rawLoads[0].next_review_at}:${identity.id}`,
                 message: "Revisión ACME",
                 created_at: past,
               },
@@ -1517,6 +1529,8 @@ try {
                 id: "test-cont",
                 kind: "load_review",
                 load: "BELL-CONT",
+                recipient: identity.id,
+                dedupe_key: `review:BELL-CONT:seguimiento_personal:${past}:${identity.id}`,
                 message: "Revisión Continental",
                 created_at: past,
               },
