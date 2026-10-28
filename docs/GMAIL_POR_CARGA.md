@@ -1,4 +1,4 @@
-# Gmail manual por carga — 2026.10.27.4
+# Gmail manual por carga — 2026.10.28.1
 
 Esta entrega simplifica la versión anterior. No requiere Google Cloud, OAuth, secretos ni desplegar `panel-gmail`. El panel no consulta Gmail y nunca envía correos.
 
@@ -7,7 +7,7 @@ Esta entrega simplifica la versión anterior. No requiere Google Cloud, OAuth, s
 Si ya tienes SQL 020 (la entrega `d3f9477`), no necesitas ejecutar SQL nuevo:
 
 1. Copiar todo `google-apps-script/index-sitio.html` al archivo HTML `index` del proyecto actual de Apps Script.
-2. Guardar y publicar una nueva versión de la implementación actual. Recargar: el pie muestra **v2026.10.27.4**.
+2. Guardar y publicar una nueva versión de la implementación actual. Recargar: el pie muestra **v2026.10.28.1**.
 
 Se conserva `Code.gs`, su cuenta propietaria, la autenticación de Supabase y el enlace actual del panel. Si no instalaste la integración anterior, omite completamente SQL 021 y la configuración OAuth. La entrega conjunta vuelve a usar 004–020. SQL 021 se conserva solo como historial de la entrega anterior; no se borran tablas ni datos que ya pudieran existir. La función Edge anterior ya no forma parte del código ni del paquete activo; si llegaste a desplegarla, puedes eliminar `panel-gmail` desde Edge Functions en Supabase y revocar su permiso en Google. Este cambio de HTML no elimina servicios remotos.
 
@@ -23,6 +23,14 @@ En una carga, abrir **Comunicación → Gmail manual de esta carga**:
 6. Regresar al panel, marcar **Ya envié este correo desde Gmail** y pulsar **Registrar confirmación manual**.
 
 La dirección remitente es indicada por el usuario, no verificada por Google. Abrir un enlace usa la cuenta que esté abierta en Gmail; comprobarla antes de enviar. El mensaje no se inserta automáticamente en el hilo. Preparar o copiar no acredita un envío. El registro dice **Envío confirmado manualmente por el usuario** y guarda autor, fecha, remitente indicado, destinatarios, CC, asunto, liga y texto.
+
+## Ligas aceptadas
+
+La corrección del 28 de octubre admite conversaciones abiertas desde bandejas, búsquedas y etiquetas, con o sin índice de cuenta, y ligas de ventana emergente de Gmail (`/popout?...&th=...`). Conserva los parámetros de la cuenta y el identificador completo del hilo como texto, sin convertirlo a un número.
+
+La liga general de Recibidos, o una búsqueda sin abrir una conversación, no identifica un hilo. En ese caso se muestra una explicación y se conserva el campo para corregirlo. Abrir el correo y copiar la barra de direcciones, o copiar la liga de su ventana emergente, permite guardarlo. La validación no consulta Gmail ni comprueba permisos sobre la conversación.
+
+Esta actualización solo reemplaza el HTML; mantiene los datos y no requiere SQL nuevo ni cambiar Code.gs. Las pruebas incluyen guardar una liga de ventana emergente, recuperarla al recargar, preparar el mensaje y registrar una confirmación manual con Supabase simulado. No se envían correos reales.
 
 Las preparaciones se conservan solo mientras siga abierta la sesión del panel; recargar pierde las preparaciones sin confirmar. Las ligas y las confirmaciones sí se guardan en Supabase. Si cambió la carga después de preparar, actualizar y preparar otra vez antes de registrar la confirmación.
 

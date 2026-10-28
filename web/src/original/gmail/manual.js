@@ -1,14 +1,67 @@
 /** Reglas del correo manual. No consultan Google ni envían mensajes. */
 export function gmailLink(value) {
   const text = String(value || "").trim();
+  const invalidLink =
+    "Pega la liga completa de una conversación abierta en https://mail.google.com/.";
+  if (!text || text.length > 2000 || /[\s\u0000-\u001f\u007f]/.test(text))
+    throw Error(invalidLink);
+  let url;
+  try {
+    url = new URL(text);
+  } catch {
+    throw Error(invalidLink);
+  }
   if (
-    text.length > 2000 ||
-    !/^https:\/\/mail\.google\.com\/mail\/u\/\d+\/#(?:inbox|all|sent|starred|important|label\/[^/?#\s]+)\/[A-Za-z0-9_-]+$/.test(
-      text,
-    )
+    url.href.length > 2000 ||
+    url.origin !== "https://mail.google.com" ||
+    url.username ||
+    url.password
   )
-    throw Error("Pega la liga completa de un hilo abierto en Gmail.");
-  return text;
+    throw Error(invalidLink);
+
+  const mailboxPath = /^\/mail(?:\/u\/\d+)?\/?$/.test(url.pathname);
+  const popoutPath = /^\/mail(?:\/u\/\d+)?\/popout\/?$/.test(url.pathname);
+  if (popoutPath) {
+    // URLSearchParams decodifica %23. El identificador decimal permanece como texto:
+    // convertirlo a Number puede perder precisión y abrir una conversación distinta.
+    const threads = url.searchParams.getAll("th");
+    if (
+      threads.length === 1 &&
+      /^(?:#?thread-[fa]:\d+|[A-Za-z0-9_-]+)$/.test(threads[0])
+    )
+      return url.href;
+    throw Error(
+      "La liga de la ventana emergente está incompleta. Vuelve a copiarla completa desde la conversación de Gmail.",
+    );
+  }
+  if (!mailboxPath) throw Error(invalidLink);
+  const parts = url.hash.slice(1).split("/");
+  const threadId = parts.at(-1);
+  const folders = [
+    "inbox",
+    "all",
+    "sent",
+    "starred",
+    "important",
+    "snoozed",
+    "drafts",
+    "spam",
+    "trash",
+    "scheduled",
+  ];
+  const folderThread = parts.length === 2 && folders.includes(parts[0]);
+  const searchOrLabelThread =
+    parts.length >= 3 &&
+    ["search", "label"].includes(parts[0]) &&
+    parts.slice(1, -1).every(Boolean);
+  if (
+    (folderThread || searchOrLabelThread) &&
+    /^[A-Za-z0-9_-]+$/.test(threadId)
+  )
+    return url.href;
+  throw Error(
+    "Esta liga abre una bandeja o búsqueda. Abre la conversación y copia su liga completa.",
+  );
 }
 function emails(value, required = false) {
   const result = [

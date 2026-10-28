@@ -16,6 +16,8 @@ La entrega activa es la [versión personal con instructivos por ruta](VERSION_PE
 
 El [Gmail manual por carga](GMAIL_POR_CARGA.md) usa `gmail/` y los enlaces e historial de SQL 020. Solo requiere actualizar HTML. El usuario envía desde Gmail y luego registra su confirmación manual; no usa OAuth ni Edge. WhatsApp permanece manual. SQL 021 pertenece a la integración anterior y no se instala en la entrega activa.
 
+La versión 2026.10.28.1 corrige las ligas de Gmail en `gmail/manual.js`: interpreta la URL y acepta conversaciones de ventanas emergentes, búsquedas y etiquetas. La liga general de la bandeja se rechaza con una explicación. `--gmail-only` verifica guardado, recuperación tras recargar y confirmación manual con destinos Google bloqueados.
+
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.
 - `index.template.html`, `client.template.html`, `manager.template.html`: presentación de cada vista.
 - `panel-source.js` y `panel.parts.json`: ensamblan los nueve archivos de `panel/` en orden. Mantienen un único cierre para preservar los eventos heredados; no se ejecutan por separado.

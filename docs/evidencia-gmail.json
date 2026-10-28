@@ -1,8 +1,9 @@
 {
-  "version": "2026.10.27.4",
+  "version": "2026.10.28.1",
   "environment": "Chromium; Supabase simulado, destinos Google bloqueados",
   "checks": [
-    "Liga moderna de Gmail sin OAuth",
+    "Liga de bandeja sin conversación muestra una explicación y conserva el campo",
+    "Liga de ventana emergente se guarda y se recupera al recargar sin alterar su identificador",
     "Remitente, Para, CC y texto revisables",
     "Copiar y preparar no registran envío",
     "Confirmación manual explícita",

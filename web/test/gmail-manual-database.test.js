@@ -72,7 +72,8 @@ test("Gmail manual: SQL 020, liga persistente, versión, permisos y confirmació
   };
   const call = gmailMethods(ctx).gmailCarga;
   const load = "MANUAL-A",
-    url = "https://mail.google.com/mail/u/0/#inbox/FMfcSimulado";
+    url =
+      "https://mail.google.com/mail/u/0/popout?ver=ejemplo&search=inbox&th=%23thread-f:1870123456789012345&cvid=1";
   const values = {
     load,
     from: "ana@example.com",

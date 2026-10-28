@@ -5,6 +5,8 @@ export async function runGmailReview({ newPage, rawLoads, profiles }) {
     records = [];
   let confirmations = 0,
     googleRequests = 0;
+  const link =
+    "https://mail.google.com/mail/u/0/popout?ver=ejemplo&search=inbox&th=%23thread-f:1870123456789012345&cvid=1";
   const preview = {
     from: "operador@simulado.test",
     to: "cliente@simulado.test",
@@ -46,6 +48,7 @@ export async function runGmailReview({ newPage, rawLoads, profiles }) {
     assert.equal(input.p_type, "Gmail manual");
     assert.ok(input.p_message.includes(preview.from));
     assert.ok(input.p_message.includes(preview.body));
+    assert.ok(input.p_message.includes(link));
     confirmations++;
     const stamp = "2026-10-08T18:01:00Z";
     records.push({
@@ -74,9 +77,43 @@ export async function runGmailReview({ newPage, rawLoads, profiles }) {
     .evaluate((button) => button.click());
   await page.locator('[data-workspace-tab="comunicacion"]').click();
   await page.locator("[data-gmail-link]").click();
-  const link = "https://mail.google.com/mail/u/0/#all/FMfcSimulado";
+  await page
+    .locator('.personal-dialog [name="url"]')
+    .fill("https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox");
+  await page.locator('.personal-dialog button[type="submit"]').click();
+  await page.waitForFunction(() =>
+    document
+      .querySelector(".personal-dialog .personal-error")
+      ?.textContent.includes("Abre la conversación"),
+  );
+  assert.equal(
+    await page.locator('.personal-dialog [name="url"]').inputValue(),
+    "https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox",
+  );
   await page.locator('.personal-dialog [name="url"]').fill(link);
   await page.locator('.personal-dialog button[type="submit"]').click();
+  await page.locator("[data-gmail-compose]").waitFor({ state: "visible" });
+  assert.equal(
+    await page.locator(".gmail-load a").first().getAttribute("href"),
+    link,
+  );
+  // La liga debe recuperarse desde Supabase simulado, no solo desde el diálogo recién guardado.
+  await page.reload();
+  await page.locator('[data-page="operation"]').first().click();
+  await page
+    .locator('[data-workspace-load="VISUAL-001"]')
+    .first()
+    .waitFor({ state: "attached" });
+  await page
+    .locator('[data-workspace-load="VISUAL-001"]')
+    .first()
+    .evaluate((button) => button.click());
+  await page.locator('[data-workspace-tab="comunicacion"]').click();
+  await page.locator("[data-gmail-compose]").waitFor({ state: "visible" });
+  assert.equal(
+    await page.locator(".gmail-load a").first().getAttribute("href"),
+    link,
+  );
   await page.locator("[data-gmail-compose]").click();
   for (const [name, value] of Object.entries(preview))
     await page.locator(`.personal-dialog [name="${name}"]`).fill(value);
@@ -127,10 +164,11 @@ export async function runGmailReview({ newPage, rawLoads, profiles }) {
   assert.equal(googleRequests, 0);
   await page.close();
   return {
-    version: "2026.10.27.4",
+    version: "2026.10.28.1",
     environment: "Chromium; Supabase simulado, destinos Google bloqueados",
     checks: [
-      "Liga moderna de Gmail sin OAuth",
+      "Liga de bandeja sin conversación muestra una explicación y conserva el campo",
+      "Liga de ventana emergente se guarda y se recupera al recargar sin alterar su identificador",
       "Remitente, Para, CC y texto revisables",
       "Copiar y preparar no registran envío",
       "Confirmación manual explícita",

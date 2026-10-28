@@ -32,7 +32,7 @@ export function mountGmail(api) {
             data.thread?.url || "",
             'required maxlength="2000"',
           ) +
-            "<p>Abre el hilo en tu Gmail y pega su liga completa. No se solicitará acceso a Google.</p>",
+            "<p>Abre la conversación en Gmail y copia la liga de la barra de direcciones. También se acepta la liga de su ventana emergente. La liga general de la bandeja no identifica un hilo.</p>",
           async (form) => {
             await call("link", { load, url: form.get("url") });
             await render(load, target);
