@@ -66,6 +66,7 @@
   "getRadarExcel",
   "getRespaldoCompleto",
   "getSlaComunicacion",
+  "getUltimoComentarioCarga",
   "getUltimosComentarios",
   "getVistasCargas",
   "gmailCarga",

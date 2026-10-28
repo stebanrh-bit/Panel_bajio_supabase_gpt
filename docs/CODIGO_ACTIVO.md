@@ -18,6 +18,8 @@ El [Gmail manual por carga](GMAIL_POR_CARGA.md) usa `gmail/` y los enlaces e his
 
 La versión 2026.10.28.1 corrige las ligas de Gmail en `gmail/manual.js`: interpreta la URL y acepta conversaciones de ventanas emergentes, búsquedas y etiquetas. La liga general de la bandeja se rechaza con una explicación. `--gmail-only` verifica guardado, recuperación tras recargar y confirmación manual con destinos Google bloqueados.
 
+Las [variables de mensajes y comentarios v2026.10.28.2](VARIABLES_MENSAJES_2026-10-28.md) usan un catálogo único en `message-variables.js`. Las plantillas insertan marcadores y los textos libres insertan valores. `getUltimoComentarioCarga` recupera una fila de comentarios al utilizar esa variable. El recorrido de navegador se ejecuta con `--message-variables-only`; solo se actualiza el HTML.
+
 - `web/src/original/main.js`: arranque del panel interno; `main-portal.js`: arranque de cliente/gerencia.
 - `index.template.html`, `client.template.html`, `manager.template.html`: presentación de cada vista.
 - `panel-source.js` y `panel.parts.json`: ensamblan los nueve archivos de `panel/` en orden. Mantienen un único cierre para preservar los eventos heredados; no se ejecutan por separado.

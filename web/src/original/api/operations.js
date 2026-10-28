@@ -304,6 +304,25 @@ export function operationMethods(ctx) {
         recordatorio_fecha: record?.recordatorio_fecha || "",
       };
     },
+    getUltimoComentarioCarga: async (load) => {
+      ctx.staff();
+      // Solo una fila de esta carga; RLS conserva el alcance de la cuenta que redacta.
+      const records = await safe(
+        unwrap(
+          client
+            .from("comments")
+            .select("id,load,body,created_by,created_at")
+            .eq("load", String(load))
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: false })
+            .limit(1),
+        ),
+      );
+      return {
+        ok: true,
+        comment: records[0] ? commentModel(records[0], name) : null,
+      };
+    },
     getUltimosComentarios: async () => {
       if (!ctx.profile) return json({});
       ctx.staff();

@@ -42,6 +42,8 @@ def main():
         else: path.write_text(content)
     files={
         'GMAIL_POR_CARGA.md':ROOT/'docs/GMAIL_POR_CARGA.md',
+        'VARIABLES_MENSAJES_2026-10-28.md':ROOT/'docs/VARIABLES_MENSAJES_2026-10-28.md',
+        'evidencia-variables-mensajes.json':ROOT/'docs/evidencia-variables-mensajes.json',
         'evidencia-gmail.json':ROOT/'docs/evidencia-gmail.json',
         'index-cliente.html':ROOT/'google-apps-script/index-cliente.html',
         'index-gerencia.html':ROOT/'google-apps-script/index-gerencia.html',

@@ -2815,3 +2815,19 @@
   vertical-align: middle;
   margin: 0 0 0 6px;
 }
+.message-variable-menu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  color: #52647d;
+  font-size: 12px;
+  max-width: 100%;
+}
+.message-variable-menu .var-select {
+  max-width: 100%;
+  min-width: 0;
+  font-size: 12px;
+  padding: 7px 9px;
+}

@@ -1,4 +1,5 @@
 import { runCalendarDateReview } from "./calendar_date_checks.mjs";
+import { runMessageVariablesReview } from "./message_variables_checks.mjs";
 import { runFollowupReview } from "./followup_checks.mjs";
 import { runGmailReview } from "./gmail_checks.mjs";
 import { runPersonalReview } from "./personal_checks.mjs";
@@ -344,7 +345,7 @@ const original = originalPage({
   config,
 });
 const helperSource =
-  "const signalsSummary=window.panelSignals.signalsSummary;const instructionStateLabels=window.panelInstructionUI.instructionStateLabels;const requirementLabels=window.panelInstructionUI.requirementLabels;\n" +
+  "const escapeHtml=window.panelContent.escapeHtml;const signalsSummary=window.panelSignals.signalsSummary;const instructionStateLabels=window.panelInstructionUI.instructionStateLabels;const requirementLabels=window.panelInstructionUI.requirementLabels;\n" +
   (
     (await read("web/src/original/guidance.js")) +
     "\n" +
@@ -354,7 +355,8 @@ const helperSource =
     "\n" +
     (await read("web/src/original/history.js")) +
     "\n" +
-    (await read("web/src/original/calendar.js"))
+    (await read("web/src/original/calendar.js")) +
+    "\n" + (await read("web/src/original/message-variables.js"))
   )
     .replace(/^import[\s\S]*?;\n/gm, "")
     .replace(/^export /gm, "");
@@ -425,7 +427,7 @@ const goldenHtml =
   original.body +
   "<script>(function(){" +
   helperSource +
-  ";window.panelGuidance={reminderEntries,currentLoadReviewAlert,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelCalendar={calendarClientKey,reservationCalendarClient,filterCalendarEvents};window.panelUsability.mountUsability(document);})()</script>" +
+  ";window.panelMessageVariables={messageVariables,variableValues,renderMessageTemplate,needsLatestComment,variableSelectHtml};window.panelGuidance={reminderEntries,currentLoadReviewAlert,mountGuidance};window.panelPeople={canOperate,isOperational};window.panelUsability={attentionGroups,formatMoment,mountUsability,pendingChange};window.panelHistory={presentHistoryChange};window.panelCalendar={calendarClientKey,reservationCalendarClient,filterCalendarEvents};window.panelUsability.mountUsability(document);})()</script>" +
   newHelpers +
   "<script>window.panelValidation.mountValidation(document);</script>" +
   original.scripts.map((script) => "<script>" + script + "</script>").join("") +
@@ -912,6 +914,15 @@ let panelReview,
   punctualPendingReview,
   logisticsSignalsReview;
 try {
+  if (process.argv.includes("--message-variables-only")) {
+    customerAssignments[0].owner_id = adminId;
+    const result = await runMessageVariablesReview({ newPage, profiles });
+    assert.deepEqual(errors, []);
+    await writeFile(new URL("docs/evidencia-variables-mensajes.json", root), JSON.stringify(result, null, 2) + "\n");
+    await browser.close();
+    console.log("Variables: menú, último comentario actualizado, plantillas persistentes y edición conservada verificados.");
+    process.exit(0);
+  }
   if (process.argv.includes("--followups-only")) {
     customerAssignments[0].owner_id = adminId;
     const result = await runFollowupReview({ newPage, rawLoads, profiles });

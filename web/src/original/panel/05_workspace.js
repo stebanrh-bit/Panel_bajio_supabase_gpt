@@ -247,7 +247,7 @@
     );
   }
   function inlineCommentHtml() {
-    return '<div class="inline-panel" id="ws-inline-comment" hidden><h3 class="ws-section-title">Agregar comentario</h3><textarea class="review-input" id="ws-inline-comment-text" placeholder="Escribe el comentario operativo…"></textarea><div class="ws-actions"><button class="ws-btn primary" data-inline-comment-save>Guardar comentario</button><button class="ws-btn" data-inline-close="ws-inline-comment">Cancelar</button></div><div id="ws-inline-comments-list"></div></div>';
+    return '<div class="inline-panel" id="ws-inline-comment" hidden><h3 class="ws-section-title">Agregar comentario</h3><textarea class="review-input" id="ws-inline-comment-text" placeholder="Escribe el comentario operativo…"></textarea>' + templateVarSelectHtml("ws-inline-comment-text", workspaceCurrentLoad) + '<div class="ws-actions"><button class="ws-btn primary" data-inline-comment-save>Guardar comentario</button><button class="ws-btn" data-inline-close="ws-inline-comment">Cancelar</button></div><div id="ws-inline-comments-list"></div></div>';
   }
   function inlineIncidentHtml() {
     return '<div class="inline-panel" id="ws-inline-incident" hidden><h3 class="ws-section-title">Registrar incidencia</h3><select class="review-input" id="ws-inline-inc-category"><option>Documentación</option><option>Operador</option><option>Unidad</option><option>Aduana</option><option>Cliente</option><option>Otro</option></select><select class="review-input" id="ws-inline-inc-severity"><option value="warn">Media</option><option value="critical">Crítica</option><option value="good">Informativa</option></select><textarea class="review-input" id="ws-inline-inc-desc" placeholder="Describe la incidencia…"></textarea><textarea class="review-input" id="ws-inline-inc-action" placeholder="Acción tomada / siguiente paso…"></textarea><div class="ws-actions"><button class="ws-btn primary" data-inline-inc-save>Guardar incidencia</button><button class="ws-btn" data-inline-close="ws-inline-incident">Cancelar</button></div></div>';
@@ -719,6 +719,8 @@
         .join("") +
       '<button type="button" class="comm-type-new" data-template-quick-add>+ Nueva plantilla</button>' +
       '</div></div><textarea class="comm-textarea" id="comm-message" aria-label="Mensaje para cliente"></textarea>' +
+      templateVarSelectHtml("comm-message", r.load) +
+      '<p id="comm-variable-feedback" class="tracking-note" role="status"></p>' +
       (r.tracking_link
         ? '<label class="comm-track-check"><input type="checkbox" id="comm-include-tracking" checked> Incluir link de seguimiento Samsara en el mensaje</label>'
         : "") +
@@ -831,31 +833,8 @@
         return c.toUpperCase();
       });
   }
-  var COMM_TEMPLATE_VARS = [
-    { key: "load", label: "Load" },
-    { key: "work_order", label: "Work order" },
-    { key: "status", label: "Estatus" },
-    { key: "route", label: "Ruta" },
-    { key: "delivery", label: "Entrega (cita)" },
-    { key: "delivery_actual", label: "Entrega (real)" },
-    { key: "reason", label: "Motivo" },
-    { key: "crossing", label: "Cruce aduana" },
-    { key: "destination", label: "Destino" },
-    { key: "truck", label: "Truck" },
-    { key: "trailer", label: "Trailer" },
-    { key: "tracking", label: "Tracking" },
-    { key: "customer", label: "Cliente" },
-  ];
-  function templateVarSelectHtml() {
-    return (
-      '<select class="var-select" data-insert-var-select><option value="">+ Insertar variable…</option>' +
-      COMM_TEMPLATE_VARS.map(function (v) {
-        return (
-          '<option value="' + esc(v.key) + '">' + esc(v.label) + "</option>"
-        );
-      }).join("") +
-      "</select>"
-    );
+  function templateVarSelectHtml(target, load) {
+    return window.panelMessageVariables.variableSelectHtml(target, load);
   }
   /** Inserta texto en la posición del cursor de un textarea (o al final si no hay selección),
    * y deja el cursor justo después de lo insertado para poder seguir escribiendo. */
@@ -874,6 +853,7 @@
     var pos = start + text.length;
     textarea.focus();
     textarea.setSelectionRange(pos, pos);
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
   function templateAdminHtml() {
     var t = getCommTemplates();
@@ -913,49 +893,96 @@
     );
   }
   function applyCommTemplate(r, type, includeTracking) {
-    var t = getCommTemplates()[type] || DEFAULT_COMM_TEMPLATES.general,
-      delivery = r.delivery_appt
-        ? wsDate(r.delivery_appt)
-        : "pendiente por confirmar";
-    var vals = {
-      load: "Carga " + r.load,
-      work_order: r.work_order || "—",
-      status: r.status || "Sin estatus",
-      route:
-        titleCity(r.origin_city) +
-        (r.origin_state ? ", " + String(r.origin_state).toUpperCase() : "") +
-        " → " +
-        titleCity(r.dest_city) +
-        (r.dest_state ? ", " + String(r.dest_state).toUpperCase() : ""),
-      delivery: delivery,
-      reason: r.client_notify_reason
-        ? " Motivo de actualización: " + r.client_notify_reason + "."
-        : "",
-      crossing: r.cruce_usa_fecha
-        ? "Cruce a USA registrado: " + wsDate(r.cruce_usa_fecha) + ". "
-        : "",
-      destination:
-        titleCity(r.dest_city) +
-        (r.dest_state ? ", " + String(r.dest_state).toUpperCase() : ""),
-      delivery_actual: r.delivery_actual
-        ? "Entrega registrada: " + wsDate(r.delivery_actual) + "."
-        : "Seguimos atentos al cumplimiento de la entrega.",
-      truck: r.truck || "",
-      trailer: r.trailer || "",
-      tracking: r.tracking_link || "",
-      customer: r.customer || "",
-    };
-    Object.keys(vals).forEach(function (k) {
-      t = t.split("{{" + k + "}}").join(vals[k]);
-    });
+    var t = window.panelMessageVariables.renderMessageTemplate(
+      getCommTemplates()[type] || DEFAULT_COMM_TEMPLATES.general,
+      messageVariableValues_(r),
+    );
     if (includeTracking && r.tracking_link && t.indexOf(r.tracking_link) === -1)
-      t += "\\n\\nSeguimiento de la unidad: " + r.tracking_link;
+      t += "\n\nSeguimiento de la unidad: " + r.tracking_link;
     return t;
   }
 
   function communicationMessage(r, type, includeTracking) {
     return applyCommTemplate(r, type, includeTracking);
   }
+
+  var latestCommentRequests_ = new Map(), latestCommentWrites_ = new Map();
+  var communicationComposeRequest_ = 0;
+  var communicationLoadingState_ = new WeakMap();
+  function messageVariableValues_(record) {
+    return window.panelMessageVariables.variableValues(record, ultimosComentarios[String(record.load)] || null, wsDate, titleCity);
+  }
+  function rememberConfirmedComment_(load, comment) {
+    load = String(load);
+    ultimosComentarios[load] = comment;
+    latestCommentWrites_.set(load, (latestCommentWrites_.get(load) || 0) + 1);
+  }
+  /** Consulta una sola fila al usar el último comentario, sin volver a descargar todos los hilos. */
+  function loadLatestMessageComment_(load) {
+    load = String(load);
+    if (latestCommentRequests_.has(load)) return latestCommentRequests_.get(load);
+    var writing = latestCommentWrites_.get(load) || 0;
+    var request = window.panelApi.methods.getUltimoComentarioCarga(load).then(function (result) {
+      if ((latestCommentWrites_.get(load) || 0) === writing) {
+        if (result.comment) ultimosComentarios[load] = result.comment;
+        else delete ultimosComentarios[load];
+      }
+      return ultimosComentarios[load] || null;
+    });
+    latestCommentRequests_.set(load, request);
+    request.finally(function () {
+      if (latestCommentRequests_.get(load) === request) latestCommentRequests_.delete(load);
+    }).catch(function () {});
+    return request;
+  }
+  function setCommunicationTemplate_(record, type, includeTracking) {
+    var textarea = document.getElementById("comm-message"), request = ++communicationComposeRequest_;
+    if (!textarea) return;
+    var template = getCommTemplates()[type] || DEFAULT_COMM_TEMPLATES.general;
+    if (!window.panelMessageVariables.needsLatestComment(template)) {
+      communicationLoading_(textarea, false, "");
+      textarea.value = communicationMessage(record, type, includeTracking);
+      return;
+    }
+    var before = textarea.value;
+    communicationLoading_(textarea, true, "Consultando último comentario…");
+    loadLatestMessageComment_(record.load).then(function () {
+      if (request !== communicationComposeRequest_ || !textarea.isConnected) return;
+      if (textarea.value !== before) {
+        communicationLoading_(textarea, false, "Conservamos el texto que editaste. Vuelve a elegir la plantilla para generar otro mensaje.");
+        return;
+      }
+      textarea.value = communicationMessage(record, type, includeTracking);
+      communicationLoading_(textarea, false, "");
+    }).catch(function (error) {
+      if (textarea.isConnected && request === communicationComposeRequest_) {
+        communicationLoading_(textarea, false, "No se pudo consultar el último comentario. Conservamos tu texto; vuelve a elegir la plantilla para reintentar.");
+        showToast(error.message, "error");
+      }
+    });
+  }
+  /** Conserva el borrador y los botones originales mientras llega el dato necesario para generar. */
+  function communicationLoading_(textarea, busy, message) {
+    var controls = Array.from(document.querySelectorAll("[data-comm-copy],[data-comm-open],[data-comm-sent]"));
+    if (busy) {
+      if (!communicationLoadingState_.has(textarea))
+        communicationLoadingState_.set(textarea, controls.map(function (button) { return [button, button.disabled]; }));
+      controls.forEach(function (button) { button.disabled = true; });
+    } else if (communicationLoadingState_.has(textarea)) {
+      communicationLoadingState_.get(textarea).forEach(function (state) { state[0].disabled = state[1]; });
+      communicationLoadingState_.delete(textarea);
+    }
+    textarea.setAttribute("aria-busy", String(busy));
+    var feedback = document.getElementById("comm-variable-feedback");
+    if (feedback) feedback.textContent = message;
+  }
+  window.addEventListener("panel:save", function (event) {
+    if (event.detail && event.detail.phase === "reset") {
+      latestCommentRequests_.clear();
+      latestCommentWrites_.clear();
+      communicationComposeRequest_++;
+    }
+  });
 
   function docDisplay(v) {
     if (
@@ -1459,7 +1486,7 @@
     }
     if (workspaceCurrentTab === "comunicacion") {
       var ta = document.getElementById("comm-message");
-      if (ta) ta.value = communicationMessage(r, "general", !!r.tracking_link);
+      if (ta) setCommunicationTemplate_(r, "general", !!r.tracking_link);
     }
   }
 
@@ -1646,26 +1673,47 @@
           active = document.querySelector(".comm-type.active"),
           ta = document.getElementById("comm-message");
         if (r && ta)
-          ta.value = communicationMessage(
+          setCommunicationTemplate_(
             r,
             active ? active.getAttribute("data-comm-type") : "general",
             e.target.checked,
           );
       }
-      if (
-        e.target &&
-        e.target.matches &&
-        e.target.matches("[data-insert-var-select]")
-      ) {
-        var sel = e.target,
-          val = sel.value;
-        if (!val) return;
-        var row = sel.closest(".template-row"),
-          ta2 = row ? row.querySelector("textarea") : null;
-        if (ta2) insertAtCursor(ta2, "{{" + val + "}}");
-        sel.value = "";
-      }
     });
+
+  document.addEventListener("change", function (event) {
+    var select = event.target.closest("[data-insert-var-select]");
+    if (!select || !select.value) return;
+    var key = select.value, target = select.dataset.variableTarget;
+    select.value = "";
+    var row = select.closest(".template-row");
+    var textarea = target ? document.getElementById(target) : row && row.querySelector("textarea");
+    if (!textarea) return;
+    if (!target) {
+      insertAtCursor(textarea, "{{" + key + "}}");
+      return;
+    }
+    var load = select.dataset.variableLoad, record = recPorLoad_(load);
+    if (!record) return;
+    var before = textarea.value, start = textarea.selectionStart, end = textarea.selectionEnd;
+    function insertValue() {
+      if (!select.isConnected || !textarea.isConnected) return;
+      if (textarea.value !== before) {
+        showToast("El texto cambió mientras se consultaba. Vuelve a seleccionar la variable.", "warn");
+        return;
+      }
+      textarea.setSelectionRange(start, end);
+      insertAtCursor(textarea, messageVariableValues_(recPorLoad_(load) || record)[key]);
+    }
+    if (!window.panelMessageVariables.needsLatestComment("{{" + key + "}}")) {
+      insertValue();
+      return;
+    }
+    select.disabled = true;
+    loadLatestMessageComment_(load).then(insertValue).catch(function (error) {
+      if (select.isConnected && textarea.isConnected) showToast(error.message, "error");
+    }).finally(function () { select.disabled = false; });
+  });
 
   document
     .getElementById("workspace-close")
@@ -1980,6 +2028,7 @@
               showToast((res && res.error) || "No se pudo guardar", "error");
               return;
             }
+            rememberConfirmedComment_(r.load, { ts: res.ts, text: txt, usuario: res.usuario });
             showToast("Comentario guardado", "good");
             renderWorkspace();
             aplicarRevision_(r.load, res);
@@ -2214,7 +2263,7 @@
         b.classList.add("active");
         var ta = document.getElementById("comm-message");
         if (ta && r)
-          ta.value = communicationMessage(
+          setCommunicationTemplate_(
             r,
             b.getAttribute("data-comm-type"),
             !!(
@@ -2228,7 +2277,7 @@
         var active = document.querySelector(".comm-type.active");
         var ta = document.getElementById("comm-message");
         if (ta && r)
-          ta.value = communicationMessage(
+          setCommunicationTemplate_(
             r,
             active ? active.getAttribute("data-comm-type") : "general",
             !!(
@@ -2364,6 +2413,9 @@
         rec && rec.trailer ? "Trailer: " + rec.trailer : "";
     }
     document.getElementById("comments-textarea").value = "";
+    var variableMenu = document.getElementById("comments-variable-menu");
+    variableMenu.hidden = commentsCurrentKind !== "load";
+    variableMenu.innerHTML = commentsCurrentKind === "load" ? templateVarSelectHtml("comments-textarea", key) : "";
     document.getElementById("comments-list").innerHTML =
       '<div class="comments-empty">Cargando…</div>';
     document.getElementById("comments-backdrop").classList.add("show");
@@ -2863,11 +2915,11 @@
             "</span>";
           box.insertBefore(entry, box.firstChild);
 
-          ultimosComentarios[String(load)] = {
+          rememberConfirmedComment_(load, {
             ts: res.ts,
             text: text,
             usuario: res.usuario,
-          };
+          });
           if (kind === "pendiente") {
             renderPendientes();
           } else if (currentView === "table") {

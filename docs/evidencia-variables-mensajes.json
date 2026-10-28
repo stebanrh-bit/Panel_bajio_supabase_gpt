@@ -1,0 +1,21 @@
+{
+  "version": "2026.10.28.2",
+  "variableCount": 52,
+  "checks": [
+    "Catálogo agrupado en siete categorías; Último comentario inserta solo el de la carga elegida y respeta saltos, símbolos y marcadores literales",
+    "Una respuesta atrasada no sobrescribe el mensaje que el usuario está editando",
+    "El comentario confirmado desde el expediente queda disponible como Último comentario sin recargar el panel",
+    "Un error de consulta al generar conserva el borrador, libera los controles y permite reintentar sin inventar un comentario vacío",
+    "La plantilla guarda el marcador, persiste al recargar y consulta el comentario actual al generar la actualización",
+    "Cambiar de carga durante una consulta no inserta el comentario anterior en el nuevo expediente",
+    "El modal de comentarios también inserta valores reales y espera que el usuario decida guardarlos"
+  ],
+  "productionWrites": 0,
+  "realMessagesSent": 0,
+  "suite": {
+    "command": "node --test --test-concurrency=2 web/test/*.test.js",
+    "tests": 234,
+    "passed": 234,
+    "failed": 0
+  }
+}

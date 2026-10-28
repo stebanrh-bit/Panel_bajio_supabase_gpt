@@ -35,6 +35,7 @@ import { mountPersonal } from "./personal/ui.js";
 import personalStyles from "./personal/style.css?raw";
 import { mountGmail } from "./gmail/ui.js";
 import gmailStyles from "./gmail/style.css?raw";
+import * as messageVariables from "./message-variables.js";
 
 /** Arranque único: la presentación original usa una sesión Supabase para todos sus módulos. */
 async function start() {
@@ -61,6 +62,7 @@ async function start() {
   window.panelCalendar = calendar;
   window.panelNotices = notices;
   window.panelValidation = validation;
+  window.panelMessageVariables = messageVariables;
   const view = "internal";
   const page = originalPage({
     template,
